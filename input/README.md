@@ -62,6 +62,7 @@ git apply ../fineibt_vm_support.patch
 
 ./scripts/config --set-val CONFIG_FINEIBT y
 ./scripts/config --set-val CONFIG_CFI_CLANG y
+
 make CC=clang-16 defconfig
 make -j 32
 ```
