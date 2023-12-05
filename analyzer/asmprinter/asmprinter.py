@@ -83,9 +83,9 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, is_
     proj.kb.comments = {}
     return output
 
-def output_gadget_to_file(t : Transmission, proj, name):
-    Path("asm").mkdir(parents=True, exist_ok=True)
-    o = open(f"asm/gadget_{name.replace('/', '_')}_{hex(t.pc)}.asm", "a+")
+def output_gadget_to_file(t : Transmission, proj, name, path):
+    Path("path").mkdir(parents=True, exist_ok=True)
+    o = open(f"{path}/gadget_{name.replace('/', '_')}_{hex(t.pc)}.asm", "a+")
     o.write(f"----------------- TRANSMISSION -----------------\n")
     o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.transmission.expr, t.pc, t.secret_load_pc, is_tfp=False, color=False))
     o.write(f"""
@@ -120,9 +120,9 @@ Branches: {t.branches}
 def has_aliasing(reg):
     return reg.control == TFPRegisterControlType.DEPENDS_ON_TFP_EXPR or reg.control == TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
 
-def output_tfp_to_file(t : TaintedFunctionPointer, proj, name):
-    Path("asm").mkdir(parents=True, exist_ok=True)
-    o = open(f"asm/tfp_{name.replace('/', '_')}_{hex(t.pc)}.asm", "a+")
+def output_tfp_to_file(t : TaintedFunctionPointer, proj, name, path):
+    Path("path").mkdir(parents=True, exist_ok=True)
+    o = open(f"{path}/tfp_{name.replace('/', '_')}_{hex(t.pc)}.asm", "a+")
     o.write(f"--------------------- TFP ----------------------\n")
     o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.expr, t.pc, None, is_tfp=True, color=False))
     o.write(f"""

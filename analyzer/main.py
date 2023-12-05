@@ -136,7 +136,7 @@ def append_to_csv(csv_filename, transmissions):
         writer.writerows(flatten_dicts)
 
 
-def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_filename):
+def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_filename, asm_folder):
     # Step 1. Analyze the code snippet with angr.
     l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
     s = Scanner()
@@ -167,7 +167,8 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
         t.properties["deps"] = None
         l.info(t)
 
-        output_gadget_to_file(t, proj, name)
+        if asm_folder != "":
+            output_gadget_to_file(t, proj, name, asm_folder)
         if csv_filename != "":
             append_to_csv(csv_filename, [t])
 
@@ -187,12 +188,13 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
             rangeAnalysis.analyse_tfp(tfp)
             l.info(tfp)
 
-            output_tfp_to_file(tfp, proj, name)
+            if asm_folder != "":
+                output_tfp_to_file(tfp, proj, name, asm_folder)
             if tfp_csv_filename != "":
                 append_to_csv(tfp_csv_filename, [tfp])
 
 
-def main(binary, cache_project, config_file, base_address, gadgets, csv_filename="", tfp_csv_filename=""):
+def main(binary, cache_project, config_file, base_address, gadgets, csv_filename="", tfp_csv_filename="", asm_folder=""):
     # Simplify how symbols get printed.
     claripy.ast.base._unique_names = False
 
@@ -210,7 +212,7 @@ def main(binary, cache_project, config_file, base_address, gadgets, csv_filename
     # Run the Analyzer.
     # TODO: Parallelize.
     for g in gadgets:
-        analyse_gadget(proj, g[0], g[1], config, csv_filename, tfp_csv_filename)
+        analyse_gadget(proj, g[0], g[1], config, csv_filename, tfp_csv_filename, asm_folder)
 
 
 if __name__ == '__main__':
@@ -225,6 +227,7 @@ if __name__ == '__main__':
     # Outputs.
     arg_parser.add_argument('--csv', required=False, default="")
     arg_parser.add_argument('--tfp-csv', required=False, default="")
+    arg_parser.add_argument('--asm', required=False, default="")
 
     args = arg_parser.parse_args()
 
@@ -253,4 +256,4 @@ if __name__ == '__main__':
 
     # Call main.
     parsed_gadgets = [[int(x[0], 16), str(x[1]).strip()] for x in gadgets]
-    main(args.binary, args.cache_project, args.config, args.base_address, parsed_gadgets, args.csv, args.tfp_csv)
+    main(args.binary, args.cache_project, args.config, args.base_address, parsed_gadgets, args.csv, args.tfp_csv, args.asm)
