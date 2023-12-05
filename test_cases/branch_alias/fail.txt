@@ -1,0 +1,1672 @@
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
+---------------- [ ERROR ] ----------------
+where: 0x40dead     started at:0x400000
+No bytes in memory for block starting at 0x40dead.
+Traceback (most recent call last):
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 534, in run
+    self.record_bb_size(self.cur_state)
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/new-analyzer/scanner/scanner.py", line 132, in record_bb_size
+    self.bb_sizes[state.addr] = state.block().instructions
+                                ^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/sim_state.py", line 618, in block
+    return self.project.factory.block(*args, backup_state=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/factory.py", line 346, in block
+    return Block(
+           ^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/block.py", line 205, in __init__
+    vex = self._vex_engine.lift_vex(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/elvis/Documents/vu/projects/InspectorGadget/.venv/lib/python3.11/site-packages/angr/engines/vex/lifter.py", line 252, in lift_vex
+    raise SimEngineError("No bytes in memory for block starting at %#x." % addr)
+angr.errors.SimEngineError: No bytes in memory for block starting at 0x40dead.
+
