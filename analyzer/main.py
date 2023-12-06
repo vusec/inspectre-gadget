@@ -242,18 +242,18 @@ def main(binary, cache_project, config_file, base_address, gadgets, csv_filename
 
 
 if __name__ == '__main__':
-    arg_parser = argparse.ArgumentParser(description='An analyzer for Spectre gadgets.')
+    arg_parser = argparse.ArgumentParser(description='An inspector for Spectre gadgets.')
 
     arg_parser.add_argument('binary')
-    arg_parser.add_argument('--cache-project', action='store_true')
-    arg_parser.add_argument('--config', type=str, required=True)
-    arg_parser.add_argument('--base-address', required=False, default="")
-    arg_parser.add_argument('--gadget-address', required=False, default="")
-    arg_parser.add_argument('--gadgets-file', required=False, default="")
+    arg_parser.add_argument('--cache-project', action='store_true', help='Load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist.')
+    arg_parser.add_argument('--config', type=str, required=True, help='Which configuration file to use.')
+    arg_parser.add_argument('--base-address', required=False, default='', help='Base address of the binary to analyze.')
+    arg_parser.add_argument('--gadget-address', required=False, default='', help='Inspect a single entrypoint at the given (hex) address.')
+    arg_parser.add_argument('--gadgets-file', required=False, default='', help='Inspect multiple entrypoints listed in the specified CSV file. The format should be <HEX_ADDRESS>,<NAME>. You can choose any name.')
     # Outputs.
-    arg_parser.add_argument('--csv', required=False, default="")
-    arg_parser.add_argument('--tfp-csv', required=False, default="")
-    arg_parser.add_argument('--asm', required=False, default="")
+    arg_parser.add_argument('--csv', required=False, default='', help='Output all found gadgets to a CSV.')
+    arg_parser.add_argument('--tfp-csv', required=False, default='', help='Output all found dispatch gadgets to a CSV (see paper for details on dispatch gadgets).')
+    arg_parser.add_argument('--asm', required=False, default='', help='Output an annotated ASM file for each gadget inthe specified folder. Useful for manual analysis.')
 
     args = arg_parser.parse_args()
 
