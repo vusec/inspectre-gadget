@@ -10,16 +10,16 @@ for f in os.listdir('gadgets'):
         continue
 
     name = f.split('-')[0]
-    
+
     try:
-        df = pd.read_csv('gadgets/' + f)
+        df = pd.read_csv('gadgets/' + f, sep=";")
         df['name'] = name
         dfs.append(df)
     except:
         pass
 
     try:
-        df = pd.read_csv('tfps/' + f)
+        df = pd.read_csv('tfps/' + f, sep=";")
     except:
         continue
 
@@ -29,7 +29,7 @@ for f in os.listdir('gadgets'):
 # IPython.embed()
 
 res = pd.concat(dfs)
-res.to_csv('all-gadgets.csv')
+res.to_csv('all-gadgets.csv', sep=";")
 
 res = pd.concat(tfps)
-res.to_csv('all-tfps.csv')
+res.to_csv('all-tfps.csv', sep=";")
