@@ -113,10 +113,10 @@ Some other configurations that can be tweaked are:
 
 ### Tests
 
-The `test_cases` folder contains some samples that can be used
+The `tests` folder contains some samples that can be used
 to test the behavior of the scanner in specific situations.
 
-You can run all tests with `cd test_cases && ./run-all.sh`.
+You can run all tests with `cd tests && ./run-all.sh`.
 
 ### Linux Kernel Experiment
 
