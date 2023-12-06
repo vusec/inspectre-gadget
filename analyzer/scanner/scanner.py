@@ -549,7 +549,7 @@ class Scanner:
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
                 l.error(traceback.format_exc())
-                report_error(e, hex(self.cur_state.addr), hex(start_address))
+                report_error(e, hex(self.cur_state.addr), hex(start_address), error_type="SCANNER")
                 continue
 
             # Add successors to the visit stack.
