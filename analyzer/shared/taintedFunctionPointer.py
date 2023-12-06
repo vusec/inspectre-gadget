@@ -159,6 +159,7 @@ class TaintedFunctionPointer():
                                          constraints=self.constraints,
                                          aliases=self.aliases,
                                          n_instr=self.n_instr,
+                                         contains_spec_stop=self.contains_spec_stop,
                                          n_dependent_loads=self.n_dependent_loads)
         new_tfp.requirements.extend(self.requirements)
         new_tfp.controlled.extend(self.controlled)
