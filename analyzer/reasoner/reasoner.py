@@ -1,6 +1,7 @@
 import argparse
 import pandas as pd
 import numpy as np
+from io import StringIO
 
 # Number of bits of the secret that are used in the transmission.
 # E.g.     BASE + (SECRET & 0xf) has 4 inferable bits
@@ -361,8 +362,14 @@ def is_exploitable(t : pd.Series):
 def main(in_csv, out_csv):
     global with_branches
 
-    df = pd.read_csv(in_csv, delimiter=';')
-    df = df.replace(to_replace=['None'], value=0)
+    # Replace 'None' with 0
+    # TODO: Hack, we should adjust the analyzer output.
+    file = open(in_csv, 'r')
+    data = file.read()
+    data = data.replace('None', '0')
+    file.close()
+
+    df = pd.read_csv(StringIO(data), delimiter=';')
 
     integer_cols = ['base_range_max',
                     'base_range_min',
