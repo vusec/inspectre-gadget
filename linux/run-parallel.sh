@@ -1,4 +1,4 @@
-ANALYZER_FOLDER=analyzer
+ANALYZER_FOLDER=../analyzer
 CONFIG=config_all.yaml
 
 OUT_FOLDER=out
@@ -21,7 +21,7 @@ run-analyzer () {
         addr=$(echo $l | sed 's/,/ /g' | awk '{ print $1 }')
         name=$(echo $l | sed 's/,/ /g' | awk '{ print $2 }')
         echo "addr: $addr    name: $name " >> $OUT_FOLDER/finished.txt
-        timeout 360 python3 $ANALYZER_FOLDER/main.py $BINARY --config $CONFIG --gadget-address $addr --cache-project --csv $GADGET_FOLDER/$name-$addr.csv --tfp-csv $TFP_FOLDER/$name-$addr.csv --asm $ASM_FOLDER 2> $LOG_FOLDER/out_$name-$addr.log 2>&1
+        timeout 360 python3 $ANALYZER_FOLDER/main.py $BINARY --config $CONFIG --gadget-address $addr --cache-project --csv $GADGET_FOLDER/$name-$addr.csv --tfp-csv $TFP_FOLDER/$name-$addr.csv --asm $ASM_FOLDER 2> $LOG_FOLDER/out_$name-$addr.log
         echo "Exited with code $?" >> $LOG_FOLDER/out_$name-$addr.log
     done
 }
@@ -29,15 +29,17 @@ run-analyzer () {
 # Prepare output folder.
 mv $OUT_FOLDER $OUT_FOLDER.backup
 mkdir $OUT_FOLDER
-mkdir GADGET_FOLDER TFP_FOLDER LOG_FOLDER $OUT_FOLDER/asm
+mkdir $GADGET_FOLDER $TFP_FOLDER $LOG_FOLDER $OUT_FOLDER/asm
 
 # Split the gadget list to run the analyzer in parallel.
-rm splitted*
+rm $OUT_FOLDER/splitted*
 n_gadgets=$(cat $GADGET_LIST | wc -l)
-gadgets_per_task=$(python -c "from math import ceil; print ceil($n_gadgets/$JOBS)")
-split -l $gadgets_per_task --numeric-suffixes $GADGET_LIST 'splitted'
+gadgets_per_task=$(python -c "from math import ceil; print(ceil($n_gadgets/$JOBS))")
+
+echo $gadgets_per_task
+split -l $gadgets_per_task --numeric-suffixes $GADGET_LIST "$OUT_FOLDER/splitted"
 
 # Run analyzer.
- for f in ./splitted*; do
+ for f in $OUT_FOLDER/splitted*; do
      run-analyzer "$f" &
  done
