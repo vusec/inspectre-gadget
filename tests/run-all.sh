@@ -1,14 +1,9 @@
 make clean
 make
 
-mv gadgets.csv gadgets_backup.csv
-touch gadgets.csv
-
-mv tfp.csv tfp_backup.csv
-touch tfp.csv
-
-mv asm asm_backup
-mkdir asm
+rm gadgets.csv
+rm tfp.csv
+rm -rf asm && mkdir asm
 
 for f in $(ls ./*/gadget)
 do
@@ -17,6 +12,6 @@ do
     echo ""
     objdump --adjust-vma=0x4000000 -d -Mintel $f | batcat -l asm
     echo ""
-    python3 ../analyzer/main.py --config config_all.yaml $f --csv gadgets.csv --tfp-csv tfp.csv --asm asm || exit -1
+    python3 ../inspectre analyze $f --config config_all.yaml --address 0x4000000 --output gadgets.csv --tfp-output tfp.csv --asm asm || exit -1
 #    read
 done

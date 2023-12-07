@@ -5,10 +5,8 @@ import claripy
 import sys
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.utils import *
-from shared.transmission import Requirements, ControlType
+from ..shared.utils import *
+from ..shared.transmission import Requirements, ControlType
 # autopep8: on
 
 

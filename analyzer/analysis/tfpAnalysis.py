@@ -5,14 +5,12 @@ import itertools
 from .range_strategies import *
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.taintedFunctionPointer import *
-from shared.utils import *
-from shared.logger import *
-from shared.config import *
-from shared.astTransform import *
-from analysis.dependencyGraph import DepGraph, is_expr_controlled
+from ..shared.taintedFunctionPointer import *
+from ..shared.utils import *
+from ..shared.logger import *
+from ..shared.config import *
+from ..shared.astTransform import *
+from ..analysis.dependencyGraph import DepGraph, is_expr_controlled
 # autopep8: on
 
 l = get_logger("TFPAnalysis")

@@ -9,10 +9,8 @@ import sys
 import random
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from scanner.annotations import *
-from shared.logger import *
+from ..scanner.annotations import *
+from ..shared.logger import *
 # autopep8: on
 
 l = get_logger("DepGraph")

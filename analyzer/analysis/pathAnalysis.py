@@ -11,12 +11,10 @@ import sys
 from .dependencyGraph import DepGraph
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.transmission import *
-from shared.taintedFunctionPointer import *
-from shared.utils import *
-from shared.logger import *
+from ..shared.transmission import *
+from ..shared.taintedFunctionPointer import *
+from ..shared.utils import *
+from ..shared.logger import *
 # autopep8: on
 
 l = get_logger("PathAnalysis")

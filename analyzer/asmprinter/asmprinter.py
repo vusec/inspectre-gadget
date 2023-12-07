@@ -4,13 +4,11 @@ import sys
 from pathlib import Path
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.logger import *
-from shared.transmission import *
-from shared.taintedFunctionPointer import *
-from shared.utils import *
-from scanner.annotations import *
+from ..shared.logger import *
+from ..shared.transmission import *
+from ..shared.taintedFunctionPointer import *
+from ..shared.utils import *
+from ..scanner.annotations import *
 # autopep8: on
 
 def get_branch_comments(branches):

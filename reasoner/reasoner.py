@@ -42,7 +42,7 @@ def is_overlapping(x_min, x_max, y_min, y_max):
     return x_max >= y_min and y_max >= x_min
 
 def calc_base_size(t: pd.Series):
-    if t['base_control'] == 'BaseControlType.NO_BASE' or pd.isna(t['base_expr']):
+    if t['base_control'] == 'BaseControlType.NO_BASE' or t['base_expr'] == '0':
         return 0
 
     assert(t['base_expr'].startswith('<BV'))
@@ -359,7 +359,7 @@ def is_exploitable(t : pd.Series):
 
     return exploitable, required_solutions if exploitable else [], fail_reasons
 
-def main(in_csv, out_csv):
+def run(in_csv, out_csv):
     global with_branches
 
     # Replace 'None' with 0
@@ -447,16 +447,3 @@ def main(in_csv, out_csv):
     df.to_csv(out_csv, sep=';', index=False)
 
     print("[-] Done!")
-
-
-# ----------------- Main
-
-if __name__ == '__main__':
-
-    arg_parser = argparse.ArgumentParser(description='Reason over the exploitability of InSpectre Gadget transmissions.')
-
-    arg_parser.add_argument('csv_in')
-    arg_parser.add_argument('csv_out')
-    args = arg_parser.parse_args()
-
-    main(args.csv_in, args.csv_out)

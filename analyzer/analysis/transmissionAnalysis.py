@@ -11,13 +11,11 @@ import itertools
 from .dependencyGraph import *
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.logger import *
-from shared.astTransform import *
-from shared.config import *
-from shared.transmission import *
-from scanner.annotations import *
+from ..shared.logger import *
+from ..shared.astTransform import *
+from ..shared.config import *
+from ..shared.transmission import *
+from ..scanner.annotations import *
 # autopep8: on
 
 l = get_logger("TransmissionAnalysis")

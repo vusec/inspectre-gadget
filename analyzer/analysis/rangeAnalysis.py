@@ -3,13 +3,11 @@ import sys
 from .range_strategies import *
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.transmission import *
-from shared.taintedFunctionPointer import *
-from shared.utils import *
-from shared.logger import *
-from shared.config import *
+from ..shared.transmission import *
+from ..shared.taintedFunctionPointer import *
+from ..shared.utils import *
+from ..shared.logger import *
+from ..shared.config import *
 # autopep8: on
 
 l = get_logger("RangeAnalys")

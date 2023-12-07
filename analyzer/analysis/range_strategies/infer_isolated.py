@@ -5,12 +5,10 @@ import sys
 from . import RangeStrategy
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.ranges import *
-from shared.transmission import *
-from shared.utils import *
-from shared.logger import *
+from ...shared.ranges import *
+from ...shared.transmission import *
+from ...shared.utils import *
+from ...shared.logger import *
 # autopep8: on
 
 

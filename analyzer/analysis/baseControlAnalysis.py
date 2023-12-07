@@ -10,13 +10,11 @@ import sys
 from .dependencyGraph import DepGraph, is_expr_controlled
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from scanner.annotations import *
-from scanner.memory import *
-from shared.transmission import *
-from shared.logger import *
-from shared.astTransform import *
+from ..scanner.annotations import *
+from ..scanner.memory import *
+from ..shared.transmission import *
+from ..shared.logger import *
+from ..shared.astTransform import *
 # autopep8: on
 
 l = get_logger("BaseControlAnalysis")

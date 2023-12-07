@@ -4,9 +4,7 @@ import sys
 from . import RangeStrategy
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.ranges import *
+from ...shared.ranges import *
 # autopep8: on
 
 SOLVER_TIMEOUT = 10*1000  # ms, 10s

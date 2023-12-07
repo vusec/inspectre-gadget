@@ -8,14 +8,12 @@ import claripy
 import sys
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.transmission import *
-from shared.taintedFunctionPointer import *
-from shared.utils import *
-from shared.astTransform import *
-from shared.logger import *
-from scanner.annotations import *
+from ..shared.transmission import *
+from ..shared.taintedFunctionPointer import *
+from ..shared.utils import *
+from ..shared.astTransform import *
+from ..shared.logger import *
+from ..scanner.annotations import *
 # autopep8: on
 
 l = get_logger("ReqAnalysis")

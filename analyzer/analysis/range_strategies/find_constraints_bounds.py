@@ -6,10 +6,8 @@ from . import RangeStrategy
 from .infer_isolated import RangeStrategyInferIsolated
 
 # autopep8: off
-# I hate python.
-sys.path.append("../..")
-from shared.config import *
-from shared.utils import *
+from ...shared.config import *
+from ...shared.utils import *
 # autopep8: on
 
 

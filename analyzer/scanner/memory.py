@@ -9,9 +9,7 @@ import claripy
 import sys
 
 # autopep8: off
-# I hate python.
-sys.path.append("..")
-from shared.logger import *
+from ..shared.logger import *
 from .annotations import *
 # autopep8: on
 

@@ -3,7 +3,6 @@
 from collections import OrderedDict
 import os
 import yaml
-import argparse
 import pickle
 import angr
 import csv
@@ -11,13 +10,13 @@ import uuid
 import claripy.ast.base
 from collections.abc import MutableMapping
 
-from scanner.scanner import Scanner
-from analysis import transmissionAnalysis, baseControlAnalysis, branchControlAnalysis, pathAnalysis, requirementsAnalysis, rangeAnalysis, bitsAnalysis, tfpAnalysis
-from shared.logger import *
-from shared.transmission import *
-from shared.config import *
-from shared.utils import report_error
-from asmprinter.asmprinter import *
+from .scanner.scanner import Scanner
+from .analysis import transmissionAnalysis, baseControlAnalysis, branchControlAnalysis, pathAnalysis, requirementsAnalysis, rangeAnalysis, bitsAnalysis, tfpAnalysis
+from .shared.logger import *
+from .shared.transmission import *
+from .shared.config import *
+from .shared.utils import report_error
+from .asmprinter.asmprinter import *
 
 
 l = get_logger("MAIN")
@@ -31,17 +30,6 @@ def flatten_dict(dictionary, parent_key='', separator='_'):
         else:
             items.append((new_key, value))
     return dict(items)
-
-def parse_gadget_list(filename):
-    file = open(filename, "r")
-    data = list(csv.reader(file, delimiter=","))
-    file.close()
-
-    if len(data[0]) != 2:
-        l.critical("Invalid CSV: gadgets should be in the form of <hex_address>,<name")
-        exit(-1)
-
-    return data
 
 
 def remove_memory_sections(proj: angr.Project):
@@ -181,7 +169,7 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
         l.info(t)
 
         if asm_folder != "":
-            output_gadget_to_file(t, proj, name, asm_folder)
+            output_gadget_to_file(t, proj, asm_folder)
         if csv_filename != "":
             append_to_csv(csv_filename, [t])
 
@@ -215,12 +203,12 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
             l.info(tfp)
 
             if asm_folder != "":
-                output_tfp_to_file(tfp, proj, name, asm_folder)
+                output_tfp_to_file(tfp, proj, asm_folder)
             if tfp_csv_filename != "":
                 append_to_csv(tfp_csv_filename, [tfp])
 
 
-def main(binary, cache_project, config_file, base_address, gadgets, csv_filename="", tfp_csv_filename="", asm_folder=""):
+def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder=""):
     # Simplify how symbols get printed.
     claripy.ast.base._unique_names = False
 
@@ -239,47 +227,3 @@ def main(binary, cache_project, config_file, base_address, gadgets, csv_filename
     # TODO: Parallelize.
     for g in gadgets:
         analyse_gadget(proj, g[0], g[1], config, csv_filename, tfp_csv_filename, asm_folder)
-
-
-if __name__ == '__main__':
-    arg_parser = argparse.ArgumentParser(description='An inspector for Spectre gadgets.')
-
-    arg_parser.add_argument('binary')
-    arg_parser.add_argument('--cache-project', action='store_true', help='Load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist.')
-    arg_parser.add_argument('--config', type=str, required=True, help='Which configuration file to use.')
-    arg_parser.add_argument('--base-address', required=False, default='', help='Base address of the binary to analyze.')
-    arg_parser.add_argument('--gadget-address', required=False, default='', help='Inspect a single entrypoint at the given (hex) address.')
-    arg_parser.add_argument('--gadgets-file', required=False, default='', help='Inspect multiple entrypoints listed in the specified CSV file. The format should be <HEX_ADDRESS>,<NAME>. You can choose any name.')
-    # Outputs.
-    arg_parser.add_argument('--csv', required=False, default='', help='Output all found gadgets to a CSV.')
-    arg_parser.add_argument('--tfp-csv', required=False, default='', help='Output all found dispatch gadgets to a CSV (see paper for details on dispatch gadgets).')
-    arg_parser.add_argument('--asm', required=False, default='', help='Output an annotated ASM file for each gadget inthe specified folder. Useful for manual analysis.')
-
-    args = arg_parser.parse_args()
-
-    gadgets = []
-
-    # Check if we are looking for one or more than one gadget.
-    if args.gadgets_file == "" and args.gadget_address == "":
-        # No gadget address or gadget file: use default.
-        gadgets = [["0x400000", args.binary]]
-        print(f"Assuming gadget address: 0x400000")
-    elif args.gadgets_file != "" and args.gadget_address != "":
-        # Both gadget address and gadget file defined" error.
-        print("Use only one between '--gadget-address' (specify only one address) and '--gadget-file' (provide a CSV with a list of addresses)")
-        exit()
-
-    elif args.gadget_address != "":
-        gadgets = [[args.gadget_address, args.binary]]
-    elif args.gadgets_file != "":
-        gadgets = parse_gadget_list(args.gadgets_file)
-
-    # Base address is by default the address of the first gadget.
-    if args.base_address == "":
-        args.base_address = int(gadgets[0][0], 16)
-    else:
-        args.base_address = int(args.base_address, 16)
-
-    # Call main.
-    parsed_gadgets = [[int(x[0], 16), str(x[1]).strip()] for x in gadgets]
-    main(args.binary, args.cache_project, args.config, args.base_address, parsed_gadgets, args.csv, args.tfp_csv, args.asm)
