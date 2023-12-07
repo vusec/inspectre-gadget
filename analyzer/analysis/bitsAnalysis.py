@@ -8,7 +8,6 @@ from ..scanner.annotations import *
 from ..shared.config import *
 # autopep8: on
 
-DEBUG = False
 BITMAP_SPREAD = 0
 BITMAP_DIRECT = 1
 
@@ -38,6 +37,8 @@ class FlowMap:
     spread: list
     inferable_bits : list
 
+    sign_extended : bool
+
     @property
     def spread_low(self):
         if self.is_direct:
@@ -64,16 +65,16 @@ class FlowMap:
     @property
     def all_inferable_bits(self):
         if self.is_direct:
-            return self.direct_map.values()
+            return list(self.direct_map.values())
         else:
-            return self.inferable_bits
+            return list(set(self.inferable_bits))
 
     @property
     def number_of_bits_inferable(self):
         if self.is_direct:
             return len(set(self.direct_map.values()))
         else:
-            return len(self.inferable_bits)
+            return len(set(self.inferable_bits))
 
 
 
@@ -109,6 +110,7 @@ class FlowMap:
         self.direct_map = direct_map
         self.spread = spread
         self.inferable_bits = inferable_bits
+        self.sign_extended = False
 
     def is_empty(self):
 
@@ -129,6 +131,8 @@ class FlowMap:
         self.is_direct = BITMAP_SPREAD
 
     def merge_inferable_bits(self, other):
+
+        self.sign_extended = self.sign_extended | other.sign_extended
 
         if self.is_direct:
             self.convert_to_spread()
@@ -195,7 +199,7 @@ class FlowMap:
         min_spread = min(self.spread)
         self.set_spread(range(min_spread, end + 1))
 
-    def spread_to_left_by_one(self, int_length):
+    def spread_to_left_by(self, to_spread, int_length):
 
         if self.is_direct:
             self.convert_to_spread()
@@ -203,13 +207,17 @@ class FlowMap:
         if not self.spread:
             return
 
-        new_max = max(self.spread) + 2   # last excluding
+        new_max = max(self.spread) + to_spread + 1   # last excluding
         if new_max > int_length:
             # we have a overflow, we set spread to all
             self.spread = range(0, int_length)
         else:
             old_min = min(self.spread)
             self.spread = range(old_min, new_max)
+
+    def spread_to_left_by_one(self, int_length):
+
+        self.spread_to_left_by(1, int_length)
 
     def spread_to_right_by_one(self, int_length):
 
@@ -230,34 +238,8 @@ class FlowMap:
     ###########################################################################
     # Operation functions
 
-    def sign_ext(self, own_length, extend_size):
-        msb = own_length - 1
-
-        if self.is_direct:
-
-            # Set the extended part to the last bit
-            if msb in self.direct_map:
-                sign_bit = self.direct_map[msb]
-
-                for idx in range(own_length, own_length + extend_size):
-                    self.direct_map[idx] = sign_bit
-
-        else:
-
-            if msb in self.spread:
-
-                if isinstance(self.spread, range):
-                    old_start = self.spread.start
-                    new_end = own_length + extend_size
-                    self.set_spread(range(old_start, new_end))
-
-                else:
-                    new_spread = self.spread + list(range(own_length,  own_length + extend_size))
-                    self.set_spread(new_spread)
-
-
-
     def extract(self, start, end):
+
         to_extract = range(start, end + 1)
 
         if self.is_direct:
@@ -269,10 +251,11 @@ class FlowMap:
 
             self.direct_map = new_map
         else:
-            spread = [s for s in self.spread if s in to_extract]
+            spread = [(s - start) for s in self.spread if s in to_extract]
             self.spread = spread
 
     def concat_flow_map(self, other, self_length):
+
         self.merge_inferable_bits(other)
 
         for bit in other.spread:
@@ -280,6 +263,7 @@ class FlowMap:
             self.spread.append(bit + self_length)
 
     def add_flow_map(self, other, int_length):
+
         self.merge_inferable_bits(other)
 
         self.widen_spread(min(other.spread), max(other.spread))
@@ -450,6 +434,35 @@ class FlowMap:
 
             self.spread = new_spread
 
+    def or_mask(self, mask):
+
+        # First get the list of bits to preserve
+        to_remove = get_list_of_bits_set(mask)
+
+        # Now apply the mask
+
+        if self.is_direct:
+            new_map = {}
+
+            for idx in self.direct_map:
+                if idx in to_remove:
+                    continue
+
+                new_map[idx] = self.direct_map[idx]
+
+            self.direct_map = new_map
+
+        else:
+            new_spread = []
+
+            for idx in self.spread:
+                if idx in to_remove:
+                    continue
+
+                new_spread.append(idx)
+
+            self.spread = new_spread
+
 def flow_maps_merge_inferable_bits(flow_maps, self=None):
 
     base_map = self
@@ -473,7 +486,15 @@ def op_zero_ext(ast, flow_maps):
 def op_sign_ext(ast, flow_maps):
     # extendSize .. src : arg[0] .. arg[1]
     base_map = flow_maps[1]
-    base_map.sign_ext(ast.args[1].length, ast.args[0])
+
+    # We do not adjust the map to comply the sign extension. This limits
+    # the reasoning about the exploitable. We can always leak only ASCII
+    # characters and thus we can ignore sign extension
+    # base_map.sign_ext(ast.args[1].length, ast.args[0])
+
+    # Instead: mark secret as sign extended
+    base_map.sign_extended = True
+
     return base_map
 
 def op_concat(ast, flow_maps):
@@ -547,6 +568,29 @@ def op_and(ast, flow_maps):
 
     return base_map
 
+def op_or(ast, flow_maps):
+    # arg0 | arg1
+
+    if flow_maps[0]:
+        base_map = flow_maps[0]
+        other_idx = 1
+    else:
+        base_map = flow_maps[1]
+        other_idx = 0
+
+    if ast.args[other_idx].symbolic:
+        # Symbolic and, merge inferable bits if any and convert to spread
+        if flow_maps[other_idx]:
+            base_map.merge_inferable_bits(flow_maps[other_idx])
+        else:
+            base_map.convert_to_spread()
+    else:
+        # apply the mask
+        mask = ast.args[other_idx].args[0]
+        base_map.or_mask(mask)
+
+    return base_map
+
 def op_invert(ast, flow_maps):
     # ~ arg[0]
     # There are multiple ways to handle this situation. We just return the
@@ -608,27 +652,17 @@ def op_lshr(ast, flow_maps):
 def op_rshift(ast, flow_maps):
     # sar arg0 arg1 : sar dst shift
 
+    # We treat the arithmetic right shift as a normal right shift.
+    # Otherwise the most-significant bits are set to the MsB, which an
+    # attacker can circumvent by leaking ASCII characters.
+
     if flow_maps[0]:
         base_map = flow_maps[0]
-
-        if ast.args[1].symbolic:
-            # Symbolic shift, merge inferable bits and just spread to right
-            if flow_maps[1]:
-                base_map.merge_inferable_bits(flow_maps[1])
-            base_map.spread_to_right(0)
-
-        else:
-            # Non symbolic shift
-            shift = ast.args[1].args[0]
-            base_map.shift_arithmetic_right(shift, ast.args[0].length)
-
-        return base_map
-
     else:
-        # The shift it self has a flow map
         base_map = flow_maps[1]
-        base_map.set_spread(range(0, ast.length))
-        return base_map
+
+    base_map.sign_extended = True
+    return op_lshr(ast, flow_maps)
 
 def op_add(ast, flow_maps):
     # arg0 + arg1 + _
@@ -642,39 +676,27 @@ def op_add(ast, flow_maps):
 
     # For every addition, merge the flow_map
     # or increase spread by one
-    for map in flow_maps:
+    for idx, map in enumerate(flow_maps):
         if map == base_map:
             continue
 
         if map:
             base_map.add_flow_map(map, ast.length)
         else:
-            base_map.add_of_size(ast.length, ast.length)
+
+            if ast.args[idx].symbolic:
+                size = ast.args[idx].length
+            else:
+                value = ast.args[idx].args[0]
+                size = value.bit_length()
+
+            base_map.add_of_size(ast.length, size)
 
     return base_map
 
 def op_sub(ast, flow_maps):
     # arg0 - arg1 - _
     return op_add(ast, flow_maps)
-
-    # get the first flow_map
-    # for map in flow_maps:
-    #     if map:
-    #         base_map = map
-    #         break
-
-    # # For every subtraction, merge the flow_map
-    # # or increase the lower spread by one
-    # for map in flow_maps:
-    #     if map == base_map:
-    #         continue
-
-    #     if map:
-    #         base_map.sub_flow_map(map)
-    #     else:
-    #         base_map.widen_spread(0, ast.length - 1)
-
-    # return base_map
 
 def op_mul(ast, flow_maps):
     # arg0 * ag1 * _
@@ -700,13 +722,15 @@ def op_mul(ast, flow_maps):
             value = ast.args[idx].args[0]
             min_shift = value.bit_length() - 1
             remainder = value - (2 ** min_shift)
-            # first we shift
-            base_map.shift_left(min_shift, ast.length)
 
-            if remainder != 0:
-                # We have to spread one to left, and far to right
-                base_map.spread_to_left_by_one(ast.length)
-                base_map.spread_to_right(0)
+            if remainder == 0:
+                # Multiplication with base 2, we can treat it like a shift
+                base_map.shift_left(min_shift, ast.length)
+
+            else:
+                # We spread to left by min_shift + 1. We do not have
+                # to spread to right
+                base_map.spread_to_left_by(min_shift + 1, ast.length)
 
     return base_map
 
@@ -772,6 +796,7 @@ operators = {
     'Concat'        : op_concat,
     'Extract'       : op_extract,
     '__and__'       : op_and,
+    '__or__'        : op_or,
     '__invert__'    : op_invert,
     '__lshift__'    : op_lshift,
     'LShR'          : op_lshr,
