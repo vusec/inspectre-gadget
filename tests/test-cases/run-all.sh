@@ -1,0 +1,14 @@
+make clean
+make
+
+rm -rf output && mkdir output
+
+for f in $(ls ./*/gadget)
+do
+    echo "\n================= $f ================\n"
+    cat $f.s | batcat -l asm
+    echo ""
+    objdump --adjust-vma=0x4000000 -d -Mintel $f | batcat -l asm
+    echo ""
+    python3 ../../inspectre analyze $f --config config_all.yaml --address 0x4000000 --output output/gadgets.csv --tfp-output output/tfp.csv --asm output/asm || exit -1
+done
