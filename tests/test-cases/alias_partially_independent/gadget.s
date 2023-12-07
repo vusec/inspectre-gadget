@@ -7,7 +7,8 @@ alias_partially_independent:
    mov    rax, QWORD PTR [r12 + 0x28]
    mov    r9, QWORD PTR [rsi + rax]
 
-   # 'exploitable'
+   # Exploitable, but base is dependent from a value loaded near the secret
+   # value. It requires to leak a secret near a valid base in memory.
    mov    esi, edi
    add    rsi, r12
    mov    eax, DWORD PTR [r12 + 0x28]
