@@ -23,12 +23,6 @@ class __CustomFormatter(logging.Formatter):
         return color(col, False) + f"[{name}]  {message}"
 
 
-class __ExitHandler(logging.Handler):
-    def emit(self, _):
-        logging.shutdown()
-        exit(1)
-
-
 def __initialize_logger(name):
 
     logger = logging.getLogger(name)
@@ -38,7 +32,6 @@ def __initialize_logger(name):
     ch = logging.StreamHandler()
     ch.setFormatter(__CustomFormatter())
     logger.addHandler(ch)
-    logger.addHandler(__ExitHandler(level=50))
 
     return logger
 

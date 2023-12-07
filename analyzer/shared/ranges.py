@@ -147,6 +147,9 @@ def range_simple(min, max, stride, isolated):
 def get_stride_from_mask(and_mask, or_mask):
     mask = and_mask & ~or_mask
 
+    if mask == 0:
+        return 0
+
     lowest_bit = (mask & -mask).bit_length() - 1
 
     return 2 ** lowest_bit

@@ -15,9 +15,6 @@ class RangeStrategyFindMasking(RangeStrategy):
     def find_range(self, constraints, ast : claripy.ast.bv.BVS,
                    ast_min : int = None, ast_max : int = None):
 
-        # print("\n>>>Complex Range:")
-        # print(ast)
-
         s = claripy.Solver(timeout=SOLVER_TIMEOUT)
         s.constraints = constraints
 
@@ -54,7 +51,7 @@ def _find_entropy(s : claripy.Solver, ast : claripy.BV, ast_max : int):
             and_mask = and_mask & ~(1 << bit)
             entropy -= 1
 
-        elif not s.satisfiable(extra_constraints=[to_check == 0,  ast > 0]):
+        elif not s.satisfiable(extra_constraints=[to_check == 0]):
             # bit is always one
             one_bits.append(bit)
             or_mask = or_mask | 1 << bit
