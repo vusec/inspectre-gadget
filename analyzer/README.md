@@ -56,7 +56,7 @@ For each **branch**, we save the PC and constraints in a list.
 
 We also completely disable concretization.
 
-At the end of its execution, the Scanner reports a list of potential transmission,
+At the end of its execution, the Scanner reports a list of potential transmissions,
 i.e. instructions that are known to leak the argument (only loads and stores are
 supported for now) and have a secret-dependent argument.
 

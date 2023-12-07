@@ -22,7 +22,7 @@ make -j 32
 ## 2: Create a memory dump
 
 Since the Linux kernel patches spurious `endbr` on boot time, we need
-to create a dump of a booted Linux Kernel. Follow the stepts in the VM folder
+to create a dump of a booted Linux Kernel. Follow the steps in the VM folder
 to create a memory dump.
 
 ## 3: Extract the endbr targets
