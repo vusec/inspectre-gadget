@@ -1,6 +1,5 @@
 import os
 import pandas as pd
-import IPython
 
 dfs = []
 tfps = []
@@ -26,7 +25,6 @@ for f in os.listdir('gadgets'):
     df['name'] = name
     tfps.append(df)
 
-# IPython.embed()
 
 res = pd.concat(dfs)
 res.to_csv('all-gadgets.csv', sep=";")
