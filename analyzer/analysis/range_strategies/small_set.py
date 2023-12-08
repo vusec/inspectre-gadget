@@ -16,14 +16,20 @@ class RangeStrategySmallSet(RangeStrategy):
         s = claripy.Solver(timeout=global_config["Z3Timeout"])
         s.constraints = constraints
 
+        if ast_min == None or ast_max == None:
 
-        samples = s.eval(ast, 100)
+            if ast_min == None:
+                ast_min = s.min(ast)
+            if ast_max == None:
+                ast_max = s.max(ast)
+
+        if ast_min == ast_max:
+            return range_static(ast_min, False)
+
+        samples = s.eval(ast, 17)
         sample_len = len(samples)
 
-        if sample_len == 1:
-            return range_static(samples[0], False)
-
-        elif sample_len < 100:
+        if sample_len < 17:
             return __list_to_stride_range(sorted(samples))
 
         return None

@@ -39,8 +39,15 @@ def get_constraints_on_ast(ast, constraints):
 
 def get_ast_ranges(constraints, ast : claripy.BV):
     l.info(f"Getting range for {ast}")
+
+    # We calculate the min and max once
+    s = claripy.Solver(timeout=global_config["Z3Timeout"])
+    s.constraints = constraints
+    ast_min = s.min(ast)
+    ast_max = s.max(ast)
+
     for strategy in __range_strategies:
-        ast_range = strategy.find_range(constraints, ast, None, None)
+        ast_range = strategy.find_range(constraints, ast, ast_min, ast_max)
 
         if ast_range:
             l.info(f"Range: {ast_range}")
