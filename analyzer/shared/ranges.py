@@ -117,29 +117,6 @@ def range_static(value, isolated):
     return AstRange(min=value, max=value, exact=True, entropy=0, isolated=isolated, intervals=[interval])
 
 
-def list_to_stride_range(numbers : list):
-    assert(len(numbers) > 1)
-    stride = numbers[1] - numbers[0]
-
-    for i in range(0, len(numbers) - 1):
-        if numbers[i] + stride != numbers[i+1]:
-            return None
-
-    return (numbers[0], numbers[-1], stride)
-
-
-def range_small(samples):
-    # TODO better handling of small ranges
-    interval = list_to_stride_range(samples)
-
-    if interval:
-        return AstRange(min=interval[0] , max=interval[1],
-                exact=True, isolated=True,
-                intervals=[Interval(interval[0], interval[1], interval[2])])
-
-    return AstRange(min=samples[0], max=samples[1], values=samples, exact=True, isolated=True)
-
-
 def range_simple(min, max, stride, isolated):
     return AstRange(min=min, max=max, exact=True, isolated=isolated, intervals=[Interval(min, max, stride)])
 

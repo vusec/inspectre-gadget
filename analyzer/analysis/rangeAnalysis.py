@@ -13,7 +13,7 @@ from ..shared.config import *
 l = get_logger("RangeAnalys")
 
 __range_strategies = [
-    # RangeStrategySmallSet(),
+    RangeStrategySmallSet(),
     RangeStrategyInferIsolated(),
     RangeStrategyFindConstraintsBounds(RangeStrategyInferIsolated()),
     RangeStrategyFindMasking()

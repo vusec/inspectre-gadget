@@ -26,6 +26,19 @@ class RangeStrategySmallSet(RangeStrategy):
             return range_static(samples[0], False)
 
         elif sample_len < 100:
-            return range_small(sorted(samples))
+            return __list_to_stride_range(sorted(samples))
 
         return None
+
+
+def __list_to_stride_range(numbers : list):
+    assert(len(numbers) > 1)
+    stride = numbers[1] - numbers[0]
+
+    for i in range(0, len(numbers) - 1):
+        if numbers[i] + stride != numbers[i+1]:
+            return None
+
+    return AstRange(min=numbers[0] , max=numbers[-1],
+                    exact=True, isolated=True,
+                    intervals=[Interval(numbers[0], numbers[-1], stride)])
