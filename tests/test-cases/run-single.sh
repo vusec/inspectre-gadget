@@ -1,3 +1,9 @@
+if [ "$#" -ne 1 ]; then
+    echo "USAGE: $0 <test_case_name>"
+    exit 1
+fi
+
+
  f=$1/gadget
     echo "\n================= $f ================\n"
     cat $f.s | batcat -l asm

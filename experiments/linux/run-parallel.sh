@@ -9,6 +9,7 @@ ASM_FOLDER=$OUT_FOLDER/asm
 
 if [ "$#" -ne 3 ]; then
     echo "USAGE: $0 <BINARY> <GADGET_CSV> <JOBS>"
+    exit 1
 fi
 
 BINARY=$1
