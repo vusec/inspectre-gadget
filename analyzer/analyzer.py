@@ -90,6 +90,7 @@ def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Projec
 
 def append_to_csv(csv_filename, transmissions):
     # Read the CSV file to see if there are already existing entries.
+    Path(os.path.dirname(csv_filename)).mkdir(parents=True, exist_ok=True)
     existing_keys = []
     try:
         if os.stat(csv_filename).st_size > 0:

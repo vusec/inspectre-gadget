@@ -83,7 +83,7 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, is_
 
 def output_gadget_to_file(t : Transmission, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
-    o = open(f"{path}/gadget_{t.uuid}.asm", "a+")
+    o = open(f"{path}/gadget_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"----------------- TRANSMISSION -----------------\n")
     o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.transmission.expr, t.pc, t.secret_load_pc, is_tfp=False, color=False))
     o.write(f"""
@@ -120,7 +120,7 @@ def has_aliasing(reg):
 
 def output_tfp_to_file(t : TaintedFunctionPointer, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
-    o = open(f"{path}/tfp_{t.uuid}.asm", "a+")
+    o = open(f"{path}/tfp_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"--------------------- TFP ----------------------\n")
     o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.expr, t.pc, None, is_tfp=True, color=False))
     o.write(f"""

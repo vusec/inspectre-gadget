@@ -24,7 +24,7 @@ def run_analyzer(args):
     # Parse entrypoint list.
     entrypoints = []
     if args.address != "":
-        entrypoints = [[args.address, args.binary]]
+        entrypoints = [[args.address, args.name if args.name != "" else args.binary]]
     elif args.address_list != "":
         entrypoints = parse_gadget_list(args.address_list)
 
@@ -70,7 +70,9 @@ if __name__ == '__main__':
     analyzer_args.add_argument('--config', type=str, required=True, help='which configuration file to use')
     group = analyzer_args.add_mutually_exclusive_group(required=True)
     group.add_argument('--address', default='', help='inspect a single entrypoint at the given (hex) address')
+    analyzer_args.add_argument('--name', default='', help='give a name to the single entrypoint to analyze (you can choose any name)')
     group.add_argument('--address-list', default='', help='read entrypoints from a file with the format <HEX_ADDRESS>,<NAME> (you can choose any name)')
+
     # Optional args.
     analyzer_args.add_argument('--cache-project', action='store_true', help='load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist')
     analyzer_args.add_argument('--base-address', required=False, default='', help='base address of the binary to analyze')
@@ -94,4 +96,10 @@ if __name__ == '__main__':
     viewer_args.set_defaults(func=run_viewer)
 
     args = arg_parser.parse_args()
+
+    # No support for mutually exclusivity between a group of 1 and 2 arguments
+    # so we check manually for this
+    if args.address_list and args.name:
+        arg_parser.error("--name: not allowed with argument --address-list")
+
     args.func(args)

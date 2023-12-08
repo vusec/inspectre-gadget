@@ -22,7 +22,7 @@ run-analyzer () {
         addr=$(echo $l | sed 's/,/ /g' | awk '{ print $1 }')
         name=$(echo $l | sed 's/,/ /g' | awk '{ print $2 }')
         echo "addr: $addr    name: $name " >> $OUT_FOLDER/finished.txt
-        timeout 360 python3 $ANALYZER_FOLDER/inspectre analyze $BINARY --config $CONFIG --address $addr --cache-project --output $GADGET_FOLDER/$name-$addr.csv --tfp-output $TFP_FOLDER/$name-$addr.csv --asm $ASM_FOLDER 2> $LOG_FOLDER/out_$name-$addr.log
+        timeout 360 python3 $ANALYZER_FOLDER/inspectre analyze $BINARY --config $CONFIG --address $addr --name $name --cache-project --output $GADGET_FOLDER/$name-$addr.csv --tfp-output $TFP_FOLDER/$name-$addr.csv --asm $ASM_FOLDER 2> $LOG_FOLDER/out_$name-$addr.log
         echo "Exited with code $?" >> $LOG_FOLDER/out_$name-$addr.log
     done
 }
