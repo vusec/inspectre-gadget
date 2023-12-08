@@ -291,36 +291,48 @@ def op_extract(ast, range_maps):
 def op_or(ast, range_maps):
     # arg0 | arg1
 
-    if range_maps[0]:
-        base_map = range_maps[0]
-        other_idx = 1
-    else:
-        base_map = range_maps[1]
-        other_idx = 0
+    base_map = None
+    mask = None
 
-    if ast.args[other_idx].symbolic:
-        # Mask by symbolic, we can't know the range
-        return unknown_range()
-    else:
-        mask = ast.args[other_idx].args[0]
-        return base_map.op_or(mask)
+    for idx, arg in enumerate(ast.args):
+
+        if not arg.symbolic:
+            if mask == None:
+                mask = arg.args[0]
+            else:
+                mask |= arg.args[0]
+
+        elif base_map == None:
+            base_map = range_maps[idx]
+
+        else:
+            # Mask by symbolic variable, we can't know the range
+            return unknown_range()
+
+    return base_map.op_or(mask)
 
 def op_and(ast, range_maps):
     # arg0 & arg1
 
-    if range_maps[0]:
-        base_map = range_maps[0]
-        other_idx = 1
-    else:
-        base_map = range_maps[1]
-        other_idx = 0
+    base_map = None
+    mask = None
 
-    if ast.args[other_idx].symbolic:
-        # Mask by symbolic, we can't know the range
-        return unknown_range()
-    else:
-        mask = ast.args[other_idx].args[0]
-        return base_map.op_and(mask)
+    for idx, arg in enumerate(ast.args):
+
+        if not arg.symbolic:
+            if mask == None:
+                mask = arg.args[0]
+            else:
+                mask &= arg.args[0]
+
+        elif base_map == None:
+            base_map = range_maps[idx]
+
+        else:
+            # Mask by symbolic variable, we can't know the range
+            return unknown_range()
+
+    return base_map.op_and(mask)
 
 def op_invert(ast, range_maps):
     # ~ arg[0]
