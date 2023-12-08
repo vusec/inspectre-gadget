@@ -10,7 +10,7 @@ we might be able to leak memory through a side-channel.
 However, not all double-loads are created equal.
 
 This tool finds potential Spectre gadgets and classifies them based on properties
-like where can we leak from, where can we place our reaload buffer, etc.
+like where can we leak from, where can we place our reload buffer, etc.
 
 ## How it works
 
@@ -42,7 +42,7 @@ The scanner performs symbolic execution and records:
 For each **store**, we save the address and value.
 
 For each **load**, we create a new symbol and set it as the result of the load.
-The newly created symbol is tagged with a `LoadAnnotation`, that can be one
+The newly created symbol is tagged with a `LoadAnnotation`, which can be one
 of the following:
 
 - `MaybeAttacker` -> value loaded from a constant address
@@ -69,7 +69,7 @@ a _transmission base_ (e.g. flush-reload buffer).
 First, the expression is **canonicalized**, i.e. reduced to a known form:
 
 - `claripy.simplify()` is applied, to covert subtractions into sums and distribute \* and / over +
-- expressions containing ` if-then-else` statements (e.g. CMOVs) are split into equivalent expressions with associated constraints (e.g. `if a>0 then b else c`is split into`b (condition a>0)`and`c (condition a <=0)`)
+- expressions containing ` if-then-else` statements (e.g. CMOVs) are split into equivalent expressions with associated constraints (e.g. `if a>0 then b else c` is split into `b (condition a>0)` and `c (condition a <=0)`)
 - concats are reduced to shifts
 - `<<` are distributed over `+`
 
