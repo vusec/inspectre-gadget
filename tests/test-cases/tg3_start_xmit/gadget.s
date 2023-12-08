@@ -1,4 +1,3 @@
-# DUMP:  /home/wiebingsj/vmlinux/linux-6.1.13/vmlinux 0xffffffff817ee1e0
 .intel_syntax noprefix
 
 tg3_start_xmit:
