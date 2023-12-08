@@ -9,14 +9,10 @@ from ...shared.ranges import *
 from ...shared.transmission import *
 from ...shared.utils import *
 from ...shared.logger import *
+from ...shared.config import *
 # autopep8: on
 
-
-DEBUG = False
-SOLVER_TIMEOUT = 10*1000  # ms, 10s
-
 l = get_logger("InferIsolated")
-
 
 class RangeStrategyInferIsolated(RangeStrategy):
 
@@ -30,7 +26,7 @@ class RangeStrategyInferIsolated(RangeStrategy):
 
         if ast_min == None or ast_max == None:
 
-            s = claripy.Solver(timeout=SOLVER_TIMEOUT)
+            s = claripy.Solver(timeout=global_config["Z3Timeout"])
 
             if ast_min == None:
                 ast_min = s.min(ast)
@@ -458,7 +454,7 @@ operators = {
     'Extract'       : op_extract,
     '__or__'        : op_or,
     '__and__'       : op_and,
-    '__invert__'    : op_invert,   # TODO
+    '__invert__'    : op_invert,
     '__lshift__'    : op_lshift,
     'LShR'          : op_lshr,
     '__rshift__'    : op_rshift,
@@ -496,15 +492,9 @@ def get_range_map_from_ast(ast : claripy.ast.bv.BVS):
         if all(m is None or not m.has_range() or m.unknown for m in args_range_maps):
             return unknown_range()
 
-        if DEBUG:
-            print("\nAST:", ast)
-            print("OP:", ast.op, args_range_maps)
-
         if ast.op in operators:
             new_map = operators[ast.op](ast, args_range_maps)
 
-            if DEBUG:
-                print("New:", new_map)
 
             return new_map
 

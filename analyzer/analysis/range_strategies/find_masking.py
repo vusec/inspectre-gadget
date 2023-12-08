@@ -5,17 +5,15 @@ from . import RangeStrategy
 
 # autopep8: off
 from ...shared.ranges import *
+from ...shared.config import *
 # autopep8: on
-
-SOLVER_TIMEOUT = 10*1000  # ms, 10s
-
 
 class RangeStrategyFindMasking(RangeStrategy):
 
     def find_range(self, constraints, ast : claripy.ast.bv.BVS,
                    ast_min : int = None, ast_max : int = None):
 
-        s = claripy.Solver(timeout=SOLVER_TIMEOUT)
+        s = claripy.Solver(timeout=global_config["Z3Timeout"])
         s.constraints = constraints
 
 
