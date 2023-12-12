@@ -1,22 +1,6 @@
-# InSpectre Gadget
+# Analyzer
 
 Modelling exploitability for Spectre disclosure gadgets.
-
-## Motivation
-
-Whenever there's a chain of loads that can be executed in a speculative window,
-we might be able to leak memory through a side-channel.
-
-However, not all double-loads are created equal.
-
-This tool finds potential Spectre gadgets and classifies them based on properties
-like where can we leak from, where can we place our reload buffer, etc.
-
-## How it works
-
-The tool takes as input a binary and a list of attacker-controlled registers and stack locations.
-
-It outputs a list of **transmissions**, i.e. symbolic expressions associated to a given location in the program, enriched with a set of properties that can be used by the analyst to filter out or prioritize gadgets.
 
 ## Design
 
@@ -31,7 +15,7 @@ Internally, the gadget analysis is divided into different steps:
   - A **Requirements** analysis lists which registers and memory locations need to be controlled by the attacker.
   - A **Range** analysis tries to identify the range of the secret, the secret address and the transmission base.
 
-### Scanner
+## Scanner
 
 The scanner performs symbolic execution and records:
 
@@ -45,7 +29,7 @@ For each **load**, we create a new symbol and set it as the result of the load.
 The newly created symbol is tagged with a `LoadAnnotation`, which can be one
 of the following:
 
-- `MaybeAttacker` -> value loaded from a constant address
+- `Uncontrolled` -> value loaded from a constant address
 - `Secret` -> value loaded from an attacker-controlled address
 - `Transmission` -> load of a secret-dependent address
 
@@ -60,7 +44,7 @@ At the end of its execution, the Scanner reports a list of potential transmissio
 i.e. instructions that are known to leak the argument (only loads and stores are
 supported for now) and have a secret-dependent argument.
 
-### TransmissionAnalysis
+## TransmissionAnalysis
 
 Once we have a list of potential transmissions from the scanner, we analyze them
 to identify clearly what secret is being transmitted and possibly if there's
@@ -68,8 +52,13 @@ a _transmission base_ (e.g. flush-reload buffer).
 
 First, the expression is **canonicalized**, i.e. reduced to a known form:
 
-- `claripy.simplify()` is applied, to covert subtractions into sums and distribute \* and / over +
-- expressions containing ` if-then-else` statements (e.g. CMOVs) are split into equivalent expressions with associated constraints (e.g. `if a>0 then b else c` is split into `b (condition a>0)` and `c (condition a <=0)`)
+- `claripy.simplify()` is applied, to covert subtractions into sums and
+  distribute \* and / over +
+- expressions containing `if-then-else` statements (e.g. CMOVs) are split into
+  equivalent expressions with associated constraints (e.g.
+  `if a>0 then b else c` is split into `b (condition a>0)` and `c (condition a <=0)`)
+- expressions containing a `SExt` expression are split in two expressions, each
+  with an associated condition on the MSB of the operand.
 - concats are reduced to shifts
 - `<<` are distributed over `+`
 
