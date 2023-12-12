@@ -17,7 +17,7 @@ author = 'Sander Wiebing & Alvise de Faveri Tron - Vrije Universiteit Amsterdam'
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ['myst_parser', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary']
+extensions = ['myst_parser', 'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx_rtd_theme', 'sphinx_rtd_size']
 autosummary_generate = True  # Turn on sphinx.ext.autosummary
 
 templates_path = ['_templates']
@@ -27,18 +27,19 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'alabaster'
+# html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static', 'img']
 
-logo_url = "img/inspectre-gadget2.jpeg"
+html_logo = "img/inspectre-gadget-circle.png"
 
-html_sidebars = {
-        '**': [
-                 'icon.html',
-                #  'about.html',
-                 'navigation.html',
-                 'searchbox.html',
-            ]
+html_theme_options = {
+    # Toc options
+    'collapse_navigation': True,
+    'sticky_navigation': True,
+    'navigation_depth': 4,
+    'includehidden': True,
+    'titles_only': False
+}
 
-        }
-
+sphinx_rtd_size_width = "60%"

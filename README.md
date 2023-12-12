@@ -23,10 +23,11 @@ You can find all the documentation, including usage examples, in the
 To build the documentation:
 
 ```sh
-pip install sphinx myst-parser
+pip install sphinx myst-parser sphinx_rtd_theme sphinx-rtd-size
 cd docs
 make html
-<open _build/html/index.html in a browser>
+
+# --> open _build/html/index.html in a browser
 ```
 
 ## Usage
