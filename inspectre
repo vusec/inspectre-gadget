@@ -21,6 +21,11 @@ def parse_gadget_list(filename):
 
 
 def run_analyzer(args):
+    # No support for mutually exclusivity between a group of 1 and 2 arguments
+    # so we check manually for this
+    if args.address_list and args.name:
+        arg_parser.error("--name: not allowed with argument --address-list")
+
     # Parse entrypoint list.
     entrypoints = []
     if args.address != "":
@@ -96,10 +101,5 @@ if __name__ == '__main__':
     viewer_args.set_defaults(func=run_viewer)
 
     args = arg_parser.parse_args()
-
-    # No support for mutually exclusivity between a group of 1 and 2 arguments
-    # so we check manually for this
-    if args.address_list and args.name:
-        arg_parser.error("--name: not allowed with argument --address-list")
 
     args.func(args)
