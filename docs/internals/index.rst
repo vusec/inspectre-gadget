@@ -5,3 +5,4 @@ Internals
    :maxdepth: 2
 
    analyzer
+   reasoner

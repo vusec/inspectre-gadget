@@ -1,14 +1,16 @@
 # Analyzer
 
-Modelling exploitability for Spectre disclosure gadgets.
-
 ## Design
 
 Internally, the gadget analysis is divided into different steps:
 
 - Step 0: the binary is loaded into an **angr project** and all non-writable memory is removed.
 - Step 1: the **Scanner** performs symbolic execution on the code for a limited number of basic blocks and returns a list of symbolic expression that have been classified as potential transmissions.
-- Step 2: the **Transmission Analyzer** extracts a list of transmissions from the symbolic expressions found by the scanner, identifying a _base_ and _secret_ for each of them.
+- Step 2: the **TransmissionAnalysis** pass extracts a list of transmissions from the symbolic expressions found by the scanner, identifying a _base_ and _secret_ for each of them.
+  - Note that for a single transmission expression there can be multiple transmissions, e.g. in the
+    expression `LOAD[LOAD[rax] + LOAD[rbx]]` both `LOAD[rax]` and `LOAD[rbx]` can
+    be considered "secret" if `rax` and `rbx` are controlled. In this case, the
+    TransmissionAnalysis will extract two separate transmissions.
 - Step 3: a series of analysis are run on each transmission:
   - A **Base Control** analysis tries to understand if the base can be independently controlled from the secret and secret address.
   - A **Path** analysis recovers the visited branches and the resulting constraints.
