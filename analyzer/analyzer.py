@@ -20,6 +20,7 @@ from .asmprinter.asmprinter import *
 
 
 l = get_logger("MAIN")
+l_verbose = get_logger("MAIN_VERBOSE")
 
 def flatten_dict(dictionary, parent_key='', separator='_'):
     items = []
@@ -115,8 +116,8 @@ def append_to_csv(csv_filename, transmissions):
             flatten_dicts.append(new_d)
             new_keys = (list(new_d.keys()))
 
-        l.info(f"Missing keys: {set(existing_keys) - set(new_keys)}")
-        l.info(f"New keys: {set(new_keys) - set(existing_keys)}")
+        l_verbose.info(f"Missing keys: {set(existing_keys) - set(new_keys)}")
+        l_verbose.info(f"New keys: {set(new_keys) - set(existing_keys)}")
 
         keys = existing_keys if len(existing_keys) > 0 else new_keys
         writer = csv.DictWriter(outfile, fieldnames = keys, delimiter=';')
@@ -142,6 +143,7 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
     # Step 3. Analyze each transmission.
     l.info(f"--------------- ANALYZING TRANSMISSIONS ------------------")
     for t in transmissions:
+        l.info(f"Analyzing {t.transmission.expr}...")
         t.uuid = str(uuid.uuid4())
         t.name = name
         t.address = gadget_address
@@ -167,13 +169,14 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
 
         # Remove the dependency graph before printing.
         t.properties["deps"] = None
-        l.info(t)
+        l_verbose.info(t)
 
         if asm_folder != "":
             output_gadget_to_file(t, proj, asm_folder)
+            l.info(f"Dumped annotated ASM to {asm_folder}")
         if csv_filename != "":
             append_to_csv(csv_filename, [t])
-
+            l.info(f"Dumped properties to {csv_filename}")
 
     # Step 4. Analyze tainted function pointers.
     if global_config["TaintedFunctionPointers"]:
@@ -201,13 +204,14 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
                 report_error(e, where="range_analysis", start_addr=hex(gadget_address), error_type="TFP RANGE")
                 continue
 
-            l.info(tfp)
+            l_verbose.info(tfp)
 
             if asm_folder != "":
                 output_tfp_to_file(tfp, proj, asm_folder)
+                l.info(f"Dumped annotated ASM to {asm_folder}")
             if tfp_csv_filename != "":
                 append_to_csv(tfp_csv_filename, [tfp])
-
+                l.info(f"Dumped CSV to {tfp_csv_filename}")
 
 def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder=""):
     # Simplify how symbols get printed.
@@ -221,8 +225,10 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     l.info("Removing non-writable memory...")
     remove_memory_sections(proj)
 
-    if not global_config["EnableLogging"]:
+    if global_config["LogLevel"] == 0:
         disable_logging()
+    elif global_config["LogLevel"] == 1:
+        disable_logging(keep_main=True)
 
     # Run the Analyzer.
     # TODO: Parallelize.
