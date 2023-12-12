@@ -1,3 +1,9 @@
+"""BitsAnalysis
+
+This analysis infers how bits of the secret are spread in the transmission
+expression.
+"""
+
 import claripy
 
 # autopep8: off

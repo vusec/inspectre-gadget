@@ -1,8 +1,9 @@
-# DependencyGraph
-#
-# The dependency graph is used to calculate sets of symbolic variables that
-# should be considered dependent from each other, i.e. they are tied together
-# by either aliases or constraints that involve each other.
+"""DependencyGraph
+
+The dependency graph is used to calculate sets of symbolic variables that
+should be considered dependent from each other, i.e. they are tied together
+by either aliases or constraints that involve each other.
+"""
 
 import claripy
 import sys

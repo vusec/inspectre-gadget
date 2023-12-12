@@ -1,9 +1,9 @@
-# PathAnalysis
-#
-# This analysis is responsible of tracking which branches need to be taken or
-# not taken for the transmission to happen, and how their condition influence
-# the final transmission.
+"""PathAnalysis
 
+This analysis is responsible of tracking which branches need to be taken or
+not taken for the transmission to happen, and how their condition influence
+the final transmission.
+"""
 
 import claripy
 import sys

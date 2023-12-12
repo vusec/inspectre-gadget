@@ -1,7 +1,8 @@
-# BaseControlAnalysis
-#
-# This analysis is responsible of checking if the base of the transmission
-# can be controlled independently from the secret and the secret address.
+"""BaseControlAnalysis
+
+This analysis is responsible of checking if the base of the transmission
+can be controlled independently from the secret and the secret address.
+"""
 
 from enum import Enum
 import claripy

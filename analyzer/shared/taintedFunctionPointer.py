@@ -1,3 +1,7 @@
+"""
+TaintedFunctionPointer object (a.k.a. dispatch gadget).
+"""
+
 from enum import Enum
 from collections import OrderedDict
 from claripy import BVS

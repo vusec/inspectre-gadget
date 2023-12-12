@@ -1,4 +1,10 @@
-#!/usr/bin/python3
+"""
+Entrypoint for the analysis component. The analyzer is responsible of:
+1. Loading the target binary
+2. Running the scanner to find potential transmission
+3. Run analysis passes on each gadget
+4. Collect and output results
+"""
 
 from collections import OrderedDict
 import os
@@ -23,6 +29,9 @@ l = get_logger("MAIN")
 l_verbose = get_logger("MAIN_VERBOSE")
 
 def flatten_dict(dictionary, parent_key='', separator='_'):
+    """
+    Transform a hierarchy of nested objects into a flat dictionary.
+    """
     items = []
     for key, value in dictionary.items():
         new_key = parent_key + separator + key if parent_key else key
@@ -34,8 +43,10 @@ def flatten_dict(dictionary, parent_key='', separator='_'):
 
 
 def remove_memory_sections(proj: angr.Project):
-    # We always remove remove the writeable segments to prevent
-    # initialized concrete values (zeros) while they should be symbolic.
+    """
+    We always remove remove the writeable segments to prevent
+    initialized concrete values (zeros) while they should be symbolic.
+    """
 
     # Get the start addresses of segments to remove
     start_addresses = []
@@ -54,6 +65,9 @@ def remove_memory_sections(proj: angr.Project):
 
 
 def load_config(config_file):
+    """
+    Read the YAML configuration.
+    """
     if config_file:
         with open(config_file, "r") as f:
             config = yaml.safe_load(f)
@@ -70,6 +84,9 @@ def load_config(config_file):
 
 
 def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Project:
+    """
+    Load angr project from a pickle, or create one if it does not exist.
+    """
     if use_pickle:
         pickle_file = binary_file + '.angr'
 
@@ -90,6 +107,10 @@ def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Projec
 
 
 def append_to_csv(csv_filename, transmissions):
+    """
+    Output to a CSV, trying to preserve column order if the file is not empty.
+    """
+
     # Read the CSV file to see if there are already existing entries.
     Path(os.path.dirname(csv_filename)).mkdir(parents=True, exist_ok=True)
     existing_keys = []
@@ -127,10 +148,16 @@ def append_to_csv(csv_filename, transmissions):
 
 
 def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_filename, asm_folder):
+    """
+    Run the scanner from a single entrypoint and analyze the potential transmissions
+    found at symbolic-execution time.
+    """
+
     # Step 1. Analyze the code snippet with angr.
     l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
     s = Scanner()
     s.run(proj, gadget_address, config)
+
     l.info(f"Found {len(s.transmissions)} potential transmissions.")
     l.info(f"Found {len(s.calls)} tainted function pointers.")
 
@@ -214,6 +241,10 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
                 l.info(f"Dumped CSV to {tfp_csv_filename}")
 
 def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder=""):
+    """
+    Run the analyzer on a binary.
+    """
+
     # Simplify how symbols get printed.
     claripy.ast.base._unique_names = False
 

@@ -1,3 +1,8 @@
+"""
+Transformations that are performed on the AST of ANGR's symbolic expressions to
+normalize their form and ease analysis.
+"""
+
 import claripy
 import itertools
 

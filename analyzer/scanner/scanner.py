@@ -1,6 +1,12 @@
-# The Scanner is responsible of finding potential secrets (i.e. attacker-controlled loads)
-# and potential transmissions (loads/stores of secret-dependent values) in a given
-# snippet.
+"""
+The Scanner is responsible of:
+
+- initializing symbols
+- running the symbolic execution engine
+- hook all symbolic loads, stores and calls
+- label propagation ("secret", "transmission")
+- enforcing the memory model (all symbolic loads return a pure symbol)
+"""
 
 import angr
 import claripy
@@ -24,16 +30,21 @@ l = get_logger("Scanner")
 
 n_concrete_addr = 0
 class DummyConcretizationStrategy(SimConcretizationStrategy):
+    """
+    Dummy concretization strategy to make ANGR happy. We never use this.
+    """
     def _concretize(self, memory, addr, **kwargs):
         global n_concrete_addr
         n_concrete_addr+=8
         return [n_concrete_addr]
 
 def skip_concretization(state: angr.SimState):
-    # The address concretization constraints will not be saved.
-    # Since in the after_hook of every load we generate a completely
-    # new symbolic value, we are effectively eliminating the side-effects
-    # of concretization.
+    """
+    The address concretization constraints will not be saved.
+    Since in the after_hook of every load we generate a completely
+    new symbolic value, we are effectively eliminating the side-effects
+    of concretization.
+    """
     state.inspect.address_concretization_add_constraints = False
 
 
@@ -51,6 +62,11 @@ class SplitException(Exception):
     pass
 
 class Scanner:
+    """
+    Performs the symbolic execution, keeping track of state splitting and
+    all the loads/stores that were encountered.
+    """
+
     transmissions: list[TransmissionExpr]
     loads: list[memory.MemOp]
     stores: list[memory.MemOp]
@@ -187,6 +203,11 @@ class Scanner:
                                                        contains_spec_stop=contains_spec_stop))
 
     def split_state(self, state, asts, addr):
+        """
+        Manually split the state in two sub-states with different conditions.
+        Needed e.g. for CMOVEs and SExt. Note that the current state should be
+        skipped after splitting, since the split is done at the BB level.
+        """
         for a in asts:
             a.expr = remove_spurious_annotations(a.expr)
             # Create a new state.
@@ -209,6 +230,10 @@ class Scanner:
 
 
     def split_state_store(self, state, addr_asts, value_asts, addr):
+        """
+        Manually split the state on symbolic stores. Used when the symbolic
+        address contains an if-then-else statement.
+        """
         for a in addr_asts:
             a.expr = remove_spurious_annotations(a.expr)
 

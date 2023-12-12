@@ -1,6 +1,8 @@
-# This module is used to model symbolic memory while avoiding concretization.
-# Basically, it is used to calculate aliases and overlaps between symbolic
-# addresses.
+"""
+This module is used to model symbolic memory while avoiding concretization.
+Basically, it is used to calculate aliases and overlaps between symbolic
+addresses.
+"""
 
 from enum import Enum
 
@@ -52,6 +54,9 @@ class MemOp:
 
 
 class RangedSymbol:
+    """
+    Represents a slice of a symbolic variable.
+    """
     sym: claripy.BV
     min: int
     max: int
@@ -69,6 +74,9 @@ class RangedSymbol:
 
 
 class MemoryAlias:
+    """
+    Represents an alias between two symbolic variables.
+    """
     val1: RangedSymbol
     val2: RangedSymbol
 

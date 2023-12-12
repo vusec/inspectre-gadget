@@ -1,8 +1,8 @@
-# RequirementsAnalysis
-#
-# This analysis calculates which registers and memory locations have to be
-# controlled or leaked by the attacker in order to trigger a transmission.
+"""RequirementsAnalysis
 
+This analysis calculates which registers and memory locations have to be
+controlled or leaked by the attacker in order to trigger a transmission.
+"""
 
 import claripy
 import sys

@@ -1,7 +1,8 @@
-# BranchControlAnalysis
-#
-# This analysis is responsible of checking if any of the branches or
-# constraint depends on the secret.
+"""BranchControlAnalysis
+
+This analysis is responsible of checking if any of the branches or
+constraint depends on the secret.
+"""
 
 from enum import Enum
 import claripy
@@ -98,7 +99,7 @@ def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
 
 def analyse(t: Transmission):
     """
-    Check if the base depends on the secret or secret address.
+    Check if any branch depends on the secret or secret address.
     """
 
     l.warning(f"========= [BASE] ==========")

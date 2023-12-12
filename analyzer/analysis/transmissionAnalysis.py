@@ -1,8 +1,8 @@
-# TransmissionAnalysis
-#
-# This analysis is responsible of identifying the basic components (transmission
-# base, transmitted secret and secret address) of a transmission.
+"""TransmissionAnalysis
 
+This analysis is responsible of identifying the basic components (transmission
+base, transmitted secret and secret address) of a transmission.
+"""
 
 import sys
 import claripy.ast.base
