@@ -1,10 +1,13 @@
 # Configuration
 
-A YAML file can be provided to the tool with the `--config` flag.
+A YAML file must be provided to the tool with the `--config` flag.
 The config file defines which registers and stack locations are controlled by the
 user, as well as some analysis parameters. Here's an example:
 
 ```yaml
+# Which registers are attacker-controlled.
+# Note that we generally consider everything controlled,
+# and later filter the gadgets based on the "Requirements" column.
 controlled_registers:
   - rax
   - rbx
@@ -22,19 +25,33 @@ controlled_registers:
   - r13
   - r14
   - r15
+
+# What portion of the stack is attacker-controlled.
 controlled_stack:
   # 20 64-bit values
   - start: 0
     end: 160
     size: 8
 
-EnableLogging: False
+# Verbosity of the logging output.
+# Level 0: no output
+# Level 1: coarse-grained log
+# Level 2: fine-grained log (debug)
+LogLevel: 1
+
+# Forward stored values to subsequent loads.
 STLForwarding: True
 
+# Timeout of the Z3 solver when evaluating constraints.
 Z3Timeout: 10000 # ms = 10s
-AnalysisTimeout: 50 #s
+
+# Maximum number of basic blocks to explore for each entrypoint.
 MaxBB: 5
+
+# Distribute left shifts over + and -.
 DistributeShifts: True
+
+# Also look for tainted function pointers (i.e. dispatch gadgets).
 TaintedFunctionPointers: True
 ```
 

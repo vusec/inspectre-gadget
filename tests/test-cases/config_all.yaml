@@ -21,8 +21,7 @@ controlled_stack:
     end: 160
     size: 8
 
-Jobs: 1
-EnableLogging: True
+LogLevel: 2
 STLForwarding: True
 
 Z3Timeout: 10000 # ms = 10s

@@ -21,12 +21,10 @@ controlled_stack:
     end: 160
     size: 8
 
-Jobs: 1
-EnableLogging: False
+LogLevel: 0
 STLForwarding: True
 
 Z3Timeout: 10000 # ms = 10s
-AnalysisTimeout: 60 #s
 MaxBB: 6
 DistributeShifts: True
 TaintedFunctionPointers: True
