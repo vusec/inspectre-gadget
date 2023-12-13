@@ -16,7 +16,7 @@ tar -xvf v6.6-rc4.tar.gz
 cd linux-6.6-rc4
 
 make defconfig
-make -j 32
+make -j`nproc`
 ```
 
 ## 2: Create a memory dump
@@ -64,7 +64,7 @@ git apply ../fineibt_vm_support.patch
 ./scripts/config --set-val CONFIG_CFI_CLANG y
 
 make CC=clang-16 defconfig
-make -j 32
+make -j`nproc`
 ```
 
 Since CFI creates an `__cfi_` symbol for each function, and these are only
@@ -85,3 +85,23 @@ python3 filter_addresses.py call-targets endbr_addresses_6.6-rc4-fineibt.txt all
 # filter jump-targets
 python3 filter_addresses.py jump-targets endbr_addresses_6.6-rc4-fineibt.txt all_text_symbols_cfi_6.6-rc4-fineibt.txt > endbr_jump_target_6.6-rc4-fineibt.txt
 ```
+
+## 4: Extract the reached function list from Syzkaller
+
+To make an estimation of which targets are reachable
+(i.e., can be triggered from userspace through a syscall), we extract
+all the reached functions by Syzkaller as part of the syzbot project.
+
+First download the coverage report:
+
+``` bash
+wget https://storage.googleapis.com/syzkaller/cover/ci-qemu-upstream.html
+```
+
+Next, extract the list of reached functions by using the script `get_reached_functions.sh`:
+
+``` bash
+./get_reached_functions.sh ci-qemu-upstream.html > reachable_functions.txt
+```
+
+The list of reached functions is included in the `linux-6.6-rc4` folder.
