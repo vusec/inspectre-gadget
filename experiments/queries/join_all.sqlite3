@@ -1,12 +1,14 @@
 .mode csv
+.separator ;
 .import call_gadgets.csv call_gadgets
 .import jump_gadgets.csv jump_gadgets
 .import call_tfps.csv call_tfps
 .import jump_tfps.csv jump_tfps
-.import all_text_symbols_6.6-rc4_FINEIBT.txt symbols_fineibt
-.import all_text_symbols_6.6-rc4_IBT.txt symbols_ibt
+
+.separator ,
+.import all_text_symbols_6.6-rc4-fineibt.txt symbols_fineibt
+.import all_text_symbols_6.6-rc4-default.txt symbols_ibt
 .import reachable_functions.txt reachable
-.import endbr_branch_function_target_6.6-rc4_FINEIBT_NOCFI.txt calls_no_fineibt
 
 ----- Give name to indirect jump targets.
 UPDATE jump_tfps SET name = 'indirectjump';
@@ -32,15 +34,6 @@ UPDATE jump_gadgets SET has_fineibt_check = 0;
 UPDATE call_gadgets SET has_fineibt_check = 1;
 UPDATE jump_tfps SET has_fineibt_check = 0;
 UPDATE call_tfps SET has_fineibt_check = 1;
-
------ Add info on symbols with no fineibt check.
-UPDATE call_gadgets
-SET has_fineibt_check = 0
-WHERE name IN (
-    SELECT symbols_fineibt.name
-    FROM symbols_fineibt JOIN calls_no_fineibt
-    ON symbols_fineibt.address == calls_no_fineibt.address
-);
 
 ----- Create joint tables.
 
