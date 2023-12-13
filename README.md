@@ -1,4 +1,4 @@
-<img src="./docs/img/inspectre-gadget2.jpeg" width="300px" style="border-radius: 50%">
+![](./docs/img/inspectre-gadget-circle.png)
 
 # InSpectre Gadget
 

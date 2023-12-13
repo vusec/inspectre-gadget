@@ -1,14 +1,17 @@
 .mode csv
 .separator ;
-.import call_gadgets.csv call_gadgets
-.import jump_gadgets.csv jump_gadgets
-.import call_tfps.csv call_tfps
-.import jump_tfps.csv jump_tfps
 
+-- Import analysis results
+.import call_targets/all-gadgets-reasoned.csv call_gadgets
+.import jump_targets/all-gadgets-reasoned.csv jump_gadgets
+.import call_targets/all-tfps.csv call_tfps
+.import jump_targets/all-tfps.csv jump_tfps
+
+-- Import lists generated from the target
 .separator ,
-.import all_text_symbols_6.6-rc4-fineibt.txt symbols_fineibt
-.import all_text_symbols_6.6-rc4-default.txt symbols_ibt
-.import reachable_functions.txt reachable
+.import lists/all_text_symbols_6.6-rc4-fineibt.txt symbols_fineibt
+.import lists/all_text_symbols_6.6-rc4-default.txt symbols_ibt
+.import lists/reachable_functions.txt reachable
 
 ----- Give name to indirect jump targets.
 UPDATE jump_tfps SET name = 'indirectjump';
