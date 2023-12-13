@@ -1,5 +1,9 @@
 # Examples
 
+## Queries
+
+In the `queries/` folder you will find some example queries for the output.
+
 ## Tests
 
 The `tests` folder contains two sets of tests:
