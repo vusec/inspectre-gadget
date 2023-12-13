@@ -42,10 +42,13 @@ def is_overlapping(x_min, x_max, y_min, y_max):
     return x_max >= y_min and y_max >= x_min
 
 def calc_base_size(t: pd.Series):
-    if t['base_control'] == 'BaseControlType.NO_BASE' or t['base_expr'] == '0':
+    if t['base_control'] == 'BaseControlType.NO_BASE' or t['base_expr'] == '0' or t['base_expr'] == 0:
         return 0
-
-    assert(t['base_expr'].startswith('<BV'))
+    try:
+        assert(t['base_expr'].startswith('<BV'))
+    except:
+        print(t['name'], ":  ", t['base_expr'], )
+        return 0
     return int(t['base_expr'].split(' ')[0].replace('<BV',''))
 
 def calc_transmitted_secret_size(t: pd.Series):
@@ -367,9 +370,12 @@ def run(in_csv, out_csv):
     file = open(in_csv, 'r')
     data = file.read()
     data = data.replace('None', '0')
+    data = data.replace('nan', '0')
+    data = data.replace('Nan', '0')
     file.close()
 
     df = pd.read_csv(StringIO(data), delimiter=';')
+    df.fillna(0, inplace=True)
 
     integer_cols = ['base_range_max',
                     'base_range_min',
