@@ -272,7 +272,7 @@ def can_perform_known_prefix(t : pd.Series):
         return False
 
     # TODO: should we check the secret address window also?
-    return  t[f'secret_address_range{"" if not with_branches else "_w_branches"}_stride'] <= MAX_ENTROPY and t[f'secret_address_range{"" if not with_branches else "_w_branches"}_stride'] <= MAX_ENTROPY
+    return  t[f'secret_address_range{"" if not with_branches else "_w_branches"}_stride'] <= MAX_ENTROPY
 
 def can_adjust_base(t : pd.Series):
     """
@@ -284,7 +284,12 @@ def can_adjust_base(t : pd.Series):
 
     base_controllable_window = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_window']
     secret_max = t[f'transmitted_secret_range{"" if not with_branches else "_w_branches"}_max']
+    secret_window = t[f'transmitted_secret_range{"" if not with_branches else "_w_branches"}_window']
 
+    # TODO: quick fix for stupid cases, we need a more sophisticated way of sampling
+    # the range.
+    if secret_window >= 2**48 and base_controllable_window <= 2**32:
+        return False
 
     for r in MAPPED_REGIONS:
         # We assume the attacker can subtract the window from a valid address.
