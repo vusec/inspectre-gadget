@@ -42,12 +42,11 @@ def is_overlapping(x_min, x_max, y_min, y_max):
     return x_max >= y_min and y_max >= x_min
 
 def calc_base_size(t: pd.Series):
-    if t['base_control'] == 'BaseControlType.NO_BASE' or t['base_expr'] == '0' or t['base_expr'] == 0:
+    if t['base_control'] == 'BaseControlType.NO_BASE' or t['base_expr'] == '':
         return 0
     try:
         assert(t['base_expr'].startswith('<BV'))
     except:
-        print(t['name'], ":  ", t['base_expr'], )
         return 0
     return int(t['base_expr'].split(' ')[0].replace('<BV',''))
 
@@ -200,6 +199,10 @@ def _has_valid_independent_base(t : pd.Series):
     """
     Check if the independent part of the base can point to a valid address
     """
+
+    if t['base_expr'] == '' or pd.isna(t['base_expr']):
+        return True
+
     base_min = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_min']
     base_max = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_max']
 
@@ -369,13 +372,13 @@ def run(in_csv, out_csv):
     # TODO: Hack, we should adjust the analyzer output.
     file = open(in_csv, 'r')
     data = file.read()
-    data = data.replace('None', '0')
-    data = data.replace('nan', '0')
-    data = data.replace('Nan', '0')
+    data = data.replace('None', '')
+    data = data.replace('nan', '')
+    data = data.replace('Nan', '')
     file.close()
 
     df = pd.read_csv(StringIO(data), delimiter=';')
-    df.fillna(0, inplace=True)
+    # df.fillna(0, inplace=True)
 
     integer_cols = ['base_range_max',
                     'base_range_min',
@@ -417,9 +420,10 @@ def run(in_csv, out_csv):
     df['base_size'] = df.apply(calc_base_size, axis=1)
     df['transmitted_secret_size'] = df.apply(calc_transmitted_secret_size, axis=1)
     df['pc_as_int'] = df.apply(get_pc_as_number, axis=1)
+    print(f"[-] Imported {len(df)} gadgets")
 
     # Add results of exploitability analysis.
-    print("[-] Doing exploitability analysis...")
+    print("[-] Performing exploitability analysis...")
     with_branches = False
     for b in basic_checks:
         df[b.__name__] = df.apply(b, axis=1)
@@ -433,8 +437,10 @@ def run(in_csv, out_csv):
 
     df[['exploitable', 'required_solutions', 'fail_reasons']] = df.apply(is_exploitable, axis=1, result_type="expand")
 
+    print(f"Found {len(df[df['exploitable'] == True])} exploitable gadgets!")
+
     # Add results of exploitability analysis considering branches.
-    print("[-] Doing exploitability analysis including branch constraints...")
+    print("[-] Performing exploitability analysis including branch constraints...")
     with_branches = True
     for b in basic_checks:
         df[b.__name__ + '_w_branches'] = df.apply(b, axis=1)
@@ -449,7 +455,10 @@ def run(in_csv, out_csv):
     df[['exploitable_w_branches', 'required_solutions_w_branches',
         'fail_reasons_w_branches']] = df.apply(is_exploitable, axis=1, result_type="expand")
 
+    print(f"Found {len(df[df['exploitable_w_branches'] == True])} exploitable gadgets!")
+
     # Save to new file.
+    print(f"[-] Saving to {out_csv}")
     df.to_csv(out_csv, sep=';', index=False)
 
     print("[-] Done!")
