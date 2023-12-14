@@ -108,7 +108,10 @@ def has_valid_secret_address(t : pd.Series):
     return True
 
 def is_cmove_independent_from_secret(t: pd.Series):
-    return t['cmove_control_type'] == 'BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET'
+    # TODO: current BranchAnalysis implementation is broken, since it treats
+    # sign extend the same way it treats CMOVEs.
+    # return t['cmove_control_type'] == 'BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET'
+    return True
 
 def has_no_speculation_stop(t : pd.Series):
     return t['contains_spec_stop'] == False
