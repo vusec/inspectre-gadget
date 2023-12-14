@@ -17,18 +17,7 @@ considered a production-grade tool by any means.
 InSpectre Gadget is a tool for inspecting potential Spectre disclosure gadgets
 and performing exploitability analysis.
 
-You can find all the documentation, including usage examples, in the
-`docs/` folder.
-
-To build the documentation:
-
-```sh
-pip install sphinx myst-parser sphinx_rtd_theme sphinx-rtd-size
-cd docs
-make html
-
-# --> open _build/html/index.html in a browser
-```
+Documentation can be found at `docs/_build/html/index.html`.
 
 ## Usage
 
