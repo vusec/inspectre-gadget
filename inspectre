@@ -29,7 +29,7 @@ def run_analyzer(args):
     # Parse entrypoint list.
     entrypoints = []
     if args.address != "":
-        entrypoints = [[args.address, args.name if args.name != "" else args.binary]]
+        entrypoints = [[args.address, args.name if args.name != "" else  os.path.basename(args.binary)]]
     elif args.address_list != "":
         entrypoints = parse_gadget_list(args.address_list)
 
@@ -56,12 +56,12 @@ def run_reasoner(args):
 
 def run_viewer(args):
     asm_files = os.listdir(args.folder)
-    asm = [ x for x in asm_files if args.pc in x ]
+    asm = [ f"{args.folder}/{x}" for x in asm_files if args.id in x ]
     if len(asm) == 0:
         print("Not found")
         exit()
 
-    subprocess.run(["batcat", f"{args.folder}/{asm[0]}"])
+    subprocess.run(["batcat"] + asm)
 
 
 if __name__ == '__main__':
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     # ----------- Viewer
     viewer_args = subparsers.add_parser('show', help='Inspect a specific gadget')
     viewer_args.add_argument('folder', help='folder containing the annotated assembly files')
-    viewer_args.add_argument('pc', help='program counter reported by the analyzer (in hex)')
+    viewer_args.add_argument('id', help='uuid or pc reported by the analyzer (in hex)')
     viewer_args.set_defaults(func=run_viewer)
 
     args = arg_parser.parse_args()
