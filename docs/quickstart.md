@@ -9,8 +9,6 @@ they are not required for the core of the tool (analyzer and reasoner).
 
 ## Build Docs
 
-To build this documentation:
-
 ```sh
 pip install sphinx myst-parser sphinx_rtd_theme sphinx-rtd-size
 cd docs
@@ -55,7 +53,7 @@ inspectre reason out/gadgets.csv out/gadgets-reasoned.csv
 
 # Import the CSV in a database and query the results.
 # You can use any DB, this is just an example with sqlite3.
-sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd '.import gout/adgets-reasoned.csv gadgets' -cmd '.mode table' < experiments/queries/exploitable_list.sql
+sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd '.import out/gadgets-reasoned.csv gadgets' -cmd '.mode table' < queries/exploitable_list.sql
 
 # Manually inspect interesting candidates.
 inspectre show <UUID>

@@ -33,7 +33,7 @@ inspectre reason gadgets.csv gadgets-reasoned.csv
 
 # Import the CSV in a database and query the results.
 # You can use any DB, this is just an example with sqlite3.
-sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd '.import gadgets-reasoned.csv gadgets' -cmd '.mode table' < experiments/queries/exploitable_list.sql
+sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd '.import gadgets-reasoned.csv gadgets' -cmd '.mode table' < queries/exploitable_list.sql
 
 # Manually inspect interesting candidates.
 inspectre show <UUID>

@@ -97,7 +97,6 @@ they are not required for the core of the tool (analyzer and reasoner).</p>
 </section>
 <section id="build-docs">
 <h2>Build Docs<a class="headerlink" href="#build-docs" title="Link to this heading"></a></h2>
-<p>To build this documentation:</p>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>sphinx<span class="w"> </span>myst-parser<span class="w"> </span>sphinx_rtd_theme<span class="w"> </span>sphinx-rtd-size
 <span class="nb">cd</span><span class="w"> </span>docs
 make<span class="w"> </span>html
@@ -137,7 +136,7 @@ inspectre<span class="w"> </span>reason<span class="w"> </span>out/gadgets.csv<s
 
 <span class="c1"># Import the CSV in a database and query the results.</span>
 <span class="c1"># You can use any DB, this is just an example with sqlite3.</span>
-sqlite3<span class="w"> </span>:memory:<span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.mode csv&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.separator ;&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.import gout/adgets-reasoned.csv gadgets&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.mode table&#39;</span><span class="w"> </span>&lt;<span class="w"> </span>experiments/queries/exploitable_list.sql
+sqlite3<span class="w"> </span>:memory:<span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.mode csv&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.separator ;&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.import out/gadgets-reasoned.csv gadgets&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.mode table&#39;</span><span class="w"> </span>&lt;<span class="w"> </span>queries/exploitable_list.sql
 
 <span class="c1"># Manually inspect interesting candidates.</span>
 inspectre<span class="w"> </span>show<span class="w"> </span>&lt;UUID&gt;
