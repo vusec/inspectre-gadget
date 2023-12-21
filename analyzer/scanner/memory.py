@@ -218,7 +218,7 @@ def get_aliasing_store(load_addr: claripy.BV, load_size: int, state: angr.SimSta
 
         # Account for size mismatch.
         if load_size < store.size:
-            returned_sym = store.val[load_size*8:0]
+            returned_sym = store.val[load_size*8-1:0]
 
         if load_size > store.size:
             # TODO: What to do if the load size is greater than the store size?
