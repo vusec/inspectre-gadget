@@ -11,4 +11,4 @@ fi
     echo "\n"
     objdump --adjust-vma=0x4000000 -d -Mintel $f | batcat -l asm
     echo ""
-    python3 ../../inspectre analyze --config config_all.yaml --address 0x4000000 --name $name --output output/gadgets.csv --asm output/asm $f
+    python3 ../../inspectre analyze --config config_all.yaml --address 0x4000000 --name $name --output output/gadgets.csv --tfp-output output/tfp.csv --asm output/asm $f

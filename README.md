@@ -26,7 +26,7 @@ A typical workflow might look something like this:
 ```sh
 # Run the analyzer on a binary to find transmissions.
 mkdir out
-inspectre analyze <BINARY> --address-list <CSV> --config config_all.yaml --output out/gadgets.csv --asm out/asm
+inspectre analyze <BINARY> --address-list <CSV> --config config_all.yaml --output out/gadgets.csv --tfp-output output/tfp.csv --asm out/asm
 
 # Evaluate exploitability.
 inspectre reason gadgets.csv gadgets-reasoned.csv
