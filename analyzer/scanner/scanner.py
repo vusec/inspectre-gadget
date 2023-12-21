@@ -202,6 +202,78 @@ class Scanner:
                                                        n_instr=n_instr,
                                                        contains_spec_stop=contains_spec_stop))
 
+    def check_tfp(self, state, func_ptr_reg, func_ptr_ast):
+        is_tainted = False
+
+        annotations = func_ptr_ast.annotations
+        for anno in annotations:
+            if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
+                is_tainted = True
+                break
+
+        if is_tainted:
+            *_, jmp_source = state.history.jump_sources
+
+            # Check if there is a substitution to be made for this address.
+            # This can happen if the state comes from a manual splitting.
+            subst = getSubstitution(state, state.addr)
+            if subst != None:
+                func_ptr_ast = subst
+            else:
+                # Check if the symbolic address contains an if-then-else node.
+                func_ptr_ast = match_sign_ext(func_ptr_ast)
+                func_ptr_ast = sign_ext_to_sum(func_ptr_ast)
+                asts = split_if_statements(func_ptr_ast)
+                assert(len(asts) >= 1)
+
+                l.info(f"  After transformations: {func_ptr_ast}")
+
+                if len(asts) > 1:
+                    self.split_state(self.cur_state, asts, state.addr)
+                    # TODO: Is there a way to exit from `step()` instead of marking
+                    #       the state as discard?
+                    self.discard = True
+                    raise SplitException
+
+            # Gather constraints and aliases from globals.
+            aliases = []
+            constraints = []
+            for v in state.globals.keys():
+                if isinstance(state.globals[v], memory.MemoryAlias):
+                    aliases.append(state.globals[v])
+                if str(v).startswith("constr_"):
+                    constraints.append(state.globals[v])
+            l.error(f"Aliases: {aliases}")
+
+            # Save history.
+            history = [(x, y, z) for x, y, z in zip(state.history.jump_sources,
+                                            state.history.jump_guards,
+                                            utils.branch_outcomes(state.history))]
+            bbls = [x for x in state.history.bbl_addrs]
+
+            # Get number of executed instructions.
+            n_instr = self.count_instructions(state, state.addr)
+
+            # Check if we encountered a speculation stop
+            contains_spec_stop = self.history_contains_speculation_stop(state)
+
+            tfp = TaintedFunctionPointer(pc=jmp_source,
+                                            expr=func_ptr_ast,
+                                            reg=func_ptr_reg,
+                                            bbls=bbls,
+                                            branches=history,
+                                            aliases=aliases,
+                                            constraints=constraints,
+                                            n_instr=n_instr,
+                                            contains_spec_stop=contains_spec_stop,
+                                            n_dependent_loads=get_load_depth(func_ptr_ast))
+
+            for reg in get_x86_registers():
+                reg_ast = getattr(state.regs, reg)
+                tfp.registers[reg] = TFPRegister(reg, reg_ast)
+
+            self.calls.append(tfp)
+
     def split_state(self, state, asts, addr):
         """
         Manually split the state in two sub-states with different conditions.
@@ -421,6 +493,48 @@ class Scanner:
         # Is this store a transmission?
         self.check_transmission(store_addr, TransmitterType.STORE, state)
 
+    def exit_hook_before(self, state : angr.SimState):
+
+        if self.discard:
+            return
+
+        l.info("Exit hook")
+        func_ptr_ast = state.inspect.exit_target
+
+
+        if func_ptr_ast.symbolic:
+            # Whenever the target is symbolic, we
+            # know we are performing an indirect call.
+
+            # get the register
+            block = state.block()
+            instruction = block.capstone.insns[-1].insn
+
+            regs_read, regs_write = instruction.regs_access()
+
+            # exclude all written registers; RSP in case of a call instruction
+            if len(regs_read) > len(regs_write):
+                regs_read = [x for x in regs_read if x not in regs_write]
+
+            # TODO: Handle indirect branches with multiple registers
+            reg_id = regs_read[0]
+            func_ptr_reg = instruction.reg_name(reg_id)
+
+            # Update the history, we have to do it manually because we are
+            # in hook_before
+            state.history.jumpkind = state.inspect.exit_jumpkind
+            state.history.jump_target = state.inspect.exit_target
+            state.history.jump_guard = state.inspect.exit_guard
+            state.history.jump_source = state.addr
+
+            # process the TFP
+            self.check_tfp(state, func_ptr_reg, func_ptr_ast)
+
+            self.discard = 1
+
+            # Concretize the target to prevent Angr from complaining
+            state.inspect.exit_target = 0xdeadbeef
+
 
     def exit_hook_after(self, state : angr.SimState):
         """
@@ -438,76 +552,10 @@ class Scanner:
             # know we are performing an indirect call.
             func_ptr_reg = self.thunk_list[exit_target]
             func_ptr_ast = getattr(state.regs, func_ptr_reg)
-            annotations = func_ptr_ast.annotations
 
-            is_tainted = False
-            for anno in annotations:
-                if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
-                    is_tainted = True
-                    break
+            self.check_tfp(state, func_ptr_reg, func_ptr_ast)
 
-            if is_tainted:
-                *_, jmp_source = state.history.jump_sources
-
-                # Check if there is a substitution to be made for this address.
-                # This can happen if the state comes from a manual splitting.
-                subst = getSubstitution(state, state.addr)
-                if subst != None:
-                    func_ptr_ast = subst
-                else:
-                    # Check if the symbolic address contains an if-then-else node.
-                    func_ptr_ast = match_sign_ext(func_ptr_ast)
-                    func_ptr_ast = sign_ext_to_sum(func_ptr_ast)
-                    asts = split_if_statements(func_ptr_ast)
-                    assert(len(asts) >= 1)
-
-                    l.info(f"  After transformations: {func_ptr_ast}")
-
-                    if len(asts) > 1:
-                        self.split_state(self.cur_state, asts, state.addr)
-                        # TODO: Is there a way to exit from `step()` instead of marking
-                        #       the state as discard?
-                        self.discard = True
-                        raise SplitException
-
-                # Gather constraints and aliases from globals.
-                aliases = []
-                constraints = []
-                for v in state.globals.keys():
-                    if isinstance(state.globals[v], memory.MemoryAlias):
-                        aliases.append(state.globals[v])
-                    if str(v).startswith("constr_"):
-                        constraints.append(state.globals[v])
-                l.error(f"Aliases: {aliases}")
-
-                # Save history.
-                history = [(x, y, z) for x, y, z in zip(state.history.jump_sources,
-                                                state.history.jump_guards,
-                                                utils.branch_outcomes(state.history))]
-                bbls = [x for x in state.history.bbl_addrs]
-
-                # Get number of executed instructions.
-                n_instr = self.count_instructions(state, state.addr)
-
-                # Check if we encountered a speculation stop
-                contains_spec_stop = self.history_contains_speculation_stop(state)
-
-                tfp = TaintedFunctionPointer(pc=jmp_source,
-                                             expr=func_ptr_ast,
-                                             reg=func_ptr_reg,
-                                             bbls=bbls,
-                                             branches=history,
-                                             aliases=aliases,
-                                             constraints=constraints,
-                                             n_instr=n_instr,
-                                             contains_spec_stop=contains_spec_stop,
-                                             n_dependent_loads=get_load_depth(func_ptr_ast))
-
-                for reg in get_x86_registers():
-                    reg_ast = getattr(state.regs, reg)
-                    tfp.registers[reg] = TFPRegister(reg, reg_ast)
-
-                self.calls.append(tfp)
+            self.discard = 1
 
 
     def run(self, proj: angr.Project, start_address, config) -> list[TransmissionExpr]:
@@ -539,6 +587,7 @@ class Scanner:
         state.inspect.b('mem_read', when=angr.BP_BEFORE, action=self.load_hook_before)
         state.inspect.b('mem_read', when=angr.BP_AFTER, action=self.load_hook_after)
         state.inspect.b('mem_write', when=angr.BP_BEFORE, action=self.store_hook_before)
+        state.inspect.b('exit', when=angr.BP_BEFORE, action=self.exit_hook_before)
         state.inspect.b('exit', when=angr.BP_AFTER, action=self.exit_hook_after)
         state.inspect.b('address_concretization', when=angr.BP_AFTER, action=skip_concretization)
 
