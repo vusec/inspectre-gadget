@@ -50,7 +50,7 @@ def get_x86_registers():
 def report_error(error: Exception, where="dunno", start_addr="dunno", error_type="GENERIC"):
     o = open("fail.txt", "a+")
     o.write(f"---------------- [ {error_type} ERROR ] ----------------\n")
-    o.write(f"where: {where}     started at:{start_addr}\n")
+    o.write(f"in basic block: {where}     started at:{start_addr}\n")
     o.write(str(error) + "\n")
     o.write(traceback.format_exc())
     o.write("\n")
