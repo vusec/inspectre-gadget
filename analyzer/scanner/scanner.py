@@ -617,10 +617,23 @@ class Scanner:
             except SplitException as e:
                 l.error(str(e))
                 continue
+            except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
+                l.error("=============== UNSUPPORTED INSTRUCTION ===============")
+                l.error(str(e))
+                report_unsupported(e, hex(self.cur_state.addr), hex(start_address), error_type="SCANNER")
+                continue
+            except angr.errors.UnsupportedDirtyError as e:
+                if "IRET" in str(e):
+                    continue
+                l.error("=============== UNSUPPORTED INSTRUCTION ===============")
+                l.error(str(e))
+                report_unsupported(e, hex(self.cur_state.addr), hex(start_address), error_type="SCANNER")
+                continue
             except Exception as e:
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
-                l.error(traceback.format_exc())
+                if not l.disabled:
+                    traceback.format_exc()
                 report_error(e, hex(self.cur_state.addr), hex(start_address), error_type="SCANNER")
                 continue
 

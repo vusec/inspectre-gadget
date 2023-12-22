@@ -48,14 +48,28 @@ def get_x86_registers():
 
 
 def report_error(error: Exception, where="dunno", start_addr="dunno", error_type="GENERIC"):
+    ins_addr = None
+    if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
+        ins_addr = hex(error.ins_addr)
+
     o = open("fail.txt", "a+")
     o.write(f"---------------- [ {error_type} ERROR ] ----------------\n")
-    o.write(f"in basic block: {where}     started at:{start_addr}\n")
+    o.write(f"where: {where}     started at: {start_addr} {f'instruction addr: {ins_addr}' if ins_addr else ''}\n")
     o.write(str(error) + "\n")
     o.write(traceback.format_exc())
     o.write("\n")
     o.close()
 
+def report_unsupported(error: Exception, where="dunno", start_addr="dunno", error_type="GENERIC"):
+    if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
+        where = hex(error.ins_addr)
+
+    o = open("unsupported.txt", "a+")
+    o.write(f"---------------- [ {error_type} UNSUPPORTED INSTRUCTION ] ----------------\n")
+    o.write(f"instruction addr: {where}     started at: {start_addr}\n")
+    o.write(str(error) + "\n")
+    o.write("\n")
+    o.close()
 
 def branch_outcomes(history):
     outcomes = []
