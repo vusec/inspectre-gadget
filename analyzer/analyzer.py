@@ -154,7 +154,7 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
     """
 
     # Step 1. Analyze the code snippet with angr.
-    l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
+    l.info(f"Analyzing gadget at address {hex(gadget_address)} {name} ...")
     s = Scanner()
     s.run(proj, gadget_address, config)
 
