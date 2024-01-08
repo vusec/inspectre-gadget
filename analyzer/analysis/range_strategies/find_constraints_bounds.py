@@ -8,8 +8,10 @@ from .infer_isolated import RangeStrategyInferIsolated
 # autopep8: off
 from ...shared.config import *
 from ...shared.utils import *
+from ...shared.logger import *
 # autopep8: on
 
+l = get_logger("FindConstraintsBounds")
 
 class RangeStrategyFindConstraintsBounds(RangeStrategy):
     infer_isolated_strategy : RangeStrategyInferIsolated
@@ -87,7 +89,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
                     return self.infer_isolated_strategy.find_range([], ast, upper_ast_min, lower_ast_max)
 
         # --------- Can't solve this
-        print(f"Cant' solve range: {ast}  ({constraints})")
+        l.warning(f"Cant' solve range: {ast}  ({constraints})")
 
         # TODO: If there is only one SAT range, we may still be able to treat
         # it as isolated and adjust the min and max.

@@ -1,0 +1,19 @@
+SELECT
+    pc,
+    base_range_min,
+    base_range_max,
+    base_range_window,
+    base_range_stride,
+    base_range_and_mask,
+    base_range_or_mask,
+    base_range_exact,
+    base_range_w_branches_min,
+    base_range_w_branches_max,
+    base_range_w_branches_window,
+    base_range_w_branches_stride,
+    base_range_w_branches_and_mask,
+    base_range_w_branches_or_mask,
+    base_range_w_branches_exact
+FROM
+    gadgets
+order by n_instr, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches

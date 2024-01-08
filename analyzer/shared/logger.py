@@ -1,7 +1,10 @@
 import logging
 import zlib
+import sys
 
 from angr.misc.ansi import Color, BackgroundColor, color, clear
+
+ENDC = '\033[0m'
 
 
 class __CustomFormatter(logging.Formatter):
@@ -14,13 +17,17 @@ class __CustomFormatter(logging.Formatter):
         name_len: int = len(name)
         lvl_len: int = len(level)
 
-        # Choose a different color for each logger.
-        c: int = zlib.adler32(name.encode()) % 7
-        c = (c + zlib.adler32(level.encode())) % 7
-        if c != 0:  # Do not color black or white, allow 'uncolored'
-            col = Color(c + Color.black.value)
+        if sys.stdout.isatty():
+            # Choose a different color for each logger.
+            c: int = zlib.adler32(name.encode()) % 7
+            c = (c + zlib.adler32(level.encode())) % 7
+            if c != 0:  # Do not color black or white, allow 'uncolored'
+                col = Color(c + Color.black.value)
+            return color(col, False) + f"[{name}]  {message}{ENDC}"
 
-        return color(col, False) + f"[{name}]  {message}"
+        else:
+
+            return f"[{name}]  {message}"
 
 
 def __initialize_logger(name):
@@ -29,7 +36,7 @@ def __initialize_logger(name):
     logger.propagate = False
 
     logger.setLevel(logging.INFO)
-    ch = logging.StreamHandler()
+    ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(__CustomFormatter())
     logger.addHandler(ch)
 

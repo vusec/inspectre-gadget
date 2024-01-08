@@ -1,0 +1,19 @@
+SELECT
+    pc,
+    secret_address_range_min,
+    secret_address_range_max,
+    secret_address_range_window,
+    secret_address_range_stride,
+    secret_address_range_and_mask,
+    secret_address_range_or_mask,
+    secret_address_range_exact,
+    secret_address_range_w_branches_min,
+    secret_address_range_w_branches_max,
+    secret_address_range_w_branches_window,
+    secret_address_range_w_branches_stride,
+    secret_address_range_w_branches_and_mask,
+    secret_address_range_w_branches_or_mask,
+    secret_address_range_w_branches_exact
+FROM
+    gadgets
+order by n_instr, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches

@@ -1,0 +1,21 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <tfp_symbolic>:
+ 4000000:	48 8b 04 31          	mov    rax,QWORD PTR [rcx+rsi*1]
+ 4000004:	ff e0                	jmp    rax
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 0 potential transmissions.
+[MAIN]  Found 1 tainted function pointers.
+[MAIN]  Extracted 0 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  --------------- ANALYZING TFPs ------------------
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped CSV to tfp.csv

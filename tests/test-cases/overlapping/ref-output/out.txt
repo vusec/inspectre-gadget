@@ -1,0 +1,52 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <constraints_isolater>:
+ 4000000:	4c 8b 07             	mov    r8,QWORD PTR [rdi]
+ 4000003:	4c 0f b7 0f          	movzx  r9,WORD PTR [rdi]
+ 4000007:	4d 8b 91 00 00 00 81 	mov    r10,QWORD PTR [r9-0x7f000000]
+ 400000e:	48 0f b7 47 04       	movzx  rax,WORD PTR [rdi+0x4]
+ 4000013:	4c 8b 98 00 00 00 81 	mov    r11,QWORD PTR [rax-0x7f000000]
+ 400001a:	8b 5f 04             	mov    ebx,DWORD PTR [rdi+0x4]
+ 400001d:	4c 8b a3 00 00 00 81 	mov    r12,QWORD PTR [rbx-0x7f000000]
+ 4000024:	48 8b 4f 04          	mov    rcx,QWORD PTR [rdi+0x4]
+ 4000028:	4c 8b a9 00 00 00 81 	mov    r13,QWORD PTR [rcx-0x7f000000]
+ 400002f:	4f 8b 34 21          	mov    r14,QWORD PTR [r9+r12*1]
+ 4000033:	e9 00 00 00 00       	jmp    4000038 <constraints_isolater+0x38>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 5 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 5 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdi>]_21)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdi + 0x4>]_23)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#32 .. LOAD_32[<BV64 rdi + 0x4>]_25)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + LOAD_64[<BV64 rdi + 0x4>]_27>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 (0#48 .. LOAD_16[<BV64 rdi>]_21) + LOAD_64[<BV64 (0#32 .. LOAD_32[<BV64 rdi + 0x4>]_25) + 0xffffffff81000000>]_26>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 5 gadgets
+[-] Performing exploitability analysis...
+Found 2 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 2 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

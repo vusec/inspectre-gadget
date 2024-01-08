@@ -39,15 +39,21 @@ class Requirements():
         self.const_mem = set()
 
     def __repr__(self) -> str:
-        return f"regs: {self.regs}, mem: {self.mem}, const_mem: {self.const_mem}, direct_regs: {self.direct_regs}, indirect_regs: {self.indirect_regs}"
+        d =  {'regs' : sorted([str(x) for x in self.regs]),
+            'indirect_regs' : sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs]),
+            'direct_regs' : sorted([str(x) for x in self.direct_regs]),
+            'mem' : sorted([str(x) for x in self.mem]),
+            'const_mem' : sorted([str(x) for x in self.const_mem]),
+        }
+        return str(d)
 
     def to_dict(self):
         return OrderedDict([
-            ('regs' , [str(x) for x in self.regs]),
-            ('indirect_regs' , [f"{str(x)}: {self.indirect_regs[x]}" for x in self.indirect_regs]),
-            ('direct_regs' , [str(x) for x in self.direct_regs]),
-            ('mem' , [str(x) for x in self.mem]),
-            ('const_mem' , [str(x) for x in self.const_mem]),
+            ('regs' , sorted([str(x) for x in self.regs])),
+            ('indirect_regs' , sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs])),
+            ('direct_regs' , sorted([str(x) for x in self.direct_regs])),
+            ('mem' , sorted([str(x) for x in self.mem])),
+            ('const_mem' , sorted([str(x) for x in self.const_mem])),
         ])
 
     def merge(self, other):

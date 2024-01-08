@@ -1,0 +1,53 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <alias_type_2>:
+ 4000000:	44 0f b7 42 28       	movzx  r8d,WORD PTR [rdx+0x28]
+ 4000005:	48 8b 42 20          	mov    rax,QWORD PTR [rdx+0x20]
+ 4000009:	48 8b 08             	mov    rcx,QWORD PTR [rax]
+ 400000c:	4e 8b 1c 01          	mov    r11,QWORD PTR [rcx+r8*1]
+ 4000010:	44 0f b7 4a 24       	movzx  r9d,WORD PTR [rdx+0x24]
+ 4000015:	48 8b 5a 20          	mov    rbx,QWORD PTR [rdx+0x20]
+ 4000019:	48 8b 33             	mov    rsi,QWORD PTR [rbx]
+ 400001c:	4e 8b 24 0e          	mov    r12,QWORD PTR [rsi+r9*1]
+ 4000020:	e9 00 00 00 00       	jmp    4000025 <alias_type_2+0x25>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 4 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 6 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdx + 0x20>]_21>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 rdx + 0x20>]_21>]_22 + (0#48 .. LOAD_16[<BV64 rdx + 0x28>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 rdx + 0x20>]_21>]_22 + (0#48 .. LOAD_16[<BV64 rdx + 0x28>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdx + 0x20>]_25>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 rdx + 0x20>]_25>]_26 + (0#48 .. LOAD_16[<BV64 rdx + 0x24>]_24)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 rdx + 0x20>]_25>]_26 + (0#48 .. LOAD_16[<BV64 rdx + 0x24>]_24)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 6 gadgets
+[-] Performing exploitability analysis...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 1 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

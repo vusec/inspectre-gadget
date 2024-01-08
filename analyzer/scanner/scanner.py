@@ -630,6 +630,10 @@ class Scanner:
                 report_unsupported(e, hex(self.cur_state.addr), hex(start_address), error_type="SCANNER")
                 continue
             except Exception as e:
+                # Catch test-case end error
+                if 'No bytes in memory for block starting at 0x400dead.' == str(e):
+                    continue
+
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
                 if not l.disabled:
