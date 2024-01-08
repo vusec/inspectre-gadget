@@ -6,16 +6,25 @@ Disassembly of section .text:
 
 0000000004000000 <tfp_symbolic>:
  4000000:	48 8b 04 31          	mov    rax,QWORD PTR [rcx+rsi*1]
- 4000004:	ff e0                	jmp    rax
+ 4000004:	49 83 ff 00          	cmp    r15,0x0
+ 4000008:	74 02                	je     400000c <tfp1>
+
+000000000400000a <tfp0>:
+ 400000a:	ff e0                	jmp    rax
+
+000000000400000c <tfp1>:
+ 400000c:	ff d0                	call   rax
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Removing non-writable memory...
 [MAIN]  Analyzing gadget at address 0x4000000...
 [MAIN]  Found 0 potential transmissions.
-[MAIN]  Found 1 tainted function pointers.
+[MAIN]  Found 2 tainted function pointers.
 [MAIN]  Extracted 0 transmissions.
 [MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
 [MAIN]  --------------- ANALYZING TFPs ------------------
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped CSV to tfp.csv
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
