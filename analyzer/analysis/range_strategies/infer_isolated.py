@@ -20,7 +20,6 @@ class RangeStrategyInferIsolated(RangeStrategy):
                    ast_min : int = None, ast_max : int = None):
 
         # We only support isolated ranges
-
         if constraints:
             return None
 
@@ -34,33 +33,72 @@ class RangeStrategyInferIsolated(RangeStrategy):
                 ast_max = s.max(ast)
 
         if ast.depth == 1:
-            return range_simple(ast_min, ast_max, 1, True)
+            return range_simple(ast_min, ast_max, ast.size(), 1, True)
 
         range_map = get_range_map_from_ast(ast)
 
         if range_map.unknown:
-            return None
+
+            # We try an extra optimization: separating the concrete value
+            # from addition. This covers cases like:
+            # 0xffffffff81000000 + <BV32 AST >
+            # get_range_map_from_ast() cannot handle 'overflows', so we
+            # split the AST and add the concrete value manually to the range.
+            if ast.op == '__add__' and any(not arg.symbolic for arg in ast.args):
+
+                concrete_value =  next(arg for arg in ast.args if not arg.symbolic).args[0]
+                sub_ast = sum([arg for arg in ast.args if arg.symbolic])
+
+                range_map = get_range_map_from_ast(sub_ast)
+
+                if range_map.unknown:
+                    return None
+
+                range_map = range_map.switch_to_stride_mode()
+
+                if range_map.unknown:
+                    return None
+
+                s = claripy.Solver(timeout=global_config["Z3Timeout"])
+                sub_ast_min = s.min(sub_ast)
+                sub_ast_max = s.max(sub_ast)
+
+                isolated_ast_min = sub_ast_min + concrete_value
+                isolated_ast_max = sub_ast_max + concrete_value
+
+                # handle overflows
+                isolated_ast_min &= (1 << ast.size()) - 1
+                isolated_ast_max &= (1 << ast.size()) - 1
+
+                if isolated_ast_min - isolated_ast_max == range_map.stride:
+                    isolated_ast_min = s.min(ast)
+                    isolated_ast_max = s.max(ast)
+
+                # incorporate non-isolated min and max, only adjust if they are
+                # tighter
+                # Note: Conditions hold for both normal and disjoint ranges
+                ast_min = ast_min if isolated_ast_min < ast_min else isolated_ast_min
+                ast_max = ast_max if isolated_ast_max > ast_max else isolated_ast_max
+
+            else:
+                return None
 
 
         if range_map.stride_mode:
-            return range_simple(ast_min, ast_max, range_map.stride, isolated=True)
+            return range_simple(ast_min, ast_max, ast.size(), range_map.stride, isolated=True)
 
         else:
-            return range_complex(ast_min, ast_max, True, None, range_map.and_mask, range_map.or_mask, True)
+            return range_complex(ast_min, ast_max, ast.size(), True, None, range_map.and_mask, range_map.or_mask, True)
 
 
 def is_linear_mask(and_mask, or_mask):
 
     mask = and_mask & ~or_mask
 
-    # print(bin(mask))
-
     highest_bit = mask.bit_length()
     lowest_bit = (mask & -mask).bit_length() - 1
 
     stride_mask = (2 ** highest_bit - 1) & ~(2 ** lowest_bit - 1)
-
-    # print(bin(stride_mask))
 
     return mask == stride_mask
 

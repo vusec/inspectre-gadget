@@ -42,7 +42,7 @@ def get_ast_ranges(constraints, ast : claripy.BV):
 
     # We calculate the min and max once
     s = claripy.Solver(timeout=global_config["Z3Timeout"])
-    s.constraints = constraints
+    s.constraints = constraints.copy()
     ast_min = s.min(ast)
     ast_max = s.max(ast)
 

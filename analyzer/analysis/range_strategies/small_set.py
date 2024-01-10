@@ -16,7 +16,7 @@ def _list_to_stride_range(numbers : list):
         if numbers[i] + stride != numbers[i+1]:
             return None
 
-    return AstRange(min=numbers[0] , max=numbers[-1],
+    return AstRange(min=numbers[0] , max=numbers[-1], ast_size=0,
                     exact=True, isolated=True,
                     intervals=[Interval(numbers[0], numbers[-1], stride)])
 

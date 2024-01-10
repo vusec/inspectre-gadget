@@ -165,8 +165,8 @@ class TransmissionComponent():
             ('branches', [str(x) for x in self.branches]),
             ('constraints', [str(x) for x in self.constraints]),
             ('requirements', self.requirements.to_dict()),
-            ('range', ranges.AstRange(0,0,False).to_dict() if self.range == None else self.range.to_dict()),
-            ('range_w_branches', ranges.AstRange(0,0,False).to_dict() if self.range_with_branches == None else self.range_with_branches.to_dict()),
+            ('range', ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
+            ('range_w_branches', ranges.AstRange(0,0,0,False).to_dict() if self.range_with_branches == None else self.range_with_branches.to_dict()),
             ('control', str(self.control)),
             ('n_dependent_loads', str(self.max_load_depth))
         ]
