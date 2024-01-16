@@ -13,7 +13,7 @@ from . import utils
 class TransmitterType(Enum):
     LOAD = 1,
     STORE = 2,
-    CALL = 3
+    CODE_LOAD = 3
 
 class ControlType(Enum):
     NO_CONTROL = 0,

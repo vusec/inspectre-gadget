@@ -4,16 +4,22 @@ gadget:     file format elf64-x86-64
 
 Disassembly of section .text:
 
-0000000004000000 <tfp_symbolic>:
- 4000000:	48 8b 04 31          	mov    rax,QWORD PTR [rcx+rsi*1]
- 4000004:	49 83 ff 00          	cmp    r15,0x0
- 4000008:	74 02                	je     400000c <tfp1>
+0000000004000000 <code_load>:
+ 4000000:	49 83 f8 00          	cmp    r8,0x0
+ 4000004:	74 0c                	je     4000012 <trans1>
 
-000000000400000a <tfp0>:
- 400000a:	ff e0                	jmp    rax
+0000000004000006 <trans0>:
+ 4000006:	48 0f b7 37          	movzx  rsi,WORD PTR [rdi]
+ 400000a:	48 89 d0             	mov    rax,rdx
+ 400000d:	48 01 f0             	add    rax,rsi
+ 4000010:	ff e0                	jmp    rax
 
-000000000400000c <tfp1>:
- 400000c:	ff d0                	call   rax
+0000000004000012 <trans1>:
+ 4000012:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 4000015:	ff e0                	jmp    rax
+
+0000000004000017 <end>:
+ 4000017:	e9 00 00 00 00       	jmp    400001c <end+0x5>
 
 == SCANNER ==
 [MAIN]  Loading angr project...
@@ -23,10 +29,10 @@ Disassembly of section .text:
 [MAIN]  Found 2 tainted function pointers.
 [MAIN]  Extracted 2 transmissions.
 [MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
-[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rcx + rsi>]_20>...
+[MAIN]  Analyzing <BV64 rdx + (0#48 .. LOAD_16[<BV64 rdi>]_20)>...
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
-[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rcx + rsi>]_20>...
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdi>]_21>...
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
 [MAIN]  --------------- ANALYZING TFPs ------------------
@@ -38,8 +44,8 @@ Disassembly of section .text:
 == REASONER ==
 [-] Imported 2 gadgets
 [-] Performing exploitability analysis...
-Found 0 exploitable gadgets!
+Found 1 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
-Found 0 exploitable gadgets!
+Found 1 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

@@ -187,14 +187,14 @@ class Scanner:
             l.error(f"Aliases: {aliases}")
 
             # Count number of instructions.
-            n_instr = self.count_instructions(state, state.addr)
+            n_instr = self.count_instructions(state, state.scratch.ins_addr)
 
             # Check if we encountered a speculation stop
             contains_spec_stop = self.history_contains_speculation_stop(state)
 
             # Create a new transmission object.
             self.transmissions.append(TransmissionExpr(state=state,
-                                                       pc=state.addr,
+                                                       pc=state.scratch.ins_addr,
                                                        expr=expr,
                                                        transmitter=op_type,
                                                        aliases=aliases,
@@ -215,7 +215,7 @@ class Scanner:
 
             # Check if there is a substitution to be made for this address.
             # This can happen if the state comes from a manual splitting.
-            subst = getSubstitution(state, state.addr)
+            subst = getSubstitution(state, state.scratch.ins_addr)
             if subst != None:
                 func_ptr_ast = subst
             else:
@@ -228,7 +228,7 @@ class Scanner:
                 l.info(f"  After transformations: {func_ptr_ast}")
 
                 if len(asts) > 1:
-                    self.split_state(self.cur_state, asts, state.addr)
+                    self.split_state(self.cur_state, asts, state.scratch.ins_addr)
                     # TODO: Is there a way to exit from `step()` instead of marking
                     #       the state as discard?
                     self.discard = True
@@ -526,6 +526,9 @@ class Scanner:
             # process the TFP
             self.check_tfp(state, func_ptr_reg, func_ptr_ast)
 
+            # check if it is also a transmission
+            self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
+
             self.discard = 1
 
         # Second case: jump to indirect thunk
@@ -536,7 +539,11 @@ class Scanner:
 
             func_ptr_ast = getattr(state.regs, func_ptr_reg)
 
+            # process the TFP
             self.check_tfp(state, func_ptr_reg, func_ptr_ast)
+
+            # check if it is also a transmission
+            self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
 
             self.discard = 1
 

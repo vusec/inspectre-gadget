@@ -9,13 +9,13 @@
 4000015  jmp     __x86_indirect_thunk_array ; {Attacker@0x4000003} > TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: ed810616-2cf3-44a6-8e61-e78595d0ec4a
+uuid: 5bf6cea5-ad74-4bb6-a28d-4efd8005e850
 
 Reg: rax
 Expr: <BV64 LOAD_64[<BV64 rcx + LOAD_64[<BV64 rdi>]_20>]_21[61:0] .. 0>
 
 Constraints: []
-Branches: [(67108885, <Bool True>, 'Taken')]
+Branches: []
 
 CONTROLLED:
 rcx: <BV64 LOAD_64[<BV64 rdi + 0x20>]_22>
