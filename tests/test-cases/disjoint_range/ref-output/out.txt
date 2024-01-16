@@ -6,34 +6,62 @@ Disassembly of section .text:
 
 0000000004000000 <disjoint_range>:
  4000000:	48 8b 47 28          	mov    rax,QWORD PTR [rdi+0x28]
- 4000004:	48 83 f8 10          	cmp    rax,0x10
- 4000008:	0f 84 00 00 00 00    	je     400000e <disjoint_range+0xe>
+ 4000004:	48 8b 76 30          	mov    rsi,QWORD PTR [rsi+0x30]
+ 4000008:	48 83 f8 0f          	cmp    rax,0xf
+ 400000c:	74 35                	je     4000043 <exit>
  400000e:	48 8b 08             	mov    rcx,QWORD PTR [rax]
- 4000011:	0f 8f 00 00 00 00    	jg     4000017 <disjoint_range+0x17>
- 4000017:	48 8b 10             	mov    rdx,QWORD PTR [rax]
- 400001a:	e9 00 00 00 00       	jmp    400001f <disjoint_range+0x1f>
+ 4000011:	4c 8b 80 00 00 00 81 	mov    r8,QWORD PTR [rax-0x7f000000]
+ 4000018:	48 81 fe ff 00 00 00 	cmp    rsi,0xff
+ 400001f:	74 22                	je     4000043 <exit>
+ 4000021:	4c 8b 0c 06          	mov    r9,QWORD PTR [rsi+rax*1]
+ 4000025:	48 83 f8 0f          	cmp    rax,0xf
+ 4000029:	7f 18                	jg     4000043 <exit>
+ 400002b:	48 8b 10             	mov    rdx,QWORD PTR [rax]
+ 400002e:	48 81 fe ff ff 00 00 	cmp    rsi,0xffff
+ 4000035:	77 0c                	ja     4000043 <exit>
+ 4000037:	48 8b 16             	mov    rdx,QWORD PTR [rsi]
+ 400003a:	48 8b 9e 00 00 00 81 	mov    rbx,QWORD PTR [rsi-0x7f000000]
+ 4000041:	eb 00                	jmp    4000043 <exit>
+
+0000000004000043 <exit>:
+ 4000043:	e9 00 00 00 00       	jmp    4000048 <exit+0x5>
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Removing non-writable memory...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 6 potential transmissions.
 [MAIN]  Found 0 tainted function pointers.
-[MAIN]  Extracted 2 transmissions.
+[MAIN]  Extracted 7 transmissions.
 [MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
 [MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdi + 0x28>]_20>...
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + LOAD_64[<BV64 rdi + 0x28>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rsi + 0x30>]_21 + LOAD_64[<BV64 rdi + 0x28>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rsi + 0x30>]_21 + LOAD_64[<BV64 rdi + 0x28>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
 [MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdi + 0x28>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rsi + 0x30>]_21>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + LOAD_64[<BV64 rsi + 0x30>]_21>...
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
 [MAIN]  --------------- ANALYZING TFPs ------------------
 
 == REASONER ==
-[-] Imported 2 gadgets
+[-] Imported 7 gadgets
 [-] Performing exploitability analysis...
-Found 0 exploitable gadgets!
+Found 2 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
-Found 0 exploitable gadgets!
+Found 3 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

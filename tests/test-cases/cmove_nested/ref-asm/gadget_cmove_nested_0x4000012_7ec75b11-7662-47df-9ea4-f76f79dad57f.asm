@@ -9,7 +9,7 @@
 4000015  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 366c2e1c-4e67-43f9-8cfe-a81118866a44
+uuid: 7ec75b11-7662-47df-9ea4-f76f79dad57f
 
 Secret Address:
   - Expr: <BV64 rdx + 0x18>
@@ -26,9 +26,9 @@ Base:
   - Independent Range: 0x24
 Transmission:
   - Expr: <BV64 0x24 + LOAD_64[<BV64 rdx + 0x18>]_20>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
+  - Range: (0x25,0x23, 0x1) Exact: True
 
-Register Requirements: {<BV64 rax>, <BV64 rdx>}
+Register Requirements: {<BV64 rdx>, <BV64 rax>}
 Constraints: [('0x4000012', <Bool LOAD_64[<BV64 rdx + 0x18>]_20 != 0x0>), ('0x4000012', <Bool rax == 0x0>)]
 Branches: []
 ------------------------------------------------

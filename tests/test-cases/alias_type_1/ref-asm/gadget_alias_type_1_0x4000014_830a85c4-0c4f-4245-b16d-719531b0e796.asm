@@ -5,11 +5,11 @@
 4000008  mov     r10, qword ptr [rdi+r8+0x50]
 400000d  mov     r11, qword ptr [rsi] ; {Attacker@rsi} > {Secret@0x400000d}
 4000010  movzx   r9d, word ptr [r11] ; {Attacker@0x400000d} > {Attacker@0x4000010}
-4000014  mov     rax, qword ptr [r11+r9+0x20] ; {Secret@0x400000d, Attacker@0x4000010} > TRANSMISSION
+4000014  mov     rax, qword ptr [r11+r9+0x20] ; {Attacker@0x4000010, Secret@0x400000d} > TRANSMISSION
 4000019  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 3924305c-37d3-48b0-ae6a-fd42e6a02b39
+uuid: 830a85c4-0c4f-4245-b16d-719531b0e796
 
 Secret Address:
   - Expr: <BV64 rsi>

@@ -4,11 +4,11 @@
 4000003  cmove   rdi, rsi
 4000007  mov     rdi, qword ptr [rdi+0x18] ; {Attacker@rdi} > {Attacker@0x4000007}
 400000b  mov     rsi, qword ptr [rsi+0x18] ; {Attacker@rsi} > {Secret@0x400000b}
-400000f  mov     eax, dword ptr [rdi+rsi] ; {Secret@0x400000b, Attacker@0x4000007} > TRANSMISSION
+400000f  mov     eax, dword ptr [rdi+rsi] ; {Attacker@0x4000007, Secret@0x400000b} > TRANSMISSION
 4000012  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 826b446c-674f-4c5f-89ff-a42daa72139d
+uuid: bba8dae9-605e-4116-9ff3-d852bdf0dffb
 
 Secret Address:
   - Expr: <BV64 rsi + 0x18>
@@ -27,7 +27,7 @@ Transmission:
   - Expr: <BV64 LOAD_64[<BV64 rdi + 0x18>]_20 + LOAD_64[<BV64 rsi + 0x18>]_21>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rdi>, <BV64 rsi>}
+Register Requirements: {<BV64 rsi>, <BV64 rdi>}
 Constraints: [('0x4000007', <Bool rdi != 0x0>)]
 Branches: []
 ------------------------------------------------

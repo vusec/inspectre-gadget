@@ -3,30 +3,31 @@
 4000000  test    rdi, rdi
 4000003  cmove   rdi, rsi
 4000007  mov     rdi, qword ptr [rdi+0x18] ; {Attacker@rdi} > {Secret@0x4000007}
-400000b  mov     eax, dword ptr [rdi] ; {Secret@0x4000007} > TRANSMISSION
-400000d  jmp     0x400dead
+400000b  mov     rsi, qword ptr [rsi+0x18] ; {Attacker@rsi} > {Attacker@0x400000b}
+400000f  mov     eax, dword ptr [rdi+rsi] ; {Attacker@0x400000b, Secret@0x4000007} > TRANSMISSION
+4000012  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 83432d23-8094-4b3d-8120-7e182b3e1eb9
+uuid: 83b2ca1a-b9bc-40c1-a650-24527e672ab9
 
 Secret Address:
   - Expr: <BV64 rdi + 0x18>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
+  - Range: (0x19,0x17, 0x1) Exact: True
 Transmitted Secret:
   - Expr: <BV64 LOAD_64[<BV64 rdi + 0x18>]_20>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
   - Spread: 0 - 63
   - Number of Bits Inferable: 64
 Base:
-  - Expr: None
-  - Range: None
-  - Independent Expr: None
-  - Independent Range: None
+  - Expr: <BV64 LOAD_64[<BV64 rsi + 0x18>]_21>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Independent Expr: <BV64 LOAD_64[<BV64 rsi + 0x18>]_21>
+  - Independent Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmission:
-  - Expr: <BV64 LOAD_64[<BV64 rdi + 0x18>]_20>
+  - Expr: <BV64 LOAD_64[<BV64 rdi + 0x18>]_20 + LOAD_64[<BV64 rsi + 0x18>]_21>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rdi>}
+Register Requirements: {<BV64 rsi>, <BV64 rdi>}
 Constraints: [('0x4000007', <Bool rdi != 0x0>)]
 Branches: []
 ------------------------------------------------

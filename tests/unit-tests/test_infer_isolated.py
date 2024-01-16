@@ -3,6 +3,7 @@ import unittest
 import claripy
 
 from analyzer.analysis.range_strategies import *
+from analyzer.shared.config import *
 
 
 class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
@@ -10,6 +11,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
     range_strategy : RangeStrategyInferIsolated
 
     def setUp(self):
+        init_config({})
         self.range_strategy = RangeStrategyInferIsolated()
 
     def test_unbound_with_symbolic_add(self):
@@ -218,3 +220,62 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.stride, 0x1c)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
+
+    def test_disjoint_range(self):
+
+        # wrap-around with full range -- we should not care
+        a = claripy.BVS("a", 64)
+
+        ast = a + 0xffffffff81000000
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertEqual(ast_range.min, 0)
+        self.assertEqual(ast_range.max, 0xffffffffffffffff)
+        self.assertEqual(ast_range.stride, 1)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
+
+        # Simple wrap-around
+        a = claripy.BVS("a", 32).zero_extend(32)
+
+        ast = a + 0xffffffff81000000
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertEqual(ast_range.min, 0xffffffff81000000)
+        self.assertEqual(ast_range.max, 0x80ffffff)
+        self.assertEqual(ast_range.stride, 1)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
+
+        # Wrap-around while preserving stride info
+        a = claripy.BVS("a", 64)
+
+        ast = (a << 2) + 0xffffffff81000000
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertEqual(ast_range.min, 0)
+        self.assertEqual(ast_range.max, 0xfffffffffffffffc)
+        self.assertEqual(ast_range.stride, 4)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
+
+        # Wrap-around with different offset, due to different base of addition
+        a = claripy.BVS("a", 64)
+
+        ast = (a << 2) + 0xffffffff81000002
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertEqual(ast_range.min, 2)
+        self.assertEqual(ast_range.max, 0xfffffffffffffffe)
+        self.assertEqual(ast_range.stride, 4)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
+
+
+        # Non-linear range: we should bail out
+        a = claripy.BVS("a", 64)
+
+        ast = ((a << 2) & 0x16) + 0xffffffff81000002
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertIsNone(ast_range)

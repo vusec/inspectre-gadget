@@ -1,15 +1,15 @@
 ----------------- TRANSMISSION -----------------
          alias_type_1:
 4000000  movzx   r8d, word ptr [rdi] ; {Attacker@rdi} > {Secret@0x4000000}
-4000004  mov     rcx, qword ptr [r8-0x20] ; {Secret@0x4000000} > TRANSMISSION
-4000008  mov     r10, qword ptr [rdi+r8+0x50]
+4000004  mov     rcx, qword ptr [r8-0x20]
+4000008  mov     r10, qword ptr [rdi+r8+0x50] ; {Secret@0x4000000, Attacker@rdi} > TRANSMISSION
 400000d  mov     r11, qword ptr [rsi]
 4000010  movzx   r9d, word ptr [r11]
 4000014  mov     rax, qword ptr [r11+r9+0x20]
 4000019  jmp     0x400dead
 
 ------------------------------------------------
-uuid: c881501a-57ea-45fb-8d28-450f6aa76dd6
+uuid: 8fb91631-205c-4606-8a75-cf830f7f8b6d
 
 Secret Address:
   - Expr: <BV64 rdi>
@@ -20,13 +20,13 @@ Transmitted Secret:
   - Spread: 0 - 15
   - Number of Bits Inferable: 16
 Base:
-  - Expr: <BV64 0xffffffffffffffe0>
-  - Range: 0xffffffffffffffe0
-  - Independent Expr: <BV64 0xffffffffffffffe0>
-  - Independent Range: 0xffffffffffffffe0
+  - Expr: <BV64 0x50 + rdi>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Independent Expr: <BV64 0x50>
+  - Independent Range: 0x50
 Transmission:
-  - Expr: <BV64 0xffffffffffffffe0 + (0#48 .. LOAD_16[<BV64 rdi>]_20)>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
+  - Expr: <BV64 0x50 + rdi + (0#48 .. LOAD_16[<BV64 rdi>]_20)>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
 Register Requirements: {<BV64 rdi>}
 Constraints: []
