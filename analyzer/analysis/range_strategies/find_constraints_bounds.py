@@ -65,7 +65,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
             r = self.infer_isolated_strategy.find_range([], ast, sat_ranges[0][0], sat_ranges[0][1])
 
-            if sat_ranges[0][0] > sat_ranges[0][1]:
+            if r != None and sat_ranges[0][0] > sat_ranges[0][1]:
                 # The range wraps around, we have to be sure that the AST range is
                 # a simple strided range, otherwise we get two separate disjoint ranges
                 # which we cannot describe in our range (e.g., [ast != 0xf, ast <= 0xffff])
