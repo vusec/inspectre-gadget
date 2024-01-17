@@ -412,8 +412,10 @@ def op_add(ast, range_maps):
 
     for idx, map in enumerate(range_maps):
         if not map:
-            assert(not concrete_ast)
-            concrete_ast = ast.args[idx]
+            if concrete_ast != None:
+                concrete_ast += ast.args[idx]
+            else:
+                concrete_ast = ast.args[idx]
 
         elif map.is_full_range(ast.length):
             return map
@@ -453,8 +455,10 @@ def op_mul(ast, range_maps):
 
     for idx, map in enumerate(range_maps):
         if not map:
-            assert(not concrete_ast)
-            concrete_ast = ast.args[idx]
+            if concrete_ast != None:
+                concrete_ast = concrete_ast * ast.args[idx]
+            else:
+                concrete_ast = ast.args[idx]
 
         elif map.is_full_range(ast.length):
             return map

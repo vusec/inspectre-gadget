@@ -211,6 +211,8 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
         all_tfps = []
         for c in s.calls:
             all_tfps.extend(tfpAnalysis.analyse(c))
+
+        l.info(f"Extracted {len(all_tfps)} tfps.")
         for tfp in all_tfps:
             tfp.uuid = str(uuid.uuid4())
             tfp.name = name
