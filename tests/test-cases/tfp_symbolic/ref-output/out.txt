@@ -30,6 +30,7 @@ Disassembly of section .text:
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
 [MAIN]  --------------- ANALYZING TFPs ------------------
+[MAIN]  Extracted 2 tfps.
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
 [MAIN]  Dumped annotated ASM to asm
@@ -41,5 +42,7 @@ Disassembly of section .text:
 Found 0 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
 Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 2 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

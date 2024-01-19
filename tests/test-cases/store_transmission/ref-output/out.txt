@@ -37,5 +37,7 @@ Disassembly of section .text:
 Found 2 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
 Found 2 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 1 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

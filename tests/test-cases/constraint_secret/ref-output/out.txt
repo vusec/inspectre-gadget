@@ -48,5 +48,7 @@ Disassembly of section .text:
 Found 0 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
 Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

@@ -218,6 +218,62 @@
 | 0x40000a3 | True                                           | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
 +-----------+------------------------------------------------+----------------------------------------+----------------------------------------------+-----------------------------------------+--------------------------------------------+-----------------------------+--------------------------------------------------+------------------------------------------+
 
+../../test-queries/reasoner-gadgets/checks_with_slam.sql
++-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
+|    pc     | slam_has_exact_secret_range | slam_has_aligned_secret_bytes | slam_is_an_user_address_translation | slam_can_ignore_direct_dependency |
++-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x400006d | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000075 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x4000086 | False                       | False                         | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | True                                | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | True                              |
++-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
+
 ../../test-queries/reasoner-gadgets/exploitable.sql
 +-----------+-------------+-------------------------------------------------------------+--------------------+
 |    pc     | exploitable |                     required_solutions                      |    fail_reasons    |
@@ -329,6 +385,62 @@
 | 0x40000a3 | True                   | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                      |
 | 0x40000a3 | True                   | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                      |
 +-----------+------------------------+-------------------------------------------------------------+-------------------------+
+
+../../test-queries/reasoner-gadgets/exploitable_with_slam.sql
++-----------+--------------------+-------------------------------------------------------------+------------------------------------------------------------------+
+|    pc     | exploitable_w_slam |                  required_solutions_w_slam                  |                       fail_reasons_w_slam                        |
++-----------+--------------------+-------------------------------------------------------------+------------------------------------------------------------------+
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
+| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
++-----------+--------------------+-------------------------------------------------------------+------------------------------------------------------------------+
 
 ../../test-queries/scanner-gadgets/aliases.sql
 +-----------+---------+

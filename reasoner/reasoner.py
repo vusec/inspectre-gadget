@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 from io import StringIO
 
+from warnings import simplefilter
+simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
+
 # Number of bits of the secret that are used in the transmission.
 # E.g.     BASE + (SECRET & 0xf) has 4 inferable bits
 #          BASE + (SECRET ^ SECRET) has 0 inferable bits
@@ -307,8 +310,7 @@ def can_adjust_base(t : pd.Series):
 
     return False
 
-
-def can_ignore_direct_dependency(t : pd.Series):
+def can_ignore_direct_dependency(t : pd.Series, slam=False):
     """
     For gadgets where the base address depends on the secret address, check if
     we need to modify the base independently from the secret.
@@ -318,7 +320,76 @@ def can_ignore_direct_dependency(t : pd.Series):
     if _has_valid_independent_base(t):
         return True
     else:
-        return not (is_secret_below_cache_granularity(t) or is_max_secret_too_high(t, only_independent=True))
+        if slam:
+            # With slam we don't adjust the base to compensate
+            # for the secret
+            return not is_secret_below_cache_granularity(t)
+        else:
+            return not (is_secret_below_cache_granularity(t) or is_max_secret_too_high(t, only_independent=True))
+
+
+# -- SLAM Covert channel
+# To use the SLAM covert channel bit 47 and 63 should be equal to pass
+# the canonicality check, and they should be zero such that the attacker
+# can map the resulting page in user-space.
+
+
+def slam_has_exact_secret_range(t : pd.Series):
+    """
+    The bit positions are really strict, so we need a exact range
+    """
+
+    secret_range_exact = t[f'transmitted_secret_range_exact']
+
+    assert(type(secret_range_exact) == bool)
+
+    if secret_range_exact == False:
+        return False
+
+    return True
+
+
+
+def slam_has_aligned_secret_bytes(t : pd.Series):
+    """
+    Shift operations should not misplace secret bytes, since we make use
+    of the fact that all ASCII characters have the 8th bit set to 0
+    """
+
+    secret_stride = t[f'transmitted_secret_range_stride']
+
+    # Shifts are fine, as long as we shift one or more complete bytes
+    if secret_stride not in [2 ** x for x in range(0, 64 + 1, 8)]:
+        return False
+
+    return True
+
+
+def slam_is_an_user_address_translation(t : pd.Series):
+    """
+    To use the SLAM covert channel bit 47 and 63 should be zero. This
+    can be tricky if you have a secret <= 32 bits.
+    """
+
+    secret_window = t[f'transmitted_secret_range_window']
+
+    base_controllable_window = t[f'independent_base_range_window']
+
+
+    if secret_window < 2 ** 32 and base_controllable_window < 2 ** 63:
+        # If the secret is smaller than 32 bits then bits 47 and 63 are
+        # probably one (kernel address) which will fail SLAM.
+        # (e.g., [0xffffffff81000000 + eax])
+        # if we control the base almost complexly, we do not have to worry
+        return False
+
+
+    return True
+
+
+
+def slam_can_ignore_direct_dependency(t : pd.Series):
+    return can_ignore_direct_dependency(t, slam=True)
 
 def perform_training(t: pd.Series):
     return True
@@ -350,6 +421,28 @@ advanced_checks = [
                     {'problem': is_branch_dependent_from_uncontrolled, 'solution': perform_out_of_place_training},
                   ]
 
+slam_basic_checks = [
+                    is_secret_inferable,
+                    has_valid_secret_address,
+                    is_cmove_independent_from_secret,
+                    has_no_speculation_stop,
+                    slam_has_exact_secret_range,
+                    slam_has_aligned_secret_bytes,
+                    slam_is_an_user_address_translation
+                    ]
+
+slam_advanced_checks = [
+                    {'problem': is_secret_below_cache_granularity, 'solution': can_perform_sliding},
+                    {'problem': is_secret_entropy_high, 'solution': can_perform_known_prefix},
+
+                    {'problem': base_has_indirect_secret_dependency, 'solution': leak_secret_near_valid_base},
+
+                    {'problem': base_has_direct_secret_dependency, 'solution': slam_can_ignore_direct_dependency},
+
+                    {'problem': is_branch_dependent_from_secret, 'solution': perform_training},
+                    {'problem': is_branch_dependent_from_uncontrolled, 'solution': perform_out_of_place_training},
+                  ]
+
 
 def is_exploitable(t : pd.Series):
     exploitable = True
@@ -364,7 +457,27 @@ def is_exploitable(t : pd.Series):
 
     for c in advanced_checks:
         if t[f'{c["problem"].__name__}{"" if not with_branches else "_w_branches"}']:
+            if t[f'{c["solution"].__name__}{"" if not with_branches else "_w_branches"}']:
+                required_solutions.append(c['solution'].__name__)
+            else:
+                exploitable = False
+                fail_reasons.append(c['problem'].__name__.replace('is_',''))
 
+    return exploitable, required_solutions if exploitable else [], fail_reasons
+
+def slam_is_exploitable(t : pd.Series):
+    exploitable = True
+
+    fail_reasons = []
+    required_solutions = []
+
+    for b in slam_basic_checks:
+        if not b(t):
+            exploitable = False
+            fail_reasons.append(b.__name__)
+
+    for c in slam_advanced_checks:
+        if t[f'{c["problem"].__name__}{"" if not with_branches else "_w_branches"}']:
             if t[f'{c["solution"].__name__}{"" if not with_branches else "_w_branches"}']:
                 required_solutions.append(c['solution'].__name__)
             else:
@@ -430,6 +543,8 @@ def run(in_csv, out_csv):
     df['pc_as_int'] = df.apply(get_pc_as_number, axis=1)
     print(f"[-] Imported {len(df)} gadgets")
 
+
+    # --------------------------------------------------------------------------
     # Add results of exploitability analysis.
     print("[-] Performing exploitability analysis...")
     with_branches = False
@@ -447,6 +562,8 @@ def run(in_csv, out_csv):
 
     print(f"Found {len(df[df['exploitable'] == True])} exploitable gadgets!")
 
+
+    # --------------------------------------------------------------------------
     # Add results of exploitability analysis considering branches.
     print("[-] Performing exploitability analysis including branch constraints...")
     with_branches = True
@@ -464,6 +581,29 @@ def run(in_csv, out_csv):
         'fail_reasons_w_branches']] = df.apply(is_exploitable, axis=1, result_type="expand")
 
     print(f"Found {len(df[df['exploitable_w_branches'] == True])} exploitable gadgets!")
+
+
+    # --------------------------------------------------------------------------
+    # Perform the checks for the SLAM attack
+    print("[-] Performing exploitability analysis assuming the SLAM covert channel...")
+    with_branches = False
+
+    for b in slam_basic_checks:
+        if b.__name__ not in df.columns:
+            df[b.__name__] = df.apply(b, axis=1)
+
+    for c in slam_advanced_checks:
+
+        if c['problem'].__name__  not in df.columns:
+            df[c['problem'].__name__] = df.apply(c['problem'], axis=1)
+
+        if c['solution'].__name__  not in df.columns:
+            df[c['solution'].__name__] = df.apply(c['solution'], axis=1)
+
+    df[['exploitable_w_slam', 'required_solutions_w_slam',
+        'fail_reasons_w_slam']] = df.apply(slam_is_exploitable, axis=1, result_type="expand")
+
+    print(f"Found {len(df[df['exploitable_w_slam'] == True])} exploitable gadgets!")
 
     # Save to new file.
     print(f"[-] Saving to {out_csv}")
