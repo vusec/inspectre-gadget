@@ -7,4 +7,4 @@ SELECT
     base_control_w_branches_and_constraints
 FROM
     gadgets
-order by n_instr, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches
+order by pc, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches

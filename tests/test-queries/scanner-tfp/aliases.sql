@@ -4,4 +4,4 @@ SELECT
     aliases
 FROM
     tfps
-order by n_instr, expr, constraints, branches
+order by pc, expr, constraints, branches

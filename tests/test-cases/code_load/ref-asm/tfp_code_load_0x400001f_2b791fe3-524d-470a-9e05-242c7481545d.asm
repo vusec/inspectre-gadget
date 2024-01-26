@@ -3,14 +3,14 @@
 4000000  cmp     r8, 0x0
 4000004  je      trans1 ; Taken   <Bool r8 == 0x0>
          trans1:
-4000012  mov     rax, qword ptr [rdi] ; {Attacker@rdi} > {Attacker@0x4000012}
-4000015  jmp     rax ; {Attacker@0x4000012} > TAINTED FUNCTION POINTER
+400001c  mov     rax, qword ptr [rdi] ; {Attacker@rdi} > {Attacker@0x400001c}
+400001f  jmp     rax ; {Attacker@0x400001c} > TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: b120ff3f-5dd6-4f66-8c41-ba876015291a
+uuid: 2b791fe3-524d-470a-9e05-242c7481545d
 
 Reg: rax
-Expr: <BV64 LOAD_64[<BV64 rdi>]_21>
+Expr: <BV64 LOAD_64[<BV64 rdi>]_24>
 
 Constraints: []
 Branches: [(67108868, <Bool r8 == 0x0>, 'Taken')]

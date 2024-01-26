@@ -13,7 +13,7 @@ SELECT
     can_adjust_base
 FROM
     gadgets
-order by n_instr, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches;
+order by pc, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches;
 
 SELECT
     pc,
@@ -27,5 +27,5 @@ SELECT
     perform_out_of_place_training
 FROM
     gadgets
-order by n_instr, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches;
+order by pc, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches;
 

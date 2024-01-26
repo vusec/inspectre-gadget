@@ -9,7 +9,7 @@ SELECT
     rax_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -22,7 +22,7 @@ SELECT
     rbx_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -35,7 +35,7 @@ SELECT
     rcx_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -48,7 +48,7 @@ SELECT
     rdx_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -61,7 +61,7 @@ SELECT
     rsi_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -74,7 +74,7 @@ SELECT
     rdi_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -87,7 +87,7 @@ SELECT
     rbp_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -100,7 +100,7 @@ SELECT
     rsp_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -113,7 +113,7 @@ SELECT
     r8_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -126,7 +126,7 @@ SELECT
     r9_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -139,7 +139,7 @@ SELECT
     r10_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -152,7 +152,7 @@ SELECT
     r11_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -165,7 +165,7 @@ SELECT
     r12_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -178,7 +178,7 @@ SELECT
     r13_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -191,7 +191,7 @@ SELECT
     r14_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
 
 SELECT
     pc,
@@ -204,4 +204,4 @@ SELECT
     r15_range
 FROM
     tfps
-order by n_instr, expr, constraints, branches;
+order by pc, expr, constraints, branches;
