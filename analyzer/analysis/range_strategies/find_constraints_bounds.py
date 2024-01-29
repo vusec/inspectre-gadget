@@ -8,8 +8,10 @@ from .infer_isolated import RangeStrategyInferIsolated
 # autopep8: off
 from ...shared.config import *
 from ...shared.utils import *
+from ...shared.logger import *
 # autopep8: on
 
+l = get_logger("FindConstraintsBounds")
 
 class RangeStrategyFindConstraintsBounds(RangeStrategy):
     infer_isolated_strategy : RangeStrategyInferIsolated
@@ -48,30 +50,45 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
         if ast_min == ast_max:
             return self.infer_isolated_strategy.find_range([], ast, ast_min, ast_max)
 
-        # print(f"min:{ast_min}     max:{ast_max}")
+
         try:
             sat_ranges = _find_sat_distribution(constraints, ast, ast_min, ast_max, stride=1)
         except claripy.ClaripyZ3Error as e:
             # timeout
             return None
 
+        # --------- One non-satisfiable range
+
         if sat_ranges != None and len(sat_ranges) == 1:
-            # It is a full range, we can treat it as isolated
-            return self.infer_isolated_strategy.find_range([], ast, sat_ranges[0][0], sat_ranges[0][1])
+            # We have one non-satisfiable range, so we can try to treat it as
+            # isolated
+
+            r = self.infer_isolated_strategy.find_range([], ast, sat_ranges[0][0], sat_ranges[0][1])
+
+            if r != None and sat_ranges[0][0] > sat_ranges[0][1]:
+                # The range wraps around, we have to be sure that the AST range is
+                # a simple strided range, otherwise we get two separate disjoint ranges
+                # which we cannot describe in our range (e.g., [ast != 0xf, ast <= 0xffff])
+                if r.and_mask != None or r.or_mask != None or \
+                    ast_max != ((1 << ast.size()) - 1 - (r.stride - 1)) or ast_min != 0:
+
+                    # We have a complex range thus fail (e.g., masking is performed)
+                    return None
+
+            return r
 
         # --------- Signed range
         if ast_min == 0 and ast_max == (2**ast.size()) - 1:
             s = claripy.Solver(timeout=global_config["Z3Timeout"])
             new_min = (1 << (ast.size() - 1))
-            s.constraints = constraints + [(ast > new_min)]
+            s.constraints = constraints + [(ast >= new_min)]
             upper_ast_min = s.min(ast)
             upper_ast_max = s.max(ast)
             s = claripy.Solver(timeout=global_config["Z3Timeout"])
-            s.constraints = constraints + [ast <= new_min]
+            s.constraints = constraints + [ast < new_min]
             lower_ast_min = s.min(ast)
             lower_ast_max = s.max(ast)
 
-            # print(f" new_min:{hex(new_min)} upper_min: {hex(upper_ast_min)}   upper_max: {hex(upper_ast_max)}    lower_min: {hex(lower_ast_min)}    lower_max: {hex(lower_ast_max)}")
 
             if lower_ast_min == 0 and upper_ast_max == (2**ast.size()) - 1:
                 # treat this as a single range that wraps around ( min > max )
@@ -87,7 +104,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
                     return self.infer_isolated_strategy.find_range([], ast, upper_ast_min, lower_ast_max)
 
         # --------- Can't solve this
-        print(f"Cant' solve range: {ast}  ({constraints})")
+        l.warning(f"Cant' solve range: {ast}  ({constraints})")
 
         # TODO: If there is only one SAT range, we may still be able to treat
         # it as isolated and adjust the min and max.
@@ -122,8 +139,7 @@ def _find_sat_distribution(constraints, ast, start, end, stride = 1):
             return [(start, end)]
 
         # Range with a "hole"
-        # print(f"Range: {[(value+1, value-1)]}")
-        return [value+1, value-1]
+        return [(value+1, value-1)]
 
     # TODO: Double check the validity of the code below
     return None

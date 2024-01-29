@@ -154,7 +154,7 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
     """
 
     # Step 1. Analyze the code snippet with angr.
-    l.info(f"Analyzing gadget at address {hex(gadget_address)} {name} ...")
+    l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
     s = Scanner()
     s.run(proj, gadget_address, config)
 
@@ -211,6 +211,9 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
         all_tfps = []
         for c in s.calls:
             all_tfps.extend(tfpAnalysis.analyse(c))
+
+        if all_tfps: l.info(f"Extracted {len(all_tfps)} tfps.")
+
         for tfp in all_tfps:
             tfp.uuid = str(uuid.uuid4())
             tfp.name = name
@@ -248,18 +251,19 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     # Simplify how symbols get printed.
     claripy.ast.base._unique_names = False
 
-    # Prepare angr project.
-    l.info("Loading angr project...")
     config = load_config(config_file)
-    proj   = load_angr_project(binary, base_address, cache_project)
-
-    l.info("Removing non-writable memory...")
-    remove_memory_sections(proj)
 
     if global_config["LogLevel"] == 0:
         disable_logging()
     elif global_config["LogLevel"] == 1:
         disable_logging(keep_main=True)
+
+    # Prepare angr project.
+    l.info("Loading angr project...")
+    proj   = load_angr_project(binary, base_address, cache_project)
+
+    l.info("Removing non-writable memory...")
+    remove_memory_sections(proj)
 
     # Run the Analyzer.
     # TODO: Parallelize.

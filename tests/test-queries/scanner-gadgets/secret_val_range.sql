@@ -1,0 +1,19 @@
+SELECT
+    pc,
+    secret_val_range_min,
+    secret_val_range_max,
+    secret_val_range_window,
+    secret_val_range_stride,
+    secret_val_range_and_mask,
+    secret_val_range_or_mask,
+    secret_val_range_exact,
+    secret_val_range_w_branches_min,
+    secret_val_range_w_branches_max,
+    secret_val_range_w_branches_window,
+    secret_val_range_w_branches_stride,
+    secret_val_range_w_branches_and_mask,
+    secret_val_range_w_branches_or_mask,
+    secret_val_range_w_branches_exact
+FROM
+    gadgets
+order by pc, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches

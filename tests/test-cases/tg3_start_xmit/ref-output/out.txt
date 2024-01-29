@@ -1,0 +1,225 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <tg3_start_xmit>:
+ 4000000:	41 57                	push   r15
+ 4000002:	41 56                	push   r14
+ 4000004:	41 55                	push   r13
+ 4000006:	49 89 fd             	mov    r13,rdi
+ 4000009:	41 54                	push   r12
+ 400000b:	55                   	push   rbp
+ 400000c:	48 89 f5             	mov    rbp,rsi
+ 400000f:	53                   	push   rbx
+ 4000010:	48 83 ec 58          	sub    rsp,0x58
+ 4000014:	8c e8                	mov    eax,gs
+ 4000016:	48 89 44 24 50       	mov    QWORD PTR [rsp+0x50],rax
+ 400001b:	31 c0                	xor    eax,eax
+ 400001d:	48 8d 86 00 09 00 00 	lea    rax,[rsi+0x900]
+ 4000024:	48 89 44 24 10       	mov    QWORD PTR [rsp+0x10],rax
+ 4000029:	0f b7 47 7c          	movzx  eax,WORD PTR [rdi+0x7c]
+ 400002d:	48 8d 14 80          	lea    rdx,[rax+rax*4]
+ 4000031:	49 89 d4             	mov    r12,rdx
+ 4000034:	48 8d 04 50          	lea    rax,[rax+rdx*2]
+ 4000038:	48 c1 e0 06          	shl    rax,0x6
+ 400003c:	49 c1 e4 06          	shl    r12,0x6
+ 4000040:	4c 03 a6 80 03 00 00 	add    r12,QWORD PTR [rsi+0x380]
+ 4000047:	4c 89 64 24 08       	mov    QWORD PTR [rsp+0x8],r12
+ 400004c:	4c 8d a4 06 40 0a 00 	lea    r12,[rsi+rax*1+0xa40]
+ 4000053:	00 
+ 4000054:	48 8b 86 58 1b 00 00 	mov    rax,QWORD PTR [rsi+0x1b58]
+ 400005b:	49 8d 94 24 c0 02 00 	lea    rdx,[r12+0x2c0]
+ 4000062:	00 
+ 4000063:	48 c1 e8 3d          	shr    rax,0x3d
+ 4000067:	a8 01                	test   al,0x1
+ 4000069:	4c 0f 45 e2          	cmovne r12,rdx
+ 400006d:	41 8b b4 24 40 02 00 	mov    esi,DWORD PTR [r12+0x240]
+ 4000074:	00 
+ 4000075:	41 8b 94 24 48 02 00 	mov    edx,DWORD PTR [r12+0x248]
+ 400007c:	00 
+ 400007d:	48 8b bf c8 00 00 00 	mov    rdi,QWORD PTR [rdi+0xc8]
+ 4000084:	89 f0                	mov    eax,esi
+ 4000086:	41 2b 84 24 44 02 00 	sub    eax,DWORD PTR [r12+0x244]
+ 400008d:	00 
+ 400008e:	25 ff 01 00 00       	and    eax,0x1ff
+ 4000093:	29 c2                	sub    edx,eax
+ 4000095:	41 8b 85 c0 00 00 00 	mov    eax,DWORD PTR [r13+0xc0]
+ 400009c:	89 54 24 4c          	mov    DWORD PTR [rsp+0x4c],edx
+ 40000a0:	48 01 f8             	add    rax,rdi
+ 40000a3:	0f b6 48 02          	movzx  ecx,BYTE PTR [rax+0x2]
+ 40000a7:	83 c1 01             	add    ecx,0x1
+ 40000aa:	39 d1                	cmp    ecx,edx
+ 40000ac:	e9 00 00 00 00       	jmp    40000b1 <tg3_start_xmit+0xb1>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 42 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 50 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc88 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc88 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc84 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_53) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_53) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_53) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_76) + LOAD_64[<BV64 rdi + 0xc8>]_74>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_76) + LOAD_64[<BV64 rdi + 0xc8>]_74>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc88 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf44 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_53) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_53) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_53) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_95) + LOAD_64[<BV64 rdi + 0xc8>]_93>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_95) + LOAD_64[<BV64 rdi + 0xc8>]_93>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf48 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf48 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc84 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_106) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_106) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_106) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_129) + LOAD_64[<BV64 rdi + 0xc8>]_127>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_129) + LOAD_64[<BV64 rdi + 0xc8>]_127>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf48 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_40) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf44 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_106) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_106) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_106) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_148) + LOAD_64[<BV64 rdi + 0xc8>]_146>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_148) + LOAD_64[<BV64 rdi + 0xc8>]_146>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc88 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc88 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc84 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_172) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_172) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_172) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_195) + LOAD_64[<BV64 rdi + 0xc8>]_193>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_195) + LOAD_64[<BV64 rdi + 0xc8>]_193>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc88 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf44 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_172) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_172) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_172) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_214) + LOAD_64[<BV64 rdi + 0xc8>]_212>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_214) + LOAD_64[<BV64 rdi + 0xc8>]_212>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf48 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf48 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xc84 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_225) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_225) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_225) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_248) + LOAD_64[<BV64 rdi + 0xc8>]_246>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_248) + LOAD_64[<BV64 rdi + 0xc8>]_246>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf48 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_159) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xf44 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_225) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_225) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_225) << 0x2) << 0x1)) << 0x6))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_267) + LOAD_64[<BV64 rdi + 0xc8>]_265>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_267) + LOAD_64[<BV64 rdi + 0xc8>]_265>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 50 gadgets
+[-] Performing exploitability analysis...
+Found 42 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 42 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 8 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

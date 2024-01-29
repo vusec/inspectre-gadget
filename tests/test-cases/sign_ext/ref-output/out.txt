@@ -1,0 +1,67 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <sign_extend>:
+ 4000000:	0f be 41 04          	movsx  eax,BYTE PTR [rcx+0x4]
+ 4000004:	48 8b 50 40          	mov    rdx,QWORD PTR [rax+0x40]
+ 4000008:	e9 00 00 00 00       	jmp    400000d <ieee80211_ctstoself_duration>
+
+000000000400000d <ieee80211_ctstoself_duration>:
+ 400000d:	41 57                	push   r15
+ 400000f:	41 56                	push   r14
+ 4000011:	41 55                	push   r13
+ 4000013:	41 54                	push   r12
+ 4000015:	55                   	push   rbp
+ 4000016:	48 89 cd             	mov    rbp,rcx
+ 4000019:	53                   	push   rbx
+ 400001a:	48 89 f3             	mov    rbx,rsi
+ 400001d:	48 89 d6             	mov    rsi,rdx
+ 4000020:	48 83 ec 10          	sub    rsp,0x10
+ 4000024:	0f b6 41 04          	movzx  eax,BYTE PTR [rcx+0x4]
+ 4000028:	48 8b 57 40          	mov    rdx,QWORD PTR [rdi+0x40]
+ 400002c:	83 e0 07             	and    eax,0x7
+ 400002f:	4c 8b bc c2 38 01 00 	mov    r15,QWORD PTR [rdx+rax*8+0x138]
+ 4000036:	00 
+ 4000037:	48 0f be 41 14       	movsx  rax,BYTE PTR [rcx+0x14]
+ 400003c:	48 8d 14 40          	lea    rdx,[rax+rax*2]
+ 4000040:	49 8b 47 08          	mov    rax,QWORD PTR [r15+0x8]
+ 4000044:	4c 8d 34 90          	lea    r14,[rax+rdx*4]
+ 4000048:	48 85 db             	test   rbx,rbx
+ 400004b:	0f 84 00 00 00 00    	je     4000051 <ieee80211_ctstoself_duration+0x44>
+ 4000051:	0f b6 43 76          	movzx  eax,BYTE PTR [rbx+0x76]
+ 4000055:	45 31 e4             	xor    r12d,r12d
+ 4000058:	80 bb 29 fd ff ff 00 	cmp    BYTE PTR [rbx-0x2d7],0x0
+ 400005f:	88 44 24 07          	mov    BYTE PTR [rsp+0x7],al
+ 4000063:	0f 84 00 00 00 00    	je     4000069 <ieee80211_ctstoself_duration+0x5c>
+ 4000069:	45 8b 26             	mov    r12d,DWORD PTR [r14]
+ 400006c:	e9 00 00 00 00       	jmp    4000071 <ieee80211_ctstoself_duration+0x64>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 2 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0x40 + (0xffffff00 + (0#56 .. LOAD_8[<BV64 rcx + 0x4>]_20))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x40 + (0#56 .. LOAD_8[<BV64 rcx + 0x4>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 2 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

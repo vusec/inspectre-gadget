@@ -1,0 +1,53 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <alias_partially_independent>:
+ 4000000:	89 fe                	mov    esi,edi
+ 4000002:	4c 01 e6             	add    rsi,r12
+ 4000005:	49 8b 44 24 28       	mov    rax,QWORD PTR [r12+0x28]
+ 400000a:	4c 8b 0c 06          	mov    r9,QWORD PTR [rsi+rax*1]
+ 400000e:	89 fe                	mov    esi,edi
+ 4000010:	4c 01 e6             	add    rsi,r12
+ 4000013:	41 8b 44 24 28       	mov    eax,DWORD PTR [r12+0x28]
+ 4000018:	4c 8b 14 06          	mov    r10,QWORD PTR [rsi+rax*1]
+ 400001c:	89 fe                	mov    esi,edi
+ 400001e:	49 03 74 24 20       	add    rsi,QWORD PTR [r12+0x20]
+ 4000023:	49 8b 44 24 28       	mov    rax,QWORD PTR [r12+0x28]
+ 4000028:	4c 8b 1c 06          	mov    r11,QWORD PTR [rsi+rax*1]
+ 400002c:	e9 00 00 00 00       	jmp    4000031 <alias_partially_independent+0x31>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 3 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 4 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + r12 + LOAD_64[<BV64 r12 + 0x28>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + r12 + (0#32 .. LOAD_32[<BV64 r12 + 0x28>]_22)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + LOAD_64[<BV64 r12 + 0x20>]_24 + LOAD_64[<BV64 r12 + 0x28>]_25>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + LOAD_64[<BV64 r12 + 0x20>]_24 + LOAD_64[<BV64 r12 + 0x28>]_25>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 4 gadgets
+[-] Performing exploitability analysis...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 3 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

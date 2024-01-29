@@ -1,0 +1,39 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <cmove_sample>:
+ 4000000:	48 85 ff             	test   rdi,rdi
+ 4000003:	48 0f 44 fe          	cmove  rdi,rsi
+ 4000007:	48 8b 7f 18          	mov    rdi,QWORD PTR [rdi+0x18]
+ 400000b:	8b 07                	mov    eax,DWORD PTR [rdi]
+ 400000d:	e9 00 00 00 00       	jmp    4000012 <cmove_sample+0x12>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 2 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdi + 0x18>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rsi + 0x18>]_22>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 2 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 2 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

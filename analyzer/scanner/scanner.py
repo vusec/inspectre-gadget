@@ -187,14 +187,14 @@ class Scanner:
             l.error(f"Aliases: {aliases}")
 
             # Count number of instructions.
-            n_instr = self.count_instructions(state, state.addr)
+            n_instr = self.count_instructions(state, state.scratch.ins_addr)
 
             # Check if we encountered a speculation stop
             contains_spec_stop = self.history_contains_speculation_stop(state)
 
             # Create a new transmission object.
             self.transmissions.append(TransmissionExpr(state=state,
-                                                       pc=state.addr,
+                                                       pc=state.scratch.ins_addr,
                                                        expr=expr,
                                                        transmitter=op_type,
                                                        aliases=aliases,
@@ -212,11 +212,10 @@ class Scanner:
                 break
 
         if is_tainted:
-            *_, jmp_source = state.history.jump_sources
 
             # Check if there is a substitution to be made for this address.
             # This can happen if the state comes from a manual splitting.
-            subst = getSubstitution(state, state.addr)
+            subst = getSubstitution(state, state.scratch.ins_addr)
             if subst != None:
                 func_ptr_ast = subst
             else:
@@ -229,7 +228,7 @@ class Scanner:
                 l.info(f"  After transformations: {func_ptr_ast}")
 
                 if len(asts) > 1:
-                    self.split_state(self.cur_state, asts, state.addr)
+                    self.split_state(self.cur_state, asts, state.scratch.ins_addr)
                     # TODO: Is there a way to exit from `step()` instead of marking
                     #       the state as discard?
                     self.discard = True
@@ -252,12 +251,12 @@ class Scanner:
             bbls = [x for x in state.history.bbl_addrs]
 
             # Get number of executed instructions.
-            n_instr = self.count_instructions(state, state.addr)
+            n_instr = self.count_instructions(state, state.scratch.ins_addr)
 
             # Check if we encountered a speculation stop
             contains_spec_stop = self.history_contains_speculation_stop(state)
 
-            tfp = TaintedFunctionPointer(pc=jmp_source,
+            tfp = TaintedFunctionPointer(pc=state.scratch.ins_addr,
                                             expr=func_ptr_ast,
                                             reg=func_ptr_reg,
                                             bbls=bbls,
@@ -501,13 +500,17 @@ class Scanner:
         l.info("Exit hook")
         func_ptr_ast = state.inspect.exit_target
 
-
+        # First case: symbolic target
         if func_ptr_ast.symbolic:
-            # Whenever the target is symbolic, we
+            # Whenever the target is symbolic, and it is not a return, we
             # know we are performing an indirect call.
 
-            # get the register
             block = state.block()
+
+            if block.vex.jumpkind == 'Ijk_Ret':
+                return
+
+            # get the register
             instruction = block.capstone.insns[-1].insn
 
             regs_read, regs_write = instruction.regs_access()
@@ -520,43 +523,29 @@ class Scanner:
             reg_id = regs_read[0]
             func_ptr_reg = instruction.reg_name(reg_id)
 
-            # Update the history, we have to do it manually because we are
-            # in hook_before
-            state.history.jumpkind = state.inspect.exit_jumpkind
-            state.history.jump_target = state.inspect.exit_target
-            state.history.jump_guard = state.inspect.exit_guard
-            state.history.jump_source = state.addr
+            # process the TFP
+            self.check_tfp(state, func_ptr_reg, func_ptr_ast)
+
+            # check if it is also a transmission
+            self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
+
+            self.discard = 1
+
+        # Second case: jump to indirect thunk
+        elif state.inspect.exit_target.args[0] in self.thunk_list:
+            exit_target = state.inspect.exit_target.args[0]
+
+            func_ptr_reg = self.thunk_list[exit_target]
+
+            func_ptr_ast = getattr(state.regs, func_ptr_reg)
 
             # process the TFP
             self.check_tfp(state, func_ptr_reg, func_ptr_ast)
 
-            self.discard = 1
-
-            # Concretize the target to prevent Angr from complaining
-            state.inspect.exit_target = 0xdeadbeef
-
-
-    def exit_hook_after(self, state : angr.SimState):
-        """
-        Hook to inspect indirect calls. If an indirect call is tainted,
-        we can jump to any gadget, which considerably increases the attack surface.
-        """
-
-        if self.discard:
-            return
-
-        l.info("Exit hook")
-        exit_target = state.inspect.exit_target.args[0]
-        if exit_target in self.thunk_list:
-            # Whenever we are calling an indirect thunk in the kernel, we
-            # know we are performing an indirect call.
-            func_ptr_reg = self.thunk_list[exit_target]
-            func_ptr_ast = getattr(state.regs, func_ptr_reg)
-
-            self.check_tfp(state, func_ptr_reg, func_ptr_ast)
+            # check if it is also a transmission
+            self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
 
             self.discard = 1
-
 
     def run(self, proj: angr.Project, start_address, config) -> list[TransmissionExpr]:
         """
@@ -588,7 +577,6 @@ class Scanner:
         state.inspect.b('mem_read', when=angr.BP_AFTER, action=self.load_hook_after)
         state.inspect.b('mem_write', when=angr.BP_BEFORE, action=self.store_hook_before)
         state.inspect.b('exit', when=angr.BP_BEFORE, action=self.exit_hook_before)
-        state.inspect.b('exit', when=angr.BP_AFTER, action=self.exit_hook_after)
         state.inspect.b('address_concretization', when=angr.BP_AFTER, action=skip_concretization)
 
         self.initialize_regs_and_stack(state, config)
@@ -630,6 +618,10 @@ class Scanner:
                 report_unsupported(e, hex(self.cur_state.addr), hex(start_address), error_type="SCANNER")
                 continue
             except Exception as e:
+                # Catch test-case end error
+                if 'No bytes in memory for block starting at 0x400dead.' == str(e):
+                    continue
+
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
                 if not l.disabled:

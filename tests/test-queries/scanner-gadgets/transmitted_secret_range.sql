@@ -1,0 +1,19 @@
+SELECT
+    pc,
+    transmitted_secret_range_min,
+    transmitted_secret_range_max,
+    transmitted_secret_range_window,
+    transmitted_secret_range_stride,
+    transmitted_secret_range_and_mask,
+    transmitted_secret_range_or_mask,
+    transmitted_secret_range_exact,
+    transmitted_secret_range_w_branches_min,
+    transmitted_secret_range_w_branches_max,
+    transmitted_secret_range_w_branches_window,
+    transmitted_secret_range_w_branches_stride,
+    transmitted_secret_range_w_branches_and_mask,
+    transmitted_secret_range_w_branches_or_mask,
+    transmitted_secret_range_w_branches_exact
+FROM
+    gadgets
+order by pc, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches

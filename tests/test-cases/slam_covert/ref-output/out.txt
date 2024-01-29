@@ -1,0 +1,89 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <multiple_bb>:
+ 4000000:	49 83 f8 00          	cmp    r8,0x0
+ 4000004:	74 1e                	je     4000024 <trans1>
+ 4000006:	49 83 f8 01          	cmp    r8,0x1
+ 400000a:	74 2f                	je     400003b <trans2>
+ 400000c:	49 83 f8 02          	cmp    r8,0x2
+ 4000010:	74 39                	je     400004b <trans3>
+ 4000012:	49 83 f8 03          	cmp    r8,0x3
+ 4000016:	74 3f                	je     4000057 <trans4_5>
+
+0000000004000018 <trans0>:
+ 4000018:	4c 8b 0f             	mov    r9,QWORD PTR [rdi]
+ 400001b:	4d 8b 91 90 58 00 00 	mov    r10,QWORD PTR [r9+0x5890]
+ 4000022:	eb 49                	jmp    400006d <end>
+
+0000000004000024 <trans1>:
+ 4000024:	4c 8b 0f             	mov    r9,QWORD PTR [rdi]
+ 4000027:	49 81 c1 21 08 00 00 	add    r9,0x821
+ 400002e:	49 c1 e1 10          	shl    r9,0x10
+ 4000032:	49 83 c1 33          	add    r9,0x33
+ 4000036:	4d 8b 11             	mov    r10,QWORD PTR [r9]
+ 4000039:	eb 32                	jmp    400006d <end>
+
+000000000400003b <trans2>:
+ 400003b:	4c 8b 0f             	mov    r9,QWORD PTR [rdi]
+ 400003e:	48 25 ff 00 00 00    	and    rax,0xff
+ 4000044:	4d 8b 54 01 20       	mov    r10,QWORD PTR [r9+rax*1+0x20]
+ 4000049:	eb 22                	jmp    400006d <end>
+
+000000000400004b <trans3>:
+ 400004b:	4c 8b 0f             	mov    r9,QWORD PTR [rdi]
+ 400004e:	4d 8b 91 00 00 00 81 	mov    r10,QWORD PTR [r9-0x7f000000]
+ 4000055:	eb 16                	jmp    400006d <end>
+
+0000000004000057 <trans4_5>:
+ 4000057:	4c 8b 0f             	mov    r9,QWORD PTR [rdi]
+ 400005a:	49 c1 e1 09          	shl    r9,0x9
+ 400005e:	4d 8b 11             	mov    r10,QWORD PTR [r9]
+ 4000061:	44 8b 0f             	mov    r9d,DWORD PTR [rdi]
+ 4000064:	4d 8b 99 00 00 00 81 	mov    r11,QWORD PTR [r9-0x7f000000]
+ 400006b:	eb 00                	jmp    400006d <end>
+
+000000000400006d <end>:
+ 400006d:	e9 00 00 00 00       	jmp    4000072 <end+0x5>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 6 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 6 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0x5890 + LOAD_64[<BV64 rdi>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 (0#9 .. LOAD_64[<BV64 rdi>]_22[54:0]) << 0x9>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#32 .. LOAD_32[<BV64 rdi>]_24)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + LOAD_64[<BV64 rdi>]_26>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x20 + LOAD_64[<BV64 rdi>]_28 + (0#56 .. rax[7:0])>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x8210000 + ((0#16 .. LOAD_64[<BV64 rdi>]_30[47:0]) << 0x10) + 0x33>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 6 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 4 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

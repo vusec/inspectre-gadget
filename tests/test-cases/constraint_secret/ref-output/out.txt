@@ -1,0 +1,54 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <constraint_secret>:
+ 4000000:	4c 0f b7 0f          	movzx  r9,WORD PTR [rdi]
+ 4000004:	49 81 f9 ff ff 00 00 	cmp    r9,0xffff
+ 400000b:	77 19                	ja     4000026 <trans1>
+ 400000d:	49 8b b1 00 00 00 80 	mov    rsi,QWORD PTR [r9-0x80000000]
+ 4000014:	49 81 f9 ff 00 00 00 	cmp    r9,0xff
+ 400001b:	77 09                	ja     4000026 <trans1>
+ 400001d:	4d 8b 91 00 00 00 90 	mov    r10,QWORD PTR [r9-0x70000000]
+ 4000024:	eb 12                	jmp    4000038 <end>
+
+0000000004000026 <trans1>:
+ 4000026:	4c 0f b7 4f 20       	movzx  r9,WORD PTR [rdi+0x20]
+ 400002b:	49 83 f9 00          	cmp    r9,0x0
+ 400002f:	74 07                	je     4000038 <end>
+ 4000031:	4d 8b 99 00 00 00 a0 	mov    r11,QWORD PTR [r9-0x60000000]
+
+0000000004000038 <end>:
+ 4000038:	e9 00 00 00 00       	jmp    400003d <end+0x5>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 3 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 3 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0xffffffff80000000 + (0#48 .. LOAD_16[<BV64 rdi>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffffa0000000 + (0#48 .. LOAD_16[<BV64 rdi + 0x20>]_22)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff90000000 + (0#48 .. LOAD_16[<BV64 rdi>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 3 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

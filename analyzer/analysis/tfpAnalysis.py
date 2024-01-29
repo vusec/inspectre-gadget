@@ -64,6 +64,11 @@ def analyse(t: TaintedFunctionPointer):
                 if s[0] == t.reg:
                     new_t.expr = s[1].expr
 
+            s = claripy.Solver(timeout=global_config["Z3Timeout"])
+            if not s.satisfiable(extra_constraints=[x[1] for x in new_t.constraints]):
+                # Skipping.. this combination of constraints is not satisfiable
+                continue
+
             tfps.append(new_t)
 
     # Analyse tfps

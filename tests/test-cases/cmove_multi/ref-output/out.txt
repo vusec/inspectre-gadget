@@ -1,0 +1,41 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <cmove_sample>:
+ 4000000:	48 8b 7a 18          	mov    rdi,QWORD PTR [rdx+0x18]
+ 4000004:	48 85 ff             	test   rdi,rdi
+ 4000007:	48 0f 44 fe          	cmove  rdi,rsi
+ 400000b:	48 85 c0             	test   rax,rax
+ 400000e:	48 0f 44 c3          	cmove  rax,rbx
+ 4000012:	8b 04 38             	mov    eax,DWORD PTR [rax+rdi*1]
+ 4000015:	e9 00 00 00 00       	jmp    400001a <cmove_sample+0x1a>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 2 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 rax + LOAD_64[<BV64 rdx + 0x18>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 rbx + LOAD_64[<BV64 rdx + 0x18>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 2 gadgets
+[-] Performing exploitability analysis...
+Found 2 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 2 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 2 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

@@ -13,7 +13,7 @@ from . import utils
 class TransmitterType(Enum):
     LOAD = 1,
     STORE = 2,
-    CALL = 3
+    CODE_LOAD = 3
 
 class ControlType(Enum):
     NO_CONTROL = 0,
@@ -39,15 +39,21 @@ class Requirements():
         self.const_mem = set()
 
     def __repr__(self) -> str:
-        return f"regs: {self.regs}, mem: {self.mem}, const_mem: {self.const_mem}, direct_regs: {self.direct_regs}, indirect_regs: {self.indirect_regs}"
+        d =  {'regs' : sorted([str(x) for x in self.regs]),
+            'indirect_regs' : sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs]),
+            'direct_regs' : sorted([str(x) for x in self.direct_regs]),
+            'mem' : sorted([str(x) for x in self.mem]),
+            'const_mem' : sorted([str(x) for x in self.const_mem]),
+        }
+        return str(d)
 
     def to_dict(self):
         return OrderedDict([
-            ('regs' , [str(x) for x in self.regs]),
-            ('indirect_regs' , [f"{str(x)}: {self.indirect_regs[x]}" for x in self.indirect_regs]),
-            ('direct_regs' , [str(x) for x in self.direct_regs]),
-            ('mem' , [str(x) for x in self.mem]),
-            ('const_mem' , [str(x) for x in self.const_mem]),
+            ('regs' , sorted([str(x) for x in self.regs])),
+            ('indirect_regs' , sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs])),
+            ('direct_regs' , sorted([str(x) for x in self.direct_regs])),
+            ('mem' , sorted([str(x) for x in self.mem])),
+            ('const_mem' , sorted([str(x) for x in self.const_mem])),
         ])
 
     def merge(self, other):
@@ -159,8 +165,8 @@ class TransmissionComponent():
             ('branches', [str(x) for x in self.branches]),
             ('constraints', [str(x) for x in self.constraints]),
             ('requirements', self.requirements.to_dict()),
-            ('range', ranges.AstRange(0,0,False).to_dict() if self.range == None else self.range.to_dict()),
-            ('range_w_branches', ranges.AstRange(0,0,False).to_dict() if self.range_with_branches == None else self.range_with_branches.to_dict()),
+            ('range', ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
+            ('range_w_branches', ranges.AstRange(0,0,0,False).to_dict() if self.range_with_branches == None else self.range_with_branches.to_dict()),
             ('control', str(self.control)),
             ('n_dependent_loads', str(self.max_load_depth))
         ]

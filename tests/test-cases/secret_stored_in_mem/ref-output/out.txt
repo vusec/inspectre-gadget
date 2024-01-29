@@ -1,0 +1,43 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <secret_stored_in_mem>:
+ 4000000:	44 8b 06             	mov    r8d,DWORD PTR [rsi]
+ 4000003:	48 c7 c2 00 00 00 82 	mov    rdx,0xffffffff82000000
+ 400000a:	4c 89 02             	mov    QWORD PTR [rdx],r8
+ 400000d:	4c 8b 12             	mov    r10,QWORD PTR [rdx]
+ 4000010:	49 81 e2 ff ff 00 00 	and    r10,0xffff
+ 4000017:	49 8b 8a 00 00 00 81 	mov    rcx,QWORD PTR [r10-0x7f000000]
+ 400001e:	4c 0f b7 1a          	movzx  r11,WORD PTR [rdx]
+ 4000022:	49 8b bb 00 00 00 81 	mov    rdi,QWORD PTR [r11-0x7f000000]
+ 4000029:	e9 00 00 00 00       	jmp    400002e <secret_stored_in_mem+0x2e>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 2 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_32[<BV64 rsi>]_20[15:0])>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_32[<BV64 rsi>]_20[15:0])>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 2 gadgets
+[-] Performing exploitability analysis...
+Found 2 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 2 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!
