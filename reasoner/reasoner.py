@@ -156,8 +156,16 @@ def is_max_secret_too_high(t : pd.Series, only_independent: bool = False):
         base_min = t[f'base_range{"" if not with_branches else "_w_branches"}_min']
         base_max = t[f'base_range{"" if not with_branches else "_w_branches"}_max']
 
-    secret_min = t[f'transmitted_secret_range{"" if not with_branches else "_w_branches"}_min']
-    secret_max = t[f'transmitted_secret_range{"" if not with_branches else "_w_branches"}_max']
+    #
+    # We don't use with_branches here because it does no make sense. Example
+    #    if secret < 10
+    #        transmit(secret)
+    #
+    # In this case either we follow the constraint, so we cannot leak secrets
+    # above 10, or we mispredict, and then we have the original secret max.
+    #
+    secret_min = t[f'transmitted_secret_range_min']
+    secret_max = t[f'transmitted_secret_range_max']
 
     # Get the transmitted secret maximum.
     if secret_min <= secret_max:
