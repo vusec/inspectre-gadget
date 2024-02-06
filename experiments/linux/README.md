@@ -72,7 +72,7 @@ We created a script for SQLITE3.
 mkdir lists
 cp input/linux-6.6-rc4/all_text_symbols_6.6-rc4-fineibt.txt lists/
 cp input/linux-6.6-rc4/all_text_symbols_6.6-rc4-default.txt lists/
-cp input/linux-6.6-rc4/reachable_functions.txt lists/
+cp input/linux-6.6-rc4/reachable_functions_6.6-rc4.txt lists/
 
 # Run the script to create a sqlite3 database and print some stats.
 scripts/run-queries.sh
