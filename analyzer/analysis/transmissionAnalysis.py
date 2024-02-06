@@ -112,13 +112,11 @@ def canonicalize(expr):
     Reduce an expression to a "canonical" form (sum of independent members).
     """
     # Guarantees:
-    # 1. all sums
-    # 2. distribution of * and / over +
+    # 1. no if-then-else statements
+    # 2. all sums
+    # 3. distribution of * and / over +
     l.info(f"CANONICALIZING: {expr}")
-    simplified = match_sign_ext(expr)
-    simplified = sign_ext_to_sum(simplified)
-    simplified = claripy.simplify(simplified)
-    splitted = split_if_statements(simplified)
+    splitted = split_conditions(expr, simplify=True)
 
     for s in splitted:
         s.expr = concat_to_shift(s.expr)
@@ -183,7 +181,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 t.transmission.expr = canonical_expr.expr
                 t.max_load_depth = get_load_depth(t.transmission.expr)
                 # Append CMOV conditions.
-                t.constraints.extend([(t.pc, x) for x in canonical_expr.conditions])
+                t.constraints.extend([(t.pc, x[0], x[1]) for x in canonical_expr.conditions])
                 # Append the dependency graph.
                 t.properties["deps"] = d
 

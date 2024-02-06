@@ -108,7 +108,7 @@ Transmission:
   - Range: {t.transmission.range}
 
 Register Requirements: {t.all_requirements.regs}
-Constraints: {[(hex(addr),cond) for addr,cond in t.constraints]}
+Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
 Branches: {t.branches}
 {'-'*48}
 """)
@@ -130,7 +130,7 @@ uuid: {t.uuid}
 Reg: {t.reg}
 Expr: {t.expr}
 
-Constraints: {[(hex(addr),cond) for addr,cond in t.constraints]}
+Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
 Branches: {t.branches}
 
 """)

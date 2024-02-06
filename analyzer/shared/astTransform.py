@@ -5,16 +5,45 @@ normalize their form and ease analysis.
 
 import claripy
 import itertools
+from enum import Enum
 
 from .utils import *
 from .logger import *
 
 thel = get_logger("AstTransform")
 
+class ConditionType(Enum):
+    """
+    Track which instruction is associated to a given condition.
+    """
+    CMOVE = 0,
+    SIGN_EXT = 1,
+    UNKNOWN = 2
 
+class SignExtAnnotation(claripy.Annotation):
+    @property
+    def eliminatable(self):
+        return False
+
+    @property
+    def relocatable(self):
+        return False
+
+def isSignExtAnnotated(ast: claripy.BV):
+    for a in ast.annotations:
+        if isinstance(a, SignExtAnnotation):
+            return True
+
+def getSignExtAnnotations(ast: claripy.BV):
+    annos = set()
+    for a in ast.annotations:
+        if isinstance(a, SignExtAnnotation):
+            annos.add(a)
+
+    return annos
 class ConditionalAst:
     """
-    Ast used to split conditional movs.
+    Ast with a set of constraints associated to it.
     """
     def __init__(self, expr, conds) -> None:
         self.expr = expr
@@ -39,6 +68,11 @@ def split_if_statements(ast: claripy.BV) -> list[ConditionalAst]:
     # associated to it.
     splitted_asts = []
     if ast.op == "If":
+        if isSignExtAnnotated(ast):
+            cond_type = ConditionType.SIGN_EXT
+        else:
+            cond_type = ConditionType.CMOVE
+
         cond_splitted = split_if_statements(ast.args[0])
         arg1_splitted = split_if_statements(ast.args[1])
         arg2_splitted = split_if_statements(ast.args[2])
@@ -48,7 +82,7 @@ def split_if_statements(ast: claripy.BV) -> list[ConditionalAst]:
                 new_conds = []
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
-                new_conds.append(c.expr)
+                new_conds.append((c.expr,cond_type))
                 splitted_asts.append(ConditionalAst(expr=remove_spurious_annotations(arg.expr), conds=new_conds))
 
         for arg in arg2_splitted:
@@ -56,7 +90,7 @@ def split_if_statements(ast: claripy.BV) -> list[ConditionalAst]:
                 new_conds = []
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
-                new_conds.append(claripy.Not(c.expr))
+                new_conds.append((claripy.Not(c.expr),cond_type))
                 splitted_asts.append(ConditionalAst(expr=remove_spurious_annotations(arg.expr), conds=new_conds))
 
         return splitted_asts
@@ -74,6 +108,7 @@ def split_if_statements(ast: claripy.BV) -> list[ConditionalAst]:
         splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
 
     return splitted_asts
+
 
 def remove_spurious_annotations(expr):
     annos = set()
@@ -116,6 +151,7 @@ def extract_summed_vals(ast: claripy.BV):
     # In any other case, do nothing.
     return [ast]
 
+
 def generate_addition(addenda):
     """
     Add together all the addenda in a single expression.
@@ -141,7 +177,7 @@ def sign_ext_to_sum(ast: claripy.BV,):
     if not isinstance(ast, claripy.ast.BV) or ast.concrete or is_sym_var(ast):
         return ast
 
-    # If this node is a concat, transform it into a shift.
+    # If this node is a signext, transform it.
     if ast.op == "SignExt":
         extend_size = ast.args[0]
         base = sign_ext_to_sum(ast.args[1])
@@ -151,6 +187,7 @@ def sign_ext_to_sum(ast: claripy.BV,):
         upper_expr = claripy.If(sign_bit == 0,
                                 claripy.BVV(0, base_size+extend_size),
                                 claripy.BVV((2**extend_size)-1, base_size+extend_size))
+        upper_expr = upper_expr.annotate(SignExtAnnotation())
 
         return base.zero_extend(extend_size) + (upper_expr << base_size)
 
@@ -206,6 +243,8 @@ def match_sign_ext(ast: claripy.BV):
                     new_args.append(claripy.If(sign_sym == 0,
                             claripy.BVV(0, sign_ext_size+1),
                             claripy.BVV((2**sign_ext_size+1)-1, sign_ext_size+1)))
+                    new_args = new_args.annotate(SignExtAnnotation())
+
                 sign_ext_size = 0
                 sign_sym = arg
 
@@ -219,3 +258,21 @@ def match_sign_ext(ast: claripy.BV):
         new_expr = new_expr.replace(arg, match_sign_ext(arg))
 
     return new_expr
+
+
+def split_conditions(expr: claripy.BV, simplify: bool) -> list[ConditionalAst]:
+    """
+    Split any AST that contains CMOVEs, SignExtensions and If-Then-Else
+    statements into separate ASTs with an associated condition.
+    """
+    # Turn SExt-like Concat expressions into if-then-else.
+    new_expr = match_sign_ext(expr)
+    # Turn SExt into an if-then-else sum.
+    new_expr = sign_ext_to_sum(new_expr)
+
+    # Optionally simplify the expression.
+    if simplify:
+        new_expr = claripy.simplify(new_expr)
+
+    # Split if-then-else statements into separate ConditionalASTs.
+    return split_if_statements(new_expr)

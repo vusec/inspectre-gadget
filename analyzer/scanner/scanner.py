@@ -220,9 +220,7 @@ class Scanner:
                 func_ptr_ast = subst
             else:
                 # Check if the symbolic address contains an if-then-else node.
-                func_ptr_ast = match_sign_ext(func_ptr_ast)
-                func_ptr_ast = sign_ext_to_sum(func_ptr_ast)
-                asts = split_if_statements(func_ptr_ast)
+                asts = split_conditions(func_ptr_ast, simplify=False)
                 assert(len(asts) >= 1)
 
                 l.info(f"  After transformations: {func_ptr_ast}")
@@ -289,8 +287,8 @@ class Scanner:
             self.n_subst += 1
             # Record the conditions of the new state.
             for constraint in a.conditions:
-                s.globals[f"constr_{self.n_constr}"] = (addr, constraint)
-                s.solver.add(constraint)
+                s.globals[f"constr_{self.n_constr}"] = (addr, constraint[0], constraint[1])
+                s.solver.add(constraint[0])
                 self.n_constr += 1
 
             l.info(f"Added state @{hex(s.addr)}  with condition {a.conditions}")
@@ -317,8 +315,8 @@ class Scanner:
                 self.n_subst += 1
                 # Record the conditions of the new state.
                 for constraint in a.conditions:
-                    s.globals[f"constr_{self.n_constr}"] = (addr, constraint)
-                    s.solver.add(constraint)
+                    s.globals[f"constr_{self.n_constr}"] = (addr, constraint[0], constraint[1])
+                    s.solver.add(constraint[0])
                     self.n_constr += 1
 
                 # Record the value substitution,
@@ -326,8 +324,8 @@ class Scanner:
                     s.globals[f"valuesubst_{self.n_subst}"] = (addr, v.expr)
                     self.n_subst += 1
                     for constraint in v.conditions:
-                        s.globals[f"constr_{self.n_constr}"] = (addr, constraint)
-                        s.solver.add(constraint)
+                        s.globals[f"constr_{self.n_constr}"] = (addr, constraint[0], constraint[1])
+                        s.solver.add(constraint[0])
                         self.n_constr += 1
 
                 l.info(f"Added state with condition addr:{a.conditions} val:{v.conditions}")
@@ -371,9 +369,7 @@ class Scanner:
             load_addr = subst
         else:
             # Check if the symbolic address contains an if-then-else node.
-            load_addr = match_sign_ext(load_addr)
-            load_addr = sign_ext_to_sum(load_addr)
-            asts = split_if_statements(load_addr)
+            asts = split_conditions(load_addr, simplify=False)
             assert(len(asts) >= 1)
 
             l.info(f"  After transformations: {load_addr}")
@@ -461,13 +457,8 @@ class Scanner:
 
         # Check if the address or value contains an if-then-else node.
         if not is_subst:
-            store_addr = match_sign_ext(store_addr)
-            store_addr = sign_ext_to_sum(store_addr)
-            addr_asts = split_if_statements(store_addr)
-
-            stored_value = match_sign_ext(stored_value)
-            stored_value = sign_ext_to_sum(stored_value)
-            value_asts = split_if_statements(stored_value)
+            addr_asts = split_conditions(store_addr, simplify=False)
+            value_asts = split_conditions(stored_value, simplify=False)
 
             l.warning(f" After ast transformation: [{store_addr}] = {stored_value}")
 

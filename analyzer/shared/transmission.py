@@ -150,7 +150,7 @@ class TransmissionComponent():
                 expr: {self.expr}
                 size: {self.size}
                 branches: {[(hex(addr),val) for addr, val in self.branches]}
-                constraints: {self.constraints}
+                constraints: {[(hex(addr), cond, str(ctype)) for addr, cond, ctype in self.constraints]}
                 requirements: {self.requirements}
                 range: {self.range}
                 range_with_branches: {self.range_with_branches}
@@ -163,7 +163,7 @@ class TransmissionComponent():
             ('expr', str(self.expr)),
             ('size', str(self.size)),
             ('branches', [str(x) for x in self.branches]),
-            ('constraints', [str(x) for x in self.constraints]),
+            ('constraints', [(hex(addr), cond, str(ctype)) for addr, cond, ctype in self.constraints]),
             ('requirements', self.requirements.to_dict()),
             ('range', ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
             ('range_w_branches', ranges.AstRange(0,0,0,False).to_dict() if self.range_with_branches == None else self.range_with_branches.to_dict()),
@@ -273,7 +273,7 @@ class Transmission():
         bbls: {[hex(x) for x in self.bbls]}
         branch requirements: {self.branch_requirements}
 
-        constraints: {[(hex(addr), cond) for addr, cond in self.constraints]}
+        constraints: {[(hex(addr), cond, str(ctype)) for addr, cond, ctype in self.constraints]}
         constraint requirements: {self.constraint_requirements}
 
         all requirements: {self.all_requirements}
@@ -321,7 +321,7 @@ class Transmission():
 
         d['branches'] = [{'addr':hex(addr), 'condition': str(cond), 'taken': str(taken)} for addr, cond, taken in self.branches]
         d['branch_requirements'] = self.branch_requirements
-        d['constraints'] = [[(hex(addr), cond) for addr, cond in self.constraints]]
+        d['constraints'] = [[(hex(addr), cond, str(ctype)) for addr, cond, ctype in self.constraints]]
         d['constraint_requirements'] = self.constraint_requirements
         d['all_requirements'] = self.all_requirements
         d['all_requirements_w_branches'] = self.all_requirements_w_branches
