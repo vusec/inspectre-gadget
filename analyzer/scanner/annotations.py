@@ -247,3 +247,9 @@ def get_dep_set(expr):
             depset.update(anno.dep_set)
 
     return depset
+
+def is_attacker_controlled(ast):
+    for anno in ast.annotations:
+        if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
+            return True
+    return False

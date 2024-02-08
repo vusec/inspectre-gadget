@@ -86,10 +86,7 @@ class Scanner:
         self.n_subst = 0
 
         self.states = []
-        self.discard = False
-
         self.bbs = {}
-
         self.cur_state = None
 
 
@@ -115,7 +112,6 @@ class Scanner:
         # TODO: this is a hack. If STL forwarding is disabled, stack variables
         # will not be loaded.
         if 'controlled_stack' in config:
-
             for region in config['controlled_stack']:
                 for offset in range(region['start'], region['end'], region['size']):
                     size = region['size']
@@ -139,14 +135,12 @@ class Scanner:
         for instruction in bb.capstone.insns:
             if instruction.mnemonic in global_config["SpeculationStopMnemonics"]:
                 return True
-
         return False
 
     def history_contains_speculation_stop(self, state):
         for bbl_addr in state.history.bbl_addrs:
             if self.bbs[bbl_addr]['speculation_stop']:
                 return True
-
         return False
 
     def count_instructions(self, state, instruction_addr):
@@ -167,52 +161,50 @@ class Scanner:
                 break
         return n_instr
 
+    def get_aliases(self, state):
+        aliases = []
+        for v in state.globals.keys():
+            if isinstance(state.globals[v], memory.MemoryAlias):
+                aliases.append(state.globals[v])
+        return aliases
 
+    def get_constraints(self, state):
+        constraints = []
+        for v in state.globals.keys():
+            if str(v).startswith("constr_"):
+                constraints.append(state.globals[v])
+        return constraints
+
+    def get_history(self, state):
+        return [(x, y, z) for x, y, z in zip(state.history.jump_sources,
+                                        state.history.jump_guards,
+                                        utils.branch_outcomes(state.history))]
+
+
+    #---------------- GADGET RECORDING ----------------------------
     def check_transmission(self, expr, op_type, state):
         """
         Loads and Stores that have at least a symbol marked as secret
         in their expression are saved as potential transmissions.
         """
         if contains_secret(expr):
-
-            # Retrieve aliases and CMOVE constraints found during symbolic
-            # execution.
-            aliases = []
-            constraints = []
-            for v in state.globals.keys():
-                if isinstance(state.globals[v], memory.MemoryAlias):
-                    aliases.append(state.globals[v])
-                if str(v).startswith("constr_"):
-                    constraints.append(state.globals[v])
-            l.error(f"Aliases: {aliases}")
-
-            # Count number of instructions.
-            n_instr = self.count_instructions(state, state.scratch.ins_addr)
-
-            # Check if we encountered a speculation stop
-            contains_spec_stop = self.history_contains_speculation_stop(state)
-
             # Create a new transmission object.
             self.transmissions.append(TransmissionExpr(state=state,
                                                        pc=state.scratch.ins_addr,
                                                        expr=expr,
                                                        transmitter=op_type,
-                                                       aliases=aliases,
-                                                       constraints=constraints,
-                                                       n_instr=n_instr,
-                                                       contains_spec_stop=contains_spec_stop))
+                                                       aliases=self.get_aliases(state),
+                                                       constraints=self.get_constraints(state),
+                                                       n_instr=self.count_instructions(state, state.scratch.ins_addr),
+                                                       contains_spec_stop=self.history_contains_speculation_stop(state)
+                                                       ))
 
     def check_tfp(self, state, func_ptr_reg, func_ptr_ast):
-        is_tainted = False
-
-        annotations = func_ptr_ast.annotations
-        for anno in annotations:
-            if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
-                is_tainted = True
-                break
-
-        if is_tainted:
-
+        """
+        Indirect calls that are attacker-controlled are saved
+        as tainted function pointers (a.k.a Dispatch Gadgets).
+        """
+        if is_attacker_controlled(func_ptr_ast):
             # Check if there is a substitution to be made for this address.
             # This can happen if the state comes from a manual splitting.
             subst = getSubstitution(state, state.scratch.ins_addr)
@@ -229,41 +221,20 @@ class Scanner:
                     self.split_state(self.cur_state, asts, state.scratch.ins_addr)
                     # TODO: Is there a way to exit from `step()` instead of marking
                     #       the state as discard?
-                    self.discard = True
                     raise SplitException
 
-            # Gather constraints and aliases from globals.
-            aliases = []
-            constraints = []
-            for v in state.globals.keys():
-                if isinstance(state.globals[v], memory.MemoryAlias):
-                    aliases.append(state.globals[v])
-                if str(v).startswith("constr_"):
-                    constraints.append(state.globals[v])
-            l.error(f"Aliases: {aliases}")
-
-            # Save history.
-            history = [(x, y, z) for x, y, z in zip(state.history.jump_sources,
-                                            state.history.jump_guards,
-                                            utils.branch_outcomes(state.history))]
-            bbls = [x for x in state.history.bbl_addrs]
-
-            # Get number of executed instructions.
-            n_instr = self.count_instructions(state, state.scratch.ins_addr)
-
-            # Check if we encountered a speculation stop
-            contains_spec_stop = self.history_contains_speculation_stop(state)
-
+            # Create a new TFP object.
             tfp = TaintedFunctionPointer(pc=state.scratch.ins_addr,
                                             expr=func_ptr_ast,
                                             reg=func_ptr_reg,
-                                            bbls=bbls,
-                                            branches=history,
-                                            aliases=aliases,
-                                            constraints=constraints,
-                                            n_instr=n_instr,
-                                            contains_spec_stop=contains_spec_stop,
-                                            n_dependent_loads=get_load_depth(func_ptr_ast))
+                                            bbls=[x for x in state.history.bbl_addrs],
+                                            branches=self.get_history(state),
+                                            aliases=self.get_aliases(state),
+                                            constraints=self.get_constraints(state),
+                                            n_instr=self.count_instructions(state, state.scratch.ins_addr),
+                                            contains_spec_stop=self.history_contains_speculation_stop(state),
+                                            n_dependent_loads=get_load_depth(func_ptr_ast)
+                                            )
 
             for reg in get_x86_registers():
                 reg_ast = getattr(state.regs, reg)
@@ -271,6 +242,8 @@ class Scanner:
 
             self.calls.append(tfp)
 
+
+    #---------------- STATE SPLITTING ----------------------------
     def split_state(self, state, asts, addr):
         """
         Manually split the state in two sub-states with different conditions.
@@ -333,29 +306,45 @@ class Scanner:
                     self.states.append(s)
 
 
+    #---------------- EXPRESSIONS HANDLING ----------------------------
+    def expr_hook_after(self, state: angr.SimState):
+        """
+        Reduce any expression equivalent to a SignExtension into an If-Then-Else statement,
+        and keep track of the original expression through an annotation.
+        This enables the scanner to split the state any time one of such expressions
+        is used in a Load/Store/Branch instructions.
+
+        Note that SignExt and CMove-like instructions should be treated different.
+        That is why we have a different annotation for each case.
+        """
+        if state.inspect.expr_result.op == "Concat":
+            state.inspect.expr_result = match_sign_ext(state.inspect.expr_result, state.scratch.ins_addr)
+
+        elif state.inspect.expr_result.op == "SignExt":
+            state.inspect.expr_result = sign_ext_to_sum(state.inspect.expr_result, state.scratch.ins_addr)
+
+        elif state.inspect.expr_result.op == "If":
+            # We assume any expression that is directly translated as an if-then-else statement is
+            # a CMOVE-like instruction.
+            if getCmoveAnnotation(state.inspect.expr_result) == None and getSignExtAnnotation(state.inspect.expr_result) == None:
+                state.inspect.expr_result = state.inspect.expr_result.annotate(CmoveAnnotation(state.scratch.ins_addr))
+
+    #---------------- LOADS ----------------------------
     def load_hook_before(self, state: angr.SimState):
         """
         Constrain the address of symbolic loads.
         """
-        if self.discard:
-            return
-
         if state.inspect.mem_read_address.symbolic:
             # TODO: Consider only valid addresses?
             # Rule out stupid edge-cases to avoid confusing the solver.
             state.solver.add(state.inspect.mem_read_address > 0x8,
                              state.inspect.mem_read_address < 0xffffffffffffffff-8)
 
-
     def load_hook_after(self, state: angr.SimState):
         """
         Create a new symbolic variable for every load, and annotate it with
         the appropriate label.
         """
-        # Is this state being discarded?
-        if self.discard:
-            return
-
         load_addr = state.inspect.mem_read_address
         load_len = state.inspect.mem_read_length
         l.info(f"Load@{hex(state.addr)}: {load_addr}")
@@ -378,10 +367,9 @@ class Scanner:
                 self.split_state(state, asts, state.addr)
                 # TODO: Is there a way to exit from `step()` instead of marking
                 #       the state as discard?
-                self.discard = True
                 raise SplitException
 
-        # Check for aliasing stores.
+        # Check if we should forward an existing value (STL) or create a new symbol.
         alias_store, stored_val = memory.get_aliasing_store(load_addr, load_len, state)
         if alias_store:
             # Perform Store-to-Load forwarding.
@@ -422,12 +410,12 @@ class Scanner:
         self.check_transmission(load_addr, TransmitterType.LOAD, state)
 
 
+    #---------------- STORES ----------------------------
     def store_hook_before(self, state: angr.SimState):
         """
         Record a store (for STL forwarding) and skip its side-effects.
         """
-        # Is this state being discarded?
-        if self.discard or not global_config["STLForwarding"]:
+        if not global_config["STLForwarding"]:
             # Don't execute the store architecturally.
             state.inspect.mem_write_length = 0
             return
@@ -464,7 +452,6 @@ class Scanner:
 
             if len(addr_asts) > 1 or len(value_asts) > 1:
                 self.split_state_store(self.cur_state, addr_asts, value_asts, state.addr)
-                self.discard = True
                 raise SplitException
 
 
@@ -483,11 +470,12 @@ class Scanner:
         # Is this store a transmission?
         self.check_transmission(store_addr, TransmitterType.STORE, state)
 
+
+    #---------------- INDIRECT CALLS ----------------------------
     def exit_hook_before(self, state : angr.SimState):
-
-        if self.discard:
-            return
-
+        """
+        Hook on indirect calls, for Tainted Function Pointers.
+        """
         l.info("Exit hook")
         func_ptr_ast = state.inspect.exit_target
 
@@ -495,15 +483,12 @@ class Scanner:
         if func_ptr_ast.symbolic:
             # Whenever the target is symbolic, and it is not a return, we
             # know we are performing an indirect call.
-
             block = state.block()
-
             if block.vex.jumpkind == 'Ijk_Ret':
                 return
 
             # get the register
             instruction = block.capstone.insns[-1].insn
-
             regs_read, regs_write = instruction.regs_access()
 
             # exclude all written registers; RSP in case of a call instruction
@@ -516,49 +501,25 @@ class Scanner:
 
             # process the TFP
             self.check_tfp(state, func_ptr_reg, func_ptr_ast)
-
             # check if it is also a transmission
             self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
 
-            self.discard = 1
+            # Stop exploration here
+            raise SplitException
 
         # Second case: jump to indirect thunk
         elif state.inspect.exit_target.args[0] in self.thunk_list:
             exit_target = state.inspect.exit_target.args[0]
-
             func_ptr_reg = self.thunk_list[exit_target]
-
             func_ptr_ast = getattr(state.regs, func_ptr_reg)
 
             # process the TFP
             self.check_tfp(state, func_ptr_reg, func_ptr_ast)
-
             # check if it is also a transmission
             self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
 
-            self.discard = 1
-
-    def expr_hook_after(self, state: angr.SimState):
-        """
-        Reduce any expression equivalent to a SignExtension into an If-Then-Else statement,
-        and keep track of the original expression through an annotation.
-        This enables the scanner to split the state any time one of such expressions
-        is used in a Load/Store/Branch instructions.
-
-        Note that SignExt and CMove-like instructions should be treated different.
-        That is why we have a different annotation for each case.
-        """
-        if state.inspect.expr_result.op == "Concat":
-            state.inspect.expr_result = match_sign_ext(state.inspect.expr_result, state.scratch.ins_addr)
-
-        elif state.inspect.expr_result.op == "SignExt":
-            state.inspect.expr_result = sign_ext_to_sum(state.inspect.expr_result, state.scratch.ins_addr)
-
-        elif state.inspect.expr_result.op == "If":
-            # We assume any expression that is directly translated as an if-then-else statement is
-            # a CMOVE-like instruction.
-            if getCmoveAnnotation(state.inspect.expr_result) == None and getSignExtAnnotation(state.inspect.expr_result) == None:
-                state.inspect.expr_result = state.inspect.expr_result.annotate(CmoveAnnotation(state.scratch.ins_addr))
+            # Stop exploration here
+            raise SplitException
 
 
     def run(self, proj: angr.Project, start_address, config) -> list[TransmissionExpr]:
@@ -609,8 +570,7 @@ class Scanner:
                 continue
 
             # Analyze this BB.
-            self.discard = False
-
+            discarded = False
             try:
                 if self.cur_state.addr not in self.bbs:
                     cur_block = self.cur_state.block()
@@ -619,6 +579,7 @@ class Scanner:
                 next_states = self.cur_state.step()
             except SplitException as e:
                 l.error(str(e))
+                discarded = True
                 continue
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
@@ -645,10 +606,8 @@ class Scanner:
                 continue
 
             # Add successors to the visit stack.
-            if not self.discard:
+            if not discarded:
                 self.states.extend(next_states)
-            else:
-                l.error("Discarded")
 
         # Print all loads.
         from tabulate import tabulate
