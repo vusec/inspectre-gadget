@@ -107,7 +107,7 @@ def distribute_shifts(ast: claripy.BV):
     return new_expr
 
 
-def canonicalize(expr):
+def canonicalize(expr, addr):
     """
     Reduce an expression to a "canonical" form (sum of independent members).
     """
@@ -116,7 +116,7 @@ def canonicalize(expr):
     # 2. all sums
     # 3. distribution of * and / over +
     l.info(f"CANONICALIZING: {expr}")
-    splitted = split_conditions(expr, simplify=True)
+    splitted = split_conditions(expr, simplify=True, addr=addr)
 
     for s in splitted:
         s.expr = concat_to_shift(s.expr)
@@ -147,7 +147,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
     l.warning(f"Analyzing: {potential_t.expr}")
 
     # Extract members of the transmission.
-    canonical_exprs = canonicalize(potential_t.expr)
+    canonical_exprs = canonicalize(potential_t.expr, potential_t.pc)
 
     transmissions = []
     for canonical_expr in canonical_exprs:
@@ -181,7 +181,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 t.transmission.expr = canonical_expr.expr
                 t.max_load_depth = get_load_depth(t.transmission.expr)
                 # Append CMOV conditions.
-                t.constraints.extend([(t.pc, x[0], x[1]) for x in canonical_expr.conditions])
+                t.constraints.extend(canonical_expr.conditions)
                 # Append the dependency graph.
                 t.properties["deps"] = d
 

@@ -220,7 +220,7 @@ class Scanner:
                 func_ptr_ast = subst
             else:
                 # Check if the symbolic address contains an if-then-else node.
-                asts = split_conditions(func_ptr_ast, simplify=False)
+                asts = split_conditions(func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
                 assert(len(asts) >= 1)
 
                 l.info(f"  After transformations: {func_ptr_ast}")
@@ -278,7 +278,7 @@ class Scanner:
         skipped after splitting, since the split is done at the BB level.
         """
         for a in asts:
-            a.expr = remove_spurious_annotations(a.expr)
+            a.expr = dedup_annotations(a.expr)
             # Create a new state.
             s = state.copy()
 
@@ -287,14 +287,13 @@ class Scanner:
             self.n_subst += 1
             # Record the conditions of the new state.
             for constraint in a.conditions:
-                s.globals[f"constr_{self.n_constr}"] = (addr, constraint[0], constraint[1])
-                s.solver.add(constraint[0])
+                s.globals[f"constr_{self.n_constr}"] = constraint
+                s.solver.add(constraint[1])
                 self.n_constr += 1
-
-            l.info(f"Added state @{hex(s.addr)}  with condition {a.conditions}")
 
             # TODO: Satisfiability check can be expensive, can we do better with ast substitutions?
             if s.solver.satisfiable():
+                l.info(f"Added state @{hex(s.addr)}  with condition {[(hex(addr), cond, str(ctype)) for addr, cond, ctype in a.conditions]}")
                 self.states.append(s)
 
 
@@ -304,7 +303,7 @@ class Scanner:
         address contains an if-then-else statement.
         """
         for a in addr_asts:
-            a.expr = remove_spurious_annotations(a.expr)
+            a.expr = dedup_annotations(a.expr)
 
             for v in value_asts:
                 # Create a new state.
@@ -315,8 +314,8 @@ class Scanner:
                 self.n_subst += 1
                 # Record the conditions of the new state.
                 for constraint in a.conditions:
-                    s.globals[f"constr_{self.n_constr}"] = (addr, constraint[0], constraint[1])
-                    s.solver.add(constraint[0])
+                    s.globals[f"constr_{self.n_constr}"] = constraint
+                    s.solver.add(constraint[1])
                     self.n_constr += 1
 
                 # Record the value substitution,
@@ -324,13 +323,13 @@ class Scanner:
                     s.globals[f"valuesubst_{self.n_subst}"] = (addr, v.expr)
                     self.n_subst += 1
                     for constraint in v.conditions:
-                        s.globals[f"constr_{self.n_constr}"] = (addr, constraint[0], constraint[1])
-                        s.solver.add(constraint[0])
+                        s.globals[f"constr_{self.n_constr}"] = constraint
+                        s.solver.add(constraint[1])
                         self.n_constr += 1
 
-                l.info(f"Added state with condition addr:{a.conditions} val:{v.conditions}")
                 # TODO: Satisfiability check can be expensive, can we do better with ast substitutions?
                 if s.solver.satisfiable():
+                    l.info(f"Added state with condition addr:{a.conditions} val:{v.conditions}")
                     self.states.append(s)
 
 
@@ -367,15 +366,16 @@ class Scanner:
         subst = getSubstitution(state, state.addr)
         if subst != None:
             load_addr = subst
+            l.info(f" Applied substitution! {load_addr}")
         else:
             # Check if the symbolic address contains an if-then-else node.
-            asts = split_conditions(load_addr, simplify=False)
+            asts = split_conditions(load_addr, simplify=False, addr=state.addr)
             assert(len(asts) >= 1)
 
             l.info(f"  After transformations: {load_addr}")
 
             if len(asts) > 1:
-                self.split_state(self.cur_state, asts, state.addr)
+                self.split_state(state, asts, state.addr)
                 # TODO: Is there a way to exit from `step()` instead of marking
                 #       the state as discard?
                 self.discard = True
@@ -457,8 +457,8 @@ class Scanner:
 
         # Check if the address or value contains an if-then-else node.
         if not is_subst:
-            addr_asts = split_conditions(store_addr, simplify=False)
-            value_asts = split_conditions(stored_value, simplify=False)
+            addr_asts = split_conditions(store_addr, simplify=False, addr=state.addr)
+            value_asts = split_conditions(stored_value, simplify=False, addr=state.addr)
 
             l.warning(f" After ast transformation: [{store_addr}] = {stored_value}")
 
@@ -538,6 +538,29 @@ class Scanner:
 
             self.discard = 1
 
+    def expr_hook_after(self, state: angr.SimState):
+        """
+        Reduce any expression equivalent to a SignExtension into an If-Then-Else statement,
+        and keep track of the original expression through an annotation.
+        This enables the scanner to split the state any time one of such expressions
+        is used in a Load/Store/Branch instructions.
+
+        Note that SignExt and CMove-like instructions should be treated different.
+        That is why we have a different annotation for each case.
+        """
+        if state.inspect.expr_result.op == "Concat":
+            state.inspect.expr_result = match_sign_ext(state.inspect.expr_result, state.scratch.ins_addr)
+
+        elif state.inspect.expr_result.op == "SignExt":
+            state.inspect.expr_result = sign_ext_to_sum(state.inspect.expr_result, state.scratch.ins_addr)
+
+        elif state.inspect.expr_result.op == "If":
+            # We assume any expression that is directly translated as an if-then-else statement is
+            # a CMOVE-like instruction.
+            if getCmoveAnnotation(state.inspect.expr_result) == None and getSignExtAnnotation(state.inspect.expr_result) == None:
+                state.inspect.expr_result = state.inspect.expr_result.annotate(CmoveAnnotation(state.scratch.ins_addr))
+
+
     def run(self, proj: angr.Project, start_address, config) -> list[TransmissionExpr]:
         """
         Run the symbolic execution engine for a given number of basic blocks.
@@ -569,6 +592,7 @@ class Scanner:
         state.inspect.b('mem_write', when=angr.BP_BEFORE, action=self.store_hook_before)
         state.inspect.b('exit', when=angr.BP_BEFORE, action=self.exit_hook_before)
         state.inspect.b('address_concretization', when=angr.BP_AFTER, action=skip_concretization)
+        state.inspect.b('expr', when=angr.BP_AFTER, action=self.expr_hook_after)
 
         self.initialize_regs_and_stack(state, config)
         self.thunk_list = get_x86_indirect_thunks(proj)

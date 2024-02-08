@@ -42,7 +42,7 @@ def analyse(t: TaintedFunctionPointer):
     needs_substitutions = False
     # Handle if-then-else statements in register expressions.
     for r in t.registers:
-        asts = split_conditions(t.registers[r].expr, simplify=False)
+        asts = split_conditions(t.registers[r].expr, simplify=False, addr=t.address)
         assert(len(asts) >= 1)
         if len(asts) > 1:
             needs_substitutions = True
@@ -57,8 +57,8 @@ def analyse(t: TaintedFunctionPointer):
             new_t = t.copy()
             for s in subst:
                 new_t.registers[s[0]].expr = s[1].expr
-                new_t.registers[s[0]].constraints.extend([(t.address, x[0], x[1]) for x in s[1].conditions])
-                new_t.constraints.extend([(t.address, x[0], x[1]) for x in s[1].conditions])
+                new_t.registers[s[0]].constraints.extend(s[1].conditions)
+                new_t.constraints.extend(s[1].conditions)
                 if s[0] == t.reg:
                     new_t.expr = s[1].expr
 
