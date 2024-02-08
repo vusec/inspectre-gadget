@@ -267,6 +267,7 @@ class Scanner:
             # TODO: Satisfiability check can be expensive, can we do better with ast substitutions?
             if s.solver.satisfiable():
                 l.info(f"Added state @{hex(s.addr)}  with condition {[(hex(addr), cond, str(ctype)) for addr, cond, ctype in a.conditions]}")
+                s.regs.pc = addr
                 self.states.append(s)
 
 
@@ -303,6 +304,7 @@ class Scanner:
                 # TODO: Satisfiability check can be expensive, can we do better with ast substitutions?
                 if s.solver.satisfiable():
                     l.info(f"Added state with condition addr:{a.conditions} val:{v.conditions}")
+                    s.regs.pc = addr
                     self.states.append(s)
 
 
