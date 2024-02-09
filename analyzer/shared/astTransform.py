@@ -6,11 +6,12 @@ normalize their form and ease analysis.
 import claripy
 import itertools
 from enum import Enum
+from itertools import chain
 
 from .utils import *
 from .logger import *
 
-thel = get_logger("AstTransform")
+l = get_logger("AstTransform")
 
 class ConditionType(Enum):
     """
@@ -332,7 +333,49 @@ def split_conditions(expr: claripy.BV, simplify: bool, addr) -> list[Conditional
 
     # Optionally simplify the expression.
     if simplify:
-        new_expr = claripy.simplify(new_expr)
+        new_expr = simplify_conservative(new_expr)
+        claripy.simplify
 
     # Split if-then-else statements into separate ConditionalASTs.
     return split_if_statements(new_expr, addr)
+
+
+def simplify_conservative(e: claripy.T) -> claripy.T:
+    """
+    Simplify the expression and, in contrast to claripy.simplify, discard
+    annotations from the expression that are simplified away.
+
+    For example, assume <BV64 attacker + ( 0x0 & secret)>, it will be
+    simplified to <BV64 attacker > with only the attacker annotation attached
+    to it. Claripy would keep both attacker and the secret annotation.
+    """
+
+    # Code below is copied from claripy/ast/base.py
+
+    if isinstance(e, claripy.ast.Base) and e.op in claripy.operations.leaf_operations:
+        return e
+
+    s = e._first_backend("simplify")
+    if s is None:
+        return e
+    else:
+        # Copy some parameters (that should really go to the Annotation backend)
+        s._uninitialized = e.uninitialized
+        s._uc_alloc_depth = e._uc_alloc_depth
+        s._simplified = claripy.ast.Base.FULL_SIMPLIFY
+
+        # dealing with annotations
+        if e.annotations:
+            ast_args = tuple(a for a in e.args if isinstance(a, claripy.ast.Base))
+            annotations = tuple(
+                set(chain(chain.from_iterable(a._relocatable_annotations for a in ast_args), tuple(a for a in e.annotations)))
+            )
+            if annotations != s.annotations:
+                l.warning(f"SafeSimplify: Experimental feature executed, annotations removed by simplification operation. Old: {e} {annotations} New: {s} {s.annotations} ")
+
+                # Claripy does instead:
+                # s = s.remove_annotations(s.annotations)
+                # s = s.annotate(*annotations)
+
+        return s
+
