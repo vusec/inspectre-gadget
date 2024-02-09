@@ -64,7 +64,7 @@ if [ -f gadgets.csv ]; then
     do
         [ -e "$sql" ] || continue
         echo $sql >> ${OUT_FOLDER}/scanner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets.csv gadgets" -cmd '.mode table' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets.csv gadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
         echo "" >> ${OUT_FOLDER}/scanner_data.txt
     done
 fi
@@ -75,7 +75,7 @@ if [ -f gadgets-reasoned.csv ]; then
     do
         [ -e "$sql" ] || continue
         echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets-reasoned.csv gadgets" -cmd '.mode table' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets-reasoned.csv gadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
         echo "" >> ${OUT_FOLDER}/reasoner_data.txt
     done
 
@@ -84,7 +84,7 @@ if [ -f gadgets-reasoned.csv ]; then
     do
         [ -e "$sql" ] || continue
         echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets-reasoned.csv gadgets" -cmd '.mode table' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets-reasoned.csv gadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
         echo "" >> ${OUT_FOLDER}/reasoner_data.txt
     done
 fi
@@ -98,7 +98,7 @@ if [ -f tfp.csv ]; then
     do
         [ -e "$sql" ] || continue
         echo $sql >> ${OUT_FOLDER}/scanner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp.csv tfps" -cmd '.mode table' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
         echo "" >> ${OUT_FOLDER}/scanner_data.txt
     done
 fi

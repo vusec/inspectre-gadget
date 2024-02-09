@@ -1,0 +1,72 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <cmove_sample>:
+ 4000000:	8b 7a 18             	mov    edi,DWORD PTR [rdx+0x18]
+ 4000003:	48 63 ff             	movsxd rdi,edi
+ 4000006:	48 89 fb             	mov    rbx,rdi
+ 4000009:	48 85 ff             	test   rdi,rdi
+ 400000c:	48 0f 44 fe          	cmove  rdi,rsi
+ 4000010:	8b 07                	mov    eax,DWORD PTR [rdi]
+ 4000012:	8b 4b 20             	mov    ecx,DWORD PTR [rbx+0x20]
+ 4000015:	e9 00 00 00 00       	jmp    400001a <cmove_sample+0x1a>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 12 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 12 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x20 + (0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_21))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x20 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_21)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x20 + (0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_29))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x20 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_29)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x20 + (0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_37))>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x20 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_37)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 12 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!
