@@ -176,9 +176,19 @@ class Scanner:
         return constraints
 
     def get_history(self, state):
-        return [(x, y, z) for x, y, z in zip(state.history.jump_sources,
-                                        state.history.jump_guards,
-                                        utils.branch_outcomes(state.history))]
+        branches = []
+
+        for cond, source, target in zip(state.history.jump_guards, state.history.jump_sources, state.history.jump_targets):
+            # Check if the condition contains an if-then-else statement,
+            # and substitute it with the appropriate choice for this state.
+            subst = getSubstitution(state, source)
+            if subst != None:
+                cond = subst
+
+            outcome = get_outcome(cond, source, target)
+            branches.append((source, cond, outcome))
+
+        return branches
 
 
     #---------------- GADGET RECORDING ----------------------------
@@ -243,19 +253,22 @@ class Scanner:
 
 
     #---------------- STATE SPLITTING ----------------------------
-    def split_state(self, state, asts, addr):
+    def split_state(self, state, asts, addr, subst_addr=None):
         """
         Manually split the state in two sub-states with different conditions.
         Needed e.g. for CMOVEs and SExt. Note that the current state should be
         skipped after splitting, since the split is done at the BB level.
         """
+        if subst_addr == None:
+            subst_addr = addr
+
         for a in asts:
             a.expr = dedup_annotations(a.expr)
             # Create a new state.
             s = state.copy()
 
             # Record a substitution to be made at this address in the new state.
-            s.globals[f"subst_{self.n_subst}"] = (addr, a.expr)
+            s.globals[f"subst_{self.n_subst}"] = (subst_addr, a.expr)
             self.n_subst += 1
             # Record the conditions of the new state.
             for constraint in a.conditions:
@@ -268,7 +281,6 @@ class Scanner:
                 l.info(f"Added state @{hex(s.addr)}  with condition {[(hex(addr), cond, str(ctype)) for addr, cond, ctype in a.conditions]}")
                 s.regs.pc = addr
                 self.states.append(s)
-
 
     def split_state_store(self, state, addr_asts, value_asts, addr):
         """
@@ -557,6 +569,7 @@ class Scanner:
         # Run the symbolic execution engine.
         self.states = [state]
         while len(self.states) > 0:
+            # Pick the next state.
             self.cur_state = self.states.pop()
             l.info(f"Visiting {hex(self.cur_state.addr)}")
 
@@ -565,17 +578,19 @@ class Scanner:
                 l.error(f"Trimmed. History: {[x for x in self.cur_state.history.jump_guards]}")
                 continue
 
-            # Analyze this BB.
-            discarded = False
+            # Analyze this state.
             try:
+                # Disassemble if we're visiting a new BB.
                 if self.cur_state.addr not in self.bbs:
                     cur_block = self.cur_state.block()
                     self.bbs[self.cur_state.addr] = {"block" : cur_block,
                         "speculation_stop" : self.block_contains_speculation_stop(cur_block)}
+                # "Execute" the state (triggers the hooks we installed).
                 next_states = self.cur_state.step()
+
             except SplitException as e:
+                # The state has been manually splitted: don't explore it further.
                 l.error(str(e))
-                discarded = True
                 continue
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
@@ -601,9 +616,16 @@ class Scanner:
                 report_error(e, hex(self.cur_state.addr), hex(start_address), error_type="SCANNER")
                 continue
 
-            # Add successors to the visit stack.
-            if not discarded:
-                self.states.extend(next_states)
+            # If we reached this point, the analysis of the BB has completed.
+            for ns in next_states:
+                # Check if the last branch condition contains an if-then-else statement.
+                asts = split_conditions(ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
+                if len(asts) > 1:
+                    # If this is the case, we need to further split the successors.
+                    self.split_state(ns, asts, ns.addr, subst_addr=ns.history.jump_sources[-1])
+                else:
+                    # If there's no splitting, just add the successor as-is.
+                    self.states.append(ns)
 
         # Print all loads.
         from tabulate import tabulate
