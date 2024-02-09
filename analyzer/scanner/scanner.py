@@ -84,6 +84,7 @@ class Scanner:
         self.n_alias = 0
         self.n_constr = 0
         self.n_subst = 0
+        self.n_hist = 0
 
         self.states = []
         self.bbs = {}
@@ -138,7 +139,7 @@ class Scanner:
         return False
 
     def history_contains_speculation_stop(self, state):
-        for bbl_addr in state.history.bbl_addrs:
+        for bbl_addr in self.get_bbls(state):
             if self.bbs[bbl_addr]['speculation_stop']:
                 return True
         return False
@@ -146,7 +147,7 @@ class Scanner:
     def count_instructions(self, state, instruction_addr):
         n_instr = 0
 
-        for bbl_addr in state.history.bbl_addrs:
+        for bbl_addr in self.get_bbls(state):
             n_instr += self.bbs[bbl_addr]['block'].instructions
             last_bbs_addr = bbl_addr
 
@@ -190,6 +191,14 @@ class Scanner:
 
         return branches
 
+    def get_bbls(self, state):
+        hist = []
+        for f in state.globals.keys():
+            if str(f).startswith('hist_'):
+                hist.append(state.globals[f])
+
+        return hist
+
 
     #---------------- GADGET RECORDING ----------------------------
     def check_transmission(self, expr, op_type, state):
@@ -202,7 +211,7 @@ class Scanner:
             self.transmissions.append(TransmissionExpr(pc=state.scratch.ins_addr,
                                                        expr=expr,
                                                        transmitter=op_type,
-                                                       bbls=utils.get_bbls(state),
+                                                       bbls=self.get_bbls(state),
                                                        branches=self.get_history(state),
                                                        aliases=self.get_aliases(state),
                                                        constraints=self.get_constraints(state),
@@ -236,7 +245,7 @@ class Scanner:
             tfp = TaintedFunctionPointer(pc=state.scratch.ins_addr,
                                             expr=func_ptr_ast,
                                             reg=func_ptr_reg,
-                                            bbls=utils.get_bbls(state),
+                                            bbls=self.get_bbls(state),
                                             branches=self.get_history(state),
                                             aliases=self.get_aliases(state),
                                             constraints=self.get_constraints(state),
@@ -567,6 +576,7 @@ class Scanner:
         self.thunk_list = get_x86_indirect_thunks(proj)
 
         # Run the symbolic execution engine.
+        state.globals['hist_0'] = state.addr
         self.states = [state]
         while len(self.states) > 0:
             # Pick the next state.
@@ -618,6 +628,9 @@ class Scanner:
 
             # If we reached this point, the analysis of the BB has completed.
             for ns in next_states:
+                self.n_hist += 1
+                ns.globals[f'hist_{self.n_hist}'] = ns.addr
+
                 # Check if the last branch condition contains an if-then-else statement.
                 asts = split_conditions(ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
                 if len(asts) > 1:

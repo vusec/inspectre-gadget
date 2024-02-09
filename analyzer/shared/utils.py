@@ -95,11 +95,6 @@ def branch_outcomes(history):
 
     return outcomes
 
-def get_bbls(state):
-    bbls = [[x for x in state.history.bbl_addrs][0]]
-    bbls.extend([x.concrete_value for x in state.history.jump_targets])
-    return bbls
-
 def ordered_branches(obj):
     obj.branches = sorted(obj.branches, key=lambda x: x[0])
     return [(hex(addr), cond, taken) for addr, cond, taken in obj.branches]
