@@ -331,7 +331,20 @@ def can_ignore_direct_dependency(t : pd.Series, slam=False):
         if slam:
             # With slam we don't adjust the base to compensate
             # for the secret
-            return not is_secret_below_cache_granularity(t)
+
+            if is_secret_below_cache_granularity(t):
+                return False
+
+            secret_range_exact = t[f'transmitted_secret_range_exact']
+            secret_window = t[f'transmitted_secret_range_window']
+
+            # We need a full secret range in order to overflow the kernel
+            # base address to get an user address
+            if secret_range_exact != True or secret_window != ((2 ** 64) - 1):
+                return False
+
+            return True
+
         else:
             return not (is_secret_below_cache_granularity(t) or is_max_secret_too_high(t, only_independent=True))
 
@@ -384,13 +397,21 @@ def slam_is_an_user_address_translation(t : pd.Series):
     base_controllable_window = t[f'independent_base_range_window']
 
 
-    if secret_window < 2 ** 32 and base_controllable_window < 2 ** 63:
+    if (secret_window <= 2 ** 32)  and base_controllable_window < 2 ** 63:
         # If the secret is smaller than 32 bits then bits 47 and 63 are
         # probably one (kernel address) which will fail SLAM.
         # (e.g., [0xffffffff81000000 + eax])
         # if we control the base almost complexly, we do not have to worry
         return False
 
+    n_inferable_bits = t['inferable_bits_n_inferable_bits']
+    secret_stride = t[f'transmitted_secret_range_stride']
+
+    if (n_inferable_bits + (secret_stride - 1) <= 32) and base_controllable_window < 2 ** 63:
+        # We do the same check as above, but now with the inferable bits
+        # information to catch the 'complex' range cases (base expr
+        # is included in transmitted secret expr)
+        return False
 
     return True
 
