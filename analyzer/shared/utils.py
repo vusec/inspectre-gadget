@@ -99,3 +99,11 @@ def get_bbls(state):
     bbls = [[x for x in state.history.bbl_addrs][0]]
     bbls.extend([x.concrete_value for x in state.history.jump_targets])
     return bbls
+
+def ordered_branches(obj):
+    obj.branches = sorted(obj.branches, key=lambda x: x[0])
+    return [(hex(addr), cond, taken) for addr, cond, taken in obj.branches]
+
+def ordered_constraints(obj):
+    obj.constraints = sorted(obj.constraints, key=lambda x: x[0])
+    return [(hex(addr), cond, ctype) for addr, cond, ctype in obj.constraints]
