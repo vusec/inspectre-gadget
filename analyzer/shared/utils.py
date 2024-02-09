@@ -89,3 +89,8 @@ def branch_outcomes(history):
                 outcomes.append("Taken")
 
     return outcomes
+
+def get_bbls(state):
+    bbls = [[x for x in state.history.bbl_addrs][0]]
+    bbls.extend([x.concrete_value for x in state.history.jump_targets])
+    return bbls
