@@ -101,4 +101,4 @@ def ordered_branches(obj):
 
 def ordered_constraints(obj):
     obj.constraints = sorted(obj.constraints, key=lambda x: x[0])
-    return [(hex(addr), cond, ctype) for addr, cond, ctype in obj.constraints]
+    return [(hex(addr), cond, str(ctype)) for addr, cond, ctype in obj.constraints]
