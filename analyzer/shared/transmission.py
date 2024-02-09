@@ -93,17 +93,15 @@ class TransmissionExpr:
     n_instr: int
     contains_spec_stop: bool
 
-    def __init__(self, state, pc: int, expr: claripy.BV, transmitter: TransmitterType, aliases, constraints, n_instr, contains_spec_stop):
+    def __init__(self, pc: int, expr: claripy.BV, transmitter: TransmitterType, bbls, branches, aliases, constraints, n_instr, contains_spec_stop):
         self.pc = pc
         self.expr = expr
         self.transmitter = transmitter
         self.aliases = aliases
         self.constraints = constraints
 
-        self.branches = [(addr,cond,taken) for addr, cond, taken in zip(state.history.jump_sources,
-                                    state.history.jump_guards,
-                                    utils.branch_outcomes(state.history))]
-        self.bbls = [x for x in state.history.bbl_addrs]
+        self.branches = branches
+        self.bbls = bbls
         self.n_instr = n_instr
         self.contains_spec_stop = contains_spec_stop
 

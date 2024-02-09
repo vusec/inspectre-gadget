@@ -189,10 +189,11 @@ class Scanner:
         """
         if contains_secret(expr):
             # Create a new transmission object.
-            self.transmissions.append(TransmissionExpr(state=state,
-                                                       pc=state.scratch.ins_addr,
+            self.transmissions.append(TransmissionExpr(pc=state.scratch.ins_addr,
                                                        expr=expr,
                                                        transmitter=op_type,
+                                                       bbls=[x for x in state.history.bbl_addrs],
+                                                       branches=self.get_history(state),
                                                        aliases=self.get_aliases(state),
                                                        constraints=self.get_constraints(state),
                                                        n_instr=self.count_instructions(state, state.scratch.ins_addr),
@@ -219,8 +220,6 @@ class Scanner:
 
                 if len(asts) > 1:
                     self.split_state(self.cur_state, asts, state.scratch.ins_addr)
-                    # TODO: Is there a way to exit from `step()` instead of marking
-                    #       the state as discard?
                     raise SplitException
 
             # Create a new TFP object.
@@ -315,9 +314,6 @@ class Scanner:
         and keep track of the original expression through an annotation.
         This enables the scanner to split the state any time one of such expressions
         is used in a Load/Store/Branch instructions.
-
-        Note that SignExt and CMove-like instructions should be treated different.
-        That is why we have a different annotation for each case.
         """
         if state.inspect.expr_result.op == "Concat":
             state.inspect.expr_result = match_sign_ext(state.inspect.expr_result, state.scratch.ins_addr)
@@ -367,8 +363,6 @@ class Scanner:
 
             if len(asts) > 1:
                 self.split_state(state, asts, state.addr)
-                # TODO: Is there a way to exit from `step()` instead of marking
-                #       the state as discard?
                 raise SplitException
 
         # Check if we should forward an existing value (STL) or create a new symbol.

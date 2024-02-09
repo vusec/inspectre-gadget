@@ -91,7 +91,7 @@ class ConditionalAst:
     """
     def __init__(self, expr, conds) -> None:
         self.expr = expr
-        self.conditions = conds
+        self.conditions = set(conds)
 
     def __repr__(self) -> str:
         return f"{self.expr}  ({self.conditions})"
@@ -326,9 +326,9 @@ def split_conditions(expr: claripy.BV, simplify: bool, addr) -> list[Conditional
     statements into separate ASTs with an associated condition.
     """
     # Turn SExt-like Concat expressions into if-then-else.
-    new_expr = match_sign_ext(expr)
+    new_expr = match_sign_ext(expr, addr)
     # Turn SExt into an if-then-else sum.
-    new_expr = sign_ext_to_sum(new_expr)
+    new_expr = sign_ext_to_sum(new_expr, addr)
 
     # Optionally simplify the expression.
     if simplify:
