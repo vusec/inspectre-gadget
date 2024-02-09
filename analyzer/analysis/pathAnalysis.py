@@ -40,13 +40,13 @@ def analyse(t: Transmission):
         br_deps = d.get_all_deps(get_vars(condition), include_constraints=False)
 
         if len(br_deps.intersection(base_deps)):
-            t.base.branches.append((addr, condition))
+            t.base.branches.append((addr, condition, taken))
         if len(br_deps.intersection(secret_addr_deps)):
-            t.secret_address.branches.append((addr, condition))
+            t.secret_address.branches.append((addr, condition, taken))
         if len(br_deps.intersection(transmission_deps)):
-            t.transmission.branches.append((addr, condition))
+            t.transmission.branches.append((addr, condition, taken))
         if len(br_deps.intersection(secret_deps)):
-            t.transmitted_secret.branches.append((addr, condition))
+            t.transmitted_secret.branches.append((addr, condition, taken))
 
     l.warning(f"Base branches: {'None' if t.base == None else t.base.branches}")
     l.warning(f"Secret Addr branches: {t.secret_address.branches}")
