@@ -172,3 +172,19 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.max, 0xffffffffffffffea)
         self.assertEqual(ast_range.stride, 8)
         self.assertFalse(ast_range.exact)
+
+
+    def test_disjoint_with_sign_ext_range(self):
+
+        a = claripy.BVS("a", 32)
+        x = a.zero_extend(2) << 2
+
+        ast = 0xfffffffc00000040 + x.zero_extend(30)
+        constraints = [a[31:31] != 0]
+
+        ast_range = get_ast_ranges(constraints, ast)
+
+        self.assertEqual(ast_range.min, 0xfffffffe00000040)
+        self.assertEqual(ast_range.max, 0x3c)
+        self.assertEqual(ast_range.stride, 4)
+        self.assertTrue(ast_range.exact)
