@@ -25,20 +25,17 @@ Disassembly of section .text:
 [MAIN]  Loading angr project...
 [MAIN]  Removing non-writable memory...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 1 potential transmissions.
 [MAIN]  Found 0 tainted function pointers.
-[MAIN]  Extracted 2 transmissions.
+[MAIN]  Extracted 1 transmissions.
 [MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
 [MAIN]  Analyzing <BV64 0xffffffff88000000 + (0#48 .. LOAD_64[<BV64 rdi + 0xff>]_22[15:0])>...
-[MAIN]  Dumped annotated ASM to asm
-[MAIN]  Dumped properties to gadgets.csv
-[MAIN]  Analyzing <BV64 rcx + LOAD_64[<BV64 LOAD_64[<BV64 0xffffffff85000000>]_27>]_28>...
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
 [MAIN]  --------------- ANALYZING TFPs ------------------
 
 == REASONER ==
-[-] Imported 2 gadgets
+[-] Imported 1 gadgets
 [-] Performing exploitability analysis...
 Found 0 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...

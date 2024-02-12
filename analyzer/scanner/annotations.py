@@ -94,15 +94,15 @@ class TransmissionAnnotation(LoadAnnotation):
         return TransmissionAnnotation(self.read_address_ast, self.address, self.controlled)
 
 
-class MaybeAttackerAnnotation(LoadAnnotation):
+class UncontrolledLoadAnnotation(LoadAnnotation):
     """
-    This symbol comes from loading a constant address.
+    This symbol comes from loading a uncontrolled address.
     """
     def __init__(self, read_address_ast, address):
-        super().__init__(read_address_ast, "MaybeAttacker", address, controlled=False)
+        super().__init__(read_address_ast, "UncontrolledLoad", address, controlled=False)
 
     def copy(self):
-        return MaybeAttackerAnnotation(self.read_address_ast, self.address)
+        return UncontrolledLoadAnnotation(self.read_address_ast, self.address)
 
 
 class AttackerAnnotation(claripy.Annotation):
@@ -162,7 +162,7 @@ def propagate_annotations(ast: claripy.BV, address):
     """
     # For constant addresses, we might be able to massage the content.
     if not ast.symbolic:
-        return MaybeAttackerAnnotation(ast, address)
+        return UncontrolledLoadAnnotation(ast, address)
 
     is_attack = False
     is_secret = False
@@ -171,14 +171,9 @@ def propagate_annotations(ast: claripy.BV, address):
     can_be_controlled = False
 
     for anno in ast.annotations:
-        if isinstance(anno, UncontrolledAnnotation):
-            return MaybeAttackerAnnotation(ast, address)
-
         if isinstance(anno, AttackerAnnotation):
             is_attack = True
             can_be_controlled = True
-        if isinstance(anno, MaybeAttackerAnnotation):
-            is_attack = True
         if isinstance(anno, SecretAnnotation):
             is_secret = True
             if anno.controlled:
@@ -194,7 +189,9 @@ def propagate_annotations(ast: claripy.BV, address):
     elif is_attack:
         return SecretAnnotation(ast, address, controlled=True)
     else:
-        return MaybeAttackerAnnotation(ast, address)
+        """ In some cases a load from an uncontrolled value could still be
+        seen as a secret, but for now this is out of scope """
+        return UncontrolledLoadAnnotation(ast, address)
 
 
 def contains_secret(ast: claripy.BV):

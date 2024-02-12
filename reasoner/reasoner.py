@@ -198,8 +198,8 @@ def base_has_direct_secret_dependency(t: pd.Series):
 def base_has_indirect_secret_dependency(t: pd.Series):
     return t['base_control_type'] == 'BaseControlType.BASE_INDIRECTLY_DEPENDS_ON_SECRET_ADDR'
 
-def is_base_uncontrolled(t : pd.Series):
-    return t['base_control'] != 'ControlType.CONTROLLED'
+def is_base_controlled(t : pd.Series):
+    return t['base_control'] in ['ControlType.CONTROLLED', 'ControlType.REQUIRES_MEM_LEAK']
 
 def is_branch_dependent_from_secret(t: pd.Series):
     return t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS' or t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE'
@@ -267,7 +267,8 @@ def can_perform_sliding(t : pd.Series):
     happen at a page boundary, we can observe a signal even if the secret
     bits are below cache-line granularity
     """
-    if t[f'base_control'] != 'ControlType.CONTROLLED':
+
+    if not is_base_controlled(t):
         return False
 
     return t[f'independent_base_range{"" if not with_branches else "_w_branches"}_stride'] <= 2**t['inferable_bits_spread_low'] and t[f'independent_base_range{"" if not with_branches else "_w_branches"}_window'] >= 4096
@@ -290,7 +291,8 @@ def can_adjust_base(t : pd.Series):
     Check if we have enough control of the base to overflow the transmission
     address in case the secret is too high.
     """
-    if t[f'base_control'] != 'ControlType.CONTROLLED':
+
+    if not is_base_controlled(t):
         return False
 
     base_controllable_window = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_window']
