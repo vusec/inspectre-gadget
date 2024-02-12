@@ -46,7 +46,7 @@
 | 0x4000013 | True                        | True                          | False                               | True                              |
 | 0x400001d | True                        | True                          | False                               | True                              |
 | 0x4000028 | True                        | True                          | True                                | True                              |
-| 0x400002f | True                        | True                          | True                                | True                              |
+| 0x400002f | True                        | True                          | False                               | True                              |
 +-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
 
 ../../test-queries/reasoner-gadgets/exploitable.sql
@@ -79,7 +79,7 @@
 | 0x4000013 | False              | []                           | ['slam_is_an_user_address_translation'] |
 | 0x400001d | False              | []                           | ['slam_is_an_user_address_translation'] |
 | 0x4000028 | True               | ['can_perform_known_prefix'] | []                                      |
-| 0x400002f | True               | []                           | []                                      |
+| 0x400002f | False              | []                           | ['slam_is_an_user_address_translation'] |
 +-----------+--------------------+------------------------------+-----------------------------------------+
 
 ../../test-queries/scanner-gadgets/aliases.sql

@@ -9,6 +9,7 @@ from .infer_isolated import RangeStrategyInferIsolated
 from ...shared.config import *
 from ...shared.utils import *
 from ...shared.logger import *
+from ...shared.ranges import *
 # autopep8: on
 
 l = get_logger("FindConstraintsBounds")
@@ -48,11 +49,10 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
         # Early exit: single value
         if ast_min == ast_max:
-            return self.infer_isolated_strategy.find_range([], ast, ast_min, ast_max)
-
+            return range_static(ast_min, isolated=False)
 
         try:
-            sat_ranges = _find_sat_distribution(constraints, ast, ast_min, ast_max, stride=1)
+            sat_ranges = _find_sat_distribution(constraints, ast, ast_min, ast_max)
         except claripy.ClaripyZ3Error as e:
             # timeout
             return None
@@ -77,45 +77,36 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
             return r
 
-        # --------- Signed range
-        if ast_min == 0 and ast_max == (2**ast.size()) - 1:
-            s = claripy.Solver(timeout=global_config["Z3Timeout"])
-            new_min = (1 << (ast.size() - 1))
-            s.constraints = constraints + [(ast >= new_min)]
-            upper_ast_min = s.min(ast)
-            upper_ast_max = s.max(ast)
-            s = claripy.Solver(timeout=global_config["Z3Timeout"])
-            s.constraints = constraints + [ast < new_min]
-            lower_ast_min = s.min(ast)
-            lower_ast_max = s.max(ast)
+        # --------- symbolic + (large) concrete value
 
+        if ast.op == '__add__' and any(not arg.symbolic for arg in ast.args):
 
-            if lower_ast_min == 0 and upper_ast_max == (2**ast.size()) - 1:
-                # treat this as a single range that wraps around ( min > max )
-                try:
-                    upper_range = _find_sat_distribution(constraints, ast, upper_ast_min, upper_ast_max, stride=1)
-                    lower_range = _find_sat_distribution(constraints, ast, lower_ast_min, lower_ast_max, stride=1)
-                except claripy.ClaripyZ3Error as e:
-                    # timeout
-                    return None
+            # We try an extra optimization: separating the concrete value
+            # from addition. This covers cases like:
+            # 0xffffffff81000000 + <BV32 X > with condition x[31:31] != 0
+            # (sign extended)
 
-                if upper_range != None and lower_range != None and len(upper_range) == 1 and len(lower_range) == 1:
-                    # It is a full range, we can treat it as isolated
-                    return self.infer_isolated_strategy.find_range([], ast, upper_ast_min, lower_ast_max)
+            concrete_value =  next(arg for arg in ast.args if not arg.symbolic).args[0]
+            sub_ast = sum([arg for arg in ast.args if arg.symbolic])
+
+            r = self.find_range(constraints, sub_ast, None, None)
+
+            # We only support 'stride mode' ranges
+            if r != None and r.and_mask == None and r.or_mask == None:
+
+                return range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
+                                                      r.min, r.max, r.stride,
+                                                      concrete_value)
+
 
         # --------- Can't solve this
         l.warning(f"Cant' solve range: {ast}  ({constraints})")
-
-        # TODO: If there is only one SAT range, we may still be able to treat
-        # it as isolated and adjust the min and max.
 
         return None
 
 
 
-def _find_sat_distribution(constraints, ast, start, end, stride = 1):
-    all_ranges = []
-    start_time = time.time()
+def _find_sat_distribution(constraints, ast, start, end):
 
     not_constraints =  claripy.Not(claripy.And(*constraints))
 
@@ -141,61 +132,4 @@ def _find_sat_distribution(constraints, ast, start, end, stride = 1):
         # Range with a "hole"
         return [(value+1, value-1)]
 
-    # TODO: Double check the validity of the code below
     return None
-
-    task_list = []
-    task_list.append((start, end))
-
-    while len(task_list) > 0:
-
-        # We are timing the complete sat finding, since it can consists
-        # of many separate solves
-        if time.time() - start_time > (SOLVER_TIMEOUT / 1000):
-            print("Timeout of interval!")
-            return None
-
-        low, high = task_list.pop(0)
-
-        sat = s.satisfiable(extra_constraints=[ast >= low, ast < high, not_constraints])
-
-        if sat:
-
-            diff_low = int((high - low) / 2)
-            diff_up = math.ceil((high - low) / 2)
-
-            if diff_low < stride:
-                continue
-
-            new_low = low + diff_low
-            new_high = high - diff_up
-
-            task_list.append((new_low, high))
-            task_list.append((low, new_high))
-
-
-        else:
-            all_ranges.append((low, high))
-
-    return _merge_ranges(sorted(all_ranges))
-
-def _merge_ranges(ranges : tuple):
-
-    if len(ranges) <= 1:
-        return ranges
-
-    prev = ranges[0]
-
-    merged_ranges = []
-
-    for cur in ranges[1:]:
-
-        if prev[1] == cur[0]:
-            prev = (prev[0], cur[1])
-        else:
-            merged_ranges.append(prev)
-            prev=cur
-
-    merged_ranges.append(prev)
-
-    return merged_ranges

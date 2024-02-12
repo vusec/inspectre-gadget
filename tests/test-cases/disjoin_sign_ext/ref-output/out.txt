@@ -1,0 +1,45 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <disjoin_sign_extend>:
+ 4000000:	48 63 41 04          	movsxd rax,DWORD PTR [rcx+0x4]
+ 4000004:	48 0f b7 37          	movzx  rsi,WORD PTR [rdi]
+ 4000008:	48 8b 94 30 96 40 00 	mov    rdx,QWORD PTR [rax+rsi*1+0x4096]
+ 400000f:	00 
+ 4000010:	e9 00 00 00 00       	jmp    4000015 <disjoin_sign_extend+0x15>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 4 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0x4096 + (0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rcx + 0x4>]_20)) + (0#48 .. LOAD_16[<BV64 rdi>]_21)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x4096 + (0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rcx + 0x4>]_20)) + (0#48 .. LOAD_16[<BV64 rdi>]_21)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x4096 + (0#32 .. LOAD_32[<BV64 rcx + 0x4>]_20) + (0#48 .. LOAD_16[<BV64 rdi>]_21)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 0x4096 + (0#32 .. LOAD_32[<BV64 rcx + 0x4>]_20) + (0#48 .. LOAD_16[<BV64 rdi>]_21)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 4 gadgets
+[-] Performing exploitability analysis...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

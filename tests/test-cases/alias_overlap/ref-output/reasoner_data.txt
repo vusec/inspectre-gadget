@@ -48,9 +48,9 @@
 +-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
 | 0x4000009 | True                        | True                          | True                                | True                              |
 | 0x400000c | True                        | True                          | True                                | True                              |
-| 0x400000c | True                        | True                          | False                               | True                              |
+| 0x400000c | True                        | True                          | False                               | False                             |
 | 0x4000019 | True                        | True                          | True                                | True                              |
-| 0x400001c | True                        | True                          | True                                | True                              |
+| 0x400001c | True                        | True                          | False                               | True                              |
 | 0x400001c | True                        | True                          | True                                | True                              |
 +-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
 
@@ -86,7 +86,7 @@
 | 0x400000c | True               | ['can_perform_known_prefix']                                      | []                                      |
 | 0x400000c | False              | []                                                                | ['slam_is_an_user_address_translation'] |
 | 0x4000019 | True               | ['can_perform_known_prefix']                                      | []                                      |
-| 0x400001c | True               | []                                                                | []                                      |
+| 0x400001c | False              | []                                                                | ['slam_is_an_user_address_translation'] |
 | 0x400001c | True               | ['can_perform_known_prefix', 'slam_can_ignore_direct_dependency'] | []                                      |
 +-----------+--------------------+-------------------------------------------------------------------+-----------------------------------------+
 

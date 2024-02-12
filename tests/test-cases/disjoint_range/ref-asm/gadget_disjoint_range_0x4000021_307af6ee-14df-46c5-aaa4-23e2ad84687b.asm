@@ -13,7 +13,7 @@
 4000029  jg      exit
 
 ------------------------------------------------
-uuid: d2bff0a4-8715-496f-a748-1628cc9d65db
+uuid: 307af6ee-14df-46c5-aaa4-23e2ad84687b
 
 Secret Address:
   - Expr: <BV64 rsi + 0x30>
@@ -32,7 +32,7 @@ Transmission:
   - Expr: <BV64 LOAD_64[<BV64 rsi + 0x30>]_21 + LOAD_64[<BV64 rdi + 0x28>]_20>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rdi>, <BV64 rsi>}
+Register Requirements: {<BV64 rsi>, <BV64 rdi>}
 Constraints: []
 Branches: [(67108876, <Bool LOAD_64[<BV64 rdi + 0x28>]_20 != 0xf>, 'Not Taken'), (67108895, <Bool LOAD_64[<BV64 rsi + 0x30>]_21 != 0xff>, 'Not Taken')]
 ------------------------------------------------

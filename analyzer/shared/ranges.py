@@ -3,8 +3,6 @@ Range object.
 """
 
 from dataclasses import dataclass
-import math
-import time
 from collections import OrderedDict
 
 import claripy
@@ -125,13 +123,38 @@ class AstRange:
 
 
 def range_static(value, isolated):
-    interval = Interval(min=value, max=value+1, stride=1)
+    interval = Interval(min=value, max=value, stride=1)
 
     return AstRange(min=value, max=value, ast_size=0, exact=True, entropy=0, isolated=isolated, intervals=[interval])
 
 
 def range_simple(min, max, ast_size, stride, isolated):
     return AstRange(min=min, max=max, ast_size=ast_size, exact=True, isolated=isolated, intervals=[Interval(min, max, stride)])
+
+
+def range_from_symbolic_concrete_addition(ast, ast_min, ast_max, sym_ast_min, sym_ast_max, sym_ast_stride, concrete_value):
+    isolated_ast_min = sym_ast_min + concrete_value
+    isolated_ast_max = sym_ast_max + concrete_value
+
+    # handle overflows
+    isolated_ast_min &= (1 << ast.size()) - 1
+    isolated_ast_max &= (1 << ast.size()) - 1
+
+    if isolated_ast_min - isolated_ast_max == sym_ast_stride:
+        # The 'gap' is the size of the stride, so actually it is not a gap
+        # and we do not need a disjoint range
+        # We replace the disjoint range with a normal range.
+        s = claripy.Solver()
+        isolated_ast_min = s.min(ast)
+        isolated_ast_max = s.max(ast)
+
+    # incorporate non-isolated min and max, only adjust if they are
+    # tighter
+    # Note: Conditions hold for both normal and disjoint ranges
+    ast_min = ast_min if isolated_ast_min < ast_min else isolated_ast_min
+    ast_max = ast_max if isolated_ast_max > ast_max else isolated_ast_max
+
+    return range_simple(ast_min, ast_max, ast.size(), sym_ast_stride, isolated=True)
 
 
 def get_stride_from_mask(and_mask, or_mask):

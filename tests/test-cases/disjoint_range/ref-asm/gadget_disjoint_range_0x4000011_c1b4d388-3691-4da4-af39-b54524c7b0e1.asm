@@ -5,18 +5,12 @@
 4000008  cmp     rax, 0xf
 400000c  je      exit ; Not Taken   <Bool LOAD_64[<BV64 rdi + 0x28>]_20 != 0xf>
 400000e  mov     rcx, qword ptr [rax]
-4000011  mov     r8, qword ptr [rax-0x7f000000]
+4000011  mov     r8, qword ptr [rax-0x7f000000] ; {Secret@0x4000000} > TRANSMISSION
 4000018  cmp     rsi, 0xff
-400001f  je      exit ; Not Taken   <Bool LOAD_64[<BV64 rsi + 0x30>]_21 != 0xff>
-4000021  mov     r9, qword ptr [rsi+rax]
-4000025  cmp     rax, 0xf
-4000029  jg      exit ; Not Taken   <Bool LOAD_64[<BV64 rdi + 0x28>]_20 <=s 0xf>
-400002b  mov     rdx, qword ptr [rax] ; {Secret@0x4000000} > TRANSMISSION
-400002e  cmp     rsi, 0xffff
-4000035  ja      exit
+400001f  je      exit
 
 ------------------------------------------------
-uuid: 79ac7d32-9cb3-4462-a53f-d7efda89bd61
+uuid: c1b4d388-3691-4da4-af39-b54524c7b0e1
 
 Secret Address:
   - Expr: <BV64 rdi + 0x28>
@@ -27,15 +21,15 @@ Transmitted Secret:
   - Spread: 0 - 63
   - Number of Bits Inferable: 64
 Base:
-  - Expr: None
-  - Range: None
-  - Independent Expr: None
-  - Independent Range: None
+  - Expr: <BV64 0xffffffff81000000>
+  - Range: 0xffffffff81000000
+  - Independent Expr: <BV64 0xffffffff81000000>
+  - Independent Range: 0xffffffff81000000
 Transmission:
-  - Expr: <BV64 LOAD_64[<BV64 rdi + 0x28>]_20>
+  - Expr: <BV64 0xffffffff81000000 + LOAD_64[<BV64 rdi + 0x28>]_20>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
 Register Requirements: {<BV64 rdi>}
 Constraints: []
-Branches: [(67108876, <Bool LOAD_64[<BV64 rdi + 0x28>]_20 != 0xf>, 'Not Taken'), (67108895, <Bool LOAD_64[<BV64 rsi + 0x30>]_21 != 0xff>, 'Not Taken'), (67108905, <Bool LOAD_64[<BV64 rdi + 0x28>]_20 <=s 0xf>, 'Not Taken')]
+Branches: [(67108876, <Bool LOAD_64[<BV64 rdi + 0x28>]_20 != 0xf>, 'Not Taken')]
 ------------------------------------------------

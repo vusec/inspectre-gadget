@@ -264,14 +264,14 @@
 | 0x40000a3 | True                        | True                          | True                                | True                              |
 | 0x40000a3 | True                        | True                          | True                                | True                              |
 | 0x40000a3 | True                        | True                          | True                                | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
-| 0x40000a3 | True                        | True                          | False                               | True                              |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
+| 0x40000a3 | True                        | True                          | False                               | False                             |
 +-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
 
 ../../test-queries/reasoner-gadgets/exploitable.sql

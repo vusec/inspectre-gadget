@@ -60,25 +60,12 @@ class RangeStrategyInferIsolated(RangeStrategy):
                     return None
 
                 s = claripy.Solver(timeout=global_config["Z3Timeout"])
-                sub_ast_min = s.min(sub_ast)
-                sub_ast_max = s.max(sub_ast)
+                sym_ast_min = s.min(sub_ast)
+                sym_ast_max = s.max(sub_ast)
 
-                isolated_ast_min = sub_ast_min + concrete_value
-                isolated_ast_max = sub_ast_max + concrete_value
-
-                # handle overflows
-                isolated_ast_min &= (1 << ast.size()) - 1
-                isolated_ast_max &= (1 << ast.size()) - 1
-
-                if isolated_ast_min - isolated_ast_max == range_map.stride:
-                    isolated_ast_min = s.min(ast)
-                    isolated_ast_max = s.max(ast)
-
-                # incorporate non-isolated min and max, only adjust if they are
-                # tighter
-                # Note: Conditions hold for both normal and disjoint ranges
-                ast_min = ast_min if isolated_ast_min < ast_min else isolated_ast_min
-                ast_max = ast_max if isolated_ast_max > ast_max else isolated_ast_max
+                return range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
+                                                      sym_ast_min, sym_ast_max, range_map.stride,
+                                                      concrete_value)
 
             else:
                 return None

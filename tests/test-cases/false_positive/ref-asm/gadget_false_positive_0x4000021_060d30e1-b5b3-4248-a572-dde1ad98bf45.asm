@@ -5,15 +5,15 @@
 400000a  add     rax, qword ptr [rax*0x8-0x7d9dd7a0] ; set() > {MaybeAttacker@0x400000a}
 4000012  add     rax, qword ptr [rdi*0x8-0x7d9dd7a0] ; {Attacker@rdi} > {Secret@0x4000012}
 400001a  lea     rdx, [rax+0x80]
-4000021  cmp     qword ptr [rax], 0x0 ; {MaybeAttacker@0x400000a, Secret@0x4000012} > TRANSMISSION
+4000021  cmp     qword ptr [rax], 0x0 ; {Secret@0x4000012, MaybeAttacker@0x400000a} > TRANSMISSION
 4000025  jmp     0x400dead
 
 ------------------------------------------------
-uuid: cac3d0b2-b297-45f9-97d8-abb6de880d90
+uuid: 060d30e1-b5b3-4248-a572-dde1ad98bf45
 
 Secret Address:
   - Expr: <BV64 ((0#32 .. rdi[31:0]) + 0x0 << 0x3) + 0xffffffff82622860>
-  - Range: (0x0,0xfffffffffffffff8, 0x8) Exact: False
+  - Range: (0xffffffff82622860,0x382622858, 0x8) Exact: True
 Transmitted Secret:
   - Expr: <BV64 LOAD_64[<BV64 ((0#32 .. rdi[31:0]) + 0x0 << 0x3) + 0xffffffff82622860>]_25>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
