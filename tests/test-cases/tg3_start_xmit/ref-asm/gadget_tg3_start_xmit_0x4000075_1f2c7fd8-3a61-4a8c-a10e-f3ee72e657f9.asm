@@ -29,10 +29,10 @@
 4000067  test    al, 0x1
 4000069  cmovne  r12, rdx
 400006d  mov     esi, dword ptr [r12+0x240]
-4000075  mov     edx, dword ptr [r12+0x248]
+4000075  mov     edx, dword ptr [r12+0x248] ; {Attacker@rsi, Secret@0x4000029} > TRANSMISSION
 400007d  mov     rdi, qword ptr [rdi+0xc8]
 4000084  mov     eax, esi
-4000086  sub     eax, dword ptr [r12+0x244] ; {Attacker@rsi, Secret@0x4000029} > TRANSMISSION
+4000086  sub     eax, dword ptr [r12+0x244]
 400008e  and     eax, 0x1ff
 4000093  sub     edx, eax
 4000095  mov     eax, dword ptr [r13+0xc0]
@@ -44,7 +44,7 @@
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 5a7a05f5-7a1a-4d65-83a4-02b897032e04
+uuid: 1f2c7fd8-3a61-4a8c-a10e-f3ee72e657f9
 
 Secret Address:
   - Expr: <BV64 rdi + 0x7c>
@@ -55,15 +55,15 @@ Transmitted Secret:
   - Spread: 6 - 26
   - Number of Bits Inferable: 16
 Base:
-  - Expr: <BV64 0xc84 + rsi>
+  - Expr: <BV64 0xf48 + rsi>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
-  - Independent Expr: <BV64 0xc84 + rsi>
+  - Independent Expr: <BV64 0xf48 + rsi>
   - Independent Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmission:
-  - Expr: <BV64 0xc84 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
+  - Expr: <BV64 0xf48 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rsi>, <BV64 rdi>}
-Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool LOAD_64[<BV64 rsi + 0x1b58>]_31[61:61] == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool LOAD_64[<BV64 rsi + 0x1b58>]_31[61:61] == 0>, 'ConditionType.CMOVE')]
+Register Requirements: {<BV64 rdi>, <BV64 rsi>}
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE')]
 Branches: []
 ------------------------------------------------

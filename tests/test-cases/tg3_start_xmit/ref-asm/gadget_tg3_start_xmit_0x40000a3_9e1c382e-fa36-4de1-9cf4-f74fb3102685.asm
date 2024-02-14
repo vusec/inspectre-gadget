@@ -44,26 +44,26 @@
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: e92cb7d4-123b-4b4c-9010-67c807d9596a
+uuid: 9e1c382e-fa36-4de1-9cf4-f74fb3102685
 
 Secret Address:
   - Expr: <BV64 rdi + 0xc8>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmitted Secret:
-  - Expr: <BV64 LOAD_64[<BV64 rdi + 0xc8>]_41>
+  - Expr: <BV64 LOAD_64[<BV64 rdi + 0xc8>]_86>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
   - Spread: 0 - 63
   - Number of Bits Inferable: 64
 Base:
-  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_43)>
+  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_97)>
   - Range: (0x2,0x100000001, 0x1) Exact: True
   - Independent Expr: <BV64 0x2>
   - Independent Range: 0x2
 Transmission:
-  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_43) + LOAD_64[<BV64 rdi + 0xc8>]_41>
+  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_97) + LOAD_64[<BV64 rdi + 0xc8>]_86>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rsi>, <BV64 rdi>}
-Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool LOAD_64[<BV64 rsi + 0x1b58>]_31[61:61] != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool LOAD_64[<BV64 rsi + 0x1b58>]_31[61:61] != 0>, 'ConditionType.CMOVE')]
+Register Requirements: {<BV64 rdi>, <BV64 rsi>}
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE')]
 Branches: []
 ------------------------------------------------

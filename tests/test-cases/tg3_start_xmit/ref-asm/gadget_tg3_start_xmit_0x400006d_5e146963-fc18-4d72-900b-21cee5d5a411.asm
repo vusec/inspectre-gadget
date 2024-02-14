@@ -14,7 +14,7 @@
 400001b  xor     eax, eax
 400001d  lea     rax, [rsi+0x900]
 4000024  mov     qword ptr [rsp+0x10], rax
-4000029  movzx   eax, word ptr [rdi+0x7c]
+4000029  movzx   eax, word ptr [rdi+0x7c] ; {Attacker@rdi} > {Secret@0x4000029}
 400002d  lea     rdx, [rax+rax*0x4]
 4000031  mov     r12, rdx
 4000034  lea     rax, [rax+rdx*0x2]
@@ -28,42 +28,42 @@
 4000063  shr     rax, 0x3d
 4000067  test    al, 0x1
 4000069  cmovne  r12, rdx
-400006d  mov     esi, dword ptr [r12+0x240]
+400006d  mov     esi, dword ptr [r12+0x240] ; {Secret@0x4000029, Attacker@rsi} > TRANSMISSION
 4000075  mov     edx, dword ptr [r12+0x248]
-400007d  mov     rdi, qword ptr [rdi+0xc8] ; {Attacker@rdi} > {Attacker@0x400007d}
+400007d  mov     rdi, qword ptr [rdi+0xc8]
 4000084  mov     eax, esi
 4000086  sub     eax, dword ptr [r12+0x244]
 400008e  and     eax, 0x1ff
 4000093  sub     edx, eax
-4000095  mov     eax, dword ptr [r13+0xc0] ; {Attacker@rdi} > {Secret@0x4000095}
+4000095  mov     eax, dword ptr [r13+0xc0]
 400009c  mov     dword ptr [rsp+0x4c], edx
 40000a0  add     rax, rdi
-40000a3  movzx   ecx, byte ptr [rax+0x2] ; {Attacker@0x400007d, Secret@0x4000095} > TRANSMISSION
+40000a3  movzx   ecx, byte ptr [rax+0x2]
 40000a7  add     ecx, 0x1
 40000aa  cmp     ecx, edx
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: c4524686-fbf2-4ba4-a9ae-a44338e57d4d
+uuid: 5e146963-fc18-4d72-900b-21cee5d5a411
 
 Secret Address:
-  - Expr: <BV64 rdi + 0xc0>
+  - Expr: <BV64 rdi + 0x7c>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmitted Secret:
-  - Expr: <BV64 0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_43>
-  - Range: (0x0,0xffffffff, 0x1) Exact: True
-  - Spread: 0 - 31
-  - Number of Bits Inferable: 32
+  - Expr: <BV64 ((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6)>
+  - Range: (0x0,0x2bffd40, 0x40) Exact: False
+  - Spread: 6 - 26
+  - Number of Bits Inferable: 16
 Base:
-  - Expr: <BV64 0x2 + LOAD_64[<BV64 rdi + 0xc8>]_41>
+  - Expr: <BV64 0xc80 + rsi>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
-  - Independent Expr: <BV64 0x2>
-  - Independent Range: 0x2
+  - Independent Expr: <BV64 0xc80 + rsi>
+  - Independent Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmission:
-  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_43) + LOAD_64[<BV64 rdi + 0xc8>]_41>
+  - Expr: <BV64 0xc80 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rsi>, <BV64 rdi>}
-Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool LOAD_64[<BV64 rsi + 0x1b58>]_31[61:61] != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool LOAD_64[<BV64 rsi + 0x1b58>]_31[61:61] != 0>, 'ConditionType.CMOVE')]
+Register Requirements: {<BV64 rdi>, <BV64 rsi>}
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE')]
 Branches: []
 ------------------------------------------------

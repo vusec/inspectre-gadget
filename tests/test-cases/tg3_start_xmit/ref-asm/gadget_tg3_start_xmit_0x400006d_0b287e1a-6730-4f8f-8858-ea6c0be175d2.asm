@@ -28,8 +28,8 @@
 4000063  shr     rax, 0x3d
 4000067  test    al, 0x1
 4000069  cmovne  r12, rdx
-400006d  mov     esi, dword ptr [r12+0x240]
-4000075  mov     edx, dword ptr [r12+0x248] ; {Secret@0x4000029, Attacker@rsi} > TRANSMISSION
+400006d  mov     esi, dword ptr [r12+0x240] ; {Secret@0x4000029, Attacker@rsi} > TRANSMISSION
+4000075  mov     edx, dword ptr [r12+0x248]
 400007d  mov     rdi, qword ptr [rdi+0xc8]
 4000084  mov     eax, esi
 4000086  sub     eax, dword ptr [r12+0x244]
@@ -44,7 +44,7 @@
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 6b282bdc-7894-4d3e-ae19-9f54d298ef2c
+uuid: 0b287e1a-6730-4f8f-8858-ea6c0be175d2
 
 Secret Address:
   - Expr: <BV64 rdi + 0x7c>
@@ -55,15 +55,15 @@ Transmitted Secret:
   - Spread: 6 - 26
   - Number of Bits Inferable: 16
 Base:
-  - Expr: <BV64 0xc88 + rsi>
+  - Expr: <BV64 0xf40 + rsi>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
-  - Independent Expr: <BV64 0xc88 + rsi>
+  - Independent Expr: <BV64 0xf40 + rsi>
   - Independent Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmission:
-  - Expr: <BV64 0xc88 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
+  - Expr: <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rsi>, <BV64 rdi>}
-Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool LOAD_64[<BV64 rsi + 0x1b58>]_31[61:61] == 0>, 'ConditionType.CMOVE')]
+Register Requirements: {<BV64 rdi>, <BV64 rsi>}
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE')]
 Branches: []
 ------------------------------------------------
