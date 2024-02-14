@@ -53,7 +53,8 @@ class SubstType(Enum):
     ADDR_SUBST = 0,
     VALUE_SUBST = 1,
     COND_SUBST = 2,
-    UNKNOWN_SUBST = 3
+    CALL_SUBST = 3,
+    UNKNOWN_SUBST = 4
 
 def getPrefix(stype: SubstType):
     if stype == SubstType.ADDR_SUBST:
@@ -62,7 +63,8 @@ def getPrefix(stype: SubstType):
         return "val_subst_"
     if stype == SubstType.COND_SUBST:
         return "cond_subst_"
-
+    if stype == SubstType.CALL_SUBST:
+        return "call_subst_"
     return ""
 
 def recordSubstitution(state, addr, value, type):
@@ -243,45 +245,29 @@ class Scanner:
         Indirect calls that are attacker-controlled are saved
         as tainted function pointers (a.k.a Dispatch Gadgets).
         """
-        if is_attacker_controlled(func_ptr_ast):
-            # Check if there is a substitution to be made for this address.
-            # This can happen if the state comes from a manual splitting.
-            subst = getSubstitution(state, state.scratch.ins_addr)
-            if subst != None:
-                func_ptr_ast = subst
-            else:
-                # Check if the symbolic address contains an if-then-else node.
-                asts = split_conditions(func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
-                assert(len(asts) >= 1)
+        l.warning(f"Found new TFP! {func_ptr_ast} {func_ptr_ast.annotations}")
+        # Create a new TFP object.
+        tfp = TaintedFunctionPointer(pc=state.scratch.ins_addr,
+                                        expr=func_ptr_ast,
+                                        reg=func_ptr_reg,
+                                        bbls=self.get_bbls(state),
+                                        branches=self.get_history(state),
+                                        aliases=self.get_aliases(state),
+                                        constraints=self.get_constraints(state),
+                                        n_instr=self.count_instructions(state, state.scratch.ins_addr),
+                                        contains_spec_stop=self.history_contains_speculation_stop(state),
+                                        n_dependent_loads=get_load_depth(func_ptr_ast)
+                                        )
 
-                l.info(f"  After transformations: {func_ptr_ast}")
+        for reg in get_x86_registers():
+            reg_ast = getattr(state.regs, reg)
+            tfp.registers[reg] = TFPRegister(reg, reg_ast)
 
-                if len(asts) > 1:
-                    self.split_state(state, asts, state.scratch.ins_addr)
-                    raise SplitException
-
-            # Create a new TFP object.
-            tfp = TaintedFunctionPointer(pc=state.scratch.ins_addr,
-                                            expr=func_ptr_ast,
-                                            reg=func_ptr_reg,
-                                            bbls=self.get_bbls(state),
-                                            branches=self.get_history(state),
-                                            aliases=self.get_aliases(state),
-                                            constraints=self.get_constraints(state),
-                                            n_instr=self.count_instructions(state, state.scratch.ins_addr),
-                                            contains_spec_stop=self.history_contains_speculation_stop(state),
-                                            n_dependent_loads=get_load_depth(func_ptr_ast)
-                                            )
-
-            for reg in get_x86_registers():
-                reg_ast = getattr(state.regs, reg)
-                tfp.registers[reg] = TFPRegister(reg, reg_ast)
-
-            self.calls.append(tfp)
+        self.calls.append(tfp)
 
 
     #---------------- STATE SPLITTING ----------------------------
-    def split_state(self, state, asts, addr, branch_split=False):
+    def split_state(self, state, asts, addr, branch_split=False, subst_type=SubstType.ADDR_SUBST):
         """
         Manually split the state in two sub-states with different conditions.
         Needed e.g. for CMOVEs and SExt. Note that the current state should be
@@ -307,7 +293,7 @@ class Scanner:
                 s.history.jump_guard = a.expr
             else:
                 # Record a substitution to be made at this address in the new state.
-                recordSubstitution(s, addr, a.expr, SubstType.ADDR_SUBST)
+                recordSubstitution(s, addr, a.expr, subst_type)
 
             # Record the conditions of the new state.
             for constraint in a.conditions:
@@ -492,8 +478,28 @@ class Scanner:
         l.info("Exit hook")
         func_ptr_ast = state.inspect.exit_target
 
+        if not isinstance(func_ptr_ast, claripy.ast.base.Base):
+            # Non-AST target, skip.
+            # TODO: inspect the target to see if it's an indirect call thunk?
+            return
+
+        # Check if we need to substitute the expression (happens with manual splits).
+        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.CALL_SUBST)
+        if subst != None:
+            func_ptr_ast = subst
+        else:
+            # Check if the symbolic address contains an if-then-else node.
+            asts = split_conditions(func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
+            assert(len(asts) >= 1)
+
+            l.info(f"  After transformations: {func_ptr_ast}")
+
+            if len(asts) > 1:
+                self.split_state(state, asts, state.scratch.ins_addr, branch_split=False, subst_type=SubstType.CALL_SUBST)
+                raise SplitException
+
         # First case: symbolic target
-        if is_sym_expr(func_ptr_ast):
+        if func_ptr_ast.symbolic:
             # Whenever the target is symbolic, and it is not a return, we
             # know we are performing an indirect call.
             block = state.block()
@@ -512,27 +518,22 @@ class Scanner:
             reg_id = regs_read[0]
             func_ptr_reg = instruction.reg_name(reg_id)
 
-            # process the TFP
-            self.check_tfp(state, func_ptr_reg, func_ptr_ast)
-            # check if it is also a transmission
-            self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
-
-            # Stop exploration here
-            raise SplitException
-
         # Second case: jump to indirect thunk
-        elif isinstance(func_ptr_ast, claripy.ast.base.Base) and state.inspect.exit_target.args[0] in self.thunk_list:
+        elif state.inspect.exit_target.args[0] in self.thunk_list:
             exit_target = state.inspect.exit_target.args[0]
             func_ptr_reg = self.thunk_list[exit_target]
             func_ptr_ast = getattr(state.regs, func_ptr_reg)
 
-            # process the TFP
-            self.check_tfp(state, func_ptr_reg, func_ptr_ast)
-            # check if it is also a transmission
-            self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
+        else:
+            return
 
-            # Stop exploration here
-            raise SplitException
+        # process the TFP
+        self.check_tfp(state, func_ptr_reg, func_ptr_ast)
+        # check if it is also a transmission
+        self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
+
+        # Stop exploration here
+        raise SplitException
 
 
     def run(self, proj: angr.Project, start_address, config) -> list[TransmissionExpr]:

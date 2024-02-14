@@ -159,6 +159,7 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
             if not is_sym_expr(ast.args[i]):
                 continue
             new_expr = new_expr.replace(ast.args[i], combination[i].expr)
+            new_expr = remove_spurious_if_annotations(new_expr, ast.args[i], combination[i].expr)
             new_conds.extend(combination[i].conditions)
         splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
 
@@ -174,6 +175,23 @@ def dedup_annotations(expr):
         annos.update(v.annotations)
 
     expr = expr.annotate(*annos, remove_annotations=expr.annotations)
+    return expr
+
+def remove_spurious_if_annotations(expr, old, new):
+    to_remove = set()
+    old_annos = set(old.annotations)
+    new_annos = set(new.annotations)
+
+    for anno in old_annos:
+        if anno not in new_annos:
+            to_remove.add(anno)
+
+    if len(to_remove) == 0:
+        return expr
+
+    to_keep = set.difference(set(expr.annotations), to_remove)
+
+    expr = expr.annotate(*to_keep, remove_annotations=expr.annotations)
     return expr
 
 
@@ -334,7 +352,6 @@ def split_conditions(expr: claripy.BV, simplify: bool, addr) -> list[Conditional
     # Optionally simplify the expression.
     if simplify:
         new_expr = simplify_conservative(new_expr)
-        claripy.simplify
 
     # Split if-then-else statements into separate ConditionalASTs.
     return split_if_statements(new_expr, addr)
