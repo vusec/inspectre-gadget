@@ -270,6 +270,15 @@ class Scanner:
         """
         if subst_addr == None:
             subst_addr = addr
+            # Note: when we are splitting _within_ a basic block, we want to
+            # clone the initial state (before symex) and restart from the
+            # first instruction of the BB.
+            # We need to do this to avoid strange angr behavior on instructions
+            # like `add rax, qptr [rdx + 0x18]`. When hooking such load, rax
+            # has the original symbol ini it, regardless of previous computation,
+            # so splitting the state here would cause a wrong interpretation
+            # of the expression.
+            state = self.cur_state
 
         for a in asts:
             a.expr = dedup_annotations(a.expr)
@@ -288,44 +297,7 @@ class Scanner:
             # TODO: Satisfiability check can be expensive, can we do better with ast substitutions?
             if s.solver.satisfiable():
                 l.info(f"Added state @{hex(s.addr)}  with condition {[(hex(addr), cond, str(ctype)) for addr, cond, ctype in a.conditions]}")
-                s.regs.pc = addr
                 self.states.append(s)
-
-    def split_state_store(self, state, addr_asts, value_asts, addr):
-        """
-        Manually split the state on symbolic stores. Used when the symbolic
-        address contains an if-then-else statement.
-        """
-        for a in addr_asts:
-            a.expr = dedup_annotations(a.expr)
-
-            for v in value_asts:
-                # Create a new state.
-                s = state.copy()
-
-                # Record a substitution to be made at this address in the new state.
-                s.globals[f"subst_{self.n_subst}"] = (addr, a.expr)
-                self.n_subst += 1
-                # Record the conditions of the new state.
-                for constraint in a.conditions:
-                    s.globals[f"constr_{self.n_constr}"] = constraint
-                    s.solver.add(constraint[1])
-                    self.n_constr += 1
-
-                # Record the value substitution,
-                if v.expr.symbolic:
-                    s.globals[f"valuesubst_{self.n_subst}"] = (addr, v.expr)
-                    self.n_subst += 1
-                    for constraint in v.conditions:
-                        s.globals[f"constr_{self.n_constr}"] = constraint
-                        s.solver.add(constraint[1])
-                        self.n_constr += 1
-
-                # TODO: Satisfiability check can be expensive, can we do better with ast substitutions?
-                if s.solver.satisfiable():
-                    l.info(f"Added state with condition addr:{a.conditions} val:{v.conditions}")
-                    s.regs.pc = addr
-                    self.states.append(s)
 
 
     #---------------- EXPRESSIONS HANDLING ----------------------------
@@ -369,14 +341,22 @@ class Scanner:
         l.info(f"Load@{hex(state.addr)}: {load_addr}")
         l.info(state.solver.constraints)
 
-        # Check if there is a substitution to be made for this address.
-        # This can happen if the state comes from a manual splitting.
+        # If the state has been manually splitted after this load, we already
+        # have a value for this load: just use that.
+        subst = getSubstitution(state, state.addr, addressSubst=False)
+        if subst != None:
+            state.inspect.mem_read_expr = subst
+            return
+
+        # If the state has been manually splitted _on_ this load, use
+        # the substitution recorded for the address.
         subst = getSubstitution(state, state.addr)
         if subst != None:
             load_addr = subst
             l.info(f" Applied substitution! {load_addr}")
         else:
-            # Check if the symbolic address contains an if-then-else node.
+            # If the state has _not_ been manually splitted, check if we
+            # should split it.
             asts = split_conditions(load_addr, simplify=False, addr=state.addr)
             assert(len(asts) >= 1)
 
@@ -398,6 +378,10 @@ class Scanner:
             load_val = claripy.BVS(name=f'LOAD_{load_len*8}[{load_addr}]_{self.cur_id}',
                                     size=load_len*8,
                                     annotations=(annotation,))
+
+            # Save it, in case we later need to split this state manually.
+            self.cur_state.globals[f'valuesubst_{self.n_subst}'] = (state.addr, load_val)
+            self.n_subst += 1
 
         # Overwrite loaded val.
         state.inspect.mem_read_expr = load_val
@@ -446,31 +430,23 @@ class Scanner:
         # Don't execute the store architecturally.
         state.inspect.mem_write_length = 0
 
-        # Check if there is a substitution to be made for this address or value.
+        # Check if there is a substitution to be made for this address.
         # This can happen if the state comes from a manual splitting.
         is_subst = False
         subst = getSubstitution(state, state.addr)
         if subst != None:
             store_addr = subst
-            is_subst = True
-        subst = getSubstitution(state, state.addr, addressSubst=False)
-        if subst != None:
-            stored_value = subst
-            is_subst = True
-        l.warning(f"After substitution: Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
-
-
-        # Check if the address or value contains an if-then-else node.
-        if not is_subst:
+        else:
+            # Check if the address contains an if-then-else node.
             addr_asts = split_conditions(store_addr, simplify=False, addr=state.addr)
-            value_asts = split_conditions(stored_value, simplify=False, addr=state.addr)
+            # value_asts = split_conditions(stored_value, simplify=False, addr=state.addr)
 
             l.warning(f" After ast transformation: [{store_addr}] = {stored_value}")
-
-            if len(addr_asts) > 1 or len(value_asts) > 1:
-                self.split_state_store(self.cur_state, addr_asts, value_asts, state.addr)
+            if len(addr_asts) > 1:
+                self.split_state(state, addr_asts, state.addr)
                 raise SplitException
 
+        l.warning(f"After substitution: Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
 
         # Save this store in the angr state, so that future loads can check for
         # aliasing.
