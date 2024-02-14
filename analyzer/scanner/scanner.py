@@ -238,7 +238,7 @@ class Scanner:
                 l.info(f"  After transformations: {func_ptr_ast}")
 
                 if len(asts) > 1:
-                    self.split_state(self.cur_state, asts, state.scratch.ins_addr)
+                    self.split_state(state, asts, state.scratch.ins_addr)
                     raise SplitException
 
             # Create a new TFP object.
@@ -262,14 +262,13 @@ class Scanner:
 
 
     #---------------- STATE SPLITTING ----------------------------
-    def split_state(self, state, asts, addr, subst_addr=None):
+    def split_state(self, state, asts, addr, branch_split=False):
         """
         Manually split the state in two sub-states with different conditions.
         Needed e.g. for CMOVEs and SExt. Note that the current state should be
         skipped after splitting, since the split is done at the BB level.
         """
-        if subst_addr == None:
-            subst_addr = addr
+        if not branch_split:
             # Note: when we are splitting _within_ a basic block, we want to
             # clone the initial state (before symex) and restart from the
             # first instruction of the BB.
@@ -285,9 +284,13 @@ class Scanner:
             # Create a new state.
             s = state.copy()
 
-            # Record a substitution to be made at this address in the new state.
-            s.globals[f"subst_{self.n_subst}"] = (subst_addr, a.expr)
-            self.n_subst += 1
+            if branch_split:
+                s.history.jump_guard = a.expr
+            else:
+                # Record a substitution to be made at this address in the new state.
+                s.globals[f"subst_{self.n_subst}"] = (addr, a.expr)
+                self.n_subst += 1
+
             # Record the conditions of the new state.
             for constraint in a.conditions:
                 s.globals[f"constr_{self.n_constr}"] = constraint
@@ -611,7 +614,7 @@ class Scanner:
                 asts = split_conditions(ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
                 if len(asts) > 1:
                     # If this is the case, we need to further split the successors.
-                    self.split_state(ns, asts, ns.addr, subst_addr=ns.history.jump_sources[-1])
+                    self.split_state(ns, asts, ns.addr, branch_split=True)
                 else:
                     # If there's no splitting, just add the successor as-is.
                     self.states.append(ns)
