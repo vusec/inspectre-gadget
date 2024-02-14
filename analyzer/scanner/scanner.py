@@ -14,6 +14,7 @@ import claripy
 from . import memory
 from .annotations import *
 import sys
+from enum import Enum
 import traceback
 
 from angr.concretization_strategies import SimConcretizationStrategy
@@ -48,11 +49,30 @@ def skip_concretization(state: angr.SimState):
     state.inspect.address_concretization_add_constraints = False
 
 
-def getSubstitution(state, addr, addressSubst=True):
-    string_to_search = "subst_" if addressSubst else "valuesubst_"
-    for g in state.globals.keys():
-        if str(g).startswith(string_to_search) and state.globals[g][0] == addr:
-            return state.globals[g][1]
+class SubstType(Enum):
+    ADDR_SUBST = 0,
+    VALUE_SUBST = 1,
+    COND_SUBST = 2,
+    UNKNOWN_SUBST = 3
+
+def getPrefix(stype: SubstType):
+    if stype == SubstType.ADDR_SUBST:
+        return "addr_subst_"
+    if stype == SubstType.VALUE_SUBST:
+        return "val_subst_"
+    if stype == SubstType.COND_SUBST:
+        return "cond_subst_"
+
+    return ""
+
+def recordSubstitution(state, addr, value, type):
+    state.globals[getPrefix(type) + str(addr)] = value
+
+def getSubstitution(state, addr, type: SubstType):
+    key = getPrefix(type) + str(addr)
+
+    if key in state.globals.keys():
+        return state.globals[key]
 
     return None
 
@@ -83,7 +103,6 @@ class Scanner:
         self.cur_id = 0
         self.n_alias = 0
         self.n_constr = 0
-        self.n_subst = 0
         self.n_hist = 0
 
         self.states = []
@@ -182,7 +201,7 @@ class Scanner:
         for cond, source, target in zip(state.history.jump_guards, state.history.jump_sources, state.history.jump_targets):
             # Check if the condition contains an if-then-else statement,
             # and substitute it with the appropriate choice for this state.
-            subst = getSubstitution(state, source)
+            subst = getSubstitution(state, source, SubstType.COND_SUBST)
             if subst != None:
                 cond = subst
 
@@ -288,8 +307,7 @@ class Scanner:
                 s.history.jump_guard = a.expr
             else:
                 # Record a substitution to be made at this address in the new state.
-                s.globals[f"subst_{self.n_subst}"] = (addr, a.expr)
-                self.n_subst += 1
+                recordSubstitution(s, addr, a.expr, SubstType.ADDR_SUBST)
 
             # Record the conditions of the new state.
             for constraint in a.conditions:
@@ -346,14 +364,14 @@ class Scanner:
 
         # If the state has been manually splitted after this load, we already
         # have a value for this load: just use that.
-        subst = getSubstitution(state, state.addr, addressSubst=False)
+        subst = getSubstitution(state, state.addr,SubstType.VALUE_SUBST)
         if subst != None:
             state.inspect.mem_read_expr = subst
             return
 
         # If the state has been manually splitted _on_ this load, use
         # the substitution recorded for the address.
-        subst = getSubstitution(state, state.addr)
+        subst = getSubstitution(state, state.addr, SubstType.ADDR_SUBST)
         if subst != None:
             load_addr = subst
             l.info(f" Applied substitution! {load_addr}")
@@ -383,8 +401,7 @@ class Scanner:
                                     annotations=(annotation,))
 
             # Save it, in case we later need to split this state manually.
-            self.cur_state.globals[f'valuesubst_{self.n_subst}'] = (state.addr, load_val)
-            self.n_subst += 1
+            recordSubstitution(self.cur_state, state.addr, load_val, SubstType.VALUE_SUBST)
 
         # Overwrite loaded val.
         state.inspect.mem_read_expr = load_val
@@ -436,7 +453,7 @@ class Scanner:
         # Check if there is a substitution to be made for this address.
         # This can happen if the state comes from a manual splitting.
         is_subst = False
-        subst = getSubstitution(state, state.addr)
+        subst = getSubstitution(state, state.addr, SubstType.ADDR_SUBST)
         if subst != None:
             store_addr = subst
         else:
