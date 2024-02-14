@@ -476,7 +476,7 @@ class Scanner:
         func_ptr_ast = state.inspect.exit_target
 
         # First case: symbolic target
-        if func_ptr_ast.symbolic:
+        if is_sym_expr(func_ptr_ast):
             # Whenever the target is symbolic, and it is not a return, we
             # know we are performing an indirect call.
             block = state.block()
@@ -504,7 +504,7 @@ class Scanner:
             raise SplitException
 
         # Second case: jump to indirect thunk
-        elif state.inspect.exit_target.args[0] in self.thunk_list:
+        elif isinstance(func_ptr_ast, claripy.ast.base.Base) and state.inspect.exit_target.args[0] in self.thunk_list:
             exit_target = state.inspect.exit_target.args[0]
             func_ptr_reg = self.thunk_list[exit_target]
             func_ptr_ast = getattr(state.regs, func_ptr_reg)
