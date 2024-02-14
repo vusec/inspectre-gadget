@@ -109,7 +109,7 @@ Transmission:
 
 Register Requirements: {t.all_requirements.regs}
 Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
-Branches: {t.branches}
+Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
 {'-'*48}
 """)
     o.close()
@@ -131,7 +131,7 @@ Reg: {t.reg}
 Expr: {t.expr}
 
 Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
-Branches: {t.branches}
+Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
 
 """)
 
