@@ -437,7 +437,7 @@ class Scanner:
         store_addr = state.inspect.mem_write_address
         store_len = state.inspect.mem_write_length
         stored_value = state.inspect.mem_write_expr
-        l.warning(f"Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
+        l.error(f"Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
         l.info(state.solver.constraints)
 
         # Don't execute the store architecturally.
@@ -454,12 +454,12 @@ class Scanner:
             addr_asts = split_conditions(store_addr, simplify=False, addr=state.addr)
             # value_asts = split_conditions(stored_value, simplify=False, addr=state.addr)
 
-            l.warning(f" After ast transformation: [{store_addr}] = {stored_value}")
+            l.error(f" After ast transformation: [{store_addr}] = {stored_value}")
             if len(addr_asts) > 1:
                 self.split_state(state, addr_asts, state.addr)
                 raise SplitException
 
-        l.warning(f"After substitution: Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
+        l.error(f"After substitution: Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
 
         # Save this store in the angr state, so that future loads can check for
         # aliasing.
@@ -482,28 +482,13 @@ class Scanner:
         """
         Hook on indirect calls, for Tainted Function Pointers.
         """
-        l.info(f"Exit hook @{hex(state.scratch.ins_addr)}")
+        l.warning(f"Exit hook @{hex(state.scratch.ins_addr)}")
         func_ptr_ast = state.inspect.exit_target
 
         if not isinstance(func_ptr_ast, claripy.ast.base.Base):
             # Non-AST target, skip.
             # TODO: inspect the target to see if it's an indirect call thunk?
             return
-
-        # Check if we need to substitute the expression (happens with manual splits).
-        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.CALL_SUBST)
-        if subst != None:
-            func_ptr_ast = subst
-        else:
-            # Check if the symbolic address contains an if-then-else node.
-            asts = split_conditions(func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
-            assert(len(asts) >= 1)
-
-            l.info(f"  After transformations: {func_ptr_ast}")
-
-            if len(asts) > 1:
-                self.split_state(state, asts, state.scratch.ins_addr, branch_split=False, subst_type=SubstType.CALL_SUBST)
-                raise SplitException
 
         # First case: symbolic target
         if func_ptr_ast.symbolic:
@@ -533,6 +518,23 @@ class Scanner:
 
         else:
             return
+
+        # Check if we need to substitute the expression (happens with manual splits).
+        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.CALL_SUBST)
+        if subst != None:
+            l.warning(f"Substituting {func_ptr_ast}   with   {subst}")
+            func_ptr_ast = subst
+        else:
+            # Check if the symbolic address contains an if-then-else node.
+            asts = split_conditions(func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
+            assert(len(asts) >= 1)
+
+            l.warning(f"  Before transformations: {func_ptr_ast}")
+            l.warning(f"  After transformations: {asts}")
+
+            if len(asts) > 1:
+                self.split_state(state, asts, state.scratch.ins_addr, branch_split=False, subst_type=SubstType.CALL_SUBST)
+                raise SplitException
 
         # process the TFP
         self.check_tfp(state, func_ptr_reg, func_ptr_ast)
