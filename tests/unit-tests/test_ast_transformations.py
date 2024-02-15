@@ -50,6 +50,12 @@ class MatchSignExtTestCase(unittest.TestCase):
         self.assertTrue(res.structurally_match(expected))
         self.assertTrue(getSignExtAnnotation(res.args[1]) != None)
 
+        res = match_sign_ext(claripy.Concat(y, x[7:7],x[7:7],x[7:7],x[7:7],z), 0)
+        expected = claripy.Concat(y, x[7:7],x[7:7],x[7:7],x[7:7],z)
+
+        self.assertTrue(res.structurally_match(expected))
+        self.assertTrue(getSignExtAnnotation(res.args[1]) == None)
+
 
     def test_sign_ext_to_sum(self):
         x = claripy.BVS("x", 8)

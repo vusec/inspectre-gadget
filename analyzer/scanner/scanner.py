@@ -316,10 +316,17 @@ class Scanner:
         is used in a Load/Store/Branch instructions.
         """
         if state.inspect.expr_result.op == "Concat":
+            l.info(f"Expr Hook (Concat) @{hex(state.scratch.ins_addr)} :")
+            l.info(f"   Before:  {state.inspect.expr_result}")
             state.inspect.expr_result = match_sign_ext(state.inspect.expr_result, state.scratch.ins_addr)
+            l.info(f"   After:  {state.inspect.expr_result}")
 
         elif state.inspect.expr_result.op == "SignExt":
+            l.info(f"Expr Hook (SignExt) @{hex(state.scratch.ins_addr)} :")
+            l.info(f"   Before:  {state.inspect.expr_result}")
             state.inspect.expr_result = sign_ext_to_sum(state.inspect.expr_result, state.scratch.ins_addr)
+            l.info(f"   After:  {state.inspect.expr_result}")
+
 
         elif state.inspect.expr_result.op == "If":
             # We assume any expression that is directly translated as an if-then-else statement is
@@ -475,7 +482,7 @@ class Scanner:
         """
         Hook on indirect calls, for Tainted Function Pointers.
         """
-        l.info("Exit hook")
+        l.info(f"Exit hook @{hex(state.scratch.ins_addr)}")
         func_ptr_ast = state.inspect.exit_target
 
         if not isinstance(func_ptr_ast, claripy.ast.base.Base):

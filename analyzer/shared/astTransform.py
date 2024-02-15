@@ -302,7 +302,7 @@ def match_sign_ext(ast: claripy.BV, addr):
             arg = match_sign_ext(ast.args[i], addr)
 
             # Symbol equal to previous one: add 1 to length.
-            if is_sym_expr(arg) and arg.size() == 1 and arg.structurally_match(sign_sym):
+            if is_sym_expr(arg) and arg.op == "Extract" and arg.size() == 1 and arg.structurally_match(sign_sym):
                 sign_ext_size += 1
             # Symbol different to previous one: push new arg.
             else:
@@ -311,18 +311,26 @@ def match_sign_ext(ast: claripy.BV, addr):
                 elif sign_ext_size == 0:
                     new_args.append(sign_sym)
                     sign_sym = arg
-                else:
-                    if_expr = claripy.If(sign_sym == 0,
-                            claripy.Concat(claripy.BVV(0, sign_ext_size+1), arg),
-                            claripy.Concat(claripy.BVV((2**(sign_ext_size+1))-1, sign_ext_size+1), arg))
-                    if_expr = if_expr.annotate(SignExtAnnotation(addr))
-                    new_args.append(if_expr)
+                elif is_sym_expr(arg) and arg.structurally_match(sign_sym.args[2]):
+                        if_expr = claripy.If(sign_sym == 0,
+                                claripy.Concat(claripy.BVV(0, sign_ext_size+1), arg),
+                                claripy.Concat(claripy.BVV((2**(sign_ext_size+1))-1, sign_ext_size+1), arg))
+                        if_expr = if_expr.annotate(SignExtAnnotation(addr))
+                        new_args.append(if_expr)
 
-                    sign_sym = None
+                        sign_sym = None
+                        sign_ext_size = 0
+                else:
+                    for i in range(sign_ext_size + 1):
+                        new_args.append(sign_sym)
+
+                    sign_sym = arg
                     sign_ext_size = 0
 
         if sign_sym != None:
-            new_args.append(sign_sym)
+            for i in range(sign_ext_size + 1):
+                new_args.append(sign_sym)
+
 
         new_expr = claripy.Concat(*new_args)
 
