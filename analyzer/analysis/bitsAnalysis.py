@@ -551,49 +551,54 @@ def op_extract(ast, flow_maps):
         return base_map
 
 def op_and(ast, flow_maps):
-    # arg0 & arg1
+    # arg0 & arg1 & ...
 
-    if flow_maps[0]:
-        base_map = flow_maps[0]
-        other_idx = 1
-    else:
-        base_map = flow_maps[1]
-        other_idx = 0
+    # get the first flow_map
+    for map in flow_maps:
+        if map:
+            base_map = map
+            break
 
-    if ast.args[other_idx].symbolic:
-        # Symbolic and, merge inferable bits if any and convert to spread
-        if flow_maps[other_idx]:
-            base_map.merge_inferable_bits(flow_maps[other_idx])
+    for idx, map in enumerate(flow_maps):
+        if map == base_map:
+            continue
+
+        if ast.args[idx].symbolic:
+            # Symbolic and, merge inferable bits if any and convert to spread
+            if map:
+                base_map.merge_inferable_bits(map)
+            else:
+                base_map.convert_to_spread()
         else:
-            base_map.convert_to_spread()
-
-    else:
-        # apply the mask
-        mask = ast.args[other_idx].args[0]
-        base_map.and_mask(mask)
+            # apply the mask
+            mask = ast.args[idx].args[0]
+            base_map.and_mask(mask)
 
     return base_map
 
 def op_or(ast, flow_maps):
-    # arg0 | arg1
+    # arg0 | arg1 | ...
 
-    if flow_maps[0]:
-        base_map = flow_maps[0]
-        other_idx = 1
-    else:
-        base_map = flow_maps[1]
-        other_idx = 0
+    # get the first flow_map
+    for map in flow_maps:
+        if map:
+            base_map = map
+            break
 
-    if ast.args[other_idx].symbolic:
-        # Symbolic and, merge inferable bits if any and convert to spread
-        if flow_maps[other_idx]:
-            base_map.merge_inferable_bits(flow_maps[other_idx])
+    for idx, map in enumerate(flow_maps):
+        if map == base_map:
+            continue
+
+        if ast.args[idx].symbolic:
+            # Symbolic or, merge inferable bits if any and convert to spread
+            if map:
+                base_map.merge_inferable_bits(map)
+            else:
+                base_map.convert_to_spread()
         else:
-            base_map.convert_to_spread()
-    else:
-        # apply the mask
-        mask = ast.args[other_idx].args[0]
-        base_map.or_mask(mask)
+            # apply the mask
+            mask = ast.args[idx].args[0]
+            base_map.or_mask(mask)
 
     return base_map
 
