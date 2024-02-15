@@ -161,7 +161,7 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
             new_expr = new_expr.replace(ast.args[i], combination[i].expr)
             new_expr = remove_spurious_if_annotations(new_expr, ast.args[i], combination[i].expr)
             new_conds.extend(combination[i].conditions)
-        splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
+        splitted_asts.append(ConditionalAst(expr=dedup_annotations(new_expr), conds=new_conds))
 
     return splitted_asts
 

@@ -317,16 +317,15 @@ class Scanner:
         """
         if state.inspect.expr_result.op == "Concat":
             l.info(f"Expr Hook (Concat) @{hex(state.scratch.ins_addr)} :")
-            l.info(f"   Before:  {state.inspect.expr_result}")
+            l.info(f"   Before:  {state.inspect.expr_result}  {state.inspect.expr_result.annotations}")
             state.inspect.expr_result = match_sign_ext(state.inspect.expr_result, state.scratch.ins_addr)
-            l.info(f"   After:  {state.inspect.expr_result}")
+            l.info(f"   After:  {state.inspect.expr_result}  {state.inspect.expr_result.annotations}")
 
         elif state.inspect.expr_result.op == "SignExt":
             l.info(f"Expr Hook (SignExt) @{hex(state.scratch.ins_addr)} :")
-            l.info(f"   Before:  {state.inspect.expr_result}")
+            l.info(f"   Before:  {state.inspect.expr_result}  {state.inspect.expr_result.annotations}")
             state.inspect.expr_result = sign_ext_to_sum(state.inspect.expr_result, state.scratch.ins_addr)
-            l.info(f"   After:  {state.inspect.expr_result}")
-
+            l.info(f"   After:  {state.inspect.expr_result}  {state.inspect.expr_result.annotations}")
 
         elif state.inspect.expr_result.op == "If":
             # We assume any expression that is directly translated as an if-then-else statement is
@@ -352,7 +351,7 @@ class Scanner:
         """
         load_addr = state.inspect.mem_read_address
         load_len = state.inspect.mem_read_length
-        l.info(f"Load@{hex(state.addr)}: {load_addr}")
+        l.info(f"Load@{hex(state.addr)}: {load_addr}  {load_addr.annotations}")
         l.info(state.solver.constraints)
 
         # If the state has been manually splitted after this load, we already
@@ -367,7 +366,7 @@ class Scanner:
         subst = getSubstitution(state, state.addr, SubstType.ADDR_SUBST)
         if subst != None:
             load_addr = subst
-            l.info(f" Applied substitution! {load_addr}")
+            l.info(f" Applied substitution! {load_addr}  {load_addr.annotations}")
         else:
             # If the state has _not_ been manually splitted, check if we
             # should split it.
@@ -385,7 +384,7 @@ class Scanner:
         if alias_store:
             # Perform Store-to-Load forwarding.
             load_val = stored_val
-            l.info(f"Forwarded ({load_val}) from store @({alias_store.addr})")
+            l.info(f"Forwarded ({load_val} {load_val.annotations}) from store @({alias_store.addr})")
         else:
             # Create a new symbol to represent the loaded value.
             annotation = propagate_annotations(load_addr, state.addr)

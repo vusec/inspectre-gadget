@@ -144,14 +144,14 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
     might contain multiple transmissions.
     """
     l.warning(f"========= [AST] ==========")
-    l.warning(f"Analyzing: {potential_t.expr}")
+    l.warning(f"Analyzing @{hex(potential_t.pc)}: {potential_t.expr}")
 
     # Extract members of the transmission.
     canonical_exprs = canonicalize(potential_t.expr, potential_t.pc)
 
     transmissions = []
     for canonical_expr in canonical_exprs:
-        l.warning(f"POTENTIAL TRANSMISSION: {canonical_expr}")
+        l.warning(f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
         members = extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {potential_t.aliases}")
 
