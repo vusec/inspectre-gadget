@@ -11,6 +11,7 @@ from ..shared.logger import *
 from ..shared.config import *
 from ..shared.astTransform import *
 from ..analysis.dependencyGraph import DepGraph, is_expr_controlled
+from ..scanner.annotations import get_load_annotation, LoadAnnotation
 # autopep8: on
 
 l = get_logger("TFPAnalysis")
@@ -33,6 +34,21 @@ def is_same_var(expr: claripy.BV, reg):
 
     l.info(f"Testing {sym.args[0]} against {reg}")
     return sym.args[0] == reg
+
+def is_potential_secret(d: DepGraph, expr: claripy.BV, tfp_expr: claripy.BV):
+    """
+    Check if the expression is independent from the tfp and contains loads
+    whose address is independent from the tfp.
+    """
+    for v in get_vars(expr):
+        if not (d.is_independent(tfp_expr, v, check_constraints=True, check_addr=True) ):
+            return False
+
+        anno = get_load_annotation(v)
+        if anno != None and not (d.is_independent(tfp_expr, anno.read_address_ast, check_constraints=True, check_addr=True)):
+            return False
+
+    return True
 
 
 def analyse(t: TaintedFunctionPointer):
@@ -98,6 +114,9 @@ def analyse(t: TaintedFunctionPointer):
             elif is_sym_var(tfp.registers[r].expr) and is_same_var(tfp.registers[r].expr, tfp.registers[r].reg):
                 tfp.registers[r].control = TFPRegisterControlType.UNMODIFIED
                 tfp.unmodified.append(r)
+            elif is_potential_secret(d, tfp.registers[r].expr, tfp.expr):
+                tfp.registers[r].control = TFPRegisterControlType.POTENTIAL_SECRET
+                tfp.secrets.append(r)
             else:
                 tfp.registers[r].control = TFPRegisterControlType.CONTROLLED
                 tfp.controlled.append(r)

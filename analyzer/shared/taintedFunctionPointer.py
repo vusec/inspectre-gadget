@@ -15,7 +15,8 @@ class TFPRegisterControlType(Enum):
     DEPENDS_ON_TFP_EXPR = 4,
     INDIRECTLY_DEPENDS_ON_TFP_EXPR = 5,
     IS_TFP_REGISTER = 6,
-    UNKNOWN = 7
+    POTENTIAL_SECRET = 7,
+    UNKNOWN = 8
 
 class TFPRegister():
     control: TFPRegisterControlType
@@ -98,6 +99,7 @@ class TaintedFunctionPointer():
         self.uncontrolled = []
         self.unmodified = []
         self.aliasing = []
+        self.secrets = []
 
         self.registers = dict()
 
@@ -117,9 +119,10 @@ class TaintedFunctionPointer():
         controlled: {self.controlled}
         uncontrolled: {self.uncontrolled}
         unmodified: {self.unmodified}
+        secrets: {self.secrets}
         aliasing: {self.aliasing}
 
-        bbls: {self.bbls}
+        bbls: {[hex(x) for x in self.bbls]}
         branches: {ordered_branches(self)}
         constraints: {ordered_constraints(self)}
         aliases: {self.aliases}
@@ -144,10 +147,11 @@ class TaintedFunctionPointer():
         ("constraints", ordered_constraints(self)),
         ("aliases", self.aliases),
         ("requirements", self.requirements),
-        ("bbls", self.bbls),
+        ("bbls", [hex(x) for x in self.bbls]),
         ("controlled", self.controlled),
         ("uncontrolled", self.uncontrolled),
         ("unmodified", self.unmodified),
+        ("secrets", self.secrets),
         ("aliasing", self.aliasing)
         ])
 
@@ -171,6 +175,7 @@ class TaintedFunctionPointer():
         new_tfp.controlled.extend(self.controlled)
         new_tfp.uncontrolled.extend(self.uncontrolled)
         new_tfp.unmodified.extend(self.unmodified)
+        new_tfp.secrets.extend(self.secrets)
         new_tfp.aliasing.extend(self.aliasing)
 
         for r in self.registers:

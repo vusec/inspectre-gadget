@@ -146,6 +146,7 @@ Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
     o.write(f"\n")
     o.write(f"Uncontrolled Regs: {t.uncontrolled}\n")
     o.write(f"Unmodified Regs: {t.unmodified}\n")
+    o.write(f"Potential Secrets: {t.secrets}\n")
 
     o.write(f"""
 {'-'*48}
