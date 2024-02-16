@@ -24,4 +24,4 @@ for l in f:
 
 for e in errors:
     if not "You can" in e and not "No bytes" in e:
-        print(errors[e] + '\t' + e)
+        print(errors[e], '\t', e)
