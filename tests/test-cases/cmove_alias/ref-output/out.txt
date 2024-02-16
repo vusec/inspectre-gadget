@@ -34,10 +34,10 @@ Disassembly of section .text:
 == REASONER ==
 [-] Imported 3 gadgets
 [-] Performing exploitability analysis...
-Found 2 exploitable gadgets!
+Found 1 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
-Found 2 exploitable gadgets!
+Found 1 exploitable gadgets!
 [-] Performing exploitability analysis assuming the SLAM covert channel...
-Found 3 exploitable gadgets!
+Found 2 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

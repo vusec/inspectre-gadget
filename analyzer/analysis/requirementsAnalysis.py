@@ -127,7 +127,7 @@ def analyse(t: Transmission):
         t.branch_requirements.merge(get_requirements(b[1]))
 
     t.constraint_requirements = Requirements()
-    for addr,c in t.constraints:
+    for addr,c,ctype in t.constraints:
         t.constraint_requirements.merge(get_requirements(c))
 
     t.all_requirements = Requirements()

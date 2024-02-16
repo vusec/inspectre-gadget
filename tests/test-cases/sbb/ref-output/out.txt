@@ -1,0 +1,38 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <sbb_instruction>:
+ 4000000:	48 8b 47 28          	mov    rax,QWORD PTR [rdi+0x28]
+ 4000004:	89 c3                	mov    ebx,eax
+ 4000006:	48 83 fb 10          	cmp    rbx,0x10
+ 400000a:	48 19 db             	sbb    rbx,rbx
+ 400000d:	21 c3                	and    ebx,eax
+ 400000f:	4d 8b 14 19          	mov    r10,QWORD PTR [r9+rbx*1]
+ 4000013:	e9 00 00 00 00       	jmp    4000018 <sbb_instruction+0x18>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 1 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 r9 + (0#32 .. LOAD_64[<BV64 rdi + 0x28>]_20[31:0])>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 1 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

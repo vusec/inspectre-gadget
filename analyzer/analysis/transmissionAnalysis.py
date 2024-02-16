@@ -107,18 +107,16 @@ def distribute_shifts(ast: claripy.BV):
     return new_expr
 
 
-def canonicalize(expr):
+def canonicalize(expr, addr):
     """
     Reduce an expression to a "canonical" form (sum of independent members).
     """
     # Guarantees:
-    # 1. all sums
-    # 2. distribution of * and / over +
+    # 1. no if-then-else statements
+    # 2. all sums
+    # 3. distribution of * and / over +
     l.info(f"CANONICALIZING: {expr}")
-    simplified = match_sign_ext(expr)
-    simplified = sign_ext_to_sum(simplified)
-    simplified = claripy.simplify(simplified)
-    splitted = split_if_statements(simplified)
+    splitted = split_conditions(expr, simplify=True, addr=addr)
 
     for s in splitted:
         s.expr = concat_to_shift(s.expr)
@@ -146,14 +144,14 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
     might contain multiple transmissions.
     """
     l.warning(f"========= [AST] ==========")
-    l.warning(f"Analyzing: {potential_t.expr}")
+    l.warning(f"Analyzing @{hex(potential_t.pc)}: {potential_t.expr}")
 
     # Extract members of the transmission.
-    canonical_exprs = canonicalize(potential_t.expr)
+    canonical_exprs = canonicalize(potential_t.expr, potential_t.pc)
 
     transmissions = []
     for canonical_expr in canonical_exprs:
-        l.warning(f"POTENTIAL TRANSMISSION: {canonical_expr}")
+        l.warning(f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
         members = extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {potential_t.aliases}")
 
@@ -183,7 +181,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 t.transmission.expr = canonical_expr.expr
                 t.max_load_depth = get_load_depth(t.transmission.expr)
                 # Append CMOV conditions.
-                t.constraints.extend([(t.pc, x) for x in canonical_expr.conditions])
+                t.constraints.extend(canonical_expr.conditions)
                 # Append the dependency graph.
                 t.properties["deps"] = d
 

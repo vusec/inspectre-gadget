@@ -108,8 +108,8 @@ Transmission:
   - Range: {t.transmission.range}
 
 Register Requirements: {t.all_requirements.regs}
-Constraints: {[(hex(addr),cond) for addr,cond in t.constraints]}
-Branches: {t.branches}
+Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
+Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
 {'-'*48}
 """)
     o.close()
@@ -130,8 +130,8 @@ uuid: {t.uuid}
 Reg: {t.reg}
 Expr: {t.expr}
 
-Constraints: {[(hex(addr),cond) for addr,cond in t.constraints]}
-Branches: {t.branches}
+Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
+Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
 
 """)
 
@@ -146,6 +146,7 @@ Branches: {t.branches}
     o.write(f"\n")
     o.write(f"Uncontrolled Regs: {t.uncontrolled}\n")
     o.write(f"Unmodified Regs: {t.unmodified}\n")
+    o.write(f"Potential Secrets: {t.secrets}\n")
 
     o.write(f"""
 {'-'*48}

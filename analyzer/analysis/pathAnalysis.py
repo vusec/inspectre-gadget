@@ -40,30 +40,30 @@ def analyse(t: Transmission):
         br_deps = d.get_all_deps(get_vars(condition), include_constraints=False)
 
         if len(br_deps.intersection(base_deps)):
-            t.base.branches.append((addr, condition))
+            t.base.branches.append((addr, condition, taken))
         if len(br_deps.intersection(secret_addr_deps)):
-            t.secret_address.branches.append((addr, condition))
+            t.secret_address.branches.append((addr, condition, taken))
         if len(br_deps.intersection(transmission_deps)):
-            t.transmission.branches.append((addr, condition))
+            t.transmission.branches.append((addr, condition, taken))
         if len(br_deps.intersection(secret_deps)):
-            t.transmitted_secret.branches.append((addr, condition))
+            t.transmitted_secret.branches.append((addr, condition, taken))
 
     l.warning(f"Base branches: {'None' if t.base == None else t.base.branches}")
     l.warning(f"Secret Addr branches: {t.secret_address.branches}")
     l.warning(f"Transmitted Secret branches: {t.transmitted_secret.branches}")
     l.warning(f"Transmission branches: {t.transmission.branches}")
 
-    for addr,cond in t.constraints:
+    for addr,cond,ctype in t.constraints:
         constr_deps = d.get_all_deps(get_vars(cond), include_constraints=False)
 
         if len(constr_deps.intersection(base_deps)):
-            t.base.constraints.append(cond)
+            t.base.constraints.append((addr,cond,ctype))
         if len(constr_deps.intersection(secret_addr_deps)):
-            t.secret_address.constraints.append(cond)
+            t.secret_address.constraints.append((addr,cond,ctype))
         if len(constr_deps.intersection(transmission_deps)):
-            t.transmission.constraints.append(cond)
+            t.transmission.constraints.append((addr,cond,ctype))
         if len(constr_deps.intersection(secret_deps)):
-            t.transmitted_secret.constraints.append(cond)
+            t.transmitted_secret.constraints.append((addr,cond,ctype))
 
     l.warning(f"Base constraints: {'None' if t.base == None else t.base.constraints}")
     l.warning(f"Secret Addr constraints: {t.secret_address.constraints}")
@@ -96,11 +96,11 @@ def analyse_tfp(t: TaintedFunctionPointer):
             if len(br_deps.intersection(reg_deps[t.reg])):
                 t.registers[r].branches.append((addr, condition, taken))
 
-    for addr,c in t.constraints:
+    for addr,c,ctype in t.constraints:
         constr_deps = d.get_all_deps(get_vars(c), include_constraints=False)
 
         for r in t.registers:
             if len(constr_deps.intersection(reg_deps[t.reg])):
-                t.registers[r].constraints.append((addr, c))
+                t.registers[r].constraints.append((addr, c,ctype))
 
     l.warning("==========================")

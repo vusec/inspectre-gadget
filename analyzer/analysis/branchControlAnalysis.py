@@ -9,6 +9,7 @@ import claripy
 import sys
 
 from .dependencyGraph import DepGraph, is_expr_uncontrolled
+from ..shared.astTransform import ConditionType
 
 # autopep8: off
 from ..scanner.annotations import *
@@ -64,8 +65,9 @@ def get_branch_control(t: Transmission, d: DepGraph, constraints: bool):
 def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
         constraint_expr = claripy.BVV(0, 1)
         for c in t.constraints:
-             for v in get_vars(c[1]):
-                constraint_expr = claripy.Concat(constraint_expr, v)
+             if c[2] == ConditionType.CMOVE:
+                for v in get_vars(c[1]):
+                    constraint_expr = claripy.Concat(constraint_expr, v)
 
 
         l.info(f"Analyzing {constraint_expr} vs { t.transmitted_secret.expr}")

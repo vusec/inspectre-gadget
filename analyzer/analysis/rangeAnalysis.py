@@ -103,7 +103,7 @@ def analyse(t: Transmission):
 def analyse_tfp(t: TaintedFunctionPointer):
     l.warning(f"========= [RANGE] ==========")
     for r in t.registers:
-        if t.registers[r].control == TFPRegisterControlType.CONTROLLED:
+        if t.registers[r].control == TFPRegisterControlType.CONTROLLED or t.registers[r].control == TFPRegisterControlType.POTENTIAL_SECRET:
             t.registers[r].range = get_ast_ranges([x[1] for x in t.registers[r].constraints], t.registers[r].expr)
             # TODO: also add for unmodified? in case of constraints
 

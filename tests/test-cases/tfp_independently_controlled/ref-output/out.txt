@@ -1,0 +1,44 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <tfp_independently_controllable>:
+ 4000000:	48 8b 37             	mov    rsi,QWORD PTR [rdi]
+ 4000003:	48 8b 12             	mov    rdx,QWORD PTR [rdx]
+ 4000006:	48 8b 1e             	mov    rbx,QWORD PTR [rsi]
+ 4000009:	48 01 f1             	add    rcx,rsi
+ 400000c:	48 01 d1             	add    rcx,rdx
+ 400000f:	48 8b 47 10          	mov    rax,QWORD PTR [rdi+0x10]
+ 4000013:	ff d0                	call   rax
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Removing non-writable memory...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 1 tainted function pointers.
+[MAIN]  Extracted 2 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdi>]_20>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rdi + 0x10>]_23>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+[MAIN]  Extracted 1 tfps.
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped CSV to tfp.csv
+
+== REASONER ==
+[-] Imported 2 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 2 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

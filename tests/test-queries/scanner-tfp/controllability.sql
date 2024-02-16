@@ -2,7 +2,8 @@ SELECT
     pc,
     controlled,
     uncontrolled,
-    unmodified
+    unmodified,
+    secrets
 FROM
     tfps
 order by pc, expr, constraints, branches

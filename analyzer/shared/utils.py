@@ -71,21 +71,34 @@ def report_unsupported(error: Exception, where="dunno", start_addr="dunno", erro
     o.write("\n")
     o.close()
 
+def get_outcome(cond, source, target):
+    if cond.concrete:
+        if cond.is_true():
+            return "Taken"
+        else:
+            return "Not Taken"
+    elif target.symbolic:
+        return "Indirect JMP"
+    else:
+        # TODO: this is an approximation, find a better way to
+        # understand if the branch was taken or not.
+        target_addr = target.concrete_value
+        if target_addr == source + 2:
+            return "Not Taken"
+        else:
+            return "Taken"
+
 def branch_outcomes(history):
     outcomes = []
     for cond, source, target in zip(history.jump_guards, history.jump_sources, history.jump_targets):
-        if cond.concrete:
-            if cond.is_true():
-                outcomes.append("Taken")
-            else:
-                outcomes.append("Not Taken")
-        elif target.symbolic:
-            outcomes.append("Indirect JMP")
-        else:
-            target_addr = target.concrete_value
-            if target_addr == source + 2:
-                outcomes.append("Not Taken")
-            else:
-                outcomes.append("Taken")
+        outcomes.append(get_outcome(cond, source, target))
 
     return outcomes
+
+def ordered_branches(obj):
+    obj.branches = sorted(obj.branches, key=lambda x: x[0])
+    return [(hex(addr), cond, taken) for addr, cond, taken in obj.branches]
+
+def ordered_constraints(obj):
+    obj.constraints = sorted(obj.constraints, key=lambda x: x[0])
+    return [(hex(addr), cond, str(ctype)) for addr, cond, ctype in obj.constraints]
