@@ -12,7 +12,7 @@
 400001a  jmp     rax ; {Attacker@rdx, Secret@0x4000012} > TRANSMISSION
 
 ------------------------------------------------
-uuid: 12c7c347-6160-49f1-a173-16d2e6507caf
+uuid: 1ee556ae-b713-48fe-84a9-d9ccf46cf01c
 
 Secret Address:
   - Expr: <BV64 rdi>
@@ -31,7 +31,7 @@ Transmission:
   - Expr: <BV64 rdx + (0#48 .. LOAD_16[<BV64 rdi>]_20)>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rdi>, <BV64 rdx>}
+Register Requirements: {<BV64 rdx>, <BV64 rdi>}
 Constraints: []
-Branches: [(67108868, <Bool r8 != 0x0>, 'Not Taken'), (67108874, <Bool r8 != 0x1>, 'Not Taken'), (67108880, <Bool r8 != 0x2>, 'Not Taken')]
+Branches: [('0x4000004', <Bool r8 != 0x0>, 'Not Taken'), ('0x400000a', <Bool r8 != 0x1>, 'Not Taken'), ('0x4000010', <Bool r8 != 0x2>, 'Not Taken')]
 ------------------------------------------------

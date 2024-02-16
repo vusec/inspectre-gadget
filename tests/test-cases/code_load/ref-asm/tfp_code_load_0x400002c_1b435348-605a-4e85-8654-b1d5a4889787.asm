@@ -10,13 +10,13 @@
 400002c  jmp     qword ptr [rdi] ; {Attacker@0x400002c} > TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: 6bdbbb4a-390b-4d91-9700-c013b42d2c94
+uuid: 1b435348-605a-4e85-8654-b1d5a4889787
 
 Reg: rdi
 Expr: <BV64 LOAD_64[<BV64 rdi>]_21>
 
 Constraints: []
-Branches: [(67108868, <Bool r8 != 0x0>, 'Not Taken'), (67108874, <Bool r8 != 0x1>, 'Not Taken'), (67108880, <Bool r8 == 0x2>, 'Taken')]
+Branches: [('0x4000004', <Bool r8 != 0x0>, 'Not Taken'), ('0x400000a', <Bool r8 != 0x1>, 'Not Taken'), ('0x4000010', <Bool r8 == 0x2>, 'Taken')]
 
 CONTROLLED:
 
@@ -24,5 +24,6 @@ REGS ALIASING WITH TFP:
 
 Uncontrolled Regs: ['rbp', 'rsp']
 Unmodified Regs: ['rax', 'rbx', 'rcx', 'rdx', 'rsi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', 'r15']
+Potential Secrets: []
 
 ------------------------------------------------

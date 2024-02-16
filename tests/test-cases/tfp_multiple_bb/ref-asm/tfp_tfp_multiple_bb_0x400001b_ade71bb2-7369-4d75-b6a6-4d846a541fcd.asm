@@ -10,22 +10,20 @@
 400001b  jmp     __x86_indirect_thunk_array ; {Attacker@rax} > TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: 87a7bb59-a51e-4f5c-b48f-eefe5433a966
+uuid: ade71bb2-7369-4d75-b6a6-4d846a541fcd
 
 Reg: rax
 Expr: <BV64 rax>
 
 Constraints: []
-Branches: [(67108871, <Bool rax != 0x0>, 'Not Taken'), (67108873, <Bool True>, 'Taken')]
+Branches: [('0x4000007', <Bool rax != 0x0>, 'Not Taken'), ('0x4000009', <Bool True>, 'Taken')]
 
 CONTROLLED:
-r8: <BV64 LOAD_64[<BV64 rdi>]_20>
-r10: <BV64 LOAD_64[<BV64 rdi + 0xfffffffffffffff0>]_21>
-r11: <BV64 LOAD_64[<BV64 LOAD_64[<BV64 rdi + 0xfffffffffffffff0>]_21>]_22>
 
 REGS ALIASING WITH TFP:
 
 Uncontrolled Regs: ['rbp', 'rsp']
 Unmodified Regs: ['rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'r9', 'r12', 'r13', 'r14', 'r15']
+Potential Secrets: ['r8', 'r10', 'r11']
 
 ------------------------------------------------

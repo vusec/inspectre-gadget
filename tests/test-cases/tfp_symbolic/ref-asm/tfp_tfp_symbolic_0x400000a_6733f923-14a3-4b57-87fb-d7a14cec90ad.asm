@@ -7,13 +7,13 @@
 400000a  jmp     rax ; {Attacker@0x4000000} > TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: 20c3669d-5fa3-454b-a941-a9377441d30d
+uuid: 6733f923-14a3-4b57-87fb-d7a14cec90ad
 
 Reg: rax
 Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
 
 Constraints: []
-Branches: [(67108872, <Bool r15 != 0x0>, 'Not Taken')]
+Branches: [('0x4000008', <Bool r15 != 0x0>, 'Not Taken')]
 
 CONTROLLED:
 
@@ -21,5 +21,6 @@ REGS ALIASING WITH TFP:
 
 Uncontrolled Regs: ['rbp', 'rsp']
 Unmodified Regs: ['rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', 'r15']
+Potential Secrets: []
 
 ------------------------------------------------
