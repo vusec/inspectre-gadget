@@ -40,15 +40,18 @@ def is_potential_secret(d: DepGraph, expr: claripy.BV, tfp_expr: claripy.BV):
     Check if the expression is independent from the tfp and contains loads
     whose address is independent from the tfp.
     """
+    has_load_anno = False
     for v in get_vars(expr):
         if not (d.is_independent(tfp_expr, v, check_constraints=True, check_addr=True) ):
             return False
 
         anno = get_load_annotation(v)
-        if anno != None and not (d.is_independent(tfp_expr, anno.read_address_ast, check_constraints=True, check_addr=True)):
-            return False
+        if anno != None:
+            has_load_anno = True
+            if not (d.is_independent(tfp_expr, anno.read_address_ast, check_constraints=True, check_addr=True)):
+                return False
 
-    return True
+    return has_load_anno
 
 
 def analyse(t: TaintedFunctionPointer):
