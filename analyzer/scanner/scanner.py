@@ -54,7 +54,8 @@ class SubstType(Enum):
     VALUE_SUBST = 1,
     COND_SUBST = 2,
     CALL_SUBST = 3,
-    UNKNOWN_SUBST = 4
+    STORED_VAL_SUBST = 4,
+    UNKNOWN_SUBST = 5
 
 def getPrefix(stype: SubstType):
     if stype == SubstType.ADDR_SUBST:
@@ -65,6 +66,8 @@ def getPrefix(stype: SubstType):
         return "cond_subst_"
     if stype == SubstType.CALL_SUBST:
         return "call_subst_"
+    if stype == SubstType.STORED_VAL_SUBST:
+        return "stored_val_subst_"
     return ""
 
 def recordSubstitution(state, addr, value, type):
@@ -443,18 +446,25 @@ class Scanner:
 
         # Check if there is a substitution to be made for this address.
         # This can happen if the state comes from a manual splitting.
-        is_subst = False
         subst = getSubstitution(state, state.addr, SubstType.ADDR_SUBST)
         if subst != None:
             store_addr = subst
         else:
             # Check if the address contains an if-then-else node.
             addr_asts = split_conditions(store_addr, simplify=False, addr=state.addr)
-            # value_asts = split_conditions(stored_value, simplify=False, addr=state.addr)
-
-            l.error(f" After ast transformation: [{store_addr}] = {stored_value}")
             if len(addr_asts) > 1:
                 self.split_state(state, addr_asts, state.addr)
+                raise SplitException
+
+        # Check if there is a substitution to be made for the value.
+        subst = getSubstitution(state, state.addr, SubstType.STORED_VAL_SUBST)
+        if subst != None:
+            stored_value = subst
+        else:
+            # Check if the stored value contains an if-then-else node.
+            asts = split_conditions(stored_value, simplify=False, addr=state.addr)
+            if len(asts) > 1:
+                self.split_state(state, asts, state.addr, branch_split=False, subst_type=SubstType.STORED_VAL_SUBST)
                 raise SplitException
 
         l.error(f"After substitution: Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
