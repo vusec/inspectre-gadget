@@ -169,7 +169,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
             # Check if this member contains potential secrets.
             secrets = []
             for var in get_vars(member):
-                for anno in var.annotations:
+                for anno in get_annotations(var):
                     if isinstance(anno, SecretAnnotation) or isinstance(anno, TransmissionAnnotation):
                         secrets.append((var, anno.read_address_ast))
 
