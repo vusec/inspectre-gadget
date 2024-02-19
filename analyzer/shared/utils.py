@@ -14,6 +14,13 @@ def get_vars(expr) -> set[claripy.BV]:
 
     return set([leaf for leaf in expr.leaf_asts() if is_sym_expr(leaf)])
 
+def get_annotations(expr):
+    annos = set()
+    for v in get_vars(expr):
+        annos.update(v.annotations)
+
+    return annos
+
 def get_x86_indirect_thunks(proj):
     symbol_names = {"__x86_indirect_thunk_array" : "rax",
                     "__x86_indirect_thunk_r10" : "r10",

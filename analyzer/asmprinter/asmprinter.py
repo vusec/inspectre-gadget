@@ -37,12 +37,12 @@ def get_load_comments(expr: claripy.BV, secret_load_pc):
         if load_anno != None:
             if load_anno.address == secret_load_pc:
                 # We load the secret value
-                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(load_anno.read_address_ast.annotations, "Attacker")))
-                annotations[load_anno.address] += " > " + str(set(replace_secret_annotations_with_name(v.annotations, "Secret")))
+                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(get_annotations(load_anno.read_address_ast), "Attacker")))
+                annotations[load_anno.address] += " > " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Secret")))
             else:
                 # We load an attacker indirect value
-                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(load_anno.read_address_ast.annotations, "Attacker")))
-                annotations[load_anno.address] += " > " + str(set(replace_secret_annotations_with_name(v.annotations, "Attacker")))
+                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(get_annotations(load_anno.read_address_ast), "Attacker")))
+                annotations[load_anno.address] += " > " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Attacker")))
 
             annotations.update(get_load_comments(load_anno.read_address_ast, secret_load_pc))
 
@@ -61,10 +61,10 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, is_
     proj.kb.comments.update(get_load_comments(expr,secret_load_pc))
     # Transmission
     if is_tfp:
-        proj.kb.comments[pc] = str(set(replace_secret_annotations_with_name(expr.annotations, "Attacker")))
+        proj.kb.comments[pc] = str(set(replace_secret_annotations_with_name(get_annotations(expr), "Attacker")))
         proj.kb.comments[pc] += " > " + "TAINTED FUNCTION POINTER"
     else:
-        all_annotations = set(expr.annotations)
+        all_annotations = set(get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(a, LoadAnnotation) and a.address == secret_load_pc}
         annotations = replace_secret_annotations_with_name(secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(all_annotations - secret_annotations, "Attacker")

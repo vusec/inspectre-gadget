@@ -5,6 +5,7 @@ import claripy
 from analyzer.shared.config import *
 from analyzer.shared.astTransform import *
 from analyzer.shared.utils import *
+from analyzer.scanner.annotations import *
 from analyzer.shared.logger import disable_logging
 
 
@@ -78,3 +79,21 @@ class MatchSignExtTestCase(unittest.TestCase):
                                   z)
         self.assertTrue(res.structurally_match(expected))
         self.assertTrue(getSignExtAnnotation(res.args[1]) != None)
+
+
+    def test_annotations_simplification(self):
+        x = claripy.BVS("x", 8).annotate(AttackerAnnotation("rsi"))
+        y = claripy.BVS("y", 8).annotate(AttackerAnnotation("rdi"))
+        z = claripy.BVS("z", 8).annotate(SecretAnnotation(x+y, 0, True))
+
+        self.assertTrue(len(get_annotations(x)) == 1)
+        self.assertTrue(len(get_annotations(x + y)) == 2)
+        self.assertTrue(len(get_annotations(x + y + z)) == 3)
+
+        self.assertTrue(len(get_annotations(x + y + z)) == 3)
+        c =claripy.Concat(x, y, z)
+        self.assertTrue(len(get_annotations(c)) == 3)
+        d = c[7:0]
+        self.assertTrue(len(get_annotations(d)) == 1)
+        d = c[8:0]
+        self.assertTrue(len(get_annotations(d)) == 2)

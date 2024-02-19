@@ -53,7 +53,7 @@ class LoadAnnotation(claripy.Annotation):
 
     @property
     def eliminatable(self):
-        return False
+        return True
 
     @property
     def relocatable(self):
@@ -113,7 +113,7 @@ class AttackerAnnotation(claripy.Annotation):
 
     @property
     def eliminatable(self):
-        return False
+        return True
 
     @property
     def relocatable(self):
@@ -139,7 +139,7 @@ class UncontrolledAnnotation(claripy.Annotation):
 
     @property
     def eliminatable(self):
-        return False
+        return True
 
     @property
     def relocatable(self):
@@ -170,7 +170,7 @@ def propagate_annotations(ast: claripy.BV, address):
 
     can_be_controlled = False
 
-    for anno in ast.annotations:
+    for anno in get_annotations(ast):
         if isinstance(anno, AttackerAnnotation):
             is_attack = True
             can_be_controlled = True
@@ -198,7 +198,7 @@ def contains_secret(ast: claripy.BV):
     if not is_sym_expr(ast):
         return False
 
-    for anno in ast.annotations:
+    for anno in get_annotations(ast):
         if isinstance(anno, SecretAnnotation) or isinstance(anno, TransmissionAnnotation):
             return True
 
@@ -207,7 +207,7 @@ def contains_secret(ast: claripy.BV):
 
 def get_load_annotation(x):
     if is_sym_var(x):
-        for anno in x.annotations:
+        for anno in get_annotations(x):
             if isinstance(anno, LoadAnnotation):
                 return anno
     return None
@@ -215,7 +215,7 @@ def get_load_annotation(x):
 def get_load_depth(x):
     max_depth = 0
     if is_sym_expr(x):
-        for anno in x.annotations:
+        for anno in get_annotations(x):
             if isinstance(anno, LoadAnnotation):
                 max_depth = max(max_depth, anno.depth)
 
@@ -225,14 +225,14 @@ def get_load_depth(x):
 
 def get_attacker_annotation(x):
     if is_sym_var(x):
-        for anno in x.annotations:
+        for anno in get_annotations(x):
             if isinstance(anno, AttackerAnnotation):
                 return anno
     return None
 
 def get_uncontrolled_annotation(x):
     if is_sym_var(x):
-        for anno in x.annotations:
+        for anno in get_annotations(x):
             if isinstance(anno, UncontrolledAnnotation):
                 return anno
     return None
@@ -249,7 +249,7 @@ def get_dep_set(expr):
     return depset
 
 def is_attacker_controlled(ast):
-    for anno in ast.annotations:
+    for anno in get_annotations(ast):
         if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
             return True
     return False

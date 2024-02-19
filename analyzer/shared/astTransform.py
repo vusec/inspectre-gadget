@@ -137,7 +137,8 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
                 new_conds.append((addr, c.expr,cond_type))
-                splitted_asts.append(ConditionalAst(expr=dedup_annotations(arg.expr), conds=new_conds))
+
+                splitted_asts.append(ConditionalAst(expr=arg.expr, conds=new_conds))
 
         for arg in arg2_splitted:
             for c in cond_splitted:
@@ -145,8 +146,7 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
                 new_conds.append((addr, claripy.Not(c.expr),cond_type))
-
-                splitted_asts.append(ConditionalAst(expr=dedup_annotations(arg.expr), conds=new_conds))
+                splitted_asts.append(ConditionalAst(expr=arg.expr, conds=new_conds))
 
         return splitted_asts
 
@@ -159,40 +159,10 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
             if not is_sym_expr(ast.args[i]):
                 continue
             new_expr = new_expr.replace(ast.args[i], combination[i].expr)
-            new_expr = remove_spurious_if_annotations(new_expr, ast.args[i], combination[i].expr)
             new_conds.extend(combination[i].conditions)
-        splitted_asts.append(ConditionalAst(expr=dedup_annotations(new_expr), conds=new_conds))
+        splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
 
     return splitted_asts
-
-
-def dedup_annotations(expr):
-    """
-    Remove duplicates.
-    """
-    annos = set()
-    for v in get_vars(expr):
-        annos.update(v.annotations)
-
-    expr = expr.annotate(*annos, remove_annotations=expr.annotations)
-    return expr
-
-def remove_spurious_if_annotations(expr, old, new):
-    to_remove = set()
-    old_annos = set(old.annotations)
-    new_annos = set(new.annotations)
-
-    for anno in old_annos:
-        if anno not in new_annos:
-            to_remove.add(anno)
-
-    if len(to_remove) == 0:
-        return expr
-
-    to_keep = set.difference(set(expr.annotations), to_remove)
-
-    expr = expr.annotate(*to_keep, remove_annotations=expr.annotations)
-    return expr
 
 
 def extract_summed_vals(ast: claripy.BV):

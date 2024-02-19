@@ -220,9 +220,9 @@ class DepGraph:
 
         # Symbolic variable.
         if expr.depth == 1:
-            attacker_annos = [a for a in expr.annotations if isinstance(a, AttackerAnnotation)]
-            load_annos = [a for a in expr.annotations if isinstance(a, LoadAnnotation)]
-            uncontrolled_annos = [a for a in expr.annotations if isinstance(a, UncontrolledAnnotation)]
+            attacker_annos = [a for a in get_annotations(expr) if isinstance(a, AttackerAnnotation)]
+            load_annos = [a for a in get_annotations(expr) if isinstance(a, LoadAnnotation)]
+            uncontrolled_annos = [a for a in get_annotations(expr) if isinstance(a, UncontrolledAnnotation)]
 
             if len(attacker_annos) + len(load_annos) + len(uncontrolled_annos) == 0:
                 print("TODO: something wrong is happening")
