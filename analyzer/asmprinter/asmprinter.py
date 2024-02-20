@@ -38,11 +38,11 @@ def get_load_comments(expr: claripy.BV, secret_load_pc):
             if load_anno.address == secret_load_pc:
                 # We load the secret value
                 annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(get_annotations(load_anno.read_address_ast), "Attacker")))
-                annotations[load_anno.address] += " > " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Secret")))
+                annotations[load_anno.address] += " -> " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Secret")))
             else:
                 # We load an attacker indirect value
                 annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(get_annotations(load_anno.read_address_ast), "Attacker")))
-                annotations[load_anno.address] += " > " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Attacker")))
+                annotations[load_anno.address] += " -> " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Attacker")))
 
             annotations.update(get_load_comments(load_anno.read_address_ast, secret_load_pc))
 
@@ -62,14 +62,14 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, is_
     # Transmission
     if is_tfp:
         proj.kb.comments[pc] = str(set(replace_secret_annotations_with_name(get_annotations(expr), "Attacker")))
-        proj.kb.comments[pc] += " > " + "TAINTED FUNCTION POINTER"
+        proj.kb.comments[pc] += " -> " + "TAINTED FUNCTION POINTER"
     else:
         all_annotations = set(get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(a, LoadAnnotation) and a.address == secret_load_pc}
         annotations = replace_secret_annotations_with_name(secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(all_annotations - secret_annotations, "Attacker")
         proj.kb.comments[pc] = str(set(annotations))
-        proj.kb.comments[pc] += " > " + "TRANSMISSION"
+        proj.kb.comments[pc] += " -> " + "TRANSMISSION"
 
 
     output = ""
@@ -89,6 +89,7 @@ def output_gadget_to_file(t : Transmission, proj, path):
     o.write(f"""
 {'-'*48}
 uuid: {t.uuid}
+transmitter: {t.transmitter}
 
 Secret Address:
   - Expr: {t.secret_address.expr}
