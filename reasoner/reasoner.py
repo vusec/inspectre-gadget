@@ -27,6 +27,8 @@ CANONICAL_REGIONS = [
     (0xffff800000000000, 0xffffffff9fffffff)
 ]
 
+MAX_SECRET_WO_ADJUSTING_BASE = ((1 << 30) * 256) # 256 GB
+
 CACHE_SHIFT = 6
 PAGE_SHIFT = 12
 ADDRESS_BIT_LEN = 64
@@ -169,6 +171,11 @@ def is_max_secret_too_high(t : pd.Series, only_independent: bool = False):
         valid_secret_max = secret_max
     else:
         valid_secret_max = (2 ** t['transmitted_secret_size']) - 1
+
+    # The secret will not fit in RAM without base adjusting if it
+    # exceeds MAX_SECRET_WO_ADJUSTING_BASE
+    if valid_secret_max > MAX_SECRET_WO_ADJUSTING_BASE:
+        return True
 
     for r in MAPPED_REGIONS:
 
