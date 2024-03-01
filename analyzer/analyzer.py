@@ -243,7 +243,7 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
                 append_to_csv(tfp_csv_filename, [tfp])
                 l.info(f"Dumped CSV to {tfp_csv_filename}")
 
-def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder=""):
+def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary=""):
     """
     Run the analyzer on a binary.
     """
@@ -262,8 +262,18 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     l.info("Loading angr project...")
     proj   = load_angr_project(binary, base_address, cache_project)
 
-    l.info("Removing non-writable memory...")
-    remove_memory_sections(proj)
+    if symbol_binary:
+        l.info("Loading symbol binary...")
+        symbol_proj = load_angr_project(symbol_binary, base_address, cache_project)
+
+        proj.loader.all_objects[0]._symbol_cache = symbol_proj.loader.all_objects[0]._symbol_cache
+        proj.loader.all_objects[0].symbols = symbol_proj.loader.all_objects[0].symbols
+        proj.loader.all_objects[0]._symbols_by_name = symbol_proj.loader.all_objects[0]._symbols_by_name
+        del symbol_proj
+
+    if global_config['SymbolizeWriteableSegments']:
+        l.info("Removing non-writable memory...")
+        remove_memory_sections(proj)
 
     # Run the Analyzer.
     # TODO: Parallelize.
