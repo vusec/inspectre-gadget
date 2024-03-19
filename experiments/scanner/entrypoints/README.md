@@ -6,26 +6,13 @@ on the Linux kernel, however, InSpectre Gadget should be able to analyze any
 binary code.
 
 
-## 1: Building the kernel
-
-The first step is to build a Linux kernel, we build v6.6-rc4.
-
-``` bash
-wget https://github.com/torvalds/linux/archive/refs/tags/v6.6-rc4.tar.gz
-tar -xvf v6.6-rc4.tar.gz
-cd linux-6.6-rc4
-
-make defconfig
-make -j`nproc`
-```
-
-## 2: Create a memory dump
+## 1: Building kernel and create a memory dump
 
 Since the Linux kernel patches spurious `endbr` on boot time, we need
 to create a dump of a booted Linux Kernel. Follow the steps in the VM folder
 to create a memory dump.
 
-## 3: Extract the endbr targets
+## 2: Extract the endbr targets
 
 Next we extract the `endbr` targets, all text symbols, and differentiate between
 the jump and call targets.

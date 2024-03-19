@@ -1,11 +1,11 @@
 # VM setup
-The document describes how to setup a VM with a custom build kernel and
+This document describes how to setup a VM with a custom build kernel and
 to create a dump of the memory.
 
 ## Requirements
 
 - User must be in  the `kvm` group and `/dev/kvm` should be present
-- `sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev zstd qemu-system-x86 debootstrap wget`
+- `sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev zstd qemu-system-x86 debootstrap wget bc`
 
 ## 1. Create a rootfs
 
@@ -23,6 +23,18 @@ After this, an empty rootfs will be created.
 
 Build the selected Linux kernel. Adjust the path in `run_vm.sh` and
 `dbg.sh` accordingly.
+
+
+To build v6.6-rc4 we use:
+
+``` bash
+wget https://github.com/torvalds/linux/archive/refs/tags/v6.6-rc4.tar.gz
+tar -xvf v6.6-rc4.tar.gz
+cd linux-6.6-rc4
+
+make defconfig
+make -j`nproc`
+```
 
 
 ## 3. Test the VM is up and running
