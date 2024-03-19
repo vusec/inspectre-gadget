@@ -14,7 +14,7 @@ We reuse [syzkaller](https://github.com/google/syzkaller) scripts to easily crea
 ``` bash
 wget https://raw.githubusercontent.com/google/syzkaller/master/tools/create-image.sh -O create-image.sh
 chmod +x create-image.sh
-./create-image.sh -a x86_64 -d stretch -s 4096
+./create-image.sh -a x86_64 -s 4096
 ```
 
 After this, an empty rootfs will be created.

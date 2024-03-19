@@ -1,28 +1,14 @@
-FROM ubuntu:22.04 AS base
+#!/bin/bash
 
-RUN apt-get update && \
-    apt-get install -y build-essential libncurses-dev bison flex libssl-dev \
-    libelf-dev zstd qemu-system-x86 debootstrap wget bc sudo
+set -e
 
-# --------------------------- Stage 1. Dump VM ---------------------------------
-COPY vm /vm
+cd /vm
+mount -o loop bullseye.img /mnt/chroot
+cp -a chroot/. /mnt/chroot/.
+umount /mnt/chroot
 
-# The first step is to build a Linux kernel, we build v6.6-rc4.
-WORKDIR /vm
-RUN wget https://github.com/torvalds/linux/archive/refs/tags/v6.6-rc4.tar.gz
-RUN tar -xvf v6.6-rc4.tar.gz
-
-WORKDIR /vm/linux-6.6-rc4
-RUN make defconfig
-RUN make -j`nproc`
-
-# Since the Linux kernel patches spurious `endbr` instructions at boot time,
-# we need to create a dump of a booted Linux Kernel.
-# RUN usermod -a -G kvm $USER
-WORKDIR /vm
-RUN wget https://raw.githubusercontent.com/google/syzkaller/master/tools/create-image.sh
-RUN chmod +x create-image.sh
-RUN ./create-image.sh -a x86_64 -d stretch -s 4096
+/bin/bash
+# ./run-vm.sh
 
 # # --------------------- Stage 2. Extract Entrypoints ---------------------------
 # COPY entrypoints /entrypoints

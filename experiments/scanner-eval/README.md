@@ -19,6 +19,10 @@ The evaluation scripts performs 4 main steps, each of which is described in a
 separate `README` file. You can refer to the content of the `Dockerfile`
 for the exact commands.
 
+
+> **NOTE:**  If you want to reuse our targets, you can skip steps 1. and 2. and
+> use the lists provided in `entrypoints/linux-6.6-rc4/`.
+
 ### 1. Create a VM dump
 
 `vm/README.md` explains how to create a memory dump from a running Linux VM.
