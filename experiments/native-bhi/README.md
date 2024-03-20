@@ -46,7 +46,7 @@ Test and time the shadow leak:
 
 ``` bash
 cd src
-time sudo ./run.sh test_rate
+time sudo ./run.sh leak_shadow
 ```
 
 Note: Please re-run the PoC a few times and reboot once. The leakage
