@@ -19,7 +19,7 @@ cd ../poc-common
 Build and install the kernel:
 
 ``` bash
-cd kernel
+cd ../native-bhi/kernel
 ./build_kernel.sh
 ```
 

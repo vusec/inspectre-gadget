@@ -23,7 +23,7 @@ Build the kernel. This command will apply the required patch for the PoC
 and build a kernel with the tested kernel configuration.
 
 ``` bash
-cd kernel
+cd ../fineibt-bypass/kernel
 ./build_kernel.sh
 ```
 

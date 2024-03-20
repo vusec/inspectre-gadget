@@ -73,7 +73,7 @@ git apply ../fineibt_vm_support.patch
 ./scripts/config --set-val CONFIG_CFI_CLANG y
 
 make CC=clang-16 defconfig
-make -j`nproc`
+make CC=clang-16 -j`nproc`
 ```
 
 Or use `build-fineibt.sh`.

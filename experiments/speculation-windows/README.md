@@ -24,7 +24,7 @@ cd ../poc-common
 Build the kernel:
 
 ``` bash
-cd kernel
+cd ../speculation-windows/kernel
 ./build_kernel.sh
 ```
 
