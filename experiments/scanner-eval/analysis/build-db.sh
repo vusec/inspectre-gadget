@@ -1,2 +1,2 @@
 echo "[-] Creating database"
-sqlite3 < queries/join_all.sqlite3
+sqlite3 < /analysis/queries/join_all.sqlite3

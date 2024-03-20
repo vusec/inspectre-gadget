@@ -7,7 +7,7 @@ FROM ubuntu:23.04 AS base
 RUN apt-get update && \
     apt-get install -y build-essential libncurses-dev bison flex libssl-dev \
     libelf-dev zstd qemu-system-x86 debootstrap wget bc sudo python3-pip \
-    openssh-client clang-16 git
+    openssh-client clang-16 git sqlite3
 
 # Python dependencies.
 COPY inspectre /inspectre
@@ -29,3 +29,6 @@ COPY entrypoints /entrypoints
 COPY scanner /scanner
 COPY analysis /analysis
 COPY scripts /scripts
+
+RUN pip3 install pandas matplotlib numpy cycler scienceplots --break-system-packages
+RUN apt-get -y install texlive-latex-extra texlive-fonts-recommended dvipng cm-super

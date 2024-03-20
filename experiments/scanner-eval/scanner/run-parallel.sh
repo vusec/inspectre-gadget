@@ -1,4 +1,4 @@
-ANALYZER_FOLDER=../..
+ANALYZER_FOLDER=/inspectre
 CONFIG=config_all.yaml
 
 OUT_FOLDER=out
@@ -28,14 +28,16 @@ run-analyzer () {
 }
 
 # Prepare output folder.
+rm -f $OUT_FOLDER.backup
 mv $OUT_FOLDER $OUT_FOLDER.backup
 mkdir $OUT_FOLDER
 mkdir $GADGET_FOLDER $TFP_FOLDER $LOG_FOLDER $OUT_FOLDER/asm
+touch fail.txt
 
 # Split the gadget list to run the analyzer in parallel.
-rm $OUT_FOLDER/splitted*
+rm -f $OUT_FOLDER/splitted*
 n_gadgets=$(cat $GADGET_LIST | wc -l)
-gadgets_per_task=$(python -c "from math import ceil; print(ceil($n_gadgets/$JOBS))")
+gadgets_per_task=$(python3 -c "from math import ceil; print(ceil($n_gadgets/$JOBS))")
 
 echo $gadgets_per_task
 split -l $gadgets_per_task --numeric-suffixes $GADGET_LIST "$OUT_FOLDER/splitted"
@@ -43,6 +45,10 @@ split -l $gadgets_per_task --numeric-suffixes $GADGET_LIST "$OUT_FOLDER/splitted
 # Run analyzer.
  for f in $OUT_FOLDER/splitted*; do
      run-analyzer "$f" &
+     pids[${i}]=$!
  done
 
-wait
+# wait for all pids
+for pid in ${pids[*]}; do
+    wait $pid
+done

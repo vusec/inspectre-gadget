@@ -21,5 +21,5 @@ echo "CONFIG_NVME_TARGET=n" >> .config
 echo "CONFIG_NETCONSOLE_DYNAMIC=n" >> .config
 echo "CONFIG_OCFS2_FS=n" >> .config
 
-# make CC=clang-16 oldconfig
-make CC=clang-16 -j8
+yes "" | make CC=clang-16 oldconfig
+yes "" | make CC=clang-16 -j`nproc`

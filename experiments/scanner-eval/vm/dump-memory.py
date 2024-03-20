@@ -14,7 +14,7 @@ async def main():
         dumpname = sys.argv[1]
 
     print(f"Dumping memory to {dumpname}")
-    res = await qmp.execute('dump-guest-memory', {'paging': False, 'protocol':'file:'+dumpname})
+    res = await qmp.execute('dump-guest-memory', {'paging': True, 'protocol':'file:'+dumpname})
     print(f"Finished dumping")
 
     res = await qmp.execute('quit')
