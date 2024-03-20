@@ -18,6 +18,9 @@ RUN tar -xvf v6.6-rc4.tar.gz
 
 WORKDIR /vm/linux-6.6-rc4
 RUN make defconfig
+RUN echo "CONFIG_CONFIGFS_FS=y" >> .config
+RUN echo "CONFIG_SECURITYFS=y" >> .config
+RUN make olddefconfig
 RUN make -j`nproc`
 
 # Since the Linux kernel patches spurious `endbr` instructions at boot time,
@@ -26,7 +29,7 @@ RUN make -j`nproc`
 # First, we reuse syzkaller scripts to easily create a rootfs.
 WORKDIR /vm
 RUN chmod +x create-image.sh
-RUN ./create-image.sh -a x86_64 -s 4096
+RUN ./create-image.sh -d bullseye
 
 COPY entrypoints /entrypoints
 COPY scanner /scanner
