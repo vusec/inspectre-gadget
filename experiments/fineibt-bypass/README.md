@@ -27,6 +27,14 @@ cd kernel
 ./build_kernel.sh
 ```
 
+Please verify that the instruction at `uuid_string+324` is equal to
+`movzx  ebx,BYTE PTR [r8+rbx*1]`. This is the transmission location:
+a different load instruction will break the PoC!
+
+``` bash
+gdb vmlinux -batch -ex 'x/1i uuid_string + 324'
+```
+
 Reboot into new kernel. Note: you have to disable secure boot.
 
 ## Testing FineIBT Bypass PoC (unix_poll)

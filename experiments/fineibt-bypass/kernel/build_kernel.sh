@@ -18,4 +18,9 @@ make CC=clang-16 -j `nproc`
 sudo modules_install -j `nproc`
 sudo install -j `nproc`
 
+gdb vmlinux -batch -ex 'x/1i uuid_string + 324'
+
+echo "Please verify that the instruction at uuid_string + 324 is equal to movzx  ebx,BYTE PTR [r8+rbx*1]"
+echo "This is the transmission location: a different load instruction will break the PoC!"
+
 echo "Please reboot into the kernel: linux-6.6.0-rc4-fineibt-poc"
