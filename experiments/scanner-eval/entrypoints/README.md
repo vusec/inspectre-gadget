@@ -37,22 +37,7 @@ Jump targets are of particular interest in the case if FineIBT is enabled (see
 paper). Therefore, we extract the targets again for a Linux kernel with FineIBT
 enabled.
 
-FineIBT is not supported in QEMU, however, we apply a small patch
-such that FineIBT is still selected in the VM and correctly instrumented.
-You also have to enable FineIBT in the config and build with clang (>= 16).
-Please refer to the 'VM' section on how to create a memory dump.
-
-Build with FineIBT:
-
-``` bash
-git apply ../fineibt_vm_support.patch
-
-./scripts/config --set-val CONFIG_FINEIBT y
-./scripts/config --set-val CONFIG_CFI_CLANG y
-
-make CC=clang-16 defconfig
-make -j`nproc`
-```
+Refer to the VM folder to see how the kernel is compiled with FineIBT.
 
 Since CFI creates an `__cfi_` symbol for each function, and these are only
 used for call instructions, we can do more accurate filtering for jump targets.

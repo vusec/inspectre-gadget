@@ -44,3 +44,5 @@ split -l $gadgets_per_task --numeric-suffixes $GADGET_LIST "$OUT_FOLDER/splitted
  for f in $OUT_FOLDER/splitted*; do
      run-analyzer "$f" &
  done
+
+wait

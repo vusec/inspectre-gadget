@@ -1,6 +1,6 @@
 #!/bin/sh
 KERN_IMAGE="./linux-6.6-rc4/arch/x86/boot/bzImage"
-KERN_RFS="./stretch.img"
+KERN_RFS="./bullseye.img"
 KERN_FLAGS="root=/dev/sda rw single console=ttyS0 nokaslr"
 
 taskset -c 0,1 qemu-system-x86_64 \

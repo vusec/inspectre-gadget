@@ -11,8 +11,6 @@ qemu-system-x86_64 \
     -drive file=bullseye.img,format=raw \
     -net user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:10021-:22 \
     -net nic,model=e1000 \
-    -enable-kvm \
     -nographic \
-    -pidfile vm.pid
-
-
+    -pidfile vm.pid \
+    -qmp unix:qmp.sock,server=on,wait=off

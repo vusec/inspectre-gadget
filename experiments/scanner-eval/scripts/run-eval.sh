@@ -2,43 +2,72 @@
 
 set -e
 
+LINUX_FOLDER=/vm/linux-6.6-rc4
+
+# -------------------------- Stage 1. Create VMs -------------------------------
 cd /vm
+
+# Finish setting up the img (from syzkaller create-img script).
+echo " [+] Mouting rootfs"
 mount -o loop bullseye.img /mnt/chroot
 cp -a chroot/. /mnt/chroot/.
 umount /mnt/chroot
 
+# Since the Linux kernel patches spurious `endbr` instructions at boot time,
+# we need to create a dump of a booted Linux Kernel.
+echo " [+] Generating dump for default config"
+echo " • Running QEMU"
+./run-vm.sh &
+echo " • Dumping memory"
+sleep 40 && python3 dump-memory.py dump_6.6-rc4-default
+cp $LINUX_FOLDER/vmlinux vmlinux-default
+
+# FineIBT is not supported in QEMU, however, we apply a small patch such that
+# FineIBT is still selected in the VM and correctly instrumented.
+
+echo " [+] Generating dump for FineIBT config"
+echo " • Recompiling kernel with FineIBT"
+./build-fineibt.sh
+echo " • Running QEMU"
+cd /vm
+./run-vm.sh &
+echo " • Dumping memory"
+sleep 40 && python3 dump-memory.py dump_6.6-rc4-fineibt
+cp $LINUX_FOLDER/vmlinux vmlinux-fineibt
+
 /bin/bash
-# ./run-vm.sh
 
-# # --------------------- Stage 2. Extract Entrypoints ---------------------------
-# COPY entrypoints /entrypoints
-# WORKDIR /entrypoints
+# --------------------- Stage 2. Extract Entrypoints ---------------------------
 
-# # Next we extract the endbr targets, all text symbols, and distinguish between
-# # jump and call targets.
+# echo " [+] Generating entrypoint lists"
+# cd /entrypoints
+# ./generate-lists.sh
+# ./get-reachable.sh
 
-# # get all text symbols
-# RUN echo "address,name" > all_text_symbols_6.6-rc4-default.txt && \
-#     nm vmlinux | grep -e " t " -e " T " | awk '{print "0x"$1 "," $3}' >> \
-#     all_text_symbols_6.6-rc4-default.txt
-
-# # extract endbr addresses from memory dump
-# RUN echo "address" > endbr_addresses_6.6-rc4-default.txt && \
-#     objdump -M intel -D dump_6.6-rc4-default --start-address=0xffffffff81000000 | \
-#     grep endbr64 | awk '{print "0x"$1}' | sed 's/.$//' | sort -u >> \
-#     endbr_addresses_6.6-rc4-default.txt
-
-# # filter call-targets
-# RUN python3 filter_addresses.py call-targets endbr_addresses_6.6-rc4-default.txt all_text_symbols_6.6-rc4-default.txt > endbr_call_target_6.6-rc4-default.txt
-
-# # filter jump-targets
-# RUN python3 filter_addresses.py jump-targets endbr_addresses_6.6-rc4-default.txt all_text_symbols_6.6-rc4-default.txt > endbr_jump_target_6.6-rc4-default.txt
 
 # # ------------------------- Stage 3. Run Scanner -------------------------------
-# COPY scanner /scanner
-# COPY scanner /scanner
-# COPY scanner /scanner
-# WORKDIR /scanner
+# cd /scanner
+# mkdir out
+
+# echo " [+] Running scanner on call targets"
+# # Start the analyzer with 20 parallel jobs.
+# ./run-parallel.sh /vm/vmlinux-default /entrypoints/linux-6.6-rc4/endbr_call_target_6.6-rc4-default.txt 20
+# # Merge all results.
+# cd out && python ../scripts/merge_gadgets.py && cd ..
+# # Rename folder.
+# mv fail.txt out
+# mv out call_targets
+
+# echo " [+] Running scanner on jump targets"
+# # Start the analyzer with 20 parallel jobs.
+# ./run-parallel.sh /vm/vmlinux-fineibt /entrypoints/linux-6.6-rc4/endbr_jump_target_6.6-rc4-fineibt.txt 20
+
+# # Merge all results.
+# cd out && python ../scripts/merge_gadgets.py && cd ..
+
+# # Rename folder.
+# mv fail.txt out
+# mv out jump_targets
 
 # # ---------------------- Stage 4. Analyzer Results -----------------------------
 # COPY analysis /analysis
