@@ -1,0 +1,14 @@
+diff --git a/security/security.c b/security/security.c
+index 23b129d48..0c89e0e8b 100644
+--- a/security/security.c
++++ b/security/security.c
+@@ -3417,6 +3417,9 @@ int security_task_prctl(int option, unsigned long arg2, unsigned long arg3,
+ 	struct security_hook_list *hp;
+ 
+ 	hlist_for_each_entry(hp, &security_hook_heads.task_prctl, list) {
++
++		asm volatile("clflush (%0)\nclflush (%1)\nmfence\n"::"r"(hp), "r"(((uint8_t *)hp)+0x20));
++
+ 		thisrc = hp->hook.task_prctl(option, arg2, arg3, arg4, arg5);
+ 		if (thisrc != LSM_RET_DEFAULT(task_prctl)) {
+ 			rc = thisrc;
