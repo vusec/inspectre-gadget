@@ -46,7 +46,7 @@ scripts/config --set-val  DEBUG_INFO_DWARF5 n
 make CC=clang-16 olddefconfig
 
 make CC=clang-16  -j `nproc`
-sudo modules_install -j `nproc`
-sudo install -j `nproc`
+sudo make modules_install -j `nproc`
+sudo make install -j `nproc`
 
 echo "Please reboot into the kernel: linux-6.6.0-rc4-fineibt"

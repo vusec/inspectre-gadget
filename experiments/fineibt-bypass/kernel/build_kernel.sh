@@ -15,8 +15,8 @@ make CC=clang-16 olddefconfig
 
 # Build and install
 make CC=clang-16 -j `nproc`
-sudo modules_install -j `nproc`
-sudo install -j `nproc`
+sudo make modules_install -j `nproc`
+sudo make install -j `nproc`
 
 gdb vmlinux -batch -ex 'x/1i uuid_string + 324'
 
