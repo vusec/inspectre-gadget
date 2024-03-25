@@ -1,16 +1,16 @@
 #!/bin/sh
-KERN_IMAGE="./linux-6.6-rc4/arch/x86/boot/bzImage"
+# Usage: run-vm.sh <BZIMAGE>
+
+KERN_IMAGE=$1
 KERN_RFS="./bullseye.img"
-KERN_FLAGS="root=/dev/sda rw single console=ttyS0 nokaslr"
+KERN_FLAGS="console=ttyS0 root=/dev/sda net.ifnames=0 rw nokaslr"
 
 qemu-system-x86_64 \
-    -m 2G \
-    -smp 2 \
-    -kernel linux-6.6-rc4/arch/x86/boot/bzImage \
-    -append "console=ttyS0 root=/dev/sda earlyprintk=serial net.ifnames=0" \
-    -drive file=bullseye.img,format=raw \
-    -net user,host=10.0.2.10,hostfwd=tcp:127.0.0.1:10021-:22 \
-    -net nic,model=e1000 \
+    -m 4096 \
+    -smp 1 \
+    -kernel $KERN_IMAGE \
+    -append "$KERN_FLAGS" \
+    -drive file=$KERN_RFS,index=0,media=disk,format=raw \
     -nographic \
     -pidfile vm.pid \
     -qmp unix:qmp.sock,server=on,wait=off
