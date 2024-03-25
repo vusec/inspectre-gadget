@@ -32,11 +32,12 @@ def get_jump_targets(target_addresses, all_text_symbols):
 
     filter_addresses = set(filter_addresses)
 
+    print("address,name")
     with open(target_addresses) as f:
         for line in f:
             address = line.strip().split(',')[0]
             if address not in filter_addresses:
-                print(line.strip())
+                print(line.strip()+",jumptarget")
 
 
 

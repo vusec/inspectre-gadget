@@ -24,17 +24,22 @@ echo " [+] Generating dump for FineIBT config"
 ./run-vm.sh bzImage-fineibt &
 sleep 40 && python3 dump-memory.py dump_6.6-rc4-fineibt
 
-# # --------------------- Stage 2. Extract Entrypoints ---------------------------
 
-# echo " [+] Generating entrypoint lists"
+# --------------------- Stage 2. Extract Entrypoints ---------------------------
+echo " [+] Generating entrypoint lists"
 cd /entrypoints
 
-# ./generate-lists.sh
-# ./get-reachable.sh
+mv linux-6.6-rc4 expected
+mkdir -p linux-6.6-rc4
+
+# Use FineIBT and ENDBR instrumentation to identify the address of all indirect
+# jump and call targets of the kernel.
+./generate-lists.sh
+# Identify which ones are reachable from userspace by parsing the Syzkaller report.
+./get-reachable.sh
 
 rm -rf /results/*
 cp -r /entrypoints/linux-6.6-rc4/ /results/entrypoints
-
 
 # ------------------------- Stage 3. Run Scanner -------------------------------
 cd /scanner
