@@ -6,8 +6,18 @@ scanner.
 ## 1. Prerequisites
 
 We assume that you ran the scanner following the instructions in the
-`scanner/` folder. You should have generated an `out` folder with a csv
-of all the gadgets found in call targets and jump targets respectively.
+`entrypoints/` and `scanner/` folder, respectively to generate the input
+lists and to generate the gadget's csvs.
+You should have an `out` folder with
+a `call_targets` folder containing `all-gadgets.csv` and a `jump_targets`
+folder with another `all-gadgets.csv`.
+
+You also need a list of:
+* all symbols of the default linux build (e.g. `all_text_symbols_6.6-rc4-default.txt`)
+* all sybmols of the fineibt build (e.g. `all_text_symbols_6.6-rc4-fineibt.txt`)
+* a list of reachable functions, generated e.g. by parsing Syzkaller reports
+
+The `entrypoints/` folder contains instructions on how to generate these from scratch.
 
 ## 2. Run the reasoner
 
@@ -28,9 +38,9 @@ We created a script for SQLITE3.
 
 # Move the lists we used to a `lists/` folder.
 mkdir lists
-cp input/linux-6.6-rc4/all_text_symbols_6.6-rc4-fineibt.txt lists/
-cp input/linux-6.6-rc4/all_text_symbols_6.6-rc4-default.txt lists/
-cp input/linux-6.6-rc4/reachable_functions_6.6-rc4.txt lists/
+cp ../entrypoints/linux-6.6-rc4/all_text_symbols_6.6-rc4-fineibt.txt lists/
+cp ../entrypoints/linux-6.6-rc4/all_text_symbols_6.6-rc4-default.txt lists/
+cp ../entrypoints/linux-6.6-rc4/reachable_functions_6.6-rc4.txt lists/
 
 # Run the script to create a sqlite3 database.
 ./build-db.sh

@@ -5,6 +5,11 @@ InSpectre Gadget. In this example we focus on performing the analysis
 on the Linux kernel, however, InSpectre Gadget should be able to analyze any
 binary code.
 
+## TL;DR
+
+You can find the pre-built list in the `linux-6.6-rc4` folder.
+If you want to regenerate these lists, follow the instructions below.
+
 
 ## 1: Building kernel and create a memory dump
 
@@ -67,13 +72,14 @@ all the reached functions by Syzkaller as part of the syzbot project.
 First download the coverage report:
 
 ``` bash
-wget https://storage.googleapis.com/syzkaller/cover/ci-qemu-upstream.html
+wget https://storage.googleapis.com/syzkaller/cover/ci-qemu-upstream-8a749fd1.html
 ```
 
 Next, extract the list of reached functions by using the script `get_reached_functions.sh`:
 
 ``` bash
-./get_reached_functions.sh ci-qemu-upstream.html > reachable_functions.txt
+echo "name" > reachable_functions.txt
+./get_reached_functions.sh ci-qemu-upstream.html >> reachable_functions_6.6-rc4.txt
 ```
 
 The list of reached functions is included in the `linux-6.6-rc4` folder.

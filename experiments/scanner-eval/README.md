@@ -9,21 +9,22 @@ on Linux kernel version 6.6-rc4.
 ./run.sh
 ```
 
-This will run the full evaluation in a docker container.
+This will build a docker container and run the full evaluation (`/scripts/run-eval.sh`)
+inside it.
 
 ## Step-by-step
 
 While our evaluation has been performed on the Linux Kernel, any binary
 can be analyzed by InSpectre Gadget, given a list of entrypoints.
-The evaluation scripts perform 4 main tasks, each of which is described in a
+The evaluation script performs 4 main tasks, each of which is described in a
 separate `README` file. You can refer to the content of the `Dockerfile`
 for the exact commands.
 
-
 ### 1. Create a VM dump
 
-`vm/README.md` explains how to create the `vmlinux` binary used as an
-input and a memory dump from a running Linux VM.
+`vm/README.md` explains how to create the `vmlinux` binary analyzed by
+InSpectreGadget and a memory dump from a running Linux VM, which is used to
+find call and jump targets after the kernel's startup hotpatches.
 
 ### 2. Extract Entrypoints
 
