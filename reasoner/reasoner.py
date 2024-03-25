@@ -410,8 +410,8 @@ def slam_is_an_user_address_translation(t : pd.Series):
         # if we control the base almost complexly, we do not have to worry
         return False
 
-    n_inferable_bits = t['inferable_bits_n_inferable_bits']
-    secret_stride = t[f'transmitted_secret_range_stride']
+    n_inferable_bits = int(t['inferable_bits_n_inferable_bits'])
+    secret_stride = int(t[f'transmitted_secret_range_stride'])
 
     if (n_inferable_bits + (secret_stride - 1) <= 32) and base_controllable_window < 2 ** 63:
         # We do the same check as above, but now with the inferable bits
