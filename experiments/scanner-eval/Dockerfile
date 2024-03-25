@@ -7,28 +7,41 @@ FROM ubuntu:23.04 AS base
 RUN apt-get update && \
     apt-get install -y build-essential libncurses-dev bison flex libssl-dev \
     libelf-dev zstd qemu-system-x86 debootstrap wget bc sudo python3-pip \
-    openssh-client clang-16 git sqlite3
+    openssh-client clang-16 git sqlite3 vim fish
 
 # Python dependencies.
 COPY inspectre /inspectre
 RUN pip3 install -r inspectre/requirements.txt --break-system-packages
 RUN pip3 install qemu.qmp --break-system-packages
 
-# The first step is to build a Linux kernel, we build v6.6-rc4.
-COPY vm /vm
-WORKDIR /vm
-RUN ./build-default.sh
+# Graph drawing dependencies.
+RUN pip3 install pandas matplotlib numpy cycler scienceplots tqdm argparse --break-system-packages
+RUN apt-get -y install texlive-latex-extra texlive-fonts-recommended dvipng cm-super
 
-# Since the Linux kernel patches spurious `endbr` instructions at boot time,
-# we need to create a dump of a booted Linux Kernel.
-# First, we reuse syzkaller scripts to easily create a rootfs.
+COPY vm/build /vm
+WORKDIR /vm
+# Reuse syzkaller scripts to easily create a rootfs.
 RUN ./create-image.sh -d bullseye
+
+# Download kernel v6.6-rc4.
+RUN wget https://github.com/torvalds/linux/archive/refs/tags/v6.6-rc4.tar.gz
+RUN tar -xvf v6.6-rc4.tar.gz
+# Build kernel.
+RUN cd linux-6.6-rc4 && ../build-default.sh
+RUN cp ./linux-6.6-rc4/arch/x86/boot/bzImage bzImage-default
+RUN cp ./linux-6.6-rc4/vmlinux vmlinux-default
+
+# Build kernel with FineIBT.
+RUN rm -rf linux-6.6-rc4
+RUN tar -xvf v6.6-rc4.tar.gz
+RUN cd linux-6.6-rc4 && ../build-fineibt.sh
+RUN cp ./linux-6.6-rc4/arch/x86/boot/bzImage bzImage-fineibt
+RUN cp ./linux-6.6-rc4/vmlinux vmlinux-fineibt
 
 # Copy all folders.
 COPY entrypoints /entrypoints
 COPY scanner /scanner
 COPY analysis /analysis
 COPY scripts /scripts
+COPY vm /vm
 
-RUN pip3 install pandas matplotlib numpy cycler scienceplots --break-system-packages
-RUN apt-get -y install texlive-latex-extra texlive-fonts-recommended dvipng cm-super

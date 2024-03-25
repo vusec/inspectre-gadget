@@ -4,10 +4,10 @@ set -e
 
 LINUX_FOLDER=/vm/linux-6.6-rc4
 
-# # -------------------------- Stage 1. Create VMs -------------------------------
+# -------------------------- Stage 1. Create VMs -------------------------------
 cd /vm
 
-# Finish setting up the img (from syzkaller create-img script).
+# Finish setting up the rootfs (from syzkaller create-img script).
 echo " [+] Mouting rootfs"
 mount -o loop bullseye.img /mnt/chroot
 cp -a chroot/. /mnt/chroot/.
@@ -16,24 +16,13 @@ umount /mnt/chroot
 # Since the Linux kernel patches spurious `endbr` instructions at boot time,
 # we need to create a dump of a booted Linux Kernel.
 echo " [+] Generating dump for default config"
-# echo " • Running QEMU"
-# ./run-vm.sh &
-# echo " • Dumping memory"
-# sleep 40 && python3 dump-memory.py dump_6.6-rc4-default
-cp $LINUX_FOLDER/vmlinux vmlinux-default
+./run-vm.sh bzImage-default &
+sleep 40 && python3 dump-memory.py dump_6.6-rc4-default
 
-# FineIBT is not supported in QEMU, however, we apply a small patch such that
-# FineIBT is still selected in the VM and correctly instrumented.
-
+# Do the same for the FineIBT build.
 echo " [+] Generating dump for FineIBT config"
-echo " • Recompiling kernel with FineIBT"
-./build-fineibt.sh
-cd /vm
-# echo " • Running QEMU"
-# ./run-vm.sh &
-# echo " • Dumping memory"
-# sleep 40 && python3 dump-memory.py dump_6.6-rc4-fineibt
-cp $LINUX_FOLDER/vmlinux vmlinux-fineibt
+./run-vm.sh bzImage-fineibt &
+sleep 40 && python3 dump-memory.py dump_6.6-rc4-fineibt
 
 # # --------------------- Stage 2. Extract Entrypoints ---------------------------
 
