@@ -4,7 +4,6 @@ to create a dump of the memory.
 
 ## Requirements
 
-- User must be in  the `kvm` group and `/dev/kvm` should be present
 - `sudo apt-get install build-essential libncurses-dev bison flex libssl-dev libelf-dev zstd qemu-system-x86 debootstrap wget bc`
 
 ## 1. Create a rootfs
@@ -25,7 +24,7 @@ Build the selected Linux kernel. Adjust the path in `run_vm.sh` and
 `dbg.sh` accordingly.
 
 
-To build v6.6-rc4 we use (see `build-default.sh`):
+To build v6.6-rc4 we use (see `build/build-default.sh`):
 
 ``` bash
 wget https://github.com/torvalds/linux/archive/refs/tags/v6.6-rc4.tar.gz
@@ -55,7 +54,7 @@ The default password is `root`.
 2. `CTRL+A` followed by `c`
 3. `dump-guest-memory -p dump_6.6-rc4-default`
 
-or you can use `python3 dump-memory.py <FILENAME>` to do it programmatically.
+Or you can use `python3 dump-memory.py <FILENAME>` to do it programmatically.
 
 ## 5. FineIBT
 
@@ -76,4 +75,4 @@ make CC=clang-16 defconfig
 make CC=clang-16 -j`nproc`
 ```
 
-Or use `build-fineibt.sh`.
+Or use `build/build-fineibt.sh`.
