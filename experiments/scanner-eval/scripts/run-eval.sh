@@ -47,27 +47,21 @@ mkdir out
 
 echo " [+] Running scanner on call targets"
 # Start the analyzer with 20 parallel jobs.
-./run-parallel.sh /vm/vmlinux-default /entrypoints/linux-6.6-rc4/endbr_call_target_6.6-rc4-default.txt 20
+python3 run-parallel.py /inspectre/inspectre /vm/vmlinux-default /entrypoints/linux-6.6-rc4/endbr_call_target_6.6-rc4-default.txt -c config_all.yaml -o out -t360 -j20
 # Merge all results.
 cd out && python3 /analysis/merge_gadgets.py && cd ..
-# Rename folder.
+# Move to results folder.
 mv fail.txt out
-mv out call_targets
+mv out /results/call_targets
 
 echo " [+] Running scanner on jump targets"
 # Start the analyzer with 20 parallel jobs.
-./run-parallel.sh /vm/vmlinux-fineibt /entrypoints/linux-6.6-rc4/endbr_jump_target_6.6-rc4-fineibt.txt 20
-
+python3 run-parallel.py /inspectre/inspectre /vm/vmlinux-fineibt /entrypoints/linux-6.6-rc4/endbr_jump_target_6.6-rc4-fineibt.txt -c config_all.yaml -o out -t360 -j20
 # Merge all results.
 cd out && python3 /analysis/merge_gadgets.py && cd ..
-
-# Rename folder.
+# Move to results folder.
 mv fail.txt out
-mv out jump_targets
-
-# Move everything to the results folder.
-mv call_targets /results
-mv jump_targets /results
+mv out /results/jump_targets
 
 # ---------------------- Stage 4. Analyzer Results -----------------------------
 cd /results/jump_targets && /inspectre/inspectre reason all-gadgets.csv all-gadgets-reasoned.csv
