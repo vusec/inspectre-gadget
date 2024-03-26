@@ -17,12 +17,12 @@ umount /mnt/chroot
 # we need to create a dump of a booted Linux Kernel.
 echo " [+] Generating dump for default config"
 ./run-vm.sh bzImage-default &
-sleep 40 && python3 dump-memory.py dump_6.6-rc4-default
+sleep 100 && python3 dump-memory.py dump_6.6-rc4-default
 
 # Do the same for the FineIBT build.
 echo " [+] Generating dump for FineIBT config"
 ./run-vm.sh bzImage-fineibt &
-sleep 40 && python3 dump-memory.py dump_6.6-rc4-fineibt
+sleep 100 && python3 dump-memory.py dump_6.6-rc4-fineibt
 
 
 # --------------------- Stage 2. Extract Entrypoints ---------------------------
