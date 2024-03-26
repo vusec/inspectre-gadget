@@ -9,8 +9,13 @@ on Linux kernel version 6.6-rc4.
 ./run.sh
 ```
 
-This will build a docker container and run the full evaluation (`/scripts/run-eval.sh`)
-inside it.
+This will build a docker container (`inspectre_container`) and run the full
+evaluation (`/scripts/run-eval.sh`) inside it.
+
+The result is stored in the `results` folder, in particular:
+- `stats.txt` contains the results of the queries used in the paper
+- `figs` contains the cumulative distributions showed in the paper
+- `gadgets.db` is the gadget database
 
 ## Step-by-step
 
