@@ -260,11 +260,6 @@ void print_leakage_rate(struct config * cfg, uint64_t * store_hits) {
 
     set_load_chain_leak_secret(cfg);
 
-    hits = test_leakage_rate(cfg, 0x00, TEST_ITERATIONS);
-
-    printf("Byte: 0x%02x %5ld/%d hits %5.2f%% | ", 0x0, hits, TEST_ITERATIONS, ((float) hits / TEST_ITERATIONS) * 100);
-    fflush(stdout);
-
     hits_higher = test_leakage_rate(cfg, 0xfe, TEST_ITERATIONS);
 
     printf("Byte: 0x%02x %5ld/%d hits %5.2f%%", 0xfe, hits_higher, TEST_ITERATIONS, ((float) hits_higher / TEST_ITERATIONS) * 100);

