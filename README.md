@@ -17,7 +17,7 @@ considered a production-grade tool by any means.
 InSpectre Gadget is a tool for inspecting potential Spectre disclosure gadgets
 and performing exploitability analysis.
 
-Documentation can be found at `docs/_build/html/index.html`.
+Documentation can be found at [https://vusec.github.io/inspectre-gadget](https://vusec.github.io/inspectre-gadget).
 
 ## Usage
 
@@ -42,7 +42,6 @@ inspectre show <UUID>
 ## Demo
 
 ![](docs/img/inspectre.gif)
-
 
 ## Evaluation and PoCs
 
