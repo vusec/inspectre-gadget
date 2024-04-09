@@ -4,9 +4,8 @@
 
 This is the official repository for the InSpectre Gadget tool.
 
-This code has been developed as part of our "InSpectre Gadget" paper, which is
-currently under submission. Access is limited to interested parties until
-embargo is lifted.
+This code has been developed as part of our "InSpectre Gadget" paper (accepted
+at 33rd USENIX Security Symposium 2024).
 
 **Disclaimer**
 
