@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../'))  # Source code dir relative to this file
 
 project = 'InSpectre Gadget'
-copyright = '2023, Sander Wiebing & Alvise de Faveri Tron - Vrije Universiteit Amsterdam'
+copyright = '2023-2024, Sander Wiebing & Alvise de Faveri Tron - Vrije Universiteit Amsterdam'
 author = 'Sander Wiebing & Alvise de Faveri Tron - Vrije Universiteit Amsterdam'
 
 # -- General configuration ---------------------------------------------------
