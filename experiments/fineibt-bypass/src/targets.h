@@ -14,7 +14,7 @@
 #define _TARGETS_H_
 
 #define MAX_HISTORY_SIZE 420
-#define THR 60
+#define THR 80
 
 #define CORE_TESTING 2
 #define CORE_CONTENTION 3
