@@ -9,7 +9,7 @@ cd linux-6.6-rc4
 cp ../config .config
 
 # Apply the patch required for PoC
-git apply ../fineibt_poc.patch
+patch -p1 < ../fineibt_poc.patch
 
 make CC=clang-16 olddefconfig
 
