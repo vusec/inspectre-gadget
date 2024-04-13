@@ -51,6 +51,7 @@ struct config {
 
     pht_config * pht_cfg;
     pht_config * all_pht_cfg[NUMBER_OF_EVICT_SETS];
+    int pht_bit_set;
 };
 
 void set_load_chain_simple_touch(struct config * cfg, int number_of_loads);

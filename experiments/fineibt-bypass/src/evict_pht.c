@@ -124,6 +124,8 @@ void randomize_branch_locations(pht_config * pht_cfg, uint8_t bit_set) {
 
             // addr_off = ((addr_off + JMP_GADGET_OFFSET) & 0xfffffffffffff000 | 0x00b) - JMP_GADGET_OFFSET;
 
+            // Bit 6 of the PC have to be equal for the eviction branches and the
+            // branch to be evicted
             if (bit_set) {
                 addr_off = ((addr_off + JMP_GADGET_OFFSET) | 0x20) - JMP_GADGET_OFFSET;
             } else {

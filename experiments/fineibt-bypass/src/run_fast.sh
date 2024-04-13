@@ -13,6 +13,8 @@ if [ $# -eq 1 ]
     PHYS_MAP=$1
 fi
 
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+
 make OS=LINUX_v6_6_RC4_UBUNTU ARCH=INTEL_13_GEN -B
 
 UUID_STRING=`cat /proc/kallsyms | grep -w uuid_string | awk '{print $1}'`

