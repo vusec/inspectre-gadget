@@ -19,7 +19,7 @@
 4000035  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 32632e73-cd9e-4600-93ec-f0b7e44db874
+uuid: f37b0bbb-184a-4ecf-a514-926bbc5b61f9
 transmitter: TransmitterType.LOAD
 
 Secret Address:
@@ -27,7 +27,7 @@ Secret Address:
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmitted Secret:
   - Expr: <BV64 LOAD_64[<BV64 rdi>]_23 * LOAD_64[<BV64 rsi>]_24>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
   - Spread: 0 - 63
   - Number of Bits Inferable: 64
 Base:
@@ -37,9 +37,9 @@ Base:
   - Independent Range: None
 Transmission:
   - Expr: <BV64 LOAD_64[<BV64 rdi>]_23 * LOAD_64[<BV64 rsi>]_24>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
 
-Register Requirements: {<BV64 rsi>, <BV64 rdi>}
+Register Requirements: {<BV64 rdi>, <BV64 rsi>}
 Constraints: []
 Branches: []
 ------------------------------------------------

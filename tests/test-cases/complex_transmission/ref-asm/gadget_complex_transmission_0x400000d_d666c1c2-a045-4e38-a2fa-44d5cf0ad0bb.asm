@@ -1,10 +1,10 @@
 ----------------- TRANSMISSION -----------------
          complex_transmission:
-4000000  mov     r8, qword ptr [rdi] ; {Attacker@rdi} -> {Secret@0x4000000}
-4000003  mov     r9, qword ptr [rsi] ; {Attacker@rsi} -> {Attacker@0x4000003}
+4000000  mov     r8, qword ptr [rdi] ; {Attacker@rdi} -> {Attacker@0x4000000}
+4000003  mov     r9, qword ptr [rsi] ; {Attacker@rsi} -> {Secret@0x4000003}
 4000006  add     r9, r8
 4000009  shl     r9, 0x6
-400000d  mov     r10, qword ptr [r9] ; {Attacker@0x4000003, Secret@0x4000000} -> TRANSMISSION
+400000d  mov     r10, qword ptr [r9] ; {Secret@0x4000003, Attacker@0x4000000} -> TRANSMISSION
 4000010  mov     r8, qword ptr [rdi]
 4000013  mov     r9, qword ptr [rsi]
 4000016  mov     rax, 0x8
@@ -19,27 +19,27 @@
 4000035  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 8b880656-118d-4047-83e9-162d87f8dfdd
+uuid: d666c1c2-a045-4e38-a2fa-44d5cf0ad0bb
 transmitter: TransmitterType.LOAD
 
 Secret Address:
-  - Expr: <BV64 rdi>
+  - Expr: <BV64 rsi>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmitted Secret:
-  - Expr: <BV64 (0#6 .. LOAD_64[<BV64 rdi>]_20[57:0]) << 0x6>
+  - Expr: <BV64 (0#6 .. LOAD_64[<BV64 rsi>]_21[57:0]) << 0x6>
   - Range: (0x0,0xffffffffffffffc0, 0x40) Exact: True
   - Spread: 6 - 63
   - Number of Bits Inferable: 58
 Base:
-  - Expr: <BV64 (0#6 .. LOAD_64[<BV64 rsi>]_21[57:0]) << 0x6>
+  - Expr: <BV64 (0#6 .. LOAD_64[<BV64 rdi>]_20[57:0]) << 0x6>
   - Range: (0x0,0xffffffffffffffc0, 0x40) Exact: True
-  - Independent Expr: <BV64 (0#6 .. LOAD_64[<BV64 rsi>]_21[57:0]) << 0x6>
+  - Independent Expr: <BV64 (0#6 .. LOAD_64[<BV64 rdi>]_20[57:0]) << 0x6>
   - Independent Range: (0x0,0xffffffffffffffc0, 0x40) Exact: True
 Transmission:
   - Expr: <BV64 ((0#6 .. LOAD_64[<BV64 rsi>]_21[57:0]) << 0x6) + ((0#6 .. LOAD_64[<BV64 rdi>]_20[57:0]) << 0x6)>
   - Range: (0x0,0xffffffffffffffc0, 0x40) Exact: False
 
-Register Requirements: {<BV64 rsi>, <BV64 rdi>}
+Register Requirements: {<BV64 rdi>, <BV64 rsi>}
 Constraints: []
 Branches: []
 ------------------------------------------------

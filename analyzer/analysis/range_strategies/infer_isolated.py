@@ -14,6 +14,8 @@ from ...shared.config import *
 
 l = get_logger("InferIsolated")
 
+debug = False
+
 class RangeStrategyInferIsolated(RangeStrategy):
 
     def find_range(self, constraints, ast : claripy.ast.bv.BVS,
@@ -162,13 +164,18 @@ class RangeMap:
 
     def concrete_mul(self, value, int_length):
 
+        # Check if we are in mask mode & multiplication is power of 2
+        if (not self.stride_mode) and (value != 0) and (value & (value-1) == 0):
+            # Power of two
+            return self.shift_left(value.bit_length() - 1, int_length)
+
+
         if (self.and_mask * value) >= (2 ** int_length):
             # mul has a overflow, we are not gonna try it
             return unknown_range()
 
-        # two based shift
+        # Multiply stride by multiplication
         new_map = self.switch_to_stride_mode()
-
         if not new_map.unknown:
             new_map.stride = new_map.stride * value
 
@@ -437,26 +444,24 @@ def op_sub(ast, range_maps):
 
 def op_mul(ast, range_maps):
 
-    non_full_ranges = []
+    base_map = None
     concrete_ast = None
 
     for idx, map in enumerate(range_maps):
+        # concrete value
         if not map:
             if concrete_ast != None:
                 concrete_ast = concrete_ast * ast.args[idx]
             else:
                 concrete_ast = ast.args[idx]
 
-        elif map.is_full_range(ast.length):
-            return map
-
+        # symbolic value
+        elif base_map == None:
+            base_map = range_maps[idx]
         else:
-            non_full_ranges.append(map)
-
-    if len(non_full_ranges) == 1:
-        base_map = non_full_ranges[0]
-
-        return base_map.concrete_mul(concrete_ast.args[0], ast.length)
+            # Mask by symbolic variable, we can't know the range
+            return unknown_range()
+    return base_map.concrete_mul(concrete_ast.args[0], ast.length)
 
 def op_if(ast, range_maps):
     # if arg0 then arg1 else arg2
@@ -522,8 +527,13 @@ def get_range_map_from_ast(ast : claripy.ast.bv.BVS):
             return unknown_range()
 
         if ast.op in operators:
+            if debug:
+                print(f"OP: {ast.op} AST: {ast} MAPS: {args_range_maps}")
+
             new_map = operators[ast.op](ast, args_range_maps)
 
+            if debug:
+                print(f"OUT: {new_map}")
 
             return new_map
 

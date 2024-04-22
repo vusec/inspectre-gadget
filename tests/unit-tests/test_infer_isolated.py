@@ -199,6 +199,28 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
 
     def test_mul(self):
 
+        a = claripy.BVS("a", 64)
+
+        ast = (a * 256)
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertEqual(ast_range.min, 0)
+        self.assertEqual(ast_range.max, 0xffffffffffffff00)
+        self.assertEqual(ast_range.stride, 0x100)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
+
+        a = claripy.BVS("a", 64)
+
+        ast = (((a * 4) << 2) * 8)
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertEqual(ast_range.min, 0)
+        self.assertEqual(ast_range.max, 0xffffffffffffff80)
+        self.assertEqual(ast_range.stride, 128)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
+
         a = claripy.BVS("a", 32).zero_extend(32)
 
         ast = ((a * 3) + 10) << 2
@@ -220,6 +242,15 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.stride, 0x1c)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
+
+
+        # We do not support a overflow with a stride != power of 2
+        a = claripy.BVS("a", 64)
+
+        ast = (a * 3)
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertIsNone(ast_range)
 
     def test_disjoint_range(self):
 

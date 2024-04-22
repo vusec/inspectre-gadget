@@ -18,7 +18,7 @@ Disassembly of section .text:
  4000024:	49 81 e3 ff 00 00 00 	and    r11,0xff
  400002b:	4d 01 da             	add    r10,r11
  400002e:	4f 8b 14 02          	mov    r10,QWORD PTR [r10+r8*1]
- 4000032:	c3                   	ret
+ 4000032:	c3                   	ret    
 
 == SCANNER ==
 [MAIN]  Loading angr project...
