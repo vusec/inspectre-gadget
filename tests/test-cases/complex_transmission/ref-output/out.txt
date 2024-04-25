@@ -57,6 +57,6 @@ Found 2 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
 Found 2 exploitable gadgets!
 [-] Performing exploitability analysis assuming the SLAM covert channel...
-Found 4 exploitable gadgets!
+Found 0 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

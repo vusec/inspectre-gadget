@@ -6,28 +6,28 @@
 4000009  shl     r9, 0x6
 400000d  mov     r10, qword ptr [r9]
 4000010  mov     r8, qword ptr [rdi] ; {Attacker@rdi} -> {Secret@0x4000010}
-4000013  mov     r9, qword ptr [rsi]
+4000013  mov     r9, qword ptr [rsi] ; {Attacker@rsi} -> {Attacker@0x4000013}
 4000016  mov     rax, 0x8
 400001d  mul     r8
 4000020  mov     r11, qword ptr [rax]
 4000023  mov     rax, r8
 4000026  mul     r9
-4000029  mov     r12, qword ptr [rax]
+4000029  mov     r12, qword ptr [rax] ; {Attacker@0x4000013, Secret@0x4000010} -> TRANSMISSION
 400002c  mov     rax, r8
 400002f  mul     rdi
-4000032  mov     r13, qword ptr [rax] ; {Secret@0x4000010, Attacker@rdi} -> TRANSMISSION
+4000032  mov     r13, qword ptr [rax]
 4000035  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 15d5aa98-c42f-49c4-9c8c-ce4cb0b6cedc
+uuid: 0abb73b8-972a-4bca-9574-b0d2e3bae122
 transmitter: TransmitterType.LOAD
 
 Secret Address:
   - Expr: <BV64 rdi>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmitted Secret:
-  - Expr: <BV64 LOAD_64[<BV64 rdi>]_23 * rdi>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Expr: <BV64 LOAD_64[<BV64 rdi>]_23 * LOAD_64[<BV64 rsi>]_24>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
   - Spread: 0 - 63
   - Number of Bits Inferable: 64
 Base:
@@ -36,10 +36,10 @@ Base:
   - Independent Expr: None
   - Independent Range: None
 Transmission:
-  - Expr: <BV64 LOAD_64[<BV64 rdi>]_23 * rdi>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Expr: <BV64 LOAD_64[<BV64 rdi>]_23 * LOAD_64[<BV64 rsi>]_24>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
 
-Register Requirements: {<BV64 rdi>}
+Register Requirements: {<BV64 rdi>, <BV64 rsi>}
 Constraints: []
 Branches: []
 ------------------------------------------------
