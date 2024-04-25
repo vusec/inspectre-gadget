@@ -48,7 +48,8 @@ def run_analyzer(args):
                  cache_project=args.cache_project,
                  csv_filename=args.output,
                  tfp_csv_filename=args.tfp_output,
-                 asm_folder=args.asm)
+                 asm_folder=args.asm,
+                 symbol_binary=args.symbol_binary)
 
 
 def run_reasoner(args):
@@ -81,6 +82,8 @@ if __name__ == '__main__':
     # Optional args.
     analyzer_args.add_argument('--cache-project', action='store_true', help='load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist')
     analyzer_args.add_argument('--base-address', required=False, default='', help='base address of the binary to analyze')
+    analyzer_args.add_argument("--symbol-binary", default='', help='binary that contains function symbols')
+
     # Outputs.
     analyzer_args.add_argument('--output', required=False, default='', help='output all found gadgets to a CSV')
     analyzer_args.add_argument('--tfp-output', required=False, default='', help='output all found dispatch gadgets to a CSV')

@@ -42,28 +42,6 @@ def flatten_dict(dictionary, parent_key='', separator='_'):
     return dict(items)
 
 
-def remove_memory_sections(proj: angr.Project):
-    """
-    We always remove remove the writeable segments to prevent
-    initialized concrete values (zeros) while they should be symbolic.
-    """
-
-    # Get the start addresses of segments to remove
-    start_addresses = []
-
-    for segment in proj.loader.main_object.segments:
-        if segment.is_writable:
-            start_addresses.append(segment.min_addr)
-
-    # Remove segment backers
-    # TODO: Uncertain if this method works for all binaries
-    for addr in start_addresses:
-        for start, backer in proj.loader.memory._backers:
-            if addr >= start and addr < backer.max_addr:
-                backer.remove_backer(addr)
-                break
-
-
 def load_config(config_file):
     """
     Read the YAML configuration.
@@ -243,7 +221,7 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
                 append_to_csv(tfp_csv_filename, [tfp])
                 l.info(f"Dumped CSV to {tfp_csv_filename}")
 
-def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder=""):
+def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary=""):
     """
     Run the analyzer on a binary.
     """
@@ -262,8 +240,14 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     l.info("Loading angr project...")
     proj   = load_angr_project(binary, base_address, cache_project)
 
-    l.info("Removing non-writable memory...")
-    remove_memory_sections(proj)
+    if symbol_binary:
+        l.info("Loading symbol binary...")
+        symbol_proj = load_angr_project(symbol_binary, base_address, cache_project)
+
+        proj.loader.all_objects[0]._symbol_cache = symbol_proj.loader.all_objects[0]._symbol_cache
+        proj.loader.all_objects[0].symbols = symbol_proj.loader.all_objects[0].symbols
+        proj.loader.all_objects[0]._symbols_by_name = symbol_proj.loader.all_objects[0]._symbols_by_name
+        del symbol_proj
 
     # Run the Analyzer.
     # TODO: Parallelize.
