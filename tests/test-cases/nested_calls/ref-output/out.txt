@@ -1,0 +1,42 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <nested_calls>:
+ 4000000:	e8 18 00 00 00       	call   400001d <target_1>
+ 4000005:	e8 14 00 00 00       	call   400001e <target_2>
+ 400000a:	4c 8b 07             	mov    r8,QWORD PTR [rdi]
+ 400000d:	4c 0f b7 0f          	movzx  r9,WORD PTR [rdi]
+ 4000011:	4d 8b 91 00 00 00 81 	mov    r10,QWORD PTR [r9-0x7f000000]
+ 4000018:	e9 00 00 00 00       	jmp    400001d <target_1>
+
+000000000400001d <target_1>:
+ 400001d:	c3                   	ret
+
+000000000400001e <target_2>:
+ 400001e:	c3                   	ret
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[MAIN]  Found 1 potential transmissions.
+[MAIN]  Found 0 tainted function pointers.
+[MAIN]  Extracted 1 transmissions.
+[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
+[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdi>]_27)>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  --------------- ANALYZING TFPs ------------------
+
+== REASONER ==
+[-] Imported 1 gadgets
+[-] Performing exploitability analysis...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

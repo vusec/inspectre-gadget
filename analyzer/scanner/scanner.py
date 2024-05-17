@@ -406,12 +406,15 @@ class Scanner:
                                 op_type=memory.MemOpType.LOAD)
         self.cur_id += 1
 
-        aliases = memory.get_aliasing_loads(cur_load, state)
+        aliases = memory.get_aliasing_loads(cur_load, state, alias_store)
         for alias in aliases:
             state.globals[f"alias_{self.n_alias}"] = alias
             self.n_alias += 1
             # Add a symbolic constraint to the angr state.
             state.solver.add(alias.to_BV())
+            l.warning(f"Adding alias {alias.to_BV()}")
+            if not state.solver.satisfiable():
+                report_error(Exception(), hex(self.cur_state.addr), hex(0), error_type="ALIAS UNSAT")
 
 
         # Save this load in the angr state.

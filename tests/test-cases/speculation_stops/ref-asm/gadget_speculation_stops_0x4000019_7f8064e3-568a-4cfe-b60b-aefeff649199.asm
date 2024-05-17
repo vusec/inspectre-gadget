@@ -1,6 +1,6 @@
 ----------------- TRANSMISSION -----------------
          speculation_stops:
-4000000  movzx   r9, word ptr [rdi] ; {Attacker@rdi} > {Secret@0x4000000}
+4000000  movzx   r9, word ptr [rdi] ; {Attacker@rdi} -> {Secret@0x4000000}
 4000004  cmp     rax, 0x0
 4000008  je      trans1 ; Not Taken   <Bool rax != 0x0>
 400000a  cmp     rax, 0x1
@@ -9,11 +9,12 @@
 4000014  je      trans3 ; Not Taken   <Bool rax != 0x2>
          trans0:
 4000016  sfence  
-4000019  mov     r10, qword ptr [r9-0x7f000000] ; {Secret@0x4000000} > TRANSMISSION
+4000019  mov     r10, qword ptr [r9-0x7f000000] ; {Secret@0x4000000} -> TRANSMISSION
 4000020  jmp     end
 
 ------------------------------------------------
-uuid: 8259aebd-dcbf-461d-a735-78a068d7bd1b
+uuid: 7f8064e3-568a-4cfe-b60b-aefeff649199
+transmitter: TransmitterType.LOAD
 
 Secret Address:
   - Expr: <BV64 rdi>
@@ -34,5 +35,5 @@ Transmission:
 
 Register Requirements: {<BV64 rdi>}
 Constraints: []
-Branches: [(67108872, <Bool rax != 0x0>, 'Not Taken'), (67108878, <Bool rax != 0x1>, 'Not Taken'), (67108884, <Bool rax != 0x2>, 'Not Taken')]
+Branches: [('0x4000008', <Bool rax != 0x0>, 'Not Taken'), ('0x400000e', <Bool rax != 0x1>, 'Not Taken'), ('0x4000014', <Bool rax != 0x2>, 'Not Taken')]
 ------------------------------------------------

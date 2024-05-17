@@ -90,6 +90,9 @@ class MemoryAlias:
     def __repr__(self) -> str:
         return f"{self.val1} == {self.val2}"
 
+    def is_symbolic(self):
+        return is_sym_expr(self.val1.sym) or is_sym_expr(self.val2.sym)
+
     def to_BV(self):
         return self.val1.to_BV() == self.val2.to_BV()
 
@@ -150,12 +153,19 @@ def get_aliases(state: angr.SimState) -> MemoryAlias:
     return filter(lambda x: isinstance(x, MemoryAlias), state.globals.values())
 
 
-def get_aliasing_loads(this: MemOp, state: angr.SimState) -> list[MemoryAlias]:
+def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[MemoryAlias]:
     """
     Check if a load aliases with any other previous load.
     """
     aliasing_loads = []
-    for prev in get_previous_loads(state):
+    prev_loads = get_previous_loads(state)
+
+    if alias_store:
+        for p in prev_loads:
+            if p.id < alias_store.id:
+                del p
+
+    for prev in prev_loads:
         if overlaps_with(this, prev, state):
             memop1, memop2, off = get_overlap(this, prev, state)
 
@@ -205,7 +215,7 @@ def get_aliasing_store(load_addr: claripy.BV, load_size: int, state: angr.SimSta
     """
     store = None
 
-    # Get oldest store that aliases with this address.
+    # Get newest store that aliases with this address.
     for s in get_previous_stores(state):
         if not state.solver.satisfiable(extra_constraints=[load_addr != s.addr]):
             if not store or store.id < s.id:

@@ -5,13 +5,13 @@
 400000a  mov     qword ptr [rdx], r8
 400000d  mov     r10, qword ptr [rdx]
 4000010  and     r10, 0xffff
-4000017  mov     rcx, qword ptr [r10-0x7f000000] ; {Secret@0x4000000} -> TRANSMISSION
+4000017  mov     rcx, qword ptr [r10-0x7f000000]
 400001e  movzx   r11, word ptr [rdx]
-4000022  mov     rdi, qword ptr [r11-0x7f000000]
+4000022  mov     rdi, qword ptr [r11-0x7f000000] ; {Secret@0x4000000} -> TRANSMISSION
 4000029  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 9347e7f3-8b57-4118-a2f9-cd5060490421
+uuid: 4f15c211-7c5e-4937-941e-6a85b7bbd67c
 transmitter: TransmitterType.LOAD
 
 Secret Address:
