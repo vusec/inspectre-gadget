@@ -112,7 +112,7 @@ class Scanner:
         self.cur_state = None
 
 
-    def initialize_regs_and_stack(self, state: angr.sim_state.SimState, config):
+    def initialize_regs_and_stack(self, state: angr.sim_state.SimState):
         """
         Mark stack locations and registers as attacker-controlled.
         """
@@ -121,7 +121,7 @@ class Scanner:
         state.regs.gs = claripy.BVS('gs', 64, annotations=(UncontrolledAnnotation('gs'),))
 
         # Attacker-controlled registers.
-        for reg in config['controlled_registers']:
+        for reg in global_config['controlled_registers']:
             try:
                 length = getattr(state.regs, reg).length
             except AttributeError:
@@ -133,8 +133,8 @@ class Scanner:
         # Attacker-controlled stack locations: save them as stores.
         # TODO: this is a hack. If STL forwarding is disabled, stack variables
         # will not be loaded.
-        if 'controlled_stack' in config:
-            for region in config['controlled_stack']:
+        if 'controlled_stack' in global_config:
+            for region in global_config['controlled_stack']:
                 for offset in range(region['start'], region['end'], region['size']):
                     size = region['size']
                     assert (size in [1, 2, 4, 8])
@@ -551,7 +551,7 @@ class Scanner:
         raise SplitException
 
 
-    def run(self, proj: angr.Project, start_address, config) -> list[TransmissionExpr]:
+    def run(self, proj: angr.Project, start_address) -> list[TransmissionExpr]:
         """
         Run the symbolic execution engine for a given number of basic blocks.
         """
@@ -584,7 +584,7 @@ class Scanner:
         state.inspect.b('address_concretization', when=angr.BP_AFTER, action=skip_concretization)
         state.inspect.b('expr', when=angr.BP_AFTER, action=self.expr_hook_after)
 
-        self.initialize_regs_and_stack(state, config)
+        self.initialize_regs_and_stack(state)
         self.thunk_list = get_x86_indirect_thunks(proj)
 
         # Run the symbolic execution engine.

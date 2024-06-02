@@ -58,7 +58,6 @@ def load_config(config_file):
                                            'r12', 'r13', 'r14', 'r15']}
 
     init_config(config)
-    return config
 
 
 def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Project:
@@ -125,7 +124,7 @@ def append_to_csv(csv_filename, transmissions):
         writer.writerows(flatten_dicts)
 
 
-def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_filename, asm_folder):
+def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, asm_folder):
     """
     Run the scanner from a single entrypoint and analyze the potential transmissions
     found at symbolic-execution time.
@@ -134,7 +133,7 @@ def analyse_gadget(proj, gadget_address, name, config, csv_filename, tfp_csv_fil
     # Step 1. Analyze the code snippet with angr.
     l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
     s = Scanner()
-    s.run(proj, gadget_address, config)
+    s.run(proj, gadget_address)
 
     l.info(f"Found {len(s.transmissions)} potential transmissions.")
     l.info(f"Found {len(s.calls)} tainted function pointers.")
@@ -230,7 +229,7 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     # Simplify how symbols get printed.
     claripy.ast.base._unique_names = False
 
-    config = load_config(config_file)
+    load_config(config_file)
 
     if global_config["LogLevel"] == 0:
         disable_logging()
@@ -253,4 +252,4 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     # Run the Analyzer.
     # TODO: Parallelize.
     for g in gadgets:
-        analyse_gadget(proj, g[0], g[1], config, csv_filename, tfp_csv_filename, asm_folder)
+        analyse_gadget(proj, g[0], g[1], csv_filename, tfp_csv_filename, asm_folder)
