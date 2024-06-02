@@ -1,23 +1,25 @@
 --------------------- TFP ----------------------
          tfp_symbolic:
-4000000  mov     rax, qword ptr [rcx+rsi] ; {Attacker@rcx, Attacker@rsi} -> {Attacker@0x4000000}
-4000004  cmp     r15, 0x0
-4000008  je      tfp1 ; Taken   <Bool r15 == 0x0>
+4000000  cmp     r15, 0x0
+4000004  je      tfp1
          tfp1:
-400000c  call    rax ; {Attacker@0x4000000} -> TAINTED FUNCTION POINTER
+400000c  add     byte ptr [rdi], bh
+400000e  cmovae  eax, ecx
+4000011  jmp     qword ptr [rax-0x7db6bd40] ; {Attacker@0x4000011} -> TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: 136e582b-500f-4a72-a115-67f2df04eabe
+uuid: e80cc049-f8aa-4184-a40c-2427b844046a
 
-Reg: rax
-Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
+Reg: mem
+Expr: <BV64 LOAD_64[<BV64 (0#32 .. rax[31:0]) + 0xffffffff824942c0>]_25>
 
 Constraints: []
-Branches: [('0x4000008', <Bool r15 == 0x0>, 'Taken')]
+Branches: []
 
 CONTROLLED:
 
 REGS ALIASING WITH TFP:
+rax: <BV64 0x0 .. rax[31:0]>
 
 Uncontrolled Regs: ['rbp', 'rsp']
 Unmodified Regs: ['rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', 'r15']

@@ -110,10 +110,10 @@ class TransmissionExpr:
                 pc: {hex(self.pc)}
                 expr: {self.expr}
                 transmitter: {self.transmitter}
-                branches: {utils.ordered_branches(self)}
+                branches: {utils.ordered_branches(self.branches)}
                 bbls: {self.bbls}
                 aliases: {self.aliases}
-                constraints: {utils.ordered_constraints(self)}
+                constraints: {utils.ordered_constraints(self.constraints)}
                 n_instr: {self.n_instr}
                 contains_spec_stop: {self.contains_spec_stop}
                 """
@@ -147,8 +147,8 @@ class TransmissionComponent():
         return f"""
                 expr: {self.expr}
                 size: {self.size}
-                branches: {utils.ordered_branches(self)}
-                constraints: {utils.ordered_constraints(self)}
+                branches: {utils.ordered_branches(self.branches)}
+                constraints: {utils.ordered_constraints(self.constraints)}
                 requirements: {self.requirements}
                 range: {self.range}
                 range_with_branches: {self.range_with_branches}
@@ -160,8 +160,8 @@ class TransmissionComponent():
         return OrderedDict([
             ('expr', str(self.expr)),
             ('size', str(self.size)),
-            ('branches', utils.ordered_branches(self)),
-            ('constraints', utils.ordered_constraints(self)),
+            ('branches', utils.ordered_branches(self.branches)),
+            ('constraints', utils.ordered_constraints(self.constraints)),
             ('requirements', self.requirements.to_dict()),
             ('range', ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
             ('range_w_branches', ranges.AstRange(0,0,0,False).to_dict() if self.range_with_branches == None else self.range_with_branches.to_dict()),
@@ -267,11 +267,11 @@ class Transmission():
             {self.secret_val}
 
 
-        branches: {utils.ordered_branches(self)}
+        branches: {utils.ordered_branches(self.branches)}
         bbls: {[hex(x) for x in self.bbls]}
         branch requirements: {self.branch_requirements}
 
-        constraints: {utils.ordered_constraints(self)}
+        constraints: {utils.ordered_constraints(self.constraints)}
         constraint requirements: {self.constraint_requirements}
 
         all requirements: {self.all_requirements}
@@ -317,9 +317,9 @@ class Transmission():
         d['secret_address'] = self.secret_address.to_dict()
         d['secret_val'] = self.secret_val.to_dict()
 
-        d['branches'] = utils.ordered_branches(self)
+        d['branches'] = utils.ordered_branches(self.branches)
         d['branch_requirements'] = self.branch_requirements
-        d['constraints'] = utils.ordered_constraints(self)
+        d['constraints'] = utils.ordered_constraints(self.constraints)
         d['constraint_requirements'] = self.constraint_requirements
         d['all_requirements'] = self.all_requirements
         d['all_requirements_w_branches'] = self.all_requirements_w_branches

@@ -28,6 +28,7 @@ Disassembly of section .text:
 [MAIN]  Dumped properties to gadgets.csv
 [MAIN]  --------------- ANALYZING TFPs ------------------
 [MAIN]  Extracted 1 tfps.
+[MAIN]  Analyzing @0x4000013: <BV64 LOAD_64[<BV64 rdi + 0x10>]_23>
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
 

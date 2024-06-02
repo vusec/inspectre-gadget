@@ -1,20 +1,20 @@
 ----------------- TRANSMISSION -----------------
-         tfp_symbolic:
-4000000  mov     rax, qword ptr [rcx+rsi] ; {Attacker@rcx, Attacker@rsi} -> {Secret@0x4000000}
-4000004  cmp     r15, 0x0
-4000008  je      tfp1 ; Taken   <Bool r15 == 0x0>
-         tfp1:
-400000c  call    rax ; {Secret@0x4000000} -> TRANSMISSION
+         code_load:
+4000000  cmp     r8, 0x0
+4000004  je      trans1 ; Taken   <Bool r8 == 0x0>
+         trans1:
+400001c  mov     rax, qword ptr [rdi] ; {Attacker@rdi} -> {Secret@0x400001c}
+400001f  jmp     rax ; {Secret@0x400001c} -> TRANSMISSION
 
 ------------------------------------------------
-uuid: fd1e2eb7-df00-43ea-8517-759846789416
+uuid: a84942f4-bbda-412b-8c47-e9b2e3ee53ce
 transmitter: TransmitterType.CODE_LOAD
 
 Secret Address:
-  - Expr: <BV64 rcx + rsi>
+  - Expr: <BV64 rdi>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmitted Secret:
-  - Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
+  - Expr: <BV64 LOAD_64[<BV64 rdi>]_24>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
   - Spread: 0 - 63
   - Number of Bits Inferable: 64
@@ -24,10 +24,10 @@ Base:
   - Independent Expr: None
   - Independent Range: None
 Transmission:
-  - Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
+  - Expr: <BV64 LOAD_64[<BV64 rdi>]_24>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rsi>, <BV64 rcx>}
+Register Requirements: {<BV64 rdi>}
 Constraints: []
-Branches: [('0x4000008', <Bool r15 == 0x0>, 'Taken')]
+Branches: [('0x4000004', <Bool r8 == 0x0>, 'Taken')]
 ------------------------------------------------

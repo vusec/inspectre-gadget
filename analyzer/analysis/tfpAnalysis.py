@@ -23,7 +23,7 @@ def get_dependency_graph(t: TaintedFunctionPointer):
     for r in t.registers:
         d.add_nodes(t.registers[r].expr)
     d.add_aliases(map(lambda x: x.to_BV(), t.aliases))
-    d.add_constraints([x[1] for x in t.constraints])
+    d.add_constraints([x[1] for x in t.all_constraints])
     d.resolve_dependencies()
     return d
 
@@ -79,12 +79,13 @@ def analyse(t: TaintedFunctionPointer):
             for s in subst:
                 new_t.registers[s[0]].expr = s[1].expr
                 new_t.registers[s[0]].constraints.extend(s[1].conditions)
-                new_t.constraints.extend(s[1].conditions)
+                new_t.all_constraints.extend(s[1].conditions)
                 if s[0] == t.reg:
+                    new_t.constraints.extend(s[1].conditions)
                     new_t.expr = s[1].expr
 
             s = claripy.Solver(timeout=global_config["Z3Timeout"])
-            if not s.satisfiable(extra_constraints=[x[1] for x in new_t.constraints]):
+            if not s.satisfiable(extra_constraints=[x[1] for x in new_t.all_constraints]):
                 # Skipping.. this combination of constraints is not satisfiable
                 continue
 

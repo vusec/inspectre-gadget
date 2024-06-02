@@ -52,12 +52,16 @@ Disassembly of section .text:
 [MAIN]  Dumped properties to gadgets.csv
 [MAIN]  --------------- ANALYZING TFPs ------------------
 [MAIN]  Extracted 4 tfps.
+[MAIN]  Analyzing @0x400001a: <BV64 rdx + (0#48 .. LOAD_16[<BV64 rdi>]_20)>
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
+[MAIN]  Analyzing @0x400002c: <BV64 LOAD_64[<BV64 rdi>]_21>
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
+[MAIN]  Analyzing @0x4000025: <BV64 LOAD_64[<BV64 ((0#48 .. LOAD_16[<BV64 rdi>]_22) << 0x3) + 0xffffffff81000000>]_23>
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
+[MAIN]  Analyzing @0x400001f: <BV64 LOAD_64[<BV64 rdi>]_24>
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
 

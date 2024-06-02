@@ -1,24 +1,24 @@
 --------------------- TFP ----------------------
          code_load:
 4000000  cmp     r8, 0x0
-4000004  je      trans1 ; Not Taken   <Bool r8 != 0x0>
+4000004  je      trans1
 4000006  cmp     r8, 0x1
-400000a  je      trans2 ; Not Taken   <Bool r8 != 0x1>
+400000a  je      trans2
 400000c  cmp     r8, 0x2
-4000010  je      trans3 ; Not Taken   <Bool r8 != 0x2>
+4000010  je      trans3
          trans0:
 4000012  movzx   rsi, word ptr [rdi] ; {Attacker@rdi} -> {Attacker@0x4000012}
 4000016  lea     rax, [rdx+rsi]
-400001a  jmp     rax ; {Attacker@0x4000012, Attacker@rdx} -> TAINTED FUNCTION POINTER
+400001a  jmp     rax ; {Attacker@rdx, Attacker@0x4000012} -> TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: 2be39ebc-975c-438d-92c5-52b775db8629
+uuid: 73b87ab9-e48d-4367-9345-2b8a43e1dbd7
 
 Reg: rax
 Expr: <BV64 rdx + (0#48 .. LOAD_16[<BV64 rdi>]_20)>
 
 Constraints: []
-Branches: [('0x4000004', <Bool r8 != 0x0>, 'Not Taken'), ('0x400000a', <Bool r8 != 0x1>, 'Not Taken'), ('0x4000010', <Bool r8 != 0x2>, 'Not Taken')]
+Branches: []
 
 CONTROLLED:
 

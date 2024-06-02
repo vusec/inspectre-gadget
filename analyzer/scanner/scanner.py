@@ -501,15 +501,20 @@ class Scanner:
 
             # get the register
             instruction = block.capstone.insns[-1].insn
-            regs_read, regs_write = instruction.regs_access()
 
-            # exclude all written registers; RSP in case of a call instruction
-            if len(regs_read) > len(regs_write):
-                regs_read = [x for x in regs_read if x not in regs_write]
+            if 'ptr' in instruction.op_str:
+                # Jump to pointer in memory (e.g, jmp qword ptr [rax])
+                func_ptr_reg = 'mem'
+            else:
+                # Jump to registers
+                regs_read, regs_write = instruction.regs_access()
 
-            # TODO: Handle indirect branches with multiple registers
-            reg_id = regs_read[0]
-            func_ptr_reg = instruction.reg_name(reg_id)
+                # exclude all written registers; RSP in case of a call instruction
+                if len(regs_read) > len(regs_write):
+                    regs_read = [x for x in regs_read if x not in regs_write]
+
+                reg_id = regs_read[0]
+                func_ptr_reg = instruction.reg_name(reg_id)
 
         # Second case: jump to indirect thunk
         elif state.inspect.exit_target.args[0] in self.thunk_list:

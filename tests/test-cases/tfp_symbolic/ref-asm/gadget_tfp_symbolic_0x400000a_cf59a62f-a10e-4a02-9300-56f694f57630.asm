@@ -1,13 +1,13 @@
 ----------------- TRANSMISSION -----------------
          tfp_symbolic:
-4000000  mov     rax, qword ptr [rcx+rsi] ; {Attacker@rcx, Attacker@rsi} -> {Secret@0x4000000}
-4000004  cmp     r15, 0x0
-4000008  je      tfp1 ; Not Taken   <Bool r15 != 0x0>
+4000000  cmp     r15, 0x0
+4000004  je      tfp1 ; Not Taken   <Bool r15 != 0x0>
          tfp0:
-400000a  jmp     rax ; {Secret@0x4000000} -> TRANSMISSION
+4000006  mov     rax, qword ptr [rcx+rsi] ; {Attacker@rsi, Attacker@rcx} -> {Secret@0x4000006}
+400000a  call    rax ; {Secret@0x4000006} -> TRANSMISSION
 
 ------------------------------------------------
-uuid: e9cf7517-e0d5-4444-a042-bc477673e14e
+uuid: cf59a62f-a10e-4a02-9300-56f694f57630
 transmitter: TransmitterType.CODE_LOAD
 
 Secret Address:
@@ -29,5 +29,5 @@ Transmission:
 
 Register Requirements: {<BV64 rsi>, <BV64 rcx>}
 Constraints: []
-Branches: [('0x4000008', <Bool r15 != 0x0>, 'Not Taken')]
+Branches: [('0x4000004', <Bool r15 != 0x0>, 'Not Taken')]
 ------------------------------------------------

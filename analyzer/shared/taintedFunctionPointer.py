@@ -7,6 +7,7 @@ from collections import OrderedDict
 from claripy import BVS
 
 from .utils import ordered_branches, ordered_constraints
+from . import ranges
 
 class TFPRegisterControlType(Enum):
     UNMODIFIED = 1,
@@ -37,8 +38,8 @@ class TFPRegister():
         reg: {self.reg}
         expr: {self.expr}
         control: {self.control}
-        branches: {ordered_branches(self)}
-        constraints: {ordered_constraints(self)}
+        branches: {ordered_branches(self.branches)}
+        constraints: {ordered_constraints(self.constraints)}
         requirements: {self.requirements}
         range: {self.range}
         """
@@ -48,8 +49,8 @@ class TFPRegister():
         ("reg", self.reg),
         ("expr", self.expr),
         ("control", self.control),
-        ("branches", ordered_branches(self)),
-        ("constraints", ordered_constraints(self)),
+        ("branches", ordered_branches(self.branches)),
+        ("constraints", ordered_constraints(self.constraints)),
         ("requirements", self.requirements),
         ("range", self.range)
         ])
@@ -84,17 +85,22 @@ class TaintedFunctionPointer():
         self.n_branches = len(branches)
         self.reg = reg
         self.expr = expr
-        self.branches = []
-        self.branches.extend(branches)
-        self.constraints = []
-        self.constraints.extend(constraints)
+        self.range = None
+        self.all_branches = []
+        self.all_branches.extend(branches)
+        self.all_constraints = []
+        self.all_constraints.extend(constraints)
         self.aliases = []
         self.aliases.extend(aliases)
         self.bbls = []
         self.bbls.extend(bbls)
 
+        # Constraints only applying on tfp.expr
         self.requirements = []
+        self.constraints = []
+        self.branches = []
 
+        # Summarizing lists
         self.controlled = []
         self.uncontrolled = []
         self.unmodified = []
@@ -123,8 +129,8 @@ class TaintedFunctionPointer():
         aliasing: {self.aliasing}
 
         bbls: {[hex(x) for x in self.bbls]}
-        branches: {ordered_branches(self)}
-        constraints: {ordered_constraints(self)}
+        all_branches: {ordered_branches(self.all_branches)}
+        all_constraints: {ordered_constraints(self.all_constraints)}
         aliases: {self.aliases}
         requirements: {self.requirements}
         registers:
@@ -143,14 +149,19 @@ class TaintedFunctionPointer():
         ("pc", hex(self.pc)),
         ("reg", self.reg),
         ("expr", self.expr),
-        ("branches", ordered_branches(self)),
-        ("constraints", ordered_constraints(self)),
-        ("aliases", self.aliases),
+        ("range", ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
+        ("branches", ordered_branches(self.constraints)),
+        ("constraints", ordered_constraints(self.branches)),
         ("requirements", self.requirements),
+        ("all_branches", ordered_branches(self.all_constraints)),
+        ("all_constraints", ordered_constraints(self.all_branches)),
+        ("aliases", self.aliases),
         ("bbls", [hex(x) for x in self.bbls]),
         ("controlled", self.controlled),
+        ("n_controlled", len(self.controlled)),
         ("uncontrolled", self.uncontrolled),
         ("unmodified", self.unmodified),
+        ("n_unmodified", len(self.unmodified)),
         ("secrets", self.secrets),
         ("aliasing", self.aliasing)
         ])
@@ -165,13 +176,16 @@ class TaintedFunctionPointer():
                                          expr=self.expr,
                                          reg=self.reg,
                                          bbls=self.bbls,
-                                         branches=self.branches,
-                                         constraints=self.constraints,
+                                         branches=self.all_branches,
+                                         constraints=self.all_constraints,
                                          aliases=self.aliases,
                                          n_instr=self.n_instr,
                                          contains_spec_stop=self.contains_spec_stop,
                                          n_dependent_loads=self.n_dependent_loads)
+        new_tfp.constraints.extend(self.constraints)
+        new_tfp.branches.extend(self.branches)
         new_tfp.requirements.extend(self.requirements)
+        new_tfp.range = self.range
         new_tfp.controlled.extend(self.controlled)
         new_tfp.uncontrolled.extend(self.uncontrolled)
         new_tfp.unmodified.extend(self.unmodified)

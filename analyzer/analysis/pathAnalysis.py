@@ -81,26 +81,41 @@ def analyse_tfp(t: TaintedFunctionPointer):
     for r in t.registers:
         d.add_nodes(t.registers[r].expr)
     d.add_aliases(t.aliases)
-    d.add_constraints([x[1] for x in t.constraints])
-    d.add_constraints([x[1] for x in t.branches])
+    d.add_constraints([x[1] for x in t.all_constraints])
+    d.add_constraints([x[1] for x in t.all_branches])
     d.resolve_dependencies()
 
     reg_deps = {}
     for r in t.registers:
         reg_deps[t.registers[r].reg] = d.get_all_deps(get_vars(t.registers[r].expr), include_constraints=False)
 
-    for addr,condition,taken in t.branches:
+    if t.reg not in reg_deps:
+        reg_deps[t.reg] = d.get_all_deps(get_vars(t.expr), include_constraints=False)
+
+    for addr,condition,taken in t.all_branches:
         br_deps = d.get_all_deps(get_vars(condition), include_constraints=False)
 
+        # Check for all registers
         for r in t.registers:
-            if len(br_deps.intersection(reg_deps[t.reg])):
+            if len(br_deps.intersection(reg_deps[r])):
                 t.registers[r].branches.append((addr, condition, taken))
 
-    for addr,c,ctype in t.constraints:
+        # Check for tfp expr
+        if len(br_deps.intersection(reg_deps[t.reg])):
+            t.branches.append((addr, condition, taken))
+
+
+
+    for addr,c,ctype in t.all_constraints:
         constr_deps = d.get_all_deps(get_vars(c), include_constraints=False)
 
+        # Check for all registers
         for r in t.registers:
-            if len(constr_deps.intersection(reg_deps[t.reg])):
+            if len(constr_deps.intersection(reg_deps[r])):
                 t.registers[r].constraints.append((addr, c,ctype))
+
+        # Check for tfp expr
+        if len(constr_deps.intersection(reg_deps[t.reg])):
+            t.constraints.append((addr, c,ctype))
 
     l.warning("==========================")

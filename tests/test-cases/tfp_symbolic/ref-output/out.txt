@@ -5,43 +5,53 @@ gadget:     file format elf64-x86-64
 Disassembly of section .text:
 
 0000000004000000 <tfp_symbolic>:
- 4000000:	48 8b 04 31          	mov    rax,QWORD PTR [rcx+rsi*1]
- 4000004:	49 83 ff 00          	cmp    r15,0x0
- 4000008:	74 02                	je     400000c <tfp1>
+ 4000000:	49 83 ff 00          	cmp    r15,0x0
+ 4000004:	74 06                	je     400000c <tfp1>
 
-000000000400000a <tfp0>:
- 400000a:	ff e0                	jmp    rax
+0000000004000006 <tfp0>:
+ 4000006:	48 8b 04 31          	mov    rax,QWORD PTR [rcx+rsi*1]
+ 400000a:	ff d0                	call   rax
 
 000000000400000c <tfp1>:
- 400000c:	ff d0                	call   rax
+ 400000c:	00 3f                	add    BYTE PTR [rdi],bh
+ 400000e:	0f 43 c1             	cmovae eax,ecx
+ 4000011:	ff a0 c0 42 49 82    	jmp    QWORD PTR [rax-0x7db6bd40]
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[MAIN]  Found 2 potential transmissions.
-[MAIN]  Found 2 tainted function pointers.
-[MAIN]  Extracted 2 transmissions.
+[MAIN]  Found 3 potential transmissions.
+[MAIN]  Found 3 tainted function pointers.
+[MAIN]  Extracted 3 transmissions.
 [MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
 [MAIN]  Analyzing <BV64 LOAD_64[<BV64 rcx + rsi>]_20>...
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
-[MAIN]  Analyzing <BV64 LOAD_64[<BV64 rcx + rsi>]_20>...
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 (0#32 .. rax[31:0]) + 0xffffffff824942c0>]_25>...
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped properties to gadgets.csv
+[MAIN]  Analyzing <BV64 LOAD_64[<BV64 (0#32 .. rcx[31:0]) + 0xffffffff824942c0>]_27>...
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped properties to gadgets.csv
 [MAIN]  --------------- ANALYZING TFPs ------------------
-[MAIN]  Extracted 2 tfps.
+[MAIN]  Extracted 3 tfps.
+[MAIN]  Analyzing @0x400000a: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
+[MAIN]  Analyzing @0x4000011: <BV64 LOAD_64[<BV64 (0#32 .. rax[31:0]) + 0xffffffff824942c0>]_25>
+[MAIN]  Dumped annotated ASM to asm
+[MAIN]  Dumped CSV to tfp.csv
+[MAIN]  Analyzing @0x4000011: <BV64 LOAD_64[<BV64 (0#32 .. rcx[31:0]) + 0xffffffff824942c0>]_27>
 [MAIN]  Dumped annotated ASM to asm
 [MAIN]  Dumped CSV to tfp.csv
 
 == REASONER ==
-[-] Imported 2 gadgets
+[-] Imported 3 gadgets
 [-] Performing exploitability analysis...
 Found 0 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
 Found 0 exploitable gadgets!
 [-] Performing exploitability analysis assuming the SLAM covert channel...
-Found 2 exploitable gadgets!
+Found 3 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

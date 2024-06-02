@@ -13,10 +13,10 @@ Disassembly of section .text:
  4000018:	e9 00 00 00 00       	jmp    400001d <target_1>
 
 000000000400001d <target_1>:
- 400001d:	c3                   	ret
+ 400001d:	c3                   	ret    
 
 000000000400001e <target_2>:
- 400001e:	c3                   	ret
+ 400001e:	c3                   	ret    
 
 == SCANNER ==
 [MAIN]  Loading angr project...

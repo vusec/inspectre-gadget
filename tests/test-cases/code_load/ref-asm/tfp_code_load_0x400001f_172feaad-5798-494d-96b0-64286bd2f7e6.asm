@@ -1,19 +1,19 @@
 --------------------- TFP ----------------------
          code_load:
 4000000  cmp     r8, 0x0
-4000004  je      trans1 ; Taken   <Bool r8 == 0x0>
+4000004  je      trans1
          trans1:
 400001c  mov     rax, qword ptr [rdi] ; {Attacker@rdi} -> {Attacker@0x400001c}
 400001f  jmp     rax ; {Attacker@0x400001c} -> TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: 86802a14-7880-47c7-a123-fb7c1a291236
+uuid: 172feaad-5798-494d-96b0-64286bd2f7e6
 
 Reg: rax
 Expr: <BV64 LOAD_64[<BV64 rdi>]_24>
 
 Constraints: []
-Branches: [('0x4000004', <Bool r8 == 0x0>, 'Taken')]
+Branches: []
 
 CONTROLLED:
 

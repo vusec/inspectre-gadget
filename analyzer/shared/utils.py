@@ -102,10 +102,10 @@ def branch_outcomes(history):
 
     return outcomes
 
-def ordered_branches(obj):
-    obj.branches = sorted(obj.branches, key=lambda x: x[0])
-    return [(hex(addr), cond, taken) for addr, cond, taken in obj.branches]
+def ordered_branches(branches):
+    branches = sorted(branches, key=lambda x: x[0])
+    return [(hex(addr), cond, taken) for addr, cond, taken in branches]
 
-def ordered_constraints(obj):
-    obj.constraints = sorted(obj.constraints, key=lambda x: x[0])
-    return [(hex(addr), cond, str(ctype)) for addr, cond, ctype in obj.constraints]
+def ordered_constraints(constraints):
+    constraints = sorted(constraints, key=lambda x: x[0])
+    return [(hex(addr), cond, str(ctype)) for addr, cond, ctype in constraints]
