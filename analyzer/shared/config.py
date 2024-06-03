@@ -8,6 +8,7 @@ def init_config(config):
     global_config["MaxBB"] = 5
     global_config["STLForwarding"] = True
     global_config["DistributeShifts"] = True
+    global_config["AnalyzeDuringScanning"] = True
     global_config["LogLevel"] = 1
     global_config["TaintedFunctionPointers"] = True
     global_config["SpeculationStopMnemonics"] = {'lfence', 'mfence', 'cpuid'}

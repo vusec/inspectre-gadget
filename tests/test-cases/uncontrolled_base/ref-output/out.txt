@@ -23,20 +23,19 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_22>]_23 + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_25 + rbx + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_27 + (0#56 .. r11[7:0]) + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 3 potential transmissions.
-[MAIN]  Found 0 tainted function pointers.
-[MAIN]  Extracted 3 transmissions.
-[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
-[MAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_22>]_23 + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
-[MAIN]  Dumped annotated ASM to asm
-[MAIN]  Dumped properties to gadgets.csv
-[MAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_25 + rbx + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
-[MAIN]  Dumped annotated ASM to asm
-[MAIN]  Dumped properties to gadgets.csv
-[MAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_27 + (0#56 .. r11[7:0]) + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
-[MAIN]  Dumped annotated ASM to asm
-[MAIN]  Dumped properties to gadgets.csv
-[MAIN]  --------------- ANALYZING TFPs ------------------
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Outputted 3 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
 
 == REASONER ==
 [-] Imported 3 gadgets

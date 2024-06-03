@@ -17,14 +17,13 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_64[<BV64 r8 + 0xff>]_22[15:0])>...
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 1 potential transmissions.
-[MAIN]  Found 0 tainted function pointers.
-[MAIN]  Extracted 1 transmissions.
-[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
-[MAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_64[<BV64 r8 + 0xff>]_22[15:0])>...
-[MAIN]  Dumped annotated ASM to asm
-[MAIN]  Dumped properties to gadgets.csv
-[MAIN]  --------------- ANALYZING TFPs ------------------
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Outputted 1 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
 
 == REASONER ==
 [-] Imported 1 gadgets

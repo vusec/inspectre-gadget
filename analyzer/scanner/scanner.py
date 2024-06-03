@@ -20,6 +20,7 @@ import traceback
 from angr.concretization_strategies import SimConcretizationStrategy
 
 # autopep8: off
+from ..analysis.pipeline import AnalysisPipeline
 from ..shared.logger import *
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
@@ -96,7 +97,11 @@ class Scanner:
     cur_id: int
     n_alias: int
 
-    def __init__(self):
+    analysis_pipeline : AnalysisPipeline
+
+    def __init__(self, analysis_pipeline):
+        self.analysis_pipeline = analysis_pipeline
+
         self.transmissions = []
         self.calls = []
 
@@ -229,7 +234,7 @@ class Scanner:
         """
         if contains_secret(expr):
             # Create a new transmission object.
-            self.transmissions.append(TransmissionExpr(pc=state.scratch.ins_addr,
+            t = TransmissionExpr(pc=state.scratch.ins_addr,
                                                        expr=expr,
                                                        transmitter=op_type,
                                                        bbls=self.get_bbls(state),
@@ -238,7 +243,13 @@ class Scanner:
                                                        constraints=self.get_constraints(state),
                                                        n_instr=self.count_instructions(state, state.scratch.ins_addr),
                                                        contains_spec_stop=self.history_contains_speculation_stop(state)
-                                                       ))
+                                                       )
+            self.transmissions.append(t)
+
+            if global_config['AnalyzeDuringScanning']:
+                self.analysis_pipeline.analyze_transmission(t)
+
+
 
     def check_tfp(self, state, func_ptr_reg, func_ptr_ast):
         """
@@ -264,6 +275,10 @@ class Scanner:
             tfp.registers[reg] = TFPRegister(reg, reg_ast)
 
         self.calls.append(tfp)
+
+        if global_config['AnalyzeDuringScanning']:
+            self.analysis_pipeline.analyze_tainted_function_pointer(tfp)
+
 
 
     #---------------- STATE SPLITTING ----------------------------

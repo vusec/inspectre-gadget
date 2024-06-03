@@ -42,17 +42,16 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing <BV64 0x40 + (0xffffff00 + (0#56 .. LOAD_8[<BV64 rcx + 0x4>]_20))>...
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing <BV64 0x40 + (0#56 .. LOAD_8[<BV64 rcx + 0x4>]_20)>...
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 2 potential transmissions.
-[MAIN]  Found 0 tainted function pointers.
-[MAIN]  Extracted 2 transmissions.
-[MAIN]  --------------- ANALYZING TRANSMISSIONS ------------------
-[MAIN]  Analyzing <BV64 0x40 + (0xffffff00 + (0#56 .. LOAD_8[<BV64 rcx + 0x4>]_20))>...
-[MAIN]  Dumped annotated ASM to asm
-[MAIN]  Dumped properties to gadgets.csv
-[MAIN]  Analyzing <BV64 0x40 + (0#56 .. LOAD_8[<BV64 rcx + 0x4>]_20)>...
-[MAIN]  Dumped annotated ASM to asm
-[MAIN]  Dumped properties to gadgets.csv
-[MAIN]  --------------- ANALYZING TFPs ------------------
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Outputted 2 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
 
 == REASONER ==
 [-] Imported 2 gadgets

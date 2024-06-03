@@ -56,6 +56,6 @@ def get_logger(name):
 
 def disable_logging(keep_main=False):
     for l in __loggers:
-        if keep_main and l == "MAIN":
+        if keep_main and "MAIN" in l:
             continue
         __loggers[l].disabled = True
