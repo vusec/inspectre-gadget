@@ -161,9 +161,7 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
     prev_loads = get_previous_loads(state)
 
     if alias_store:
-        for p in prev_loads:
-            if p.id < alias_store.id:
-                del p
+        prev_loads = filter(lambda p: p.id >= alias_store.id, prev_loads)
 
     for prev in prev_loads:
         if overlaps_with(this, prev, state):
