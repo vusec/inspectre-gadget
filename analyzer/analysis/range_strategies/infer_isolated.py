@@ -56,7 +56,7 @@ class RangeStrategyInferIsolated(RangeStrategy):
                 if range_map.unknown:
                     return None
 
-                range_map = range_map.switch_to_stride_mode()
+                range_map = range_map.switch_to_stride_mode(sub_ast.length)
 
                 if range_map.unknown:
                     return None
@@ -114,7 +114,7 @@ class RangeMap:
         self.stride_mode = False
         self.stride = 0
 
-    def switch_to_stride_mode(self):
+    def switch_to_stride_mode(self, int_length):
 
         if self.stride_mode:
             return self
@@ -126,11 +126,15 @@ class RangeMap:
         self.and_mask = 0
         self.stride_mode = True
 
+        if self.stride >  2 ** int_length - 1:
+            return unknown_range()
+
+
         return self
 
     def has_range(self):
         if self.unknown:
-            return True
+            return False
 
         if self.stride_mode:
             return True
@@ -160,7 +164,7 @@ class RangeMap:
             return unknown_range()
 
         # We have to switch to STRIDE mode if possible
-        return self.switch_to_stride_mode()
+        return self.switch_to_stride_mode(int_length)
 
     def concrete_mul(self, value, int_length):
 
@@ -175,9 +179,12 @@ class RangeMap:
             return unknown_range()
 
         # Multiply stride by multiplication
-        new_map = self.switch_to_stride_mode()
+        new_map = self.switch_to_stride_mode(int_length)
         if not new_map.unknown:
             new_map.stride = new_map.stride * value
+
+            if new_map.stride >  2 ** int_length - 1:
+                return unknown_range()
 
         return new_map
 
@@ -249,6 +256,10 @@ class RangeMap:
     def shift_left(self, shift, int_length):
         if self.stride_mode:
             self.stride = self.stride * (2 ** shift)
+
+            if self.stride >  2 ** int_length - 1:
+                return unknown_range()
+
             return self
         else:
 
