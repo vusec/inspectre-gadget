@@ -310,3 +310,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         ast_range = self.range_strategy.find_range([], ast)
 
         self.assertIsNone(ast_range)
+
+    def test_overflowing_stride(self):
+        # We cannot infer a stride if its higher than the int size
+        a = claripy.BVS("a", 8)
+        ast = ((a.zero_extend(56) << 5) + 0x20) * 0xffffffffffffffff
+
+        ast_range = self.range_strategy.find_range([], ast)
+        self.assertIsNone(ast_range)

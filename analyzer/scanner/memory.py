@@ -161,9 +161,7 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
     prev_loads = get_previous_loads(state)
 
     if alias_store:
-        for p in prev_loads:
-            if p.id < alias_store.id:
-                del p
+        prev_loads = filter(lambda p: p.id >= alias_store.id, prev_loads)
 
     for prev in prev_loads:
         if overlaps_with(this, prev, state):
@@ -197,8 +195,15 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
                 range1 = RangedSymbol(sym=val1, max=(off+overlap)*8-1, min=off*8)
                 range2 = RangedSymbol(sym=val2, max=overlap*8-1, min=0)
 
+                memory_alias = MemoryAlias(range1, range2)
+
+                if claripy.is_true(MemoryAlias(range1, range2).to_BV()):
+                    # Alias between the same value, thus always true
+                    # We can skip
+                    continue
+
                 # Return this overlap.
-                aliasing_loads.append(MemoryAlias(range1, range2))
+                aliasing_loads.append(memory_alias)
         # else:
             # l.info("No overlap")
             # TODO: force them to never alias in the opposite case?
