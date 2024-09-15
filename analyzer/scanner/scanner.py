@@ -137,7 +137,12 @@ class Scanner:
                     bvs = claripy.BVS(reg, length, annotations=(UncontrolledAnnotation(reg),))
                 setattr(state.regs, reg, bvs)
             except AttributeError:
-                l.critical(f"Invalid register in config! {reg}")
+                l.critical(f"Invalid register in x86 arch! {reg}")
+
+        # Unknown registers in config
+        unknown_regs = [str(r) for r in global_config['controlled_registers'] if r not in get_x86_registers()]
+        if unknown_regs:
+            l.critical(f"Invalid registers in config! {', '.join(unknown_regs)}")
 
         # Attacker-controlled stack locations: save them as stores.
         # TODO: this is a hack. If STL forwarding is disabled, stack variables
