@@ -26,6 +26,7 @@ from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
 from ..shared.config import *
 from ..shared.astTransform import *
+from ..shared.utils import get_x86_registers
 # autopep8: on
 
 l = get_logger("Scanner")
@@ -125,15 +126,25 @@ class Scanner:
         state.regs.rsp = claripy.BVS('rsp', 64, annotations=(UncontrolledAnnotation('rsp'),))
         state.regs.gs = claripy.BVS('gs', 64, annotations=(UncontrolledAnnotation('gs'),))
 
-        # Attacker-controlled registers.
+        # Initialize non-controlled registers.
+        for reg in get_x86_registers():
+            if reg not in global_config['controlled_registers']:
+                try:
+                    length = getattr(state.regs, reg).length
+                    bvs = claripy.BVS(reg, length, annotations=(UncontrolledAnnotation(reg),))
+                    setattr(state.regs, reg, bvs)
+                except AttributeError:
+                    l.critical(f"Unsupported arch! x86 register '{reg}' is not available")
+
+        # Initialize attacker-controlled registers.
+        # They may partly overwrite uncontrolled registers (e.g., eax over rax)
         for reg in global_config['controlled_registers']:
             try:
                 length = getattr(state.regs, reg).length
+                bvs = claripy.BVS(reg, length, annotations=(AttackerAnnotation(reg),))
+                setattr(state.regs, reg, bvs)
             except AttributeError:
                 l.critical(f"Invalid register in config! {reg}")
-
-            bvs = claripy.BVS(reg, length, annotations=(AttackerAnnotation(reg),))
-            setattr(state.regs, reg, bvs)
 
         # Attacker-controlled stack locations: save them as stores.
         # TODO: this is a hack. If STL forwarding is disabled, stack variables
