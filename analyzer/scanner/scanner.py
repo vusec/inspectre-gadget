@@ -126,23 +126,25 @@ class Scanner:
         state.regs.rsp = claripy.BVS('rsp', 64, annotations=(UncontrolledAnnotation('rsp'),))
         state.regs.gs = claripy.BVS('gs', 64, annotations=(UncontrolledAnnotation('gs'),))
 
-        # Attacker-controlled registers.
+        # Initialize non-controlled registers.
         for reg in get_x86_registers():
+            if reg not in global_config['controlled_registers']:
+                try:
+                    length = getattr(state.regs, reg).length
+                    bvs = claripy.BVS(reg, length, annotations=(UncontrolledAnnotation(reg),))
+                    setattr(state.regs, reg, bvs)
+                except AttributeError:
+                    l.critical(f"Unsupported arch! x86 register '{reg}' is not available")
+
+        # Initialize attacker-controlled registers.
+        # They may partly overwrite uncontrolled registers (e.g., eax over rax)
+        for reg in global_config['controlled_registers']:
             try:
                 length = getattr(state.regs, reg).length
-
-                if reg in global_config['controlled_registers']:
-                    bvs = claripy.BVS(reg, length, annotations=(AttackerAnnotation(reg),))
-                else:
-                    bvs = claripy.BVS(reg, length, annotations=(UncontrolledAnnotation(reg),))
+                bvs = claripy.BVS(reg, length, annotations=(AttackerAnnotation(reg),))
                 setattr(state.regs, reg, bvs)
             except AttributeError:
-                l.critical(f"Invalid register in x86 arch! {reg}")
-
-        # Unknown registers in config
-        unknown_regs = [str(r) for r in global_config['controlled_registers'] if r not in get_x86_registers()]
-        if unknown_regs:
-            l.critical(f"Invalid registers in config! {', '.join(unknown_regs)}")
+                l.critical(f"Invalid register in config! {reg}")
 
         # Attacker-controlled stack locations: save them as stores.
         # TODO: this is a hack. If STL forwarding is disabled, stack variables
