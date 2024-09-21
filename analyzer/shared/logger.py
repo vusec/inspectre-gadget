@@ -14,19 +14,16 @@ class __CustomFormatter(logging.Formatter):
         name: str = record.name
         level: str = record.levelname
         message: str = record.getMessage()
-        name_len: int = len(name)
-        lvl_len: int = len(level)
 
-        if sys.stdout.isatty():
-            # Choose a different color for each logger.
-            c: int = zlib.adler32(name.encode()) % 7
-            c = (c + zlib.adler32(level.encode())) % 7
-            if c != 0:  # Do not color black or white, allow 'uncolored'
-                col = Color(c + Color.black.value)
+        # Choose a different color for each logger.
+        c: int = zlib.adler32(name.encode()) % 7
+        c = (c + zlib.adler32(level.encode())) % 7
+
+        if c != 0 and sys.stdout.isatty():
+            col = Color(c + Color.black.value)
             return color(col, False) + f"[{name}]  {message}{ENDC}"
 
         else:
-
             return f"[{name}]  {message}"
 
 
