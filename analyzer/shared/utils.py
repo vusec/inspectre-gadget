@@ -109,3 +109,8 @@ def ordered_branches(branches):
 def ordered_constraints(constraints):
     constraints = sorted(constraints, key=lambda x: x[0])
     return [(hex(addr), cond, str(ctype)) for addr, cond, ctype in constraints]
+
+def find_symbol_for_address(proj, address : int):
+    symbol = proj.loader.find_symbol(address, fuzzy=True)
+    return symbol.name if symbol else ""
+

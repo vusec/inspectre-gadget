@@ -15,7 +15,7 @@ from . import transmissionAnalysis, baseControlAnalysis, branchControlAnalysis, 
 from ..asmprinter.asmprinter import *
 from ..shared.logger import *
 from ..shared.transmission import *
-from ..shared.utils import report_error
+from ..shared.utils import *
 
 
 l = get_logger("AnalysisMAIN")
@@ -31,6 +31,7 @@ class AnalysisPipeline:
     name: str
     # Entrypoint address
     gadget_address: int
+    gadget_symbol: str
     proj: angr.Project
     # Output configurations
     asm_folder: str
@@ -48,6 +49,8 @@ class AnalysisPipeline:
         self.name = name
         self.gadget_address = gadget_address
         self.proj = proj
+
+        self.gadget_symbol = find_symbol_for_address(self.proj, self.gadget_address)
 
         self.asm_folder = asm_folder
         self.csv_filename = csv_filename
@@ -69,6 +72,8 @@ class AnalysisPipeline:
             t.uuid = str(uuid.uuid4())
             t.name = self.name
             t.address = self.gadget_address
+            t.pc_symbol = find_symbol_for_address(self.proj, t.pc)
+            t.address_symbol = self.gadget_symbol
             baseControlAnalysis.analyse(t)
             pathAnalysis.analyse(t)
             requirementsAnalysis.analyse(t)
@@ -112,6 +117,8 @@ class AnalysisPipeline:
             tfp.uuid = str(uuid.uuid4())
             tfp.name = self.name
             tfp.address = self.gadget_address
+            tfp.pc_symbol = find_symbol_for_address(self.proj, t.pc)
+            tfp.address_symbol = self.gadget_symbol
             pathAnalysis.analyse_tfp(tfp)
             requirementsAnalysis.analyse_tfp(tfp)
 

@@ -72,11 +72,27 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, is_
         proj.kb.comments[pc] += " -> " + "TRANSMISSION"
 
 
+    prev_block = None
     output = ""
     for bbl_addr in bbls:
+        symbol = proj.loader.find_symbol(bbl_addr, fuzzy=True)
+        # Capstone adds the symbol at the start of the function, thus we only
+        # add if we are not at the start and it is not a fallthrough target
+        if symbol and symbol.rebased_addr != bbl_addr:
+            is_fall_through = prev_block !=  None and prev_block.addr + prev_block.vex.size == bbl_addr
+
+            if not is_fall_through:
+                # Capstone did not add a symbol
+                addr_length = len(f'{bbl_addr:x}')
+                bytes_width = addr_length + 2
+                output += " " * bytes_width + f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
+
+        # Add the assembly code
         block = proj.factory.block(bbl_addr)
         output += proj.analyses.Disassembly(ranges=[(block.addr, block.addr + block.size)]).render(color=color)
         output += "\n"
+
+        prev_block = block
 
     proj.kb.comments = {}
     return output

@@ -179,7 +179,9 @@ class Transmission():
     uuid : str
     name: str
     address: int
+    address_symbol : str
     pc: int
+    pc_symbol : str
     secret_load_pc: int
     transmitter: TransmitterType
     n_instr: int
@@ -213,7 +215,9 @@ class Transmission():
         self.uuid = ""
         self.name = ""
         self.address = 0
+        self.address_symbol = ""
         self.pc = t.pc
+        self.pc_symbol = ""
         self.secret_load_pc = 0
         self.transmitter = t.transmitter
         self.n_instr = t.n_instr
@@ -300,7 +304,9 @@ class Transmission():
         d['uuid'] = self.uuid
         d['name'] = self.name
         d['address'] = hex(self.address)
+        d['address_symbol'] = self.address_symbol
         d['pc'] = hex(self.pc)
+        d['pc_symbol'] = self.pc_symbol
         d['secret_load_pc'] = hex(self.secret_load_pc)
         d['transmitter'] = str(self.transmitter)
         d['n_instr'] = self.n_instr

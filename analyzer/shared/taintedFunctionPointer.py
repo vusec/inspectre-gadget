@@ -69,7 +69,9 @@ class TaintedFunctionPointer():
     uuid : str
     name: str
     address: int
+    address_symbol : str
     pc: int
+    pc_symbol : str
 
     registers: dict[str, TFPRegister]
 
@@ -77,7 +79,9 @@ class TaintedFunctionPointer():
         self.uuid = ""
         self.name = ""
         self.address = 0
+        self.address_symbol = ""
         self.pc = pc
+        self.pc_symbol = ""
 
         self.n_instr = n_instr
         self.contains_spec_stop = contains_spec_stop
@@ -142,11 +146,13 @@ class TaintedFunctionPointer():
         ("uuid", self.uuid),
         ("name", self.name),
         ("address", hex(self.address)),
+        ("address_symbol", self.address_symbol),
+        ("pc", hex(self.pc)),
+        ("pc_symbol", self.pc_symbol),
         ("n_instr", self.n_instr),
         ("n_dependent_loads", self.n_dependent_loads),
         ("n_branches", self.n_branches),
         ("contains_spec_stop", self.contains_spec_stop),
-        ("pc", hex(self.pc)),
         ("reg", self.reg),
         ("expr", self.expr),
         ("range", ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
