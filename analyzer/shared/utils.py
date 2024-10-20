@@ -78,29 +78,20 @@ def report_unsupported(error: Exception, where="dunno", start_addr="dunno", erro
     o.write("\n")
     o.close()
 
-def get_outcome(cond, source, target):
-    if cond.concrete:
-        if cond.is_true():
-            return "Taken"
-        else:
-            return "Not Taken"
-    elif target.symbolic:
-        return "Indirect JMP"
-    else:
-        # TODO: this is an approximation, find a better way to
-        # understand if the branch was taken or not.
+def get_outcome(bb, target):
+
+    number_of_constant_targets =len(bb.vex.constant_jump_targets)
+
+    if number_of_constant_targets > 1:
+        # Conditional branch
         target_addr = target.concrete_value
-        if target_addr == source + 2:
+        fall_through_addr = bb.addr + bb.vex.size
+        if fall_through_addr == target_addr:
             return "Not Taken"
-        else:
-            return "Taken"
 
-def branch_outcomes(history):
-    outcomes = []
-    for cond, source, target in zip(history.jump_guards, history.jump_sources, history.jump_targets):
-        outcomes.append(get_outcome(cond, source, target))
+    # Unconditional branches are always taken
+    return "Taken"
 
-    return outcomes
 
 def ordered_branches(branches):
     branches = sorted(branches, key=lambda x: x[0])

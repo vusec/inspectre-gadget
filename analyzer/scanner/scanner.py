@@ -216,14 +216,14 @@ class Scanner:
     def get_history(self, state):
         branches = []
 
-        for cond, source, target in zip(state.history.jump_guards, state.history.jump_sources, state.history.jump_targets):
+        for cond, source, target, bbl_addr in zip(state.history.jump_guards, state.history.jump_sources, state.history.jump_targets, state.history.bbl_addrs):
             # Check if the condition contains an if-then-else statement,
             # and substitute it with the appropriate choice for this state.
             subst = getSubstitution(state, source, SubstType.COND_SUBST)
             if subst != None:
                 cond = subst
 
-            outcome = get_outcome(cond, source, target)
+            outcome = get_outcome(self.bbs[bbl_addr]['block'], target)
             branches.append((source, cond, outcome))
 
         return branches
