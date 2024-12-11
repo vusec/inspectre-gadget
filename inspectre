@@ -37,7 +37,7 @@ def run_analyzer(args):
 
     # Base address is by default the address of the first entrypoint.
     if args.base_address == "":
-        base_address = int(entrypoints[0][0], 16)
+        base_address = 0x0
     else:
         base_address = int(args.base_address, 16)
 
