@@ -1,22 +1,22 @@
 #
 # Prepare the environment for eval.
 #
-FROM ubuntu:23.04 AS base
+FROM ubuntu:22.04 AS base
 
 # Packages.
 RUN apt-get update && \
     apt-get install -y build-essential libncurses-dev bison flex libssl-dev \
     libelf-dev zstd qemu-system-x86 debootstrap wget bc sudo python3-pip \
-    openssh-client clang-16 git sqlite3 vim fish
+    openssh-client clang-15 git sqlite3 vim fish
 
 # Python dependencies.
 COPY inspectre /inspectre
-RUN pip3 install -r inspectre/requirements.txt --break-system-packages
-RUN pip3 install qemu.qmp --break-system-packages
+RUN PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install -r inspectre/requirements.txt
+RUN PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install qemu.qmp
 
 # Graph drawing dependencies.
-RUN pip3 install pandas matplotlib numpy cycler scienceplots tqdm argparse --break-system-packages
-RUN apt-get -y install texlive-latex-extra texlive-fonts-recommended dvipng cm-super
+RUN PIP_BREAK_SYSTEM_PACKAGES=1 pip3 install pandas matplotlib numpy cycler scienceplots tqdm argparse
+RUN DEBIAN_FRONTEND=noninteractive TZ=Europe/Amsterdam apt-get -y install texlive-latex-extra texlive-fonts-recommended dvipng cm-super
 
 COPY vm/build /vm
 WORKDIR /vm
