@@ -46,3 +46,9 @@ DistributeShifts: True
 
 # Also look for tainted function pointers (i.e. dispatch gadgets).
 TaintedFunctionPointers: True
+
+# Should we analyse the transmissions only after scanning the whole gadget,
+# or should we try to output transmissions as soon as they are found?
+# This has consequences on interrupting, e.g., if you analyse only _after_ scanning
+# you won't have any outputted transmission in case of  e.g.timeouts.
+AnalyzeDuringScanning: True
