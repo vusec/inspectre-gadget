@@ -49,7 +49,9 @@ def run_analyzer(args):
                  csv_filename=args.output,
                  tfp_csv_filename=args.tfp_output,
                  asm_folder=args.asm,
-                 symbol_binary=args.symbol_binary)
+                 symbol_binary=args.symbol_binary,
+                 half_gadget_filename=args.half_gadget_output
+                 )
 
 
 def run_reasoner(args):
@@ -87,6 +89,7 @@ if __name__ == '__main__':
     # Outputs.
     analyzer_args.add_argument('--output', required=False, default='', help='output all found gadgets to a CSV')
     analyzer_args.add_argument('--tfp-output', required=False, default='', help='output all found dispatch gadgets to a CSV')
+    analyzer_args.add_argument('--half-gadget-output', required=False, default='', help='output all found half-spectre gadgets to a CSV')
     analyzer_args.add_argument('--asm', required=False, default='', help='output an annotated ASM file for each gadget to the specified folder')
     # Run.
     analyzer_args.set_defaults(func=run_analyzer)

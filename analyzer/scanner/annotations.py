@@ -238,6 +238,13 @@ def get_uncontrolled_annotation(x):
                 return anno
     return None
 
+def get_uncontrolled_load_annotation(x):
+    if is_sym_var(x):
+        for anno in get_annotations(x):
+            if isinstance(anno, UncontrolledLoadAnnotation):
+                return anno
+    return None
+
 def get_dep_set(expr):
     depset = set()
 
@@ -253,4 +260,14 @@ def is_attacker_controlled(ast):
     for anno in get_annotations(ast):
         if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
             return True
+    return False
+
+def is_directly_controlled(ast: claripy.BV):
+    if not is_sym_expr(ast):
+        return False
+
+    for anno in get_annotations(ast):
+        if isinstance(anno, AttackerAnnotation):
+            return True
+
     return False

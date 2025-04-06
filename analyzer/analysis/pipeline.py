@@ -11,10 +11,11 @@ import os
 import csv
 from collections.abc import MutableMapping
 
-from . import transmissionAnalysis, baseControlAnalysis, branchControlAnalysis, pathAnalysis, requirementsAnalysis, rangeAnalysis, bitsAnalysis, tfpAnalysis
+from . import transmissionAnalysis, baseControlAnalysis, branchControlAnalysis, pathAnalysis, requirementsAnalysis, rangeAnalysis, bitsAnalysis, tfpAnalysis, halfGadgetAnalysis
 from ..asmprinter.asmprinter import *
 from ..shared.logger import *
 from ..shared.transmission import *
+from ..shared.halfGadget import HalfGadget
 from ..shared.utils import report_error
 from ..shared.config import global_config
 
@@ -37,14 +38,17 @@ class AnalysisPipeline:
     asm_folder: str
     csv_filename: str
     tfp_csv_filename: str
+    half_gadget_filename: str
 
     # Stats
     n_found_transmissions: int
-    n_found_tainted_function_pointers: int
     n_final_transmissions: int
+    n_found_tainted_function_pointers: int
     n_final_tainted_function_pointers: int
+    n_found_half_gadgets: int
+    n_final_half_gadgets: int
 
-    def __init__(self, name, gadget_address, proj, asm_folder, csv_filename, tfp_csv_filename):
+    def __init__(self, name, gadget_address, proj, asm_folder, csv_filename, tfp_csv_filename, half_gadget_filename):
         self.name = name
         self.gadget_address = gadget_address
         self.proj = proj
@@ -52,11 +56,14 @@ class AnalysisPipeline:
         self.asm_folder = asm_folder
         self.csv_filename = csv_filename
         self.tfp_csv_filename = tfp_csv_filename
+        self.half_gadget_filename = half_gadget_filename
 
         self.n_found_transmissions = 0
-        self.n_found_tainted_function_pointers = 0
         self.n_final_transmissions = 0
+        self.n_found_tainted_function_pointers = 0
         self.n_final_tainted_function_pointers = 0
+        self.n_found_half_gadgets = 0
+        self.n_final_half_gadgets = 0
 
     def analyze_transmission(self, potential_t: TransmissionExpr):
 
@@ -110,7 +117,7 @@ class AnalysisPipeline:
         tfps = tfpAnalysis.analyse(t)
 
         for tfp in tfps:
-            l.info(f"Analyzing @{hex(tfp.pc)}: {tfp.expr}")
+            l.info(f"Analyzing TFP @{hex(tfp.pc)}: {tfp.expr}")
             tfp.uuid = str(uuid.uuid4())
             tfp.name = self.name
             tfp.address = self.gadget_address
@@ -143,6 +150,42 @@ class AnalysisPipeline:
                 append_to_csv(self.tfp_csv_filename, [tfp])
                 l.info(f"Dumped CSV to {self.tfp_csv_filename}")
 
+    def analyze_half_gadget(self, gadget: HalfGadget):
+        self.n_found_half_gadgets += 1
+        gadgets = halfGadgetAnalysis.analyse(gadget)
+
+        for g in gadgets:
+            l.info(f"Analyzing half-spectre @{hex(g.pc)}: {g.loaded.expr}")
+            g.uuid = str(uuid.uuid4())
+            g.name = self.name
+            g.address = self.gadget_address
+            pathAnalysis.analyse_half_gadget(g)
+            requirementsAnalysis.analyse_half_gadget(g)
+
+            try:
+                rangeAnalysis.analyse_half_gadget(g)
+            except Exception as e:
+                if global_config['CrashOnExceptions']:
+                    raise e
+                # TODO: In very few instances, our range analysis fails. Instead of
+                # interrupting the analysis right away, we want to continue to
+                # the next gadget. There are many reasons why the range analysis
+                # can fail, and some of them might be fixed.
+                # However, since the number of errors we encountered is very low,
+                # this has not been deemed to be a priority for now.
+                l.critical("Range analysis error: bailing out")
+                report_error(e, where="range_analysis", start_addr=hex(
+                    self.gadget_address), error_type="HALF GADGET RANGE")
+
+            self.n_final_half_gadgets += 1
+            l_verbose.info(g)
+
+            if self.asm_folder != "":
+                output_half_gadget_to_file(g, self.proj, self.asm_folder)
+                l.info(f"Dumped annotated ASM to {self.asm_folder}")
+            if self.half_gadget_filename != "":
+                append_to_csv(self.half_gadget_filename, [g])
+                l.info(f"Dumped CSV to {self.half_gadget_filename}")
 
 def flatten_dict(dictionary, parent_key='', separator='_'):
     """

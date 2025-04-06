@@ -24,6 +24,7 @@ from ..analysis.pipeline import AnalysisPipeline
 from ..shared.logger import *
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
+from ..shared.halfGadget import *
 from ..shared.config import *
 from ..shared.astTransform import *
 from ..shared.utils import get_x86_registers
@@ -105,6 +106,7 @@ class Scanner:
         self.analysis_pipeline = analysis_pipeline
 
         self.transmissions = []
+        self.half_gadgets = []
         self.calls = []
 
         self.loads = []
@@ -301,6 +303,29 @@ class Scanner:
         if global_config['AnalyzeDuringScanning']:
             self.analysis_pipeline.analyze_tainted_function_pointer(tfp)
 
+    def check_half_spectre(self, expr, state):
+        """
+        Secret loads are, technically speaking, "half-Spectre" gadgets.
+        """
+        if is_directly_controlled(expr):
+            l.warning(f"Found new Half Gadget! {expr}")
+            # Create a new transmission object.
+            g = HalfGadget(expr=expr,
+                           pc=state.scratch.ins_addr,
+                           n_instr=self.count_instructions(
+                               state, state.scratch.ins_addr),
+                           contains_spec_stop=self.history_contains_speculation_stop(
+                               state),
+                           aliases=self.get_aliases(state),
+                           constraints=self.get_constraints(state),
+                           branches=self.get_history(state),
+                           bbls=self.get_bbls(state),
+                           )
+            self.half_gadgets.append(g)
+
+            if global_config['AnalyzeDuringScanning']:
+                self.analysis_pipeline.analyze_half_gadget(g)
+
     # ---------------- STATE SPLITTING ----------------------------
 
     def split_state(self, state, asts, addr, branch_split=False, subst_type=SubstType.ADDR_SUBST):
@@ -472,6 +497,10 @@ class Scanner:
 
         # Is this load a transmission?
         self.check_transmission(load_addr, TransmitterType.LOAD, state)
+        # Is this an attacker-controlled load? Then it could be classified as
+        # a half-spectre gadget.
+        if global_config["HalfSpectre"]:
+            self.check_half_spectre(load_addr, state)
 
     # ---------------- STORES ----------------------------
 
