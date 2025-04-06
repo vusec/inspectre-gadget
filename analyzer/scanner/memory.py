@@ -111,7 +111,7 @@ def overlaps_with(load1: MemOp, load2: MemOp, state: angr.SimState) -> bool:
 
     # If this condition is satisfiable, there is at least one solution for
     # addr1 and addr2 in which they don't overlap.
-    no_overlap = claripy.Or(addr2 >= addr1+sz1, addr1 >= addr2+sz2)
+    no_overlap = claripy.Or(addr2 >= addr1 + sz1, addr1 >= addr2 + sz2)
 
     # In the opposite case (not satisfiable), there is _no_ solution in which
     # they are separate.
@@ -128,12 +128,12 @@ def get_overlap(load1: MemOp, load2: MemOp, state: angr.SimState):
 
     # Consider only these offsets for possible overlaps.
     for i in [0, 1, 2, 4]:
-        if not state.solver.satisfiable(extra_constraints=[load1.addr != load2.addr+i]):
+        if not state.solver.satisfiable(extra_constraints=[load1.addr != load2.addr + i]):
             l.error("Overlap found: {} ~~ {} (offset {})".format(
                 load1.addr, load2.addr, i))
             return load2, load1, i
 
-        if not state.solver.satisfiable(extra_constraints=[load1.addr+i != load2.addr]):
+        if not state.solver.satisfiable(extra_constraints=[load1.addr + i != load2.addr]):
             l.error("Overlap found: {} (offset {}) ~~ {}".format(
                 load1.addr, i, load2.addr))
             return load1, load2, i
@@ -192,8 +192,9 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
                 overlap = min(sz1 - off, sz2)
 
                 # Calculate overlapping ranges.
-                range1 = RangedSymbol(sym=val1, max=(off+overlap)*8-1, min=off*8)
-                range2 = RangedSymbol(sym=val2, max=overlap*8-1, min=0)
+                range1 = RangedSymbol(sym=val1, max=(
+                    off + overlap) * 8 - 1, min=off * 8)
+                range2 = RangedSymbol(sym=val2, max=overlap * 8 - 1, min=0)
 
                 memory_alias = MemoryAlias(range1, range2)
 
@@ -233,12 +234,12 @@ def get_aliasing_store(load_addr: claripy.BV, load_size: int, state: angr.SimSta
 
         # Account for size mismatch.
         if load_size < store.size:
-            returned_sym = store.val[load_size*8-1:0]
+            returned_sym = store.val[load_size * 8 - 1:0]
 
         if load_size > store.size:
             # TODO: What to do if the load size is greater than the store size?
             upper_bits = claripy.BVS(name=f"mem@[({load_addr}) + {store.size}]",
-                                     size=(load_size - store.size)*8,
+                                     size=(load_size - store.size) * 8,
                                      annotations=(UncontrolledAnnotation(f'mem@[({load_addr}) + {store.size}]'),))
             returned_sym = claripy.Concat(upper_bits, store.val)
 

@@ -37,7 +37,7 @@ def get_constraints_on_ast(ast, constraints):
     return relevant_constraints
 
 
-def get_ast_ranges(constraints, ast : claripy.BV):
+def get_ast_ranges(constraints, ast: claripy.BV):
     l.info(f"Getting range for {ast}")
 
     # We calculate the min and max once
@@ -62,7 +62,8 @@ def calculate_range(component: TransmissionComponent, constraints, branches):
 
         # Calculate ranges considering also branch constraints.
         if len(branches) > 0:
-            component.range_with_branches = get_ast_ranges(branches, component.expr)
+            component.range_with_branches = get_ast_ranges(
+                branches, component.expr)
         else:
             component.range_with_branches = component.range
 
@@ -91,9 +92,9 @@ def analyse(t: Transmission):
         else:
             calculate_range(t.independent_base, constr, constr_with_branches)
 
-
     l.warning(f"base range:  {'NONE' if t.base == None else t.base.range}")
-    l.warning(f"independent base range:  {'NONE' if t.independent_base == None else t.independent_base.range}")
+    l.warning(
+        f"independent base range:  {'NONE' if t.independent_base == None else t.independent_base.range}")
     l.warning(f"secret_address range:  {t.secret_address.range}")
     l.warning(f"transmitted_secret range:  {t.transmitted_secret.range}")
     l.warning(f"transmission range:  {t.transmission.range}")
@@ -104,7 +105,8 @@ def analyse_tfp(t: TaintedFunctionPointer):
     l.warning(f"========= [RANGE] ==========")
     for r in t.registers:
         if t.registers[r].control == TFPRegisterControlType.CONTROLLED or t.registers[r].control == TFPRegisterControlType.POTENTIAL_SECRET:
-            t.registers[r].range = get_ast_ranges([x[1] for x in t.registers[r].constraints], t.registers[r].expr)
+            t.registers[r].range = get_ast_ranges(
+                [x[1] for x in t.registers[r].constraints], t.registers[r].expr)
 
     t.range = get_ast_ranges([x[1] for x in t.constraints], t.expr)
 

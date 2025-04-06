@@ -128,13 +128,13 @@ def canonicalize(expr, addr):
     return splitted
 
 def get_dependency_graph(potential_t: TransmissionExpr, transmission_expr: ConditionalAst):
-        d = DepGraph()
-        d.add_nodes(transmission_expr.expr)
-        d.add_aliases(map(lambda x: x.to_BV(), potential_t.aliases))
-        d.add_constraints(transmission_expr.conditions)
-        d.add_constraints([x[1] for x in potential_t.constraints])
-        d.resolve_dependencies()
-        return d
+    d = DepGraph()
+    d.add_nodes(transmission_expr.expr)
+    d.add_aliases(map(lambda x: x.to_BV(), potential_t.aliases))
+    d.add_constraints(transmission_expr.conditions)
+    d.add_constraints([x[1] for x in potential_t.constraints])
+    d.resolve_dependencies()
+    return d
 
 
 def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
@@ -151,7 +151,8 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
     transmissions = []
     for canonical_expr in canonical_exprs:
-        l.warning(f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
+        l.warning(
+            f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
         members = extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {potential_t.aliases}")
 
@@ -160,7 +161,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
         # Analyze each member.
         already_added = set()
         for member in members:
-            l.warning(f"  |__ MEMBER = {member}")
+            l.warning(f"  └── MEMBER = {member}")
 
             if member in already_added:
                 l.warning("     skipping")
@@ -225,17 +226,20 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
                 # Create base sub-components.
                 if len(independent_base_members) > 0:
-                    t.independent_base.expr = generate_addition(independent_base_members)
+                    t.independent_base.expr = generate_addition(
+                        independent_base_members)
                 else:
                     t.independent_base = None
 
                 if len(direct_dependent_base) > 0:
-                    t.properties['direct_dependent_base_expr'] = generate_addition(direct_dependent_base)
+                    t.properties['direct_dependent_base_expr'] = generate_addition(
+                        direct_dependent_base)
                 else:
                     t.properties['direct_dependent_base_expr'] = None
 
                 if len(indirect_dependent_base) > 0:
-                    t.properties['indirect_dependent_base_expr'] = generate_addition(indirect_dependent_base)
+                    t.properties['indirect_dependent_base_expr'] = generate_addition(
+                        indirect_dependent_base)
                 else:
                     t.properties['indirect_dependent_base_expr'] = None
 
@@ -243,7 +247,8 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 for component in [t.base, t.secret_address, t.transmission, t.transmitted_secret, t.secret_val, t.independent_base]:
                     if component != None:
                         component.size = component.expr.size()
-                        component.max_load_depth = get_load_depth(component.expr)
+                        component.max_load_depth = get_load_depth(
+                            component.expr)
 
                 transmissions.append(t)
 

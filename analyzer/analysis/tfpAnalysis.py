@@ -29,7 +29,7 @@ def get_dependency_graph(t: TaintedFunctionPointer):
 
 def is_same_var(expr: claripy.BV, reg):
     syms = get_vars(expr)
-    assert(len(syms) == 1)
+    assert (len(syms) == 1)
     sym = syms.pop()
 
     l.info(f"Testing {sym.args[0]} against {reg}")
@@ -42,7 +42,7 @@ def is_potential_secret(d: DepGraph, expr: claripy.BV, tfp_expr: claripy.BV):
     """
     has_load_anno = False
     for v in get_vars(expr):
-        if not (d.is_independent(tfp_expr, v, check_constraints=True, check_addr=True) ):
+        if not (d.is_independent(tfp_expr, v, check_constraints=True, check_addr=True)):
             return False
 
         anno = get_load_annotation(v)
@@ -62,12 +62,13 @@ def analyse(t: TaintedFunctionPointer):
 
     # Handle if-then-else statements in register expressions.
     for r in t.registers:
-        asts = split_conditions(t.registers[r].expr, simplify=False, addr=t.address)
+        asts = split_conditions(
+            t.registers[r].expr, simplify=False, addr=t.address)
 
-        assert(len(asts) >= 1)
+        assert (len(asts) >= 1)
         if len(asts) > 1:
             needs_substitutions = True
-            substitutions.append([(r,a) for a in asts])
+            substitutions.append([(r, a) for a in asts])
 
     if not needs_substitutions:
         tfps = [t]
@@ -108,12 +109,12 @@ def analyse(t: TaintedFunctionPointer):
                 tfp.registers[r].control = TFPRegisterControlType.UNCONTROLLED
                 tfp.uncontrolled.append(r)
             elif not (d.is_independently_controllable(tfp.registers[r].expr, [tfp.expr], check_constraints=True, check_addr=False)
-                       and d.is_independently_controllable(tfp.expr, [tfp.registers[r].expr], check_constraints=True, check_addr=False)):
+                      and d.is_independently_controllable(tfp.expr, [tfp.registers[r].expr], check_constraints=True, check_addr=False)):
                 tfp.registers[r].control = TFPRegisterControlType.DEPENDS_ON_TFP_EXPR
                 tfp.aliasing.append(r)
             elif not (d.is_independently_controllable(tfp.registers[r].expr, [tfp.expr], check_constraints=True, check_addr=True)
                       and d.is_independently_controllable(tfp.expr, [tfp.registers[r].expr], check_constraints=True, check_addr=True)):
-                tfp.registers[r].control =  TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
+                tfp.registers[r].control = TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
                 tfp.aliasing.append(r)
             elif is_sym_var(tfp.registers[r].expr) and is_same_var(tfp.registers[r].expr, tfp.registers[r].reg):
                 tfp.registers[r].control = TFPRegisterControlType.UNMODIFIED
@@ -130,4 +131,3 @@ def analyse(t: TaintedFunctionPointer):
     l.warning(f"Found {len(final_tfps)} tfps")
     l.warning("==========================")
     return final_tfps
-

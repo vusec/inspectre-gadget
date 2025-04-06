@@ -95,17 +95,20 @@ def analyse(t: Transmission):
     l.warning(f"Base control: {t.properties['base_control_type']}")
 
     t.properties["base_control_w_constraints"] = get_base_control(t, d, True)
-    l.warning(f"Base control with constraints: {t.properties['base_control_w_constraints']}")
+    l.warning(
+        f"Base control with constraints: {t.properties['base_control_w_constraints']}")
 
     # 3. Check control considering also branch constraints.
     if len(t.branches) > 0:
         d.add_constraints(map(lambda x: x[1], t.branches))
         d.resolve_dependencies()
-        t.properties["base_control_w_branches_and_constraints"] = get_base_control(t, d, True)
+        t.properties["base_control_w_branches_and_constraints"] = get_base_control(
+            t, d, True)
     else:
         t.properties["base_control_w_branches_and_constraints"] = t.properties["base_control_w_constraints"]
 
-    l.warning(f"Base control including branches: {t.properties['base_control_w_branches_and_constraints']}")
+    l.warning(
+        f"Base control including branches: {t.properties['base_control_w_branches_and_constraints']}")
 
     t.properties["deps"] = d
 

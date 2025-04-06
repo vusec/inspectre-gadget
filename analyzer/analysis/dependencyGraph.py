@@ -77,7 +77,7 @@ class DepNode:
         self.controlled = controlled
 
     def __repr__(self) -> str:
-        return  f"""
+        return f"""
             [
                 syms:{self.syms}
                 aliases:{self.aliases}
@@ -122,6 +122,7 @@ class SymNode(DepNode):
     """
     Represents the dependencies of a single symbolic variable.
     """
+
     def __init__(self, sym):
         super().__init__([sym], is_controlled(sym))
 
@@ -140,13 +141,14 @@ class RegNode(SymNode):
     """
     Represents a symbolic register/stack location.
     """
+
     def __init__(self, sym):
         super().__init__(sym)
 
 def is_addr_controllable(tree, sym: claripy.BV, fixed_syms: list[claripy.BV], check_constraints: bool):
     # l.info(f"Checking address: {sym}")
     node = tree.get_node(sym)
-    assert(isinstance(node, SymNode))
+    assert (isinstance(node, SymNode))
 
     if not node.controlled:
         return False
@@ -159,7 +161,7 @@ def is_addr_controllable(tree, sym: claripy.BV, fixed_syms: list[claripy.BV], ch
 def is_addr_independent(tree, expr1: claripy.BV, expr2: claripy.BV, check_constraints: bool):
     # l.info(f"Checking address: {sym}")
     node = tree.get_node(expr1)
-    assert(isinstance(node, SymNode))
+    assert (isinstance(node, SymNode))
 
     if isinstance(node, LoadNode) and is_sym_expr(node.addr):
         return tree.is_independent(node.addr, expr2, check_constraints, True)
@@ -171,6 +173,7 @@ class DepGraph:
     """
     Graph of dependencies between symbolic expressions.
     """
+
     def __init__(self):
         self.sym_nodes = dict()
         self.expr_nodes = dict()
@@ -184,7 +187,7 @@ class DepGraph:
         print("====================")
 
     def __repr__(self) -> str:
-        return  f"""
+        return f"""
         ====== DepGraph ======
         === Syms
         {self.sym_nodes}
@@ -220,23 +223,29 @@ class DepGraph:
 
         # Symbolic variable.
         if expr.depth == 1:
-            attacker_annos = [a for a in get_annotations(expr) if isinstance(a, AttackerAnnotation)]
-            load_annos = [a for a in get_annotations(expr) if isinstance(a, LoadAnnotation)]
-            uncontrolled_annos = [a for a in get_annotations(expr) if isinstance(a, UncontrolledAnnotation)]
+            attacker_annos = [a for a in get_annotations(
+                expr) if isinstance(a, AttackerAnnotation)]
+            load_annos = [a for a in get_annotations(
+                expr) if isinstance(a, LoadAnnotation)]
+            uncontrolled_annos = [a for a in get_annotations(
+                expr) if isinstance(a, UncontrolledAnnotation)]
 
             if len(attacker_annos) + len(load_annos) + len(uncontrolled_annos) == 0:
                 print("TODO: something wrong is happening")
-                anno = UncontrolledAnnotation(f"unknown_{random.randint(0, 256)}")
+                anno = UncontrolledAnnotation(
+                    f"unknown_{random.randint(0, 256)}")
                 uncontrolled_annos = [anno]
                 expr.annotate(anno)
             else:
-                assert(len(attacker_annos) + len(load_annos) + len(uncontrolled_annos) == 1)
+                assert (len(attacker_annos) + len(load_annos) +
+                        len(uncontrolled_annos) == 1)
 
             if len(attacker_annos) > 0 or len(uncontrolled_annos) > 0:
                 self.sym_nodes[expr] = RegNode(expr)
             elif len(load_annos) > 0:
                 self.add_nodes(load_annos[0].read_address_ast)
-                self.sym_nodes[expr] = LoadNode(expr, load_annos[0].read_address_ast)
+                self.sym_nodes[expr] = LoadNode(
+                    expr, load_annos[0].read_address_ast)
 
         # Symbolic expression.
         else:
@@ -253,7 +262,7 @@ class DepGraph:
         for a in aliases:
             alias_set = get_vars(a)
             for sym in alias_set:
-                assert(is_sym_var(sym))
+                assert (is_sym_var(sym))
                 self.add_nodes(sym)
                 self.sym_nodes[sym].aliases.update(alias_set)
 
@@ -315,11 +324,10 @@ class DepGraph:
             if not is_sym_expr(e):
                 continue
             n = self.get_node(e)
-            assert(n)
+            assert (n)
             deps.update(n.dependencies(include_constraints))
 
         return deps
-
 
     def is_independently_controllable(self, expr: claripy.BV, fixed_syms: list[claripy.BV], check_constraints: bool, check_addr: bool):
         """
@@ -338,12 +346,12 @@ class DepGraph:
         # Get all symbols in the expr that are not among the symbols, aliases or
         # constraints of any of the symbols of fixed_sym.
         sym_diff = set.difference(expr_syms, deps_to_check)
-        diff = set([elem for elem in filter(lambda x: is_expr_controlled(x), sym_diff)])
+        diff = set([elem for elem in filter(
+            lambda x: is_expr_controlled(x), sym_diff)])
 
         # If there's none left, expr completely depends on fixed_syms.
         if len(diff) == 0:
             return False
-
 
         # If we are not checking load addresses, we're done.
         if not check_addr:
@@ -352,7 +360,6 @@ class DepGraph:
         # Else, check each of the remaining symbols recursively and exclude those
         # that were loaded from an address that completely depends on fixed_syms.
         return any([is_addr_controllable(self, x, fixed_syms, check_constraints) for x in diff])
-
 
     def is_independent(self, expr1: claripy.BV, expr2: claripy.BV, check_constraints: bool, check_addr: bool):
         """

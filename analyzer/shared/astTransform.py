@@ -25,6 +25,7 @@ class SignExtAnnotation(claripy.Annotation):
     """
     Signals that a symbolic expression comes from a SignExt.
     """
+
     def __init__(self, addr):
         self.addr = addr
 
@@ -90,6 +91,7 @@ class ConditionalAst:
     """
     Ast with a set of constraints associated to it.
     """
+
     def __init__(self, expr, conds) -> None:
         self.expr = expr
         self.conditions = set(conds)
@@ -114,7 +116,7 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
     splitted_asts = []
     if ast.op == "If":
         anno = getSignExtAnnotation(ast)
-        if  anno != None:
+        if anno != None:
             cond_type = ConditionType.SIGN_EXT
             addr = anno.addr
 
@@ -136,17 +138,19 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
                 new_conds = []
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
-                new_conds.append((addr, c.expr,cond_type))
+                new_conds.append((addr, c.expr, cond_type))
 
-                splitted_asts.append(ConditionalAst(expr=arg.expr, conds=new_conds))
+                splitted_asts.append(ConditionalAst(
+                    expr=arg.expr, conds=new_conds))
 
         for arg in arg2_splitted:
             for c in cond_splitted:
                 new_conds = []
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
-                new_conds.append((addr, claripy.Not(c.expr),cond_type))
-                splitted_asts.append(ConditionalAst(expr=arg.expr, conds=new_conds))
+                new_conds.append((addr, claripy.Not(c.expr), cond_type))
+                splitted_asts.append(ConditionalAst(
+                    expr=arg.expr, conds=new_conds))
 
         return splitted_asts
 
@@ -228,22 +232,22 @@ def sign_ext_to_sum(ast: claripy.BV, addr):
         extend_size = ast.args[0]
         base = sign_ext_to_sum(ast.args[1], addr)
         base_size = base.size()
-        sign_bit = base[base_size -1]
+        sign_bit = base[base_size - 1]
 
         upper_expr = claripy.If(sign_bit == 0,
-                                claripy.Concat(claripy.BVV(0, extend_size), base),
-                                claripy.Concat(claripy.BVV((2**extend_size)-1, extend_size), base))
+                                claripy.Concat(claripy.BVV(
+                                    0, extend_size), base),
+                                claripy.Concat(claripy.BVV((2**extend_size) - 1, extend_size), base))
         upper_expr = upper_expr.annotate(SignExtAnnotation(addr))
 
         return upper_expr
-
 
     # Visit arguments.
     new_expr = ast
     for arg in ast.args:
         if not isinstance(arg, claripy.ast.base.BV) or arg.concrete or is_sym_var(arg):
             continue
-        new_expr = new_expr.replace(arg,sign_ext_to_sum(arg, addr))
+        new_expr = new_expr.replace(arg, sign_ext_to_sum(arg, addr))
 
     return new_expr
 
@@ -267,7 +271,7 @@ def match_sign_ext(ast: claripy.BV, addr):
         sign_ext_size = 0
         new_args = []
 
-        for i in range(1,len(ast.args)):
+        for i in range(1, len(ast.args)):
             # Recursively check args.
             arg = match_sign_ext(ast.args[i], addr)
 
@@ -282,14 +286,15 @@ def match_sign_ext(ast: claripy.BV, addr):
                     new_args.append(sign_sym)
                     sign_sym = arg
                 elif is_sym_expr(arg) and arg.structurally_match(sign_sym.args[2]):
-                        if_expr = claripy.If(sign_sym == 0,
-                                claripy.Concat(claripy.BVV(0, sign_ext_size+1), arg),
-                                claripy.Concat(claripy.BVV((2**(sign_ext_size+1))-1, sign_ext_size+1), arg))
-                        if_expr = if_expr.annotate(SignExtAnnotation(addr))
-                        new_args.append(if_expr)
+                    if_expr = claripy.If(sign_sym == 0,
+                                         claripy.Concat(claripy.BVV(
+                                             0, sign_ext_size + 1), arg),
+                                         claripy.Concat(claripy.BVV((2**(sign_ext_size + 1)) - 1, sign_ext_size + 1), arg))
+                    if_expr = if_expr.annotate(SignExtAnnotation(addr))
+                    new_args.append(if_expr)
 
-                        sign_sym = None
-                        sign_ext_size = 0
+                    sign_sym = None
+                    sign_ext_size = 0
                 else:
                     for i in range(sign_ext_size + 1):
                         new_args.append(sign_sym)
@@ -300,7 +305,6 @@ def match_sign_ext(ast: claripy.BV, addr):
         if sign_sym != None:
             for i in range(sign_ext_size + 1):
                 new_args.append(sign_sym)
-
 
         new_expr = claripy.Concat(*new_args)
 
@@ -361,16 +365,18 @@ def simplify_conservative(e: claripy.T) -> claripy.T:
 
         # dealing with annotations
         if e.annotations:
-            ast_args = tuple(a for a in e.args if isinstance(a, claripy.ast.Base))
+            ast_args = tuple(
+                a for a in e.args if isinstance(a, claripy.ast.Base))
             annotations = tuple(
-                set(chain(chain.from_iterable(a._relocatable_annotations for a in ast_args), tuple(a for a in e.annotations)))
+                set(chain(chain.from_iterable(
+                    a._relocatable_annotations for a in ast_args), tuple(a for a in e.annotations)))
             )
             if annotations != s.annotations:
-                l.warning(f"SafeSimplify: Experimental feature executed, annotations removed by simplification operation. Old: {e} {annotations} New: {s} {s.annotations} ")
+                l.warning(
+                    f"SafeSimplify: Experimental feature executed, annotations removed by simplification operation. Old: {e} {annotations} New: {s} {s.annotations} ")
 
                 # Claripy does instead:
                 # s = s.remove_annotations(s.annotations)
                 # s = s.annotate(*annotations)
 
         return s
-

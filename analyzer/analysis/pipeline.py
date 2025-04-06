@@ -38,11 +38,10 @@ class AnalysisPipeline:
     tfp_csv_filename: str
 
     # Stats
-    n_found_transmissions : int
-    n_found_tainted_function_pointers : int
-    n_final_transmissions : int
-    n_final_tainted_function_pointers : int
-
+    n_found_transmissions: int
+    n_found_tainted_function_pointers: int
+    n_final_transmissions: int
+    n_final_tainted_function_pointers: int
 
     def __init__(self, name, gadget_address, proj, asm_folder, csv_filename, tfp_csv_filename):
         self.name = name
@@ -57,7 +56,6 @@ class AnalysisPipeline:
         self.n_found_tainted_function_pointers = 0
         self.n_final_transmissions = 0
         self.n_final_tainted_function_pointers = 0
-
 
     def analyze_transmission(self, potential_t: TransmissionExpr):
 
@@ -83,7 +81,8 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                report_error(e, where="range_analysis", start_addr=hex(self.gadget_address), error_type="RANGE")
+                report_error(e, where="range_analysis", start_addr=hex(
+                    self.gadget_address), error_type="RANGE")
                 continue
 
             bitsAnalysis.analyse(t)
@@ -125,7 +124,8 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                report_error(e, where="range_analysis", start_addr=hex(self.gadget_address), error_type="TFP RANGE")
+                report_error(e, where="range_analysis", start_addr=hex(
+                    self.gadget_address), error_type="TFP RANGE")
                 continue
 
             self.n_final_tainted_function_pointers += 1
@@ -139,7 +139,6 @@ class AnalysisPipeline:
                 l.info(f"Dumped CSV to {self.tfp_csv_filename}")
 
 
-
 def flatten_dict(dictionary, parent_key='', separator='_'):
     """
     Transform a hierarchy of nested objects into a flat dictionary.
@@ -148,7 +147,8 @@ def flatten_dict(dictionary, parent_key='', separator='_'):
     for key, value in dictionary.items():
         new_key = parent_key + separator + key if parent_key else key
         if isinstance(value, MutableMapping):
-            items.extend(flatten_dict(value, new_key, separator=separator).items())
+            items.extend(flatten_dict(value, new_key,
+                         separator=separator).items())
         else:
             items.append((new_key, value))
     return dict(items)
@@ -188,7 +188,7 @@ def append_to_csv(csv_filename, transmissions):
         l_verbose.info(f"New keys: {set(new_keys) - set(existing_keys)}")
 
         keys = existing_keys if len(existing_keys) > 0 else new_keys
-        writer = csv.DictWriter(outfile, fieldnames = keys, delimiter=';')
+        writer = csv.DictWriter(outfile, fieldnames=keys, delimiter=';')
         if len(existing_keys) == 0:
             writer.writeheader()
         writer.writerows(flatten_dicts)
