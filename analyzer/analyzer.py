@@ -61,7 +61,6 @@ def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Projec
     return proj
 
 
-
 def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, asm_folder):
     """
     Run the scanner from a single entrypoint and analyze the potential transmissions
@@ -70,8 +69,8 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
 
     # Step 1. Initialize the analyzer
     analysis_pipeline = AnalysisPipeline(name=name, gadget_address=gadget_address, proj=proj,
-                    asm_folder=asm_folder, csv_filename=csv_filename,
-                    tfp_csv_filename=tfp_csv_filename)
+                                         asm_folder=asm_folder, csv_filename=csv_filename,
+                                         tfp_csv_filename=tfp_csv_filename)
 
     # Step 2. Analyze the code snippet with angr.
     l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
@@ -80,7 +79,6 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
 
     l.info(f"Found {len(s.transmissions)} potential transmissions.")
     l.info(f"Found {len(s.calls)} potential tainted function pointers.")
-
 
     # Step 3. Analyze found gadgets (if not analyzed during scanning)
     if not global_config['AnalyzeDuringScanning']:
@@ -91,8 +89,10 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
         for tfp in s.calls:
             analysis_pipeline.analyze_tainted_function_pointer(tfp)
 
-    l.info(f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
-    l.info(f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
+    l.info(
+        f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
+    l.info(
+        f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
 
 
 def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary=""):
@@ -112,11 +112,12 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
 
     # Prepare angr project.
     l.info("Loading angr project...")
-    proj   = load_angr_project(binary, base_address, cache_project)
+    proj = load_angr_project(binary, base_address, cache_project)
 
     if symbol_binary:
         l.info("Loading symbol binary...")
-        symbol_proj = load_angr_project(symbol_binary, base_address, cache_project)
+        symbol_proj = load_angr_project(
+            symbol_binary, base_address, cache_project)
 
         proj.loader.all_objects[0]._symbol_cache = symbol_proj.loader.all_objects[0]._symbol_cache
         proj.loader.all_objects[0].symbols = symbol_proj.loader.all_objects[0].symbols
@@ -126,4 +127,5 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     # Run the Analyzer.
     # TODO: Parallelize.
     for g in gadgets:
-        analyse_gadget(proj, g[0], g[1], csv_filename, tfp_csv_filename, asm_folder)
+        analyse_gadget(proj, g[0], g[1], csv_filename,
+                       tfp_csv_filename, asm_folder)

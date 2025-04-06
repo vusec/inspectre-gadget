@@ -18,8 +18,8 @@ debug = False
 
 class RangeStrategyInferIsolated(RangeStrategy):
 
-    def find_range(self, constraints, ast : claripy.ast.bv.BVS,
-                   ast_min : int = None, ast_max : int = None):
+    def find_range(self, constraints, ast: claripy.ast.bv.BVS,
+                   ast_min: int = None, ast_max: int = None):
 
         # We only support isolated ranges
         if constraints:
@@ -48,7 +48,8 @@ class RangeStrategyInferIsolated(RangeStrategy):
             # split the AST and add the concrete value manually to the range.
             if ast.op == '__add__' and any(not arg.symbolic for arg in ast.args):
 
-                concrete_value =  next(arg for arg in ast.args if not arg.symbolic).args[0]
+                concrete_value = next(
+                    arg for arg in ast.args if not arg.symbolic).args[0]
                 sub_ast = sum([arg for arg in ast.args if arg.symbolic])
 
                 range_map = get_range_map_from_ast(sub_ast)
@@ -66,12 +67,11 @@ class RangeStrategyInferIsolated(RangeStrategy):
                 sym_ast_max = s.max(sub_ast)
 
                 return range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
-                                                      sym_ast_min, sym_ast_max, range_map.stride,
-                                                      concrete_value)
+                                                             sym_ast_min, sym_ast_max, range_map.stride,
+                                                             concrete_value)
 
             else:
                 return None
-
 
         if range_map.stride_mode:
             return range_simple(ast_min, ast_max, ast.size(), range_map.stride, isolated=True)
@@ -94,15 +94,15 @@ def is_linear_mask(and_mask, or_mask):
 @dataclass
 class RangeMap:
 
-    stride_mode : bool
-    unknown : bool
+    stride_mode: bool
+    unknown: bool
 
     # mask mode
-    or_mask : int    # bits which are always one are set
-    and_mask : int   # bits which are always zero are unset
+    or_mask: int    # bits which are always one are set
+    and_mask: int   # bits which are always zero are unset
 
     # stride mode
-    stride : int
+    stride: int
 
     def __init__(self, bit_length, unknown=False):
 
@@ -126,9 +126,8 @@ class RangeMap:
         self.and_mask = 0
         self.stride_mode = True
 
-        if self.stride >  2 ** int_length - 1:
+        if self.stride > 2 ** int_length - 1:
             return unknown_range()
-
 
         return self
 
@@ -169,10 +168,9 @@ class RangeMap:
     def concrete_mul(self, value, int_length):
 
         # Check if we are in mask mode & multiplication is power of 2
-        if (not self.stride_mode) and (value != 0) and (value & (value-1) == 0):
+        if (not self.stride_mode) and (value != 0) and (value & (value - 1) == 0):
             # Power of two
             return self.shift_left(value.bit_length() - 1, int_length)
-
 
         if (self.and_mask * value) >= (2 ** int_length):
             # mul has a overflow, we are not gonna try it
@@ -183,7 +181,7 @@ class RangeMap:
         if not new_map.unknown:
             new_map.stride = new_map.stride * value
 
-            if new_map.stride >  2 ** int_length - 1:
+            if new_map.stride > 2 ** int_length - 1:
                 return unknown_range()
 
         return new_map
@@ -229,7 +227,7 @@ class RangeMap:
         else:
 
             # zero out up to end
-            end_mask = (2 ** (end + 1)) -1
+            end_mask = (2 ** (end + 1)) - 1
             self.and_mask &= end_mask
             self.or_mask &= end_mask
 
@@ -238,7 +236,6 @@ class RangeMap:
             self.or_mask = self.or_mask >> start
 
             return self
-
 
     def invert(self):
 
@@ -252,12 +249,11 @@ class RangeMap:
 
             return self
 
-
     def shift_left(self, shift, int_length):
         if self.stride_mode:
             self.stride = self.stride * (2 ** shift)
 
-            if self.stride >  2 ** int_length - 1:
+            if self.stride > 2 ** int_length - 1:
                 return unknown_range()
 
             return self
@@ -287,7 +283,6 @@ class RangeMap:
             return self
 
 
-
 def unknown_range():
     return RangeMap(0, unknown=True)
 
@@ -306,7 +301,8 @@ def op_concat(ast, range_maps):
         if range_maps[idx]:
 
             if base_map:
-                base_map = base_map.concat_range_map(range_maps[idx], cur_length, ast.length)
+                base_map = base_map.concat_range_map(
+                    range_maps[idx], cur_length, ast.length)
             else:
                 base_map = range_maps[idx]
                 if cur_length != 0:
@@ -482,7 +478,7 @@ def op_if(ast, range_maps):
     if range_maps[1] and range_maps[2]:
 
         if range_maps[1].is_full_range(ast.length) and \
-            range_maps[2].is_full_range(ast.length):
+                range_maps[2].is_full_range(ast.length):
             # TODO: Equal ranges should be enough
             return range_maps[1]
 
@@ -492,31 +488,30 @@ def op_unsupported(ast, range_maps):
     return unknown_range()
 
 
-
 operators = {
-    'ZeroExt'       : op_zero_ext,
-    'Concat'        : op_concat,
-    'Extract'       : op_extract,
-    '__or__'        : op_or,
-    '__and__'       : op_and,
-    '__invert__'    : op_invert,
-    '__lshift__'    : op_lshift,
-    'LShR'          : op_lshr,
-    '__rshift__'    : op_rshift,
-    '__add__'       : op_add,
-    '__sub__'       : op_sub,
-    '__mul__'       : op_mul,
-    'If'            : op_if,
+    'ZeroExt': op_zero_ext,
+    'Concat': op_concat,
+    'Extract': op_extract,
+    '__or__': op_or,
+    '__and__': op_and,
+    '__invert__': op_invert,
+    '__lshift__': op_lshift,
+    'LShR': op_lshr,
+    '__rshift__': op_rshift,
+    '__add__': op_add,
+    '__sub__': op_sub,
+    '__mul__': op_mul,
+    'If': op_if,
 
     # Unsupported via this method
-    '__eq__'        : op_unsupported,
-    'SignExt'       : op_unsupported,
-    '__ne__'        : op_unsupported,
-    '__xor__'       : op_unsupported
+    '__eq__': op_unsupported,
+    'SignExt': op_unsupported,
+    '__ne__': op_unsupported,
+    '__xor__': op_unsupported
 }
 
 
-def get_range_map_from_ast(ast : claripy.ast.bv.BVS):
+def get_range_map_from_ast(ast: claripy.ast.bv.BVS):
 
     if not isinstance(ast, claripy.ast.base.Base) or not ast.symbolic:
         return None
@@ -551,5 +546,3 @@ def get_range_map_from_ast(ast : claripy.ast.bv.BVS):
         l.warning(f"Unsupported operation: {ast.op}")
 
         return unknown_range()
-
-

@@ -76,6 +76,7 @@ class SecretAnnotation(LoadAnnotation):
     """
     This symbol comes from loading an attacker-controlled address.
     """
+
     def __init__(self, read_address_ast, address, controlled):
         super().__init__(read_address_ast, "Secret", address, controlled)
 
@@ -87,6 +88,7 @@ class TransmissionAnnotation(LoadAnnotation):
     """
     This symbol comes from loading/storing/calling a secret-dependent address.
     """
+
     def __init__(self, read_address_ast, address, controlled):
         super().__init__(read_address_ast, "Transmission", address, controlled)
 
@@ -98,6 +100,7 @@ class UncontrolledLoadAnnotation(LoadAnnotation):
     """
     This symbol comes from loading a uncontrolled address.
     """
+
     def __init__(self, read_address_ast, address):
         super().__init__(read_address_ast, "UncontrolledLoad", address, controlled=False)
 
@@ -183,7 +186,6 @@ def propagate_annotations(ast: claripy.BV, address):
             if anno.controlled:
                 can_be_controlled = True
 
-
     if is_secret or is_transmission:
         return TransmissionAnnotation(ast, address, controlled=can_be_controlled)
     elif is_attack:
@@ -218,7 +220,6 @@ def get_load_depth(x):
         for anno in get_annotations(x):
             if isinstance(anno, LoadAnnotation):
                 max_depth = max(max_depth, anno.depth)
-
 
     return max_depth
 

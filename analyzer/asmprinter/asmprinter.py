@@ -22,7 +22,8 @@ def replace_secret_annotations_with_name(annotations, name):
     new_annotations = []
     for anno in annotations:
         if isinstance(anno, SecretAnnotation) or isinstance(anno, TransmissionAnnotation):
-            new_annotations.append(LoadAnnotation(None, name, anno.address, None))
+            new_annotations.append(LoadAnnotation(
+                None, name, anno.address, None))
         else:
             new_annotations.append(anno)
 
@@ -37,14 +38,19 @@ def get_load_comments(expr: claripy.BV, secret_load_pc):
         if load_anno != None:
             if load_anno.address == secret_load_pc:
                 # We load the secret value
-                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(get_annotations(load_anno.read_address_ast), "Attacker")))
-                annotations[load_anno.address] += " -> " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Secret")))
+                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(
+                    get_annotations(load_anno.read_address_ast), "Attacker")))
+                annotations[load_anno.address] += " -> " + str(
+                    set(replace_secret_annotations_with_name(get_annotations(v), "Secret")))
             else:
                 # We load an attacker indirect value
-                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(get_annotations(load_anno.read_address_ast), "Attacker")))
-                annotations[load_anno.address] += " -> " + str(set(replace_secret_annotations_with_name(get_annotations(v), "Attacker")))
+                annotations[load_anno.address] = str(set(replace_secret_annotations_with_name(
+                    get_annotations(load_anno.read_address_ast), "Attacker")))
+                annotations[load_anno.address] += " -> " + str(
+                    set(replace_secret_annotations_with_name(get_annotations(v), "Attacker")))
 
-            annotations.update(get_load_comments(load_anno.read_address_ast, secret_load_pc))
+            annotations.update(get_load_comments(
+                load_anno.read_address_ast, secret_load_pc))
 
     return annotations
 
@@ -58,34 +64,39 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, is_
     # Branches.
     proj.kb.comments = get_branch_comments(branches)
     # Loads.
-    proj.kb.comments.update(get_load_comments(expr,secret_load_pc))
+    proj.kb.comments.update(get_load_comments(expr, secret_load_pc))
     # Transmission
     if is_tfp:
-        proj.kb.comments[pc] = str(set(replace_secret_annotations_with_name(get_annotations(expr), "Attacker")))
+        proj.kb.comments[pc] = str(
+            set(replace_secret_annotations_with_name(get_annotations(expr), "Attacker")))
         proj.kb.comments[pc] += " -> " + "TAINTED FUNCTION POINTER"
     else:
         all_annotations = set(get_annotations(expr))
-        secret_annotations = {a for a in all_annotations if isinstance(a, LoadAnnotation) and a.address == secret_load_pc}
-        annotations = replace_secret_annotations_with_name(secret_annotations, "Secret")
-        annotations += replace_secret_annotations_with_name(all_annotations - secret_annotations, "Attacker")
+        secret_annotations = {a for a in all_annotations if isinstance(
+            a, LoadAnnotation) and a.address == secret_load_pc}
+        annotations = replace_secret_annotations_with_name(
+            secret_annotations, "Secret")
+        annotations += replace_secret_annotations_with_name(
+            all_annotations - secret_annotations, "Attacker")
         proj.kb.comments[pc] = str(set(annotations))
         proj.kb.comments[pc] += " -> " + "TRANSMISSION"
-
 
     output = ""
     for bbl_addr in bbls:
         block = proj.factory.block(bbl_addr)
-        output += proj.analyses.Disassembly(ranges=[(block.addr, block.addr + block.size)]).render(color=color)
+        output += proj.analyses.Disassembly(
+            ranges=[(block.addr, block.addr + block.size)]).render(color=color)
         output += "\n"
 
     proj.kb.comments = {}
     return output
 
-def output_gadget_to_file(t : Transmission, proj, path):
+def output_gadget_to_file(t: Transmission, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/gadget_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"----------------- TRANSMISSION -----------------\n")
-    o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.transmission.expr, t.pc, t.secret_load_pc, is_tfp=False, color=False))
+    o.write(print_annotated_assembly(proj, t.bbls, t.branches,
+            t.transmission.expr, t.pc, t.secret_load_pc, is_tfp=False, color=False))
     o.write(f"""
 {'-'*48}
 uuid: {t.uuid}
@@ -119,11 +130,12 @@ Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
 def has_aliasing(reg):
     return reg.control == TFPRegisterControlType.DEPENDS_ON_TFP_EXPR or reg.control == TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
 
-def output_tfp_to_file(t : TaintedFunctionPointer, proj, path):
+def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/tfp_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"--------------------- TFP ----------------------\n")
-    o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.expr, t.pc, None, is_tfp=True, color=False))
+    o.write(print_annotated_assembly(proj, t.bbls, t.branches,
+            t.expr, t.pc, None, is_tfp=True, color=False))
     o.write(f"""
 {'-'*48}
 uuid: {t.uuid}

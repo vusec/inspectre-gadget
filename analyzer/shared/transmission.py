@@ -31,6 +31,7 @@ class Requirements():
     used, either directly or indirectly (i.e. through loads), by a given
     symbolic expression.
     """
+
     def __init__(self) -> None:
         self.regs = set()
         self.indirect_regs = {}
@@ -39,21 +40,22 @@ class Requirements():
         self.const_mem = set()
 
     def __repr__(self) -> str:
-        d =  {'regs' : sorted([str(x) for x in self.regs]),
-            'indirect_regs' : sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs]),
-            'direct_regs' : sorted([str(x) for x in self.direct_regs]),
-            'mem' : sorted([str(x) for x in self.mem]),
-            'const_mem' : sorted([str(x) for x in self.const_mem]),
-        }
+        d = {'regs': sorted([str(x) for x in self.regs]),
+             'indirect_regs': sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs]),
+             'direct_regs': sorted([str(x) for x in self.direct_regs]),
+             'mem': sorted([str(x) for x in self.mem]),
+             'const_mem': sorted([str(x) for x in self.const_mem]),
+             }
         return str(d)
 
     def to_dict(self):
         return OrderedDict([
-            ('regs' , sorted([str(x) for x in self.regs])),
-            ('indirect_regs' , sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs])),
-            ('direct_regs' , sorted([str(x) for x in self.direct_regs])),
-            ('mem' , sorted([str(x) for x in self.mem])),
-            ('const_mem' , sorted([str(x) for x in self.const_mem])),
+            ('regs', sorted([str(x) for x in self.regs])),
+            ('indirect_regs', sorted(
+                [f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs])),
+            ('direct_regs', sorted([str(x) for x in self.direct_regs])),
+            ('mem', sorted([str(x) for x in self.mem])),
+            ('const_mem', sorted([str(x) for x in self.const_mem])),
         ])
 
     def merge(self, other):
@@ -163,8 +165,10 @@ class TransmissionComponent():
             ('branches', utils.ordered_branches(self.branches)),
             ('constraints', utils.ordered_constraints(self.constraints)),
             ('requirements', self.requirements.to_dict()),
-            ('range', ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
-            ('range_w_branches', ranges.AstRange(0,0,0,False).to_dict() if self.range_with_branches == None else self.range_with_branches.to_dict()),
+            ('range', ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.range == None else self.range.to_dict()),
+            ('range_w_branches', ranges.AstRange(0, 0, 0, False).to_dict(
+            ) if self.range_with_branches == None else self.range_with_branches.to_dict()),
             ('control', str(self.control)),
             ('n_dependent_loads', str(self.max_load_depth))
         ]
@@ -176,7 +180,7 @@ class Transmission():
     Object that represents a Spectre transmission gadget with all the
     properties that can be extracted by our analysis.
     """
-    uuid : str
+    uuid: str
     name: str
     address: int
     pc: int
@@ -207,7 +211,7 @@ class Transmission():
     all_requirements: Requirements
 
     # Additional properties attached by analyses.
-    properties: dict()
+    properties: dict
 
     def __init__(self, t: TransmissionExpr):
         self.uuid = ""
@@ -230,7 +234,7 @@ class Transmission():
 
         self.aliases = t.aliases
         for x in t.aliases:
-            assert(' if ' not in str(x))
+            assert (' if ' not in str(x))
         self.branches = t.branches
         self.bbls = t.bbls
         # TODO check if branches contain if-then-else
@@ -255,15 +259,15 @@ class Transmission():
 
         transmission:
             {self.transmission}
-          |-- base:
+          └── base:
             {self.base}
-                |-- secret-independent part:
+                └── secret-independent part:
                 {self.independent_base}
-          |-- transmitted secret:
+          └── transmitted secret:
             {self.transmitted_secret}
-          |-- secret addr:
+          └── secret addr:
             {self.secret_address}
-          |-- secret val:
+          └── secret val:
             {self.secret_val}
 
 
@@ -292,7 +296,6 @@ class Transmission():
             outstr += f"  {key}: {val}\n"
         outstr += "}\n"
         return outstr
-
 
     def to_dict(self):
         d = OrderedDict()

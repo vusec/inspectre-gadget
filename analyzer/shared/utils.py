@@ -22,22 +22,22 @@ def get_annotations(expr):
     return annos
 
 def get_x86_indirect_thunks(proj):
-    symbol_names = {"__x86_indirect_thunk_array" : "rax",
-                    "__x86_indirect_thunk_r10" : "r10",
-                    "__x86_indirect_thunk_r11" : "r11",
-                    "__x86_indirect_thunk_r12" : "r12",
-                    "__x86_indirect_thunk_r13" : "r13",
-                    "__x86_indirect_thunk_r14" : "r14",
-                    "__x86_indirect_thunk_r15" : "r15",
-                    "__x86_indirect_thunk_r8" : "r8",
-                    "__x86_indirect_thunk_r9" : "r9",
-                    "__x86_indirect_thunk_rax" : "rax",
-                    "__x86_indirect_thunk_rbp" : "rbp",
-                    "__x86_indirect_thunk_rbx" : "rbx",
-                    "__x86_indirect_thunk_rcx" : "rcx",
-                    "__x86_indirect_thunk_rdi" : "rdi",
-                    "__x86_indirect_thunk_rdx" : "rdx",
-                    "__x86_indirect_thunk_rsi" : "rsi",
+    symbol_names = {"__x86_indirect_thunk_array": "rax",
+                    "__x86_indirect_thunk_r10": "r10",
+                    "__x86_indirect_thunk_r11": "r11",
+                    "__x86_indirect_thunk_r12": "r12",
+                    "__x86_indirect_thunk_r13": "r13",
+                    "__x86_indirect_thunk_r14": "r14",
+                    "__x86_indirect_thunk_r15": "r15",
+                    "__x86_indirect_thunk_r8": "r8",
+                    "__x86_indirect_thunk_r9": "r9",
+                    "__x86_indirect_thunk_rax": "rax",
+                    "__x86_indirect_thunk_rbp": "rbp",
+                    "__x86_indirect_thunk_rbx": "rbx",
+                    "__x86_indirect_thunk_rcx": "rcx",
+                    "__x86_indirect_thunk_rdi": "rdi",
+                    "__x86_indirect_thunk_rdx": "rdx",
+                    "__x86_indirect_thunk_rsi": "rsi",
                     }
     ind_calls = {}
 
@@ -49,9 +49,9 @@ def get_x86_indirect_thunks(proj):
     return ind_calls
 
 def get_x86_registers():
-    return  ["rax", "rbx", "rcx", "rdx", "rsi",
-             "rdi", "rbp", "rsp", "r8" , "r9",
-             "r10", "r11", "r12", "r13", "r14", "r15"]
+    return ["rax", "rbx", "rcx", "rdx", "rsi",
+            "rdi", "rbp", "rsp", "r8", "r9",
+            "r10", "r11", "r12", "r13", "r14", "r15"]
 
 
 def report_error(error: Exception, where="dunno", start_addr="dunno", error_type="GENERIC"):
@@ -61,7 +61,8 @@ def report_error(error: Exception, where="dunno", start_addr="dunno", error_type
 
     o = open("fail.txt", "a+")
     o.write(f"---------------- [ {error_type} ERROR ] ----------------\n")
-    o.write(f"where: {where}     started at: {start_addr} {f'instruction addr: {ins_addr}' if ins_addr else ''}\n")
+    o.write(
+        f"where: {where}     started at: {start_addr} {f'instruction addr: {ins_addr}' if ins_addr else ''}\n")
     o.write(str(error) + "\n")
     o.write(traceback.format_exc())
     o.write("\n")
@@ -72,7 +73,8 @@ def report_unsupported(error: Exception, where="dunno", start_addr="dunno", erro
         where = hex(error.ins_addr)
 
     o = open("unsupported.txt", "a+")
-    o.write(f"---------------- [ {error_type} UNSUPPORTED INSTRUCTION ] ----------------\n")
+    o.write(
+        f"---------------- [ {error_type} UNSUPPORTED INSTRUCTION ] ----------------\n")
     o.write(f"instruction addr: {where}     started at: {start_addr}\n")
     o.write(str(error) + "\n")
     o.write("\n")

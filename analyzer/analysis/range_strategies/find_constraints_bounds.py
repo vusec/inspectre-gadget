@@ -15,15 +15,15 @@ from ...shared.ranges import *
 l = get_logger("FindConstraintsBounds")
 
 class RangeStrategyFindConstraintsBounds(RangeStrategy):
-    infer_isolated_strategy : RangeStrategyInferIsolated
+    infer_isolated_strategy: RangeStrategyInferIsolated
 
     def __init__(self, infer_isolated_strategy):
         super().__init__()
 
         self.infer_isolated_strategy = infer_isolated_strategy
 
-    def find_range(self, constraints, ast : claripy.ast.bv.BVS,
-                    ast_min : int = None, ast_max : int = None):
+    def find_range(self, constraints, ast: claripy.ast.bv.BVS,
+                   ast_min: int = None, ast_max: int = None):
 
         if not constraints:
             return None
@@ -36,7 +36,6 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
                 new_constr.add(c)
 
         constraints = list(new_constr)
-
 
         # --------- Unsigned range
         if ast_min == None or ast_max == None:
@@ -52,7 +51,8 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             return range_static(ast_min, isolated=False)
 
         try:
-            sat_ranges = _find_sat_distribution(constraints, ast, ast_min, ast_max)
+            sat_ranges = _find_sat_distribution(
+                constraints, ast, ast_min, ast_max)
         except claripy.ClaripyZ3Error as e:
             # timeout
             return None
@@ -63,14 +63,15 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             # We have one non-satisfiable range, so we can try to treat it as
             # isolated
 
-            r = self.infer_isolated_strategy.find_range([], ast, sat_ranges[0][0], sat_ranges[0][1])
+            r = self.infer_isolated_strategy.find_range(
+                [], ast, sat_ranges[0][0], sat_ranges[0][1])
 
             if r != None and sat_ranges[0][0] > sat_ranges[0][1]:
                 # The range wraps around, we have to be sure that the AST range is
                 # a simple strided range, otherwise we get two separate disjoint ranges
                 # which we cannot describe in our range (e.g., [ast != 0xf, ast <= 0xffff])
                 if r.and_mask != None or r.or_mask != None or \
-                    ast_max != ((1 << ast.size()) - 1 - (r.stride - 1)) or ast_min != 0:
+                        ast_max != ((1 << ast.size()) - 1 - (r.stride - 1)) or ast_min != 0:
 
                     # We have a complex range thus fail (e.g., masking is performed)
                     return None
@@ -86,7 +87,8 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             # 0xffffffff81000000 + <BV32 X > with condition x[31:31] != 0
             # (sign extended)
 
-            concrete_value =  next(arg for arg in ast.args if not arg.symbolic).args[0]
+            concrete_value = next(
+                arg for arg in ast.args if not arg.symbolic).args[0]
             sub_ast = sum([arg for arg in ast.args if arg.symbolic])
 
             r = self.find_range(constraints, sub_ast, None, None)
@@ -95,9 +97,8 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             if r != None and r.and_mask == None and r.or_mask == None:
 
                 return range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
-                                                      r.min, r.max, r.stride,
-                                                      concrete_value)
-
+                                                             r.min, r.max, r.stride,
+                                                             concrete_value)
 
         # --------- Can't solve this
         l.warning(f"Cant' solve range: {ast}  ({constraints})")
@@ -105,10 +106,9 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
         return None
 
 
-
 def _find_sat_distribution(constraints, ast, start, end):
 
-    not_constraints =  claripy.Not(claripy.And(*constraints))
+    not_constraints = claripy.Not(claripy.And(*constraints))
 
     # Start with a clean state
     s = claripy.Solver(timeout=global_config["Z3Timeout"])
@@ -118,8 +118,8 @@ def _find_sat_distribution(constraints, ast, start, end):
         # print(f"Range: {[(start, end)]}")
         return [(start, end)]
 
-
-    samples = s.eval(ast, 2, extra_constraints=[ast >= start, ast <= end, not_constraints])
+    samples = s.eval(ast, 2, extra_constraints=[
+                     ast >= start, ast <= end, not_constraints])
     sample_len = len(samples)
 
     if sample_len == 1:
@@ -130,6 +130,6 @@ def _find_sat_distribution(constraints, ast, start, end):
             return [(start, end)]
 
         # Range with a "hole"
-        return [(value+1, value-1)]
+        return [(value + 1, value - 1)]
 
     return None

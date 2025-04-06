@@ -46,13 +46,13 @@ class TFPRegister():
 
     def to_dict(self):
         return OrderedDict([
-        ("reg", self.reg),
-        ("expr", self.expr),
-        ("control", self.control),
-        ("branches", ordered_branches(self.branches)),
-        ("constraints", ordered_constraints(self.constraints)),
-        ("requirements", self.requirements),
-        ("range", self.range)
+            ("reg", self.reg),
+            ("expr", self.expr),
+            ("control", self.control),
+            ("branches", ordered_branches(self.branches)),
+            ("constraints", ordered_constraints(self.constraints)),
+            ("requirements", self.requirements),
+            ("range", self.range)
         ])
 
     def copy(self):
@@ -66,14 +66,20 @@ class TFPRegister():
 
 
 class TaintedFunctionPointer():
-    uuid : str
+    """
+    A TaintedFunctionPointer (TFP) or Dispatch Gadget consists of an indirect call
+    (or jump) that ends up being attacker-controlled in the speculative window.
+    These gadgets can be used to stitch together code snippets to for a complete
+    transmission gadget.
+    """
+    uuid: str
     name: str
     address: int
     pc: int
 
     registers: dict[str, TFPRegister]
 
-    def __init__(self, pc, expr, reg, bbls, branches, constraints,  aliases, n_instr, contains_spec_stop, n_dependent_loads) -> None:
+    def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr, contains_spec_stop, n_dependent_loads) -> None:
         self.uuid = ""
         self.name = ""
         self.address = 0
@@ -139,31 +145,32 @@ class TaintedFunctionPointer():
 
     def to_dict(self):
         d = OrderedDict([
-        ("uuid", self.uuid),
-        ("name", self.name),
-        ("address", hex(self.address)),
-        ("n_instr", self.n_instr),
-        ("n_dependent_loads", self.n_dependent_loads),
-        ("n_branches", self.n_branches),
-        ("contains_spec_stop", self.contains_spec_stop),
-        ("pc", hex(self.pc)),
-        ("reg", self.reg),
-        ("expr", self.expr),
-        ("range", ranges.AstRange(0,0,0,False).to_dict() if self.range == None else self.range.to_dict()),
-        ("branches", ordered_branches(self.constraints)),
-        ("constraints", ordered_constraints(self.branches)),
-        ("requirements", self.requirements),
-        ("all_branches", ordered_branches(self.all_constraints)),
-        ("all_constraints", ordered_constraints(self.all_branches)),
-        ("aliases", self.aliases),
-        ("bbls", [hex(x) for x in self.bbls]),
-        ("controlled", self.controlled),
-        ("n_controlled", len(self.controlled)),
-        ("uncontrolled", self.uncontrolled),
-        ("unmodified", self.unmodified),
-        ("n_unmodified", len(self.unmodified)),
-        ("secrets", self.secrets),
-        ("aliasing", self.aliasing)
+            ("uuid", self.uuid),
+            ("name", self.name),
+            ("address", hex(self.address)),
+            ("n_instr", self.n_instr),
+            ("n_dependent_loads", self.n_dependent_loads),
+            ("n_branches", self.n_branches),
+            ("contains_spec_stop", self.contains_spec_stop),
+            ("pc", hex(self.pc)),
+            ("reg", self.reg),
+            ("expr", self.expr),
+            ("range", ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.range == None else self.range.to_dict()),
+            ("branches", ordered_branches(self.constraints)),
+            ("constraints", ordered_constraints(self.branches)),
+            ("requirements", self.requirements),
+            ("all_branches", ordered_branches(self.all_constraints)),
+            ("all_constraints", ordered_constraints(self.all_branches)),
+            ("aliases", self.aliases),
+            ("bbls", [hex(x) for x in self.bbls]),
+            ("controlled", self.controlled),
+            ("n_controlled", len(self.controlled)),
+            ("uncontrolled", self.uncontrolled),
+            ("unmodified", self.unmodified),
+            ("n_unmodified", len(self.unmodified)),
+            ("secrets", self.secrets),
+            ("aliasing", self.aliasing)
         ])
 
         for r in self.registers.values():

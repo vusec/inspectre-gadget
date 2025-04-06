@@ -11,7 +11,7 @@ import claripy
 class Interval():
     min: int
     max: int
-    stride : int
+    stride: int
 
     def get_tuple(self):
         return (self.min, self.max, self.stride)
@@ -24,20 +24,20 @@ class Interval():
 
 
 class AstRange:
-    min : int
-    max : int
-    window : int
+    min: int
+    max: int
+    window: int
     entropy: int
 
-    isolated : bool
+    isolated: bool
 
-    and_mask : int
-    or_mask : int
+    and_mask: int
+    or_mask: int
 
     values = list
 
     intervals: list
-    exact : bool
+    exact: bool
 
     @property
     def stride(self):
@@ -55,7 +55,7 @@ class AstRange:
         if min <= max:
             self.window = max - min
         else:
-            assert(ast_size > 0)
+            assert (ast_size > 0)
             # wrap around range
             # window = 0:max + min:ast_size
             self.window = ((1 << ast_size) - 1) - (min - 1) + max
@@ -91,14 +91,14 @@ class AstRange:
         else:
             return f"(min:{hex(self.min)}, max: {hex(self.max)})"
 
-
     def to_string(self):
 
         if self.min == self.max:
             return f"{hex(self.min)}"
 
         if self.intervals:
-            s = ",".join([str(i) for i in self.intervals]) + f" Exact: {self.exact}"
+            s = ",".join([str(i) for i in self.intervals]) + \
+                f" Exact: {self.exact}"
             if self.and_mask != None:
                 s += f", and_mask: {hex(self.and_mask)}"
             if self.or_mask:
@@ -174,7 +174,7 @@ def range_complex(min, max, ast_size, exact, entropy, and_mask, or_mask, isolate
     highest_bit = max.bit_length()
     lowest_bit = (and_mask & -and_mask).bit_length() - 1
 
-    stride_mask = (2 ** highest_bit  - 1) & ~(2 ** lowest_bit - 1)
+    stride_mask = (2 ** highest_bit - 1) & ~(2 ** lowest_bit - 1)
 
     # mask higher than the highest bit are redundant
     and_mask &= stride_mask
@@ -186,4 +186,3 @@ def range_complex(min, max, ast_size, exact, entropy, and_mask, or_mask, isolate
     return AstRange(min=min, max=max, ast_size=ast_size, exact=exact,
                     entropy=entropy, isolated=isolated, and_mask=and_mask,
                     or_mask=or_mask, intervals=[Interval(min, max, stride)])
-

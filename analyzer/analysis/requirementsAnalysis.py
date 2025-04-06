@@ -74,7 +74,7 @@ def get_requirements(expr: claripy.BV) -> Requirements:
 def get_control(c: TransmissionComponent) -> ControlType:
     # TODO: check aliasing
     if len(c.requirements.const_mem) == 0 and len(c.requirements.mem) == 0 and len(c.requirements.regs) == 0:
-            return ControlType.NO_CONTROL
+        return ControlType.NO_CONTROL
 
     controlled = False
     has_uncontrolled_components = False
@@ -84,7 +84,7 @@ def get_control(c: TransmissionComponent) -> ControlType:
 
         l.info(f"{v}:     {load_anno}    {uncontrolled_anno}")
 
-        if uncontrolled_anno == None and (load_anno == None  or load_anno.controlled == True):
+        if uncontrolled_anno == None and (load_anno == None or load_anno.controlled == True):
             controlled = True
         else:
             has_uncontrolled_components = True
@@ -111,7 +111,6 @@ def get_transmission_control(t: Transmission):
     return ControlType.CONTROLLED
 
 
-
 def analyse(t: Transmission):
     l.warning(f"========= [REQS] ==========")
 
@@ -127,7 +126,7 @@ def analyse(t: Transmission):
         t.branch_requirements.merge(get_requirements(b[1]))
 
     t.constraint_requirements = Requirements()
-    for addr,c,ctype in t.constraints:
+    for addr, c, ctype in t.constraints:
         t.constraint_requirements.merge(get_requirements(c))
 
     t.all_requirements = Requirements()
@@ -139,9 +138,11 @@ def analyse(t: Transmission):
     t.all_requirements_w_branches.merge(t.all_requirements)
     t.all_requirements_w_branches.merge(t.branch_requirements)
 
-    l.warning(f"base_requirements:  {'NONE' if t.base == None else t.base.requirements}")
+    l.warning(
+        f"base_requirements:  {'NONE' if t.base == None else t.base.requirements}")
     l.warning(f"secret_address_requirements:  {t.secret_address.requirements}")
-    l.warning(f"transmitted_secret_requirements:  {t.transmitted_secret.requirements}")
+    l.warning(
+        f"transmitted_secret_requirements:  {t.transmitted_secret.requirements}")
     l.warning(f"transmission_requirements:  {t.transmission.requirements}")
     l.warning("==========================")
 

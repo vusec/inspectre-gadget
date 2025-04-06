@@ -10,12 +10,11 @@ from ...shared.config import *
 
 class RangeStrategyFindMasking(RangeStrategy):
 
-    def find_range(self, constraints, ast : claripy.ast.bv.BVS,
-                   ast_min : int = None, ast_max : int = None):
+    def find_range(self, constraints, ast: claripy.ast.bv.BVS,
+                   ast_min: int = None, ast_max: int = None):
 
         s = claripy.Solver(timeout=global_config["Z3Timeout"])
         s.constraints = constraints
-
 
         if ast_min == None:
             ast_min = s.min(ast)
@@ -26,7 +25,7 @@ class RangeStrategyFindMasking(RangeStrategy):
 
         return range_complex(ast_min, ast_max, ast.size(), False, entropy, and_mask, or_mask)
 
-def _find_entropy(s : claripy.Solver, ast : claripy.BV, ast_max : int):
+def _find_entropy(s: claripy.Solver, ast: claripy.BV, ast_max: int):
 
     highest_bit = ast_max.bit_length()
 
@@ -34,10 +33,8 @@ def _find_entropy(s : claripy.Solver, ast : claripy.BV, ast_max : int):
     and_mask = 2 ** highest_bit - 1
     entropy = highest_bit
 
-
     zero_bits = []
     one_bits = []
-
 
     for bit in range(0, highest_bit):
 
