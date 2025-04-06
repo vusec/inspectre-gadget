@@ -12,6 +12,7 @@ def init_config(config):
     global_config["LogLevel"] = 1
     global_config["TaintedFunctionPointers"] = True
     global_config["SpeculationStopMnemonics"] = {'lfence', 'mfence', 'cpuid'}
+    global_config["CrashOnExceptions"] = False
 
     # Apply user config.
     for c in config:

@@ -693,7 +693,12 @@ class Scanner:
                 # Catch test-case end error
                 if 'No bytes in memory for block starting at 0x400dead.' == str(e):
                     continue
+                # Debug setting to print the trace and immediately exit
+                if global_config['CrashOnExceptions']:
+                    raise e
 
+                # On long runs (e.g. running on the whole Linux Kernel)
+                # we want to report the error without crashing
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
                 if not l.disabled:

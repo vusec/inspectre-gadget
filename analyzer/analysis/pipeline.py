@@ -16,6 +16,7 @@ from ..asmprinter.asmprinter import *
 from ..shared.logger import *
 from ..shared.transmission import *
 from ..shared.utils import report_error
+from ..shared.config import global_config
 
 
 l = get_logger("AnalysisMAIN")
@@ -74,6 +75,8 @@ class AnalysisPipeline:
             try:
                 rangeAnalysis.analyse(t)
             except Exception as e:
+                if global_config['CrashOnExceptions']:
+                    raise e
                 # TODO: In very few instances, our range analysis fails. Instead of
                 # interrupting the analysis right away, we want to continue to
                 # the next gadget. There are many reasons why the range analysis
@@ -117,6 +120,8 @@ class AnalysisPipeline:
             try:
                 rangeAnalysis.analyse_tfp(tfp)
             except Exception as e:
+                if global_config['CrashOnExceptions']:
+                    raise e
                 # TODO: In very few instances, our range analysis fails. Instead of
                 # interrupting the analysis right away, we want to continue to
                 # the next gadget. There are many reasons why the range analysis
