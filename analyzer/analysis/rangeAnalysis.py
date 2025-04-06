@@ -5,6 +5,7 @@ from .range_strategies import *
 # autopep8: off
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
+from ..shared.halfGadget import HalfGadget
 from ..shared.utils import *
 from ..shared.logger import *
 from ..shared.config import *
@@ -110,4 +111,26 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
     t.range = get_ast_ranges([x[1] for x in t.constraints], t.expr)
 
+    l.warning("==========================")
+
+def analyse_half_gadget(g: HalfGadget):
+    l.warning(f"========= [RANGE] ==========")
+
+    # Pre-compute constraint sets.
+    constr = []
+    constr.extend([x[1] for x in g.constraints])
+
+    constr_with_branches = []
+    if len(g.branches) > 0:
+        constr_with_branches.extend([x[1] for x in g.constraints])
+        constr_with_branches.extend([x[1] for x in g.branches])
+
+    # Calculate ranges for each component
+    for c in [g.loaded, g.base, g.uncontrolled_base, g.attacker]:
+        calculate_range(c, constr, constr_with_branches)
+
+    l.warning(f"base range:  {'NONE' if g.base == None else g.base.range}")
+    l.warning(
+        f"uncontrolled_base range:  {'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.range}")
+    l.warning(f"attacker range:  {g.attacker.range}")
     l.warning("==========================")

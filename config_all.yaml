@@ -47,6 +47,10 @@ DistributeShifts: True
 # Also look for tainted function pointers (i.e. dispatch gadgets).
 TaintedFunctionPointers: True
 
+# Also output "Half-Spectre" gadgets, a.k.a MDS gadgets.
+# https://download.vusec.net/papers/halfspectre_sp25.pdf
+HalfSpectre: False
+
 # If this is true, any exception thrown during scanning will cause immediate
 # abort of the execution. This is not desirable during long runs on e.g. the
 # Linux Kernel because we want the scanning to continue to the next gadget

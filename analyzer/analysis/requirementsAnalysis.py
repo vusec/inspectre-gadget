@@ -10,6 +10,7 @@ import sys
 # autopep8: off
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
+from ..shared.halfGadget import HalfGadget
 from ..shared.utils import *
 from ..shared.astTransform import *
 from ..shared.logger import *
@@ -71,34 +72,57 @@ def get_requirements(expr: claripy.BV) -> Requirements:
     l.info(f"   direct: {req.direct_regs},   indirect: {ind_regs}")
     return req
 
-def get_control(c: TransmissionComponent) -> ControlType:
+def get_control(c: TransmissionComponent, report_massaging=False) -> ControlType:
     # TODO: check aliasing
     if len(c.requirements.const_mem) == 0 and len(c.requirements.mem) == 0 and len(c.requirements.regs) == 0:
         return ControlType.NO_CONTROL
 
-    controlled = False
+    # At least one component is controlled
+    has_controlled_components = False
+    # At least one component is explicitly marked as uncontrolled
     has_uncontrolled_components = False
+
+    # Check the annotations of all the symbols in the expression
     for v in get_vars(c.expr):
-        load_anno = get_load_annotation(v)
-        uncontrolled_anno = get_uncontrolled_annotation(v)
+        for anno in v.annotations:
+            if isinstance(anno, AttackerAnnotation):
+                # Attacker symbols are directly controlled
+                has_controlled_components = True
+            elif isinstance(anno, LoadAnnotation) and anno.controlled == True:
+                # Controlled load
+                has_controlled_components = True
+            else:
+                # Symbolic value that is not controlled
+                has_uncontrolled_components = True
 
-        l.info(f"{v}:     {load_anno}    {uncontrolled_anno}")
-
-        if uncontrolled_anno == None and (load_anno == None or load_anno.controlled == True):
-            controlled = True
+    if has_controlled_components:
+        if has_uncontrolled_components:
+            # If an expression has both controlled and uncontrolled symbols,
+            # it means that you can control the final value of the expression
+            # only if you know the value of the uncontrolled part.
+            return ControlType.REQUIRES_MEM_LEAK
         else:
-            has_uncontrolled_components = True
+            # All symbols are controlled.
+            return ControlType.CONTROLLED
+    else:
+        # If we are here, the expression has at least one symbol, but none of the
+        # symbols are controlled, so for sure we have at least one uncontrolled symbol.
+        assert (has_uncontrolled_components)
+        if report_massaging:
+            # If an expression contains only _uncontrolled_ symbols, i.e. symbols
+            # that are not derived by the initial attacker-controlled registers,
+            # an attacker might still be able to influence these values through
+            # memory massaging, e.g. by placing attacker-controlled data in
+            # these uncontrolled positions.
+            # Since we don't do an analysis of what is considered "massageable",
+            # we let the user decide whether such gadgets should be reported
+            # or not.
+            return ControlType.REQUIRES_MEM_MASSAGING
+        else:
+            # There are no attacker-controlled components in this expression.
+            return ControlType.NO_CONTROL
 
-    if not controlled:  # and has_uncontrolled_components:
-        # return ControlType.REQUIRES_MEM_MASSAGING
-        return ControlType.NO_CONTROL
-
-    if controlled and not has_uncontrolled_components:
-        return ControlType.CONTROLLED
-
-    if controlled and has_uncontrolled_components:
-        return ControlType.REQUIRES_MEM_LEAK
-
+    # Unreachable
     return ControlType.NO_CONTROL
 
 def get_transmission_control(t: Transmission):
@@ -157,4 +181,43 @@ def analyse_tfp(t: TaintedFunctionPointer):
         t.registers[r].requirements = get_requirements(t.registers[r].expr)
 
     t.requirements = get_requirements(t.expr)
+    l.warning("==========================")
+
+
+def analyse_half_gadget(g: HalfGadget):
+    l.warning(f"========= [REQS] ==========")
+
+    # Calculate for main expression.
+    g.loaded.requirements = get_requirements(g.loaded.expr)
+    g.loaded.control = get_control(g.loaded, report_massaging=True)
+
+    # Calculate for components.
+    for c in [g.base, g.uncontrolled_base, g.attacker]:
+        if c != None:
+            c.requirements = get_requirements(c.expr)
+            c.control = get_control(c,)
+
+    g.branch_requirements = Requirements()
+    for b in g.branches:
+        g.branch_requirements.merge(get_requirements(b[1]))
+
+    g.constraint_requirements = Requirements()
+    for addr, c, ctype in g.constraints:
+        g.constraint_requirements.merge(get_requirements(c))
+
+    g.all_requirements = Requirements()
+    if g.base is not None:
+        g.all_requirements.merge(g.base.requirements)
+    g.all_requirements.merge(g.attacker.requirements)
+    g.all_requirements.merge(g.constraint_requirements)
+
+    g.all_requirements_w_branches = Requirements()
+    g.all_requirements_w_branches.merge(g.all_requirements)
+    g.all_requirements_w_branches.merge(g.branch_requirements)
+
+    l.warning(
+        f"base_requirements:  {'NONE' if g.base == None else g.base.requirements}")
+    l.warning(
+        f"uncontrolled_base_requirements:  {'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.requirements}")
+    l.warning(f"attacker_requirements:  {g.attacker.requirements}")
     l.warning("==========================")

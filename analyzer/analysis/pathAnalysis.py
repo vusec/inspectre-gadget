@@ -13,6 +13,7 @@ from .dependencyGraph import DepGraph
 # autopep8: off
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
+from ..shared.halfGadget import HalfGadget
 from ..shared.utils import *
 from ..shared.logger import *
 # autopep8: on
@@ -126,5 +127,58 @@ def analyse_tfp(t: TaintedFunctionPointer):
         # Check for tfp expr
         if len(constr_deps.intersection(reg_deps[t.reg])):
             t.constraints.append((addr, c, ctype))
+
+    l.warning("==========================")
+
+
+def analyse_half_gadget(g: HalfGadget):
+    l.warning(f"========= [PATH] ==========")
+
+    d = DepGraph()
+    d.add_nodes(g.loaded.expr)
+    d.add_aliases(g.aliases)
+    d.add_constraints([x[1] for x in g.constraints])
+    d.add_constraints([x[1] for x in g.branches])
+    d.resolve_dependencies()
+
+    base_deps = [] if g.base == None else d.get_all_deps(
+        get_vars(g.base.expr), include_constraints=False)
+    uncontrolled_base_deps = [] if g.uncontrolled_base == None else d.get_all_deps(
+        get_vars(g.uncontrolled_base.expr), include_constraints=False)
+    attacker_deps = d.get_all_deps(
+        get_vars(g.attacker.expr), include_constraints=False)
+
+    for addr, condition, taken in g.branches:
+        br_deps = d.get_all_deps(
+            get_vars(condition), include_constraints=False)
+
+        if len(br_deps.intersection(base_deps)):
+            g.base.branches.append((addr, condition, taken))
+        if len(br_deps.intersection(attacker_deps)):
+            g.attacker.branches.append((addr, condition, taken))
+        if len(br_deps.intersection(uncontrolled_base_deps)):
+            g.uncontrolled_base.branches.append((addr, condition, taken))
+
+    l.warning(
+        f"Base branches: {'None' if g.base == None else g.base.branches}")
+    l.warning(
+        f"Uncontrolled Base branches: {'None' if g.uncontrolled_base == None else g.uncontrolled_base.branches}")
+    l.warning(f"Attacker branches: {g.attacker.branches}")
+
+    for addr, cond, ctype in g.constraints:
+        constr_deps = d.get_all_deps(get_vars(cond), include_constraints=False)
+
+        if len(constr_deps.intersection(base_deps)):
+            g.base.constraints.append((addr, cond, ctype))
+        if len(constr_deps.intersection(uncontrolled_base_deps)):
+            g.uncontrolled_base.constraints.append((addr, cond, ctype))
+        if len(constr_deps.intersection(attacker_deps)):
+            g.attacker.constraints.append((addr, cond, ctype))
+
+    l.warning(
+        f"Base constraints: {'None' if g.base == None else g.base.constraints}")
+    l.warning(
+        f"Uncontrolled Base constraints: {'None' if g.uncontrolled_base == None else g.uncontrolled_base.constraints}")
+    l.warning(f"Attacker constraints: {g.attacker.constraints}")
 
     l.warning("==========================")

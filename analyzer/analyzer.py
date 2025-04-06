@@ -61,7 +61,7 @@ def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Projec
     return proj
 
 
-def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, asm_folder):
+def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, asm_folder, half_gadget_filename):
     """
     Run the scanner from a single entrypoint and analyze the potential transmissions
     found at symbolic-execution time.
@@ -70,7 +70,8 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
     # Step 1. Initialize the analyzer
     analysis_pipeline = AnalysisPipeline(name=name, gadget_address=gadget_address, proj=proj,
                                          asm_folder=asm_folder, csv_filename=csv_filename,
-                                         tfp_csv_filename=tfp_csv_filename)
+                                         tfp_csv_filename=tfp_csv_filename,
+                                         half_gadget_filename=half_gadget_filename)
 
     # Step 2. Analyze the code snippet with angr.
     l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
@@ -79,6 +80,7 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
 
     l.info(f"Found {len(s.transmissions)} potential transmissions.")
     l.info(f"Found {len(s.calls)} potential tainted function pointers.")
+    l.info(f"Found {len(s.half_gadgets)} potential half-spectre gadgets.")
 
     # Step 3. Analyze found gadgets (if not analyzed during scanning)
     if not global_config['AnalyzeDuringScanning']:
@@ -89,13 +91,17 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
         for tfp in s.calls:
             analysis_pipeline.analyze_tainted_function_pointer(tfp)
 
+        for half in s.half_gadgets:
+            analysis_pipeline.analyze_half_gadget(half)
+
     l.info(
         f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
     l.info(
         f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
+    l.info(
+        f"Outputted {analysis_pipeline.n_final_half_gadgets} half-spectre gadgets.")
 
-
-def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary=""):
+def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary="", half_gadget_filename=""):
     """
     Run the analyzer on a binary.
     """
@@ -128,4 +134,4 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     # TODO: Parallelize.
     for g in gadgets:
         analyse_gadget(proj, g[0], g[1], csv_filename,
-                       tfp_csv_filename, asm_folder)
+                       tfp_csv_filename, asm_folder, half_gadget_filename)

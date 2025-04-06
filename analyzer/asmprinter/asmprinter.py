@@ -2,11 +2,13 @@ import angr
 import claripy
 import sys
 from pathlib import Path
+from enum import Enum
 
 # autopep8: off
 from ..shared.logger import *
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
+from ..shared.halfGadget import HalfGadget
 from ..shared.utils import *
 from ..scanner.annotations import *
 # autopep8: on
@@ -60,16 +62,26 @@ def print_annotations(t: Transmission):
     print(a)
 
 
-def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, is_tfp=False, color=True):
+class GadgetType(Enum):
+    TRANSMISSION = 0,
+    TFP = 1,
+    HALF = 2,
+    UNKNOWN = 3
+
+def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, type=GadgetType.TRANSMISSION, color=True):
     # Branches.
     proj.kb.comments = get_branch_comments(branches)
     # Loads.
     proj.kb.comments.update(get_load_comments(expr, secret_load_pc))
     # Transmission
-    if is_tfp:
+    if type == GadgetType.TFP:
         proj.kb.comments[pc] = str(
             set(replace_secret_annotations_with_name(get_annotations(expr), "Attacker")))
         proj.kb.comments[pc] += " -> " + "TAINTED FUNCTION POINTER"
+    elif type == GadgetType.HALF:
+        proj.kb.comments[pc] = str(
+            set(replace_secret_annotations_with_name(get_annotations(expr), "Attacker")))
+        proj.kb.comments[pc] += " -> " + "HALF GADGET"
     else:
         all_annotations = set(get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(
@@ -95,8 +107,8 @@ def output_gadget_to_file(t: Transmission, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/gadget_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"----------------- TRANSMISSION -----------------\n")
-    o.write(print_annotated_assembly(proj, t.bbls, t.branches,
-            t.transmission.expr, t.pc, t.secret_load_pc, is_tfp=False, color=False))
+    o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.transmission.expr,
+            t.pc, t.secret_load_pc, type=GadgetType.TRANSMISSION, color=False))
     o.write(f"""
 {'-'*48}
 uuid: {t.uuid}
@@ -135,7 +147,7 @@ def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
     o = open(f"{path}/tfp_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"--------------------- TFP ----------------------\n")
     o.write(print_annotated_assembly(proj, t.bbls, t.branches,
-            t.expr, t.pc, None, is_tfp=True, color=False))
+            t.expr, t.pc, None, type=GadgetType.TFP, color=False))
     o.write(f"""
 {'-'*48}
 uuid: {t.uuid}
@@ -160,6 +172,31 @@ Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
     o.write(f"Uncontrolled Regs: {t.uncontrolled}\n")
     o.write(f"Unmodified Regs: {t.unmodified}\n")
     o.write(f"Potential Secrets: {t.secrets}\n")
+
+    o.write(f"""
+{'-'*48}
+""")
+    o.close()
+
+def output_half_gadget_to_file(g: HalfGadget, proj, path):
+    Path(path).mkdir(parents=True, exist_ok=True)
+    o = open(f"{path}/halfgadget_{g.name}_{hex(g.pc)}_{g.uuid}.asm", "a+")
+    o.write(f"--------------------- HALF GADGET ----------------------\n")
+    o.write(print_annotated_assembly(proj, g.bbls, g.branches,
+            g.loaded.expr, g.pc, None, type=GadgetType.HALF, color=False))
+    o.write(f"""
+{'-'*48}
+uuid: {g.uuid}
+
+Expr: {g.loaded.expr}
+Base: {'None' if g.base == None else g.base.expr}
+Attacker: {g.attacker.expr}
+ControlType: {g.loaded.control}
+
+Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in g.constraints]}
+Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in g.branches]}
+
+""")
 
     o.write(f"""
 {'-'*48}
