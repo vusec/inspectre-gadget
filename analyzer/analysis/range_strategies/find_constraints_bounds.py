@@ -2,7 +2,7 @@ import claripy
 import time
 import sys
 
-from . import RangeStrategy
+from .rangeStrategy import RangeStrategy
 from .infer_isolated import RangeStrategyInferIsolated
 
 # autopep8: off
