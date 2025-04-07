@@ -1,7 +1,8 @@
 import claripy
 import sys
 
-from . import RangeStrategy
+from .rangeStrategy import RangeStrategy
+
 
 # autopep8: off
 from ...shared.ranges import *
