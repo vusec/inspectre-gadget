@@ -29,3 +29,5 @@ AnalysisTimeout: 1000 #s
 MaxBB: 5
 DistributeShifts: True
 TaintedFunctionPointers: True
+HalfSpectre: True
+CrashOnExceptions: True
