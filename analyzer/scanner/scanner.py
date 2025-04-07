@@ -698,7 +698,11 @@ class Scanner:
                     self.bbs[self.cur_state.addr] = {"block": cur_block,
                                                      "speculation_stop": self.block_contains_speculation_stop(cur_block)}
                 # "Execute" the state (triggers the hooks we installed).
-                next_states = self.cur_state.step()
+                ns = self.cur_state.step()
+                succs = ns.successors
+                # If we're in aggressive mode, we need to also explore unsat successors.
+                if global_config['AggressiveSpeculation']:
+                    succs.extend(ns.unsat_successors)
 
             except SplitException as e:
                 # The state has been manually splitted: don't explore it further.
@@ -737,7 +741,18 @@ class Scanner:
                 continue
 
             # If we reached this point, the analysis of the BB has completed.
-            for ns in next_states:
+            for ns in succs:
+                if global_config['AggressiveSpeculation'] and not ns.solver.satisfiable():
+                    # If we are in 'AggressiveSpeculation' mode, we follow
+                    # branches even if their condition is always false.
+                    # For these successors, we remove the branch condition
+                    # that makes the state unsatisfiable and substitute with
+                    # a fake boolean called "UNSAT", which marks that we have
+                    # aggressively speculated that branch.
+                    ns.solver.reload_solver(self.cur_state.solver.constraints)
+                    marker = claripy.BoolV("UNSAT")
+                    ns.history.jump_guard = (marker)
+
                 self.n_hist += 1
                 ns.globals[f'hist_{self.n_hist}'] = ns.addr
 
