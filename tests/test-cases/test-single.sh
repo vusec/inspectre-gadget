@@ -35,6 +35,7 @@ rm -f -r ${ASM_FOLDER}
 mkdir -p ${OUT_FOLDER}
 rm -f gadgets.csv
 rm -f tfp.csv
+rm -f half.csv
 
 # ------------------------------------------------------------------------------
 # Run InSpectre Scanner
@@ -43,7 +44,7 @@ objdump --adjust-vma=0x4000000 -d -Mintel gadget > ${OUT_FOLDER}/out.txt
 
 echo ""  >> ${OUT_FOLDER}/out.txt
 echo "== SCANNER ==" >> ${OUT_FOLDER}/out.txt
-python3 ../../../inspectre analyze --config ../config_all.yaml --base-address 0x4000000 --address 0x4000000 --name $name --output gadgets.csv --tfp-output tfp.csv --asm asm gadget 2> /dev/null >> ${OUT_FOLDER}/out.txt || true
+python3 ../../../inspectre analyze --config ../config_all.yaml --base-address 0x4000000 --address 0x4000000 --name $name --output gadgets.csv --tfp-output tfp.csv --asm asm --half-gadget-output half.csv gadget 2> /dev/null >> ${OUT_FOLDER}/out.txt || true
 [ -f fail.txt ] && mv fail.txt ${OUT_FOLDER}/fail.txt
 
 # ------------------------------------------------------------------------------
@@ -99,6 +100,20 @@ if [ -f tfp.csv ]; then
         [ -e "$sql" ] || continue
         echo $sql >> ${OUT_FOLDER}/scanner_data.txt
         sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
+        echo "" >> ${OUT_FOLDER}/scanner_data.txt
+    done
+fi
+
+# ------------------------------------------------------------------------------
+# Execute queries for Half-Spectre gadgets
+
+if [ -f half.csv ]; then
+    echo "== Half-Spectre =="  >> ${OUT_FOLDER}/scanner_data.txt
+    for sql in in ../../test-queries/scanner-half-spectre/*.sql;
+    do
+        [ -e "$sql" ] || continue
+        echo $sql >> ${OUT_FOLDER}/scanner_data.txt
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import half.csv halfgadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
         echo "" >> ${OUT_FOLDER}/scanner_data.txt
     done
 fi

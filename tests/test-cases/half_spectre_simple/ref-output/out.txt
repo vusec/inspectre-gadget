@@ -1,0 +1,36 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <half_spectre>:
+ 4000000:	48 8b 37             	mov    rsi,QWORD PTR [rdi]
+ 4000003:	67 4c 8b 90 00 00 00 	mov    r10,QWORD PTR [eax-0x7f000000]
+ 400000a:	81 
+ 400000b:	4c 8b 1c 25 00 00 00 	mov    r11,QWORD PTR ds:0xffffffff81000000
+ 4000012:	81 
+ 4000013:	49 01 c3             	add    r11,rax
+ 4000016:	4d 8b 23             	mov    r12,QWORD PTR [r11]
+
+0000000004000019 <end>:
+ 4000019:	e9 00 00 00 00       	jmp    400001e <end+0x5>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000000: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000003: <BV64 0#32 .. 0x81000000 + rax[31:0]>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000016: <BV64 LOAD_64[<BV64 0xffffffff81000000>]_22 + rax>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[MAIN]  Found 0 potential transmissions.
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 3 potential half-spectre gadgets.
+[MAIN]  Outputted 0 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 3 half-spectre gadgets.
