@@ -17,13 +17,21 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000004: <BV64 0xff + rsp_16>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 rsp_24 + (0#48 .. LOAD_16[<BV64 rsp_16 + 0xff>]_24)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x400000c: <BV64 rsp_24 + (0#48 .. LOAD_16[<BV64 rsp_16 + 0xff>]_24)>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [MAIN]  Found 1 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 2 potential half-spectre gadgets.
 [MAIN]  Outputted 1 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 2 half-spectre gadgets.
 
 == REASONER ==
 [-] Imported 1 gadgets

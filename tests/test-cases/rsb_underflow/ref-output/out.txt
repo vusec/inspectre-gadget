@@ -6,15 +6,17 @@ Disassembly of section .text:
 
 0000000004000000 <rsp_underflow>:
  4000000:	e8 01 00 00 00       	call   4000006 <dummy_call>
- 4000005:	c3                   	ret    
+ 4000005:	c3                   	ret
 
 0000000004000006 <dummy_call>:
- 4000006:	c3                   	ret    
+ 4000006:	c3                   	ret
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
 [MAIN]  Found 0 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 0 potential half-spectre gadgets.
 [MAIN]  Outputted 0 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 0 half-spectre gadgets.

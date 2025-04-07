@@ -17,6 +17,9 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000000: <BV64 0x18 + rdx>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
@@ -29,13 +32,18 @@ Disassembly of section .text:
 [AnalysisMAIN]  Analyzing <BV64 0x20 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000010: <BV64 rsi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 0x20 + (0#32 .. LOAD_32[<BV64 rdx + 0x18>]_20)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 5 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 2 potential half-spectre gadgets.
 [MAIN]  Outputted 5 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 2 half-spectre gadgets.
 
 == REASONER ==
 [-] Imported 5 gadgets

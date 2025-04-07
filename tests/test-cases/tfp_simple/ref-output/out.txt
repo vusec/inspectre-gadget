@@ -19,10 +19,22 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000000: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 rcx + LOAD_64[<BV64 rdi>]_20>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing @0x4000015: <BV64 LOAD_64[<BV64 rcx + LOAD_64[<BV64 rdi>]_20>]_21[61:0] .. 0>
+[AnalysisMAIN]  Analyzing half-spectre @0x4000003: <BV64 rcx + LOAD_64[<BV64 rdi>]_20>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000007: <BV64 0x20 + rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x400000b: <BV64 r8>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing TFP @0x4000015: <BV64 LOAD_64[<BV64 rcx + LOAD_64[<BV64 rdi>]_20>]_21[61:0] .. 0>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped CSV to tfp.csv
 [AnalysisMAIN]  Analyzing <BV64 (0#2 .. LOAD_64[<BV64 rcx + LOAD_64[<BV64 rdi>]_20>]_21[61:0]) << 0x2>...
@@ -30,8 +42,10 @@ Disassembly of section .text:
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 2 potential transmissions.
 [MAIN]  Found 1 potential tainted function pointers.
+[MAIN]  Found 4 potential half-spectre gadgets.
 [MAIN]  Outputted 2 transmissions.
 [MAIN]  Outputted 1 tainted function pointers.
+[MAIN]  Outputted 4 half-spectre gadgets.
 
 == REASONER ==
 [-] Imported 2 gadgets

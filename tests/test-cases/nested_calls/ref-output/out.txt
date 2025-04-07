@@ -13,21 +13,29 @@ Disassembly of section .text:
  4000018:	e9 00 00 00 00       	jmp    400001d <target_1>
 
 000000000400001d <target_1>:
- 400001d:	c3                   	ret    
+ 400001d:	c3                   	ret
 
 000000000400001e <target_2>:
- 400001e:	c3                   	ret    
+ 400001e:	c3                   	ret
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x400000a: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x400000d: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdi>]_27)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 1 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 2 potential half-spectre gadgets.
 [MAIN]  Outputted 1 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 2 half-spectre gadgets.
 
 == REASONER ==
 [-] Imported 1 gadgets
