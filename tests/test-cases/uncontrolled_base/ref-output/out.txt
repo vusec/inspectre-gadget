@@ -18,24 +18,35 @@ Disassembly of section .text:
  4000024:	49 81 e3 ff 00 00 00 	and    r11,0xff
  400002b:	4d 01 da             	add    r10,r11
  400002e:	4f 8b 14 02          	mov    r10,QWORD PTR [r10+r8*1]
- 4000032:	c3                   	ret    
+ 4000032:	c3                   	ret
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000000: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_22>]_23 + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [AnalysisMAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_25 + rbx + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x400001d: <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_25 + rbx + (0#56 .. LOAD_8[<BV64 rdi>]_20)>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_27 + (0#56 .. r11[7:0]) + (0#56 .. LOAD_8[<BV64 rdi>]_20)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x400002e: <BV64 LOAD_64[<BV64 LOAD_64[<BV64 0x2ac80 + gs>]_21>]_27 + (0#56 .. r11[7:0]) + (0#56 .. LOAD_8[<BV64 rdi>]_20)>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [MAIN]  Found 3 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 3 potential half-spectre gadgets.
 [MAIN]  Outputted 3 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 3 half-spectre gadgets.
 
 == REASONER ==
 [-] Imported 3 gadgets

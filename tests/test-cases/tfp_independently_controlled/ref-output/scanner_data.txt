@@ -254,3 +254,40 @@
 | 0x4000013 | []          | {'regs': ['<BV64 rdi>'], 'indirect_regs': ["<BV64 rdi>: ['0x10']"], 'direct_regs': [], 'mem': ['<BV64 rdi + 0x10>'], 'const_mem': []} | []       |
 +-----------+-------------+---------------------------------------------------------------------------------------------------------------------------------------+----------+
 
+== Half-Spectre ==
+../../test-queries/scanner-half-spectre/aliases.sql
++-----------+---------+
+|    pc     | aliases |
++-----------+---------+
+| 0x4000000 | []      |
+| 0x4000003 | []      |
+| 0x400000f | []      |
++-----------+---------+
+
+../../test-queries/scanner-half-spectre/controllability.sql
++-----------+------------------------+------------------------+---------------------------+------------------------+
+|    pc     |     loaded_control     |      base_control      | uncontrolled_base_control |    attacker_control    |
++-----------+------------------------+------------------------+---------------------------+------------------------+
+| 0x4000000 | ControlType.CONTROLLED | ControlType.UNKNOWN    | ControlType.UNKNOWN       | ControlType.CONTROLLED |
+| 0x4000003 | ControlType.CONTROLLED | ControlType.UNKNOWN    | ControlType.UNKNOWN       | ControlType.CONTROLLED |
+| 0x400000f | ControlType.CONTROLLED | ControlType.NO_CONTROL | ControlType.UNKNOWN       | ControlType.CONTROLLED |
++-----------+------------------------+------------------------+---------------------------+------------------------+
+
+../../test-queries/scanner-half-spectre/main_fields.sql
++-----------+------------------------------+---------+-------------------+--------------------+---------------+-------------------+-------------+------------------------+---------------+
+|    pc     |             name             | n_instr | n_dependent_loads | contains_spec_stop |     bbls      |    loaded_expr    |  base_expr  | uncontrolled_base_expr | attacker_expr |
++-----------+------------------------------+---------+-------------------+--------------------+---------------+-------------------+-------------+------------------------+---------------+
+| 0x4000000 | tfp_independently_controlled | 1       | 0                 | False              | ['0x4000000'] | <BV64 rdi>        | None        | None                   | <BV64 rdi>    |
+| 0x4000003 | tfp_independently_controlled | 2       | 0                 | False              | ['0x4000000'] | <BV64 rdx>        | None        | None                   | <BV64 rdx>    |
+| 0x400000f | tfp_independently_controlled | 6       | 0                 | False              | ['0x4000000'] | <BV64 0x10 + rdi> | <BV64 0x10> | None                   | <BV64 rdi>    |
++-----------+------------------------------+---------+-------------------+--------------------+---------------+-------------------+-------------+------------------------+---------------+
+
+../../test-queries/scanner-half-spectre/requirements.sql
++-----------+-------------+----------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+----------+
+|    pc     | constraints |                                             all_requirements                                             |                             constraint_requirements                              | branches |
++-----------+-------------+----------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+----------+
+| 0x4000000 | []          | {'regs': ['<BV64 rdi>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdi>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
+| 0x4000003 | []          | {'regs': ['<BV64 rdx>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdx>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
+| 0x400000f | []          | {'regs': ['<BV64 rdi>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdi>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
++-----------+-------------+----------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+----------+
+

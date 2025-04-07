@@ -251,3 +251,52 @@
 | 0x4000031 | 0                            | 65535                        | 65535                           | 1                               | None                              | None                             | True                           | 0                                       | 65535                                   | 65535                                      | 1                                          | None                                         | None                                        | True                                      |
 +-----------+------------------------------+------------------------------+---------------------------------+---------------------------------+-----------------------------------+----------------------------------+--------------------------------+-----------------------------------------+-----------------------------------------+--------------------------------------------+--------------------------------------------+----------------------------------------------+---------------------------------------------+-------------------------------------------+
 
+== Half-Spectre ==
+../../test-queries/scanner-half-spectre/aliases.sql
++-----------+---------+
+|    pc     | aliases |
++-----------+---------+
+| 0x4000000 | []      |
+| 0x4000008 | []      |
+| 0x400000f | []      |
+| 0x4000014 | []      |
+| 0x400001f | []      |
+| 0x4000026 | []      |
++-----------+---------+
+
+../../test-queries/scanner-half-spectre/controllability.sql
++-----------+------------------------+------------------------+---------------------------+------------------------+
+|    pc     |     loaded_control     |      base_control      | uncontrolled_base_control |    attacker_control    |
++-----------+------------------------+------------------------+---------------------------+------------------------+
+| 0x4000000 | ControlType.CONTROLLED | ControlType.NO_CONTROL | ControlType.UNKNOWN       | ControlType.CONTROLLED |
+| 0x4000008 | ControlType.CONTROLLED | ControlType.UNKNOWN    | ControlType.UNKNOWN       | ControlType.CONTROLLED |
+| 0x400000f | ControlType.CONTROLLED | ControlType.NO_CONTROL | ControlType.UNKNOWN       | ControlType.CONTROLLED |
+| 0x4000014 | ControlType.CONTROLLED | ControlType.NO_CONTROL | ControlType.UNKNOWN       | ControlType.CONTROLLED |
+| 0x400001f | ControlType.CONTROLLED | ControlType.NO_CONTROL | ControlType.UNKNOWN       | ControlType.CONTROLLED |
+| 0x4000026 | ControlType.CONTROLLED | ControlType.NO_CONTROL | ControlType.UNKNOWN       | ControlType.CONTROLLED |
++-----------+------------------------+------------------------+---------------------------+------------------------+
+
+../../test-queries/scanner-half-spectre/main_fields.sql
++-----------+--------------+---------+-------------------+--------------------+---------------+--------------------+--------------+------------------------+---------------+
+|    pc     |     name     | n_instr | n_dependent_loads | contains_spec_stop |     bbls      |    loaded_expr     |  base_expr   | uncontrolled_base_expr | attacker_expr |
++-----------+--------------+---------+-------------------+--------------------+---------------+--------------------+--------------+------------------------+---------------+
+| 0x4000000 | alias_type_2 | 1       | 0                 | False              | ['0x4000000'] | <BV64 0x100 + rdi> | <BV64 0x100> | None                   | <BV64 rdi>    |
+| 0x4000008 | alias_type_2 | 2       | 0                 | False              | ['0x4000000'] | <BV64 rdi>         | None         | None                   | <BV64 rdi>    |
+| 0x400000f | alias_type_2 | 4       | 0                 | False              | ['0x4000000'] | <BV64 0x28 + rdx>  | <BV64 0x28>  | None                   | <BV64 rdx>    |
+| 0x4000014 | alias_type_2 | 5       | 0                 | False              | ['0x4000000'] | <BV64 0x20 + rdx>  | <BV64 0x20>  | None                   | <BV64 rdx>    |
+| 0x400001f | alias_type_2 | 8       | 0                 | False              | ['0x4000000'] | <BV64 0x200 + rdi> | <BV64 0x200> | None                   | <BV64 rdi>    |
+| 0x4000026 | alias_type_2 | 9       | 0                 | False              | ['0x4000000'] | <BV64 0x240 + rdi> | <BV64 0x240> | None                   | <BV64 rdi>    |
++-----------+--------------+---------+-------------------+--------------------+---------------+--------------------+--------------+------------------------+---------------+
+
+../../test-queries/scanner-half-spectre/requirements.sql
++-----------+-------------+----------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+----------+
+|    pc     | constraints |                                             all_requirements                                             |                             constraint_requirements                              | branches |
++-----------+-------------+----------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+----------+
+| 0x4000000 | []          | {'regs': ['<BV64 rdi>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdi>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
+| 0x4000008 | []          | {'regs': ['<BV64 rdi>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdi>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
+| 0x400000f | []          | {'regs': ['<BV64 rdx>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdx>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
+| 0x4000014 | []          | {'regs': ['<BV64 rdx>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdx>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
+| 0x400001f | []          | {'regs': ['<BV64 rdi>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdi>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
+| 0x4000026 | []          | {'regs': ['<BV64 rdi>'], 'indirect_regs': [], 'direct_regs': ['<BV64 rdi>'], 'mem': [], 'const_mem': []} | {'regs': [], 'indirect_regs': [], 'direct_regs': [], 'mem': [], 'const_mem': []} | []       |
++-----------+-------------+----------------------------------------------------------------------------------------------------------+----------------------------------------------------------------------------------+----------+
+

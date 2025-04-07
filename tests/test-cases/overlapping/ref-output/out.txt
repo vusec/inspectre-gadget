@@ -20,15 +20,30 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000000: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000003: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdi>]_21)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x400000e: <BV64 0x4 + rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdi + 0x4>]_23)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x400001a: <BV64 0x4 + rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + (0#32 .. LOAD_32[<BV64 rdi + 0x4>]_25)>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000024: <BV64 0x4 + rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
 [AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + LOAD_64[<BV64 rdi + 0x4>]_27>...
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
@@ -37,8 +52,10 @@ Disassembly of section .text:
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 5 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 5 potential half-spectre gadgets.
 [MAIN]  Outputted 5 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 5 half-spectre gadgets.
 
 == REASONER ==
 [-] Imported 5 gadgets
