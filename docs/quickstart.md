@@ -2,20 +2,14 @@
 
 ## Installation
 
-Just install `python3`, clone the repo and `pip3 install -r requirements.txt` in a virtual environment.
+Install `python3.11`, clone the repo and `pip3 install -r requirements.txt` in a virtual environment.
+
+```{warning}
+ To install python3.11 on newer Ubuntu versions you can check [here](https://askubuntu.com/questions/1512005/python3-11-install-on-ubuntu-24-04).
+```
 
 Some of our scripts use [batcat](https://github.com/sharkdp/bat) and `sqlite3`, although
 they are not required for the core of the tool (analyzer and reasoner).
-
-## Build Docs
-
-```sh
-pip install sphinx myst-parser sphinx_rtd_theme sphinx-rtd-size
-cd docs
-make html
-
-# --> open _build/html/index.html in a browser
-```
 
 ## Usage
 
@@ -25,9 +19,9 @@ all potential transmissions, and then use `inspectre reason` to mark the exploit
 For the analyzer, the user should provide:
 
 - a **binary**
-- a **list of speculation entrypoints**, in a CSV with the format
-  `<HEX_ADDRESS>,<ENTRYPOINT_NAME>`
-- a **config** file in YAML format (you can find an example in the source code)
+- a **list of speculation entrypoints**, i.e. a CSV with the format
+  `<HEX_ADDRESS>,<ENTRYPOINT_NAME>` (name is used for human-readable output)
+- a **config** file in YAML format (described in the dedicated [doc page](./configuration.md))
 - the name of the CSV output
 - (optionally) a folder where to output the annotated assembly of each gadget
 
@@ -62,3 +56,13 @@ inspectre show <UUID>
 ## Demo
 
 ![](img/inspectre.gif)
+
+## Build Docs
+
+```sh
+pip install sphinx myst-parser sphinx_rtd_theme sphinx-rtd-size
+cd docs
+make html && cp -r _build/* .
+
+# --> open _build/html/index.html in a browser
+```

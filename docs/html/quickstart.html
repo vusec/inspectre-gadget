@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -10,15 +12,11 @@
       <link rel="stylesheet" type="text/css" href="_static/css/sphinx_rtd_size.css?v=a8ffd9ad" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=888ff710"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -50,10 +48,10 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#build-docs">Build Docs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#workflow">Workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#demo">Demo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-docs">Build Docs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
@@ -91,19 +89,13 @@
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>Just install <code class="docutils literal notranslate"><span class="pre">python3</span></code>, clone the repo and <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code> in a virtual environment.</p>
+<p>Install <code class="docutils literal notranslate"><span class="pre">python3.11</span></code>, clone the repo and <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code> in a virtual environment.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>To install python3.11 on newer Ubuntu versions you can check <a class="reference external" href="https://askubuntu.com/questions/1512005/python3-11-install-on-ubuntu-24-04">here</a>.</p>
+</div>
 <p>Some of our scripts use <a class="reference external" href="https://github.com/sharkdp/bat">batcat</a> and <code class="docutils literal notranslate"><span class="pre">sqlite3</span></code>, although
 they are not required for the core of the tool (analyzer and reasoner).</p>
-</section>
-<section id="build-docs">
-<h2>Build Docs<a class="headerlink" href="#build-docs" title="Link to this heading"></a></h2>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>sphinx<span class="w"> </span>myst-parser<span class="w"> </span>sphinx_rtd_theme<span class="w"> </span>sphinx-rtd-size
-<span class="nb">cd</span><span class="w"> </span>docs
-make<span class="w"> </span>html
-
-<span class="c1"># --&gt; open _build/html/index.html in a browser</span>
-</pre></div>
-</div>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
@@ -114,7 +106,7 @@ all potential transmissions, and then use <code class="docutils literal notransl
 <li><p>a <strong>binary</strong></p></li>
 <li><p>a <strong>list of speculation entrypoints</strong>, in a CSV with the format
 <code class="docutils literal notranslate"><span class="pre">&lt;HEX_ADDRESS&gt;,&lt;ENTRYPOINT_NAME&gt;</span></code></p></li>
-<li><p>a <strong>config</strong> file in YAML format (you can find an example in the source code)</p></li>
+<li><p>a <strong>config</strong> file in YAML format (described in the dedicated <a class="reference internal" href="configuration.html"><span class="std std-doc">doc page</span></a>)</p></li>
 <li><p>the name of the CSV output</p></li>
 <li><p>(optionally) a folder where to output the annotated assembly of each gadget</p></li>
 </ul>
@@ -146,6 +138,16 @@ inspectre<span class="w"> </span>show<span class="w"> </span>&lt;UUID&gt;
 <section id="demo">
 <h2>Demo<a class="headerlink" href="#demo" title="Link to this heading"></a></h2>
 <p><img alt="" src="_images/inspectre.gif" /></p>
+</section>
+<section id="build-docs">
+<h2>Build Docs<a class="headerlink" href="#build-docs" title="Link to this heading"></a></h2>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>sphinx<span class="w"> </span>myst-parser<span class="w"> </span>sphinx_rtd_theme<span class="w"> </span>sphinx-rtd-size
+<span class="nb">cd</span><span class="w"> </span>docs
+make<span class="w"> </span>html
+
+<span class="c1"># --&gt; open _build/html/index.html in a browser</span>
+</pre></div>
+</div>
 </section>
 </section>
 

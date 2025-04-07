@@ -4,7 +4,7 @@ InSpectre Gadget is a program analysis tool that can be used to inspect potentia
 Spectre disclosure gadgets and perform technique-aware exploitability analysis.
 
 You can read more about the general problem and our approach in particular in
-our [paper]() (currently under submission).
+our [paper](https://download.vusec.net/papers/inspectre_sec24.pdf).
 
 ## Motivation
 
