@@ -14,6 +14,7 @@ def init_config(config):
     global_config["SpeculationStopMnemonics"] = {'lfence', 'mfence', 'cpuid'}
     global_config["HalfSpectre"] = False
     global_config["CrashOnExceptions"] = False
+    global_config["AggressiveSpeculation"] = False
 
     # Apply user config.
     for c in config:

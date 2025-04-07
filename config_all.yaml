@@ -63,3 +63,10 @@ CrashOnExceptions: False
 # This has consequences on interrupting, e.g., if you analyse only _after_ scanning
 # you won't have any outputted transmission in case of  e.g.timeouts.
 AnalyzeDuringScanning: True
+
+# Should we always visit both sides of a branch, even if the condition is
+# concrete?
+# This is helpful to simulate cases where an attacker might have _indirect_
+# control of a branch speculation, e.g. with out_of_place training or massaging,
+# or when following a trace.
+AggressiveSpeculation: False

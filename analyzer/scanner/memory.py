@@ -104,6 +104,10 @@ def overlaps_with(load1: MemOp, load2: MemOp, state: angr.SimState) -> bool:
     is true only if the two symbolic addresses _must_ overlap, i.e. there
     is no possible solution where they don't.
     """
+    # If the state is already non-sat, there's no meaning to this check.
+    if not state.solver.satisfiable():
+        return False
+
     addr1 = load1.addr
     sz1 = load1.size
     addr2 = load2.addr
@@ -125,6 +129,10 @@ def get_overlap(load1: MemOp, load2: MemOp, state: angr.SimState):
     Note that we don't handle the case in which the two can overlap
     in more than one way.
     """
+
+    # If the state is already non-sat, there's no meaning to this check.
+    if not state.solver.satisfiable():
+        return None, None, 0
 
     # Consider only these offsets for possible overlaps.
     for i in [0, 1, 2, 4]:
