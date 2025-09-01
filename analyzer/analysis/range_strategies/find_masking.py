@@ -26,7 +26,7 @@ class RangeStrategyFindMasking(RangeStrategy):
 
         return range_complex(ast_min, ast_max, ast.size(), False, entropy, and_mask, or_mask)
 
-def _find_entropy(s: claripy.Solver, ast: claripy.BV, ast_max: int):
+def _find_entropy(s: claripy.Solver, ast: claripy.ast.BV, ast_max: int):
 
     highest_bit = ast_max.bit_length()
 

@@ -8,7 +8,7 @@ def is_sym_expr(x) -> bool:
 def is_sym_var(x) -> bool:
     return is_sym_expr(x) and x.depth == 1
 
-def get_vars(expr) -> set[claripy.BV]:
+def get_vars(expr) -> set[claripy.ast.BV]:
     if not is_sym_expr(expr):
         return []
 

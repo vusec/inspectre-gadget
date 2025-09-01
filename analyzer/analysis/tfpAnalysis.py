@@ -27,7 +27,7 @@ def get_dependency_graph(t: TaintedFunctionPointer):
     d.resolve_dependencies()
     return d
 
-def is_same_var(expr: claripy.BV, reg):
+def is_same_var(expr: claripy.ast.BV, reg):
     syms = get_vars(expr)
     assert (len(syms) == 1)
     sym = syms.pop()
@@ -35,7 +35,7 @@ def is_same_var(expr: claripy.BV, reg):
     l.info(f"Testing {sym.args[0]} against {reg}")
     return sym.args[0] == reg
 
-def is_potential_secret(d: DepGraph, expr: claripy.BV, tfp_expr: claripy.BV):
+def is_potential_secret(d: DepGraph, expr: claripy.ast.BV, tfp_expr: claripy.ast.BV):
     """
     Check if the expression is independent from the tfp and contains loads
     whose address is independent from the tfp.

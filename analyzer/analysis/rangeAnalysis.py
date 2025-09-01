@@ -38,7 +38,7 @@ def get_constraints_on_ast(ast, constraints):
     return relevant_constraints
 
 
-def get_ast_ranges(constraints, ast: claripy.BV):
+def get_ast_ranges(constraints, ast: claripy.ast.BV):
     l.info(f"Getting range for {ast}")
 
     # We calculate the min and max once

@@ -32,7 +32,7 @@ def replace_secret_annotations_with_name(annotations, name):
     return new_annotations
 
 
-def get_load_comments(expr: claripy.BV, secret_load_pc):
+def get_load_comments(expr: claripy.ast.BV, secret_load_pc):
     annotations = {}
     for v in get_vars(expr):
         load_anno = get_load_annotation(v)

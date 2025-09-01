@@ -46,7 +46,7 @@ class SignExtAnnotation(claripy.Annotation):
     def __repr__(self):
         return f"SignExtAnnotation@{hex(self.addr)}"
 
-def getSignExtAnnotation(ast: claripy.BV):
+def getSignExtAnnotation(ast: claripy.ast.BV):
     for a in ast.annotations:
         if isinstance(a, SignExtAnnotation):
             return a
@@ -79,7 +79,7 @@ class CmoveAnnotation(claripy.Annotation):
     def __repr__(self):
         return f"CmoveAnnotation@{hex(self.addr)}"
 
-def getCmoveAnnotation(ast: claripy.BV):
+def getCmoveAnnotation(ast: claripy.ast.BV):
     for a in ast.annotations:
         if isinstance(a, CmoveAnnotation):
             return a
@@ -100,7 +100,7 @@ class ConditionalAst:
         return f"{self.expr}  ({self.conditions})"
 
 
-def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
+def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
     """
     Split expressions that contain if-the-else trees in separate asts.
     """
@@ -162,14 +162,14 @@ def split_if_statements(ast: claripy.BV, ast_addr) -> list[ConditionalAst]:
         for i in range(0, len(ast.args)):
             if not is_sym_expr(ast.args[i]):
                 continue
-            new_expr = new_expr.replace(ast.args[i], combination[i].expr)
+            new_expr = claripy.replace(new_expr, ast.args[i], combination[i].expr)
             new_conds.extend(combination[i].conditions)
         splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
 
     return splitted_asts
 
 
-def extract_summed_vals(ast: claripy.BV):
+def extract_summed_vals(ast: claripy.ast.BV):
     """
     Given an addition node, possibly prefixed by a Zero/Sign extension, returns
     the complete list of addenda (including nested adds).
@@ -218,7 +218,7 @@ def generate_addition(addenda):
     return expr
 
 
-def sign_ext_to_sum(ast: claripy.BV, addr):
+def sign_ext_to_sum(ast: claripy.ast.BV, addr):
     """
     Transform SignExt(A, n) into (if A[last] == 0 then 0..A else 0xfffff..A)
     """
@@ -245,14 +245,14 @@ def sign_ext_to_sum(ast: claripy.BV, addr):
     # Visit arguments.
     new_expr = ast
     for arg in ast.args:
-        if not isinstance(arg, claripy.ast.base.BV) or arg.concrete or is_sym_var(arg):
+        if not isinstance(arg, claripy.ast.BV) or arg.concrete or is_sym_var(arg):
             continue
-        new_expr = new_expr.replace(arg, sign_ext_to_sum(arg, addr))
+        new_expr = claripy.replace(new_expr, arg, sign_ext_to_sum(arg, addr))
 
     return new_expr
 
 
-def match_sign_ext(ast: claripy.BV, addr):
+def match_sign_ext(ast: claripy.ast.BV, addr):
     """
     Transform
         SYM .. a[7:7] .. a[7:7] .. a[7:7] .. a[7:7] .. a
@@ -261,7 +261,7 @@ def match_sign_ext(ast: claripy.BV, addr):
     """
 
     # If this AST is a constant, do nothing.
-    if not isinstance(ast, claripy.ast.base.BV) or ast.concrete or is_sym_var(ast):
+    if not isinstance(ast, claripy.ast.BV) or ast.concrete or is_sym_var(ast):
         return ast
 
     # If this node is a concat, check if it's a sign extension.
@@ -313,15 +313,15 @@ def match_sign_ext(ast: claripy.BV, addr):
     # Recursively check args.
     new_expr = ast
     for arg in ast.args:
-        if not isinstance(arg, claripy.ast.base.BV) or arg.concrete or is_sym_var(arg):
+        if not isinstance(arg, claripy.ast.BV) or arg.concrete or is_sym_var(arg):
             continue
 
-        new_expr = new_expr.replace(arg, match_sign_ext(arg, addr))
+        new_expr = claripy.replace(new_expr, arg, match_sign_ext(arg, addr))
 
     return new_expr
 
 
-def split_conditions(expr: claripy.BV, simplify: bool, addr) -> list[ConditionalAst]:
+def split_conditions(expr: claripy.ast.BV, simplify: bool, addr) -> list[ConditionalAst]:
     """
     Split any AST that contains CMOVEs, SignExtensions and If-Then-Else
     statements into separate ASTs with an associated condition.
@@ -338,8 +338,7 @@ def split_conditions(expr: claripy.BV, simplify: bool, addr) -> list[Conditional
     # Split if-then-else statements into separate ConditionalASTs.
     return split_if_statements(new_expr, addr)
 
-
-def simplify_conservative(e: claripy.T) -> claripy.T:
+def simplify_conservative(e: claripy.ast.BV) -> claripy.ast.BV:
     """
     Simplify the expression and, in contrast to claripy.simplify, discard
     annotations from the expression that are simplified away.
@@ -349,34 +348,27 @@ def simplify_conservative(e: claripy.T) -> claripy.T:
     to it. Claripy would keep both attacker and the secret annotation.
     """
 
-    # Code below is copied from claripy/ast/base.py
-
-    if isinstance(e, claripy.ast.Base) and e.op in claripy.operations.leaf_operations:
+    # Code below is copied from claripy/algorithm/simplify.py
+    if e.is_leaf():
         return e
 
-    s = e._first_backend("simplify")
+    s = claripy.backends.any_backend.simplify(e)
     if s is None:
         return e
-    else:
-        # Copy some parameters (that should really go to the Annotation backend)
-        s._uninitialized = e.uninitialized
-        s._uc_alloc_depth = e._uc_alloc_depth
-        s._simplified = claripy.ast.Base.FULL_SIMPLIFY
 
-        # dealing with annotations
-        if e.annotations:
-            ast_args = tuple(
-                a for a in e.args if isinstance(a, claripy.ast.Base))
-            annotations = tuple(
-                set(chain(chain.from_iterable(
-                    a._relocatable_annotations for a in ast_args), tuple(a for a in e.annotations)))
-            )
-            if annotations != s.annotations:
-                l.warning(
-                    f"SafeSimplify: Experimental feature executed, annotations removed by simplification operation. Old: {e} {annotations} New: {s} {s.annotations} ")
+    # dealing with annotations
+    if e.annotations:
+        ast_args = tuple(a for a in e.args if isinstance(a, claripy.ast.Base))
+        annotations = tuple(
+            set(chain(chain.from_iterable(
+                a._relocatable_annotations for a in ast_args), tuple(a for a in e.annotations)))
+        )
+        if annotations != s.annotations:
+            l.warning(
+                f"SafeSimplify: Experimental feature executed, annotations removed by simplification operation. Old: {e} {annotations} New: {s} {s.annotations} ")
 
-                # Claripy does instead:
-                # s = s.remove_annotations(s.annotations)
-                # s = s.annotate(*annotations)
+            # Claripy does instead:
+            # s = s.remove_annotations(s.annotations)
+            # s = s.annotate(*annotations)
 
-        return s
+    return s

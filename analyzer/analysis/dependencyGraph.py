@@ -65,9 +65,9 @@ class DepNode:
     """
     Represents a symbolic expression and its dependencies.
     """
-    aliases: set[claripy.BV]
-    constraints: set[claripy.BV]
-    syms: set[claripy.BV]
+    aliases: set[claripy.ast.BV]
+    constraints: set[claripy.ast.BV]
+    syms: set[claripy.ast.BV]
     controlled: bool
 
     def __init__(self, syms, controlled):
@@ -112,7 +112,7 @@ class ExprNode(DepNode):
     """
     Represents the dependencies of a complex symbolic expression.
     """
-    expr: claripy.BV
+    expr: claripy.ast.BV
 
     def __init__(self, expr):
         super().__init__(get_vars(expr), is_expr_controlled(expr))
@@ -131,7 +131,7 @@ class LoadNode(SymNode):
     """
     Represents the dependencies of a symbol that was materialized from a load.
     """
-    addr: claripy.BV
+    addr: claripy.ast.BV
 
     def __init__(self, val, addr):
         super().__init__(val)
@@ -145,7 +145,7 @@ class RegNode(SymNode):
     def __init__(self, sym):
         super().__init__(sym)
 
-def is_addr_controllable(tree, sym: claripy.BV, fixed_syms: list[claripy.BV], check_constraints: bool):
+def is_addr_controllable(tree, sym: claripy.ast.BV, fixed_syms: list[claripy.ast.BV], check_constraints: bool):
     # l.info(f"Checking address: {sym}")
     node = tree.get_node(sym)
     assert (isinstance(node, SymNode))
@@ -158,7 +158,7 @@ def is_addr_controllable(tree, sym: claripy.BV, fixed_syms: list[claripy.BV], ch
     else:
         return True
 
-def is_addr_independent(tree, expr1: claripy.BV, expr2: claripy.BV, check_constraints: bool):
+def is_addr_independent(tree, expr1: claripy.ast.BV, expr2: claripy.ast.BV, check_constraints: bool):
     # l.info(f"Checking address: {sym}")
     node = tree.get_node(expr1)
     assert (isinstance(node, SymNode))
@@ -329,7 +329,7 @@ class DepGraph:
 
         return deps
 
-    def is_independently_controllable(self, expr: claripy.BV, fixed_syms: list[claripy.BV], check_constraints: bool, check_addr: bool):
+    def is_independently_controllable(self, expr: claripy.ast.BV, fixed_syms: list[claripy.ast.BV], check_constraints: bool, check_addr: bool):
         """
         Check if expr contains at least one symbol that is not influenced by any
         of the symbols in fixed_syms.
@@ -361,7 +361,7 @@ class DepGraph:
         # that were loaded from an address that completely depends on fixed_syms.
         return any([is_addr_controllable(self, x, fixed_syms, check_constraints) for x in diff])
 
-    def is_independent(self, expr1: claripy.BV, expr2: claripy.BV, check_constraints: bool, check_addr: bool):
+    def is_independent(self, expr1: claripy.ast.BV, expr2: claripy.ast.BV, check_constraints: bool, check_addr: bool):
         """
         Check if expr1 and expr2 have any symbol in common, accounting for aliases
         and (optionally) constraints.

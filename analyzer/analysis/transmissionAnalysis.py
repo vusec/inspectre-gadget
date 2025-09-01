@@ -43,7 +43,7 @@ def reduce_to_shifts(args, size):
 
         return (to_shift << remaining_size) + to_add
 
-def concat_to_shift(ast: claripy.BV,):
+def concat_to_shift(ast: claripy.ast.BV,):
     """
     Transform A <concat> B into (A << size_of_b) + B.
     """
@@ -61,12 +61,12 @@ def concat_to_shift(ast: claripy.BV,):
     for arg in ast.args:
         if not isinstance(arg, claripy.ast.base.Base) or arg.concrete:
             continue
-        new_expr = new_expr.replace(arg, concat_to_shift(arg))
+        new_expr = claripy.replace(new_expr, arg, concat_to_shift(arg))
 
     return new_expr
 
 
-def distribute_shifts(ast: claripy.BV):
+def distribute_shifts(ast: claripy.ast.BV):
     """
     Distribute left shifts over additions. The resulting expression is not
     exactly the same as the input, but we decide to sacrifice exactness
@@ -102,7 +102,7 @@ def distribute_shifts(ast: claripy.BV):
     for arg in ast.args:
         if not isinstance(arg, claripy.ast.base.Base) or arg.concrete:
             continue
-        new_expr = new_expr.replace(arg, distribute_shifts(arg))
+        new_expr = claripy.replace(new_expr, arg, distribute_shifts(arg))
 
     return new_expr
 
