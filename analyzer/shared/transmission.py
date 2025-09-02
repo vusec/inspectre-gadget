@@ -87,15 +87,15 @@ class TransmissionExpr:
     into actual Transmission objects by the transmissionAnalysis.
     """
     pc: int
-    expr: claripy.BV
+    expr: claripy.ast.BV
     transmitter: TransmitterType
-    aliases: list[claripy.BV]
-    branches: list[tuple[int, claripy.BV, str],]
-    constraints: list[tuple[int, claripy.BV]]
+    aliases: list[claripy.ast.BV]
+    branches: list[tuple[int, claripy.ast.BV, str],]
+    constraints: list[tuple[int, claripy.ast.BV]]
     n_instr: int
     contains_spec_stop: bool
 
-    def __init__(self, pc: int, expr: claripy.BV, transmitter: TransmitterType, bbls, branches, aliases, constraints, n_instr, contains_spec_stop):
+    def __init__(self, pc: int, expr: claripy.ast.BV, transmitter: TransmitterType, bbls, branches, aliases, constraints, n_instr, contains_spec_stop):
         self.pc = pc
         self.expr = expr
         self.transmitter = transmitter
@@ -124,9 +124,9 @@ class TransmissionComponent():
     """
     A _component_ of a transmission (e.g. the base, the secret address or the secret value.)
     """
-    expr: claripy.BV
+    expr: claripy.ast.BV
     branches: list
-    constraints: list[tuple[int, claripy.BV]]
+    constraints: list[tuple[int, claripy.ast.BV]]
     requirements: Requirements
     range: ranges.AstRange
     range_with_branches: ranges.AstRange
@@ -201,11 +201,11 @@ class Transmission():
     independent_base: TransmissionComponent
 
     # Properties found at scanning time.
-    aliases: list[claripy.BV]
-    branches: list[tuple[int, claripy.BV]]
+    aliases: list[claripy.ast.BV]
+    branches: list[tuple[int, claripy.ast.BV]]
     branch_requirements: Requirements
 
-    constraints: list[claripy.BV]
+    constraints: list[claripy.ast.BV]
     constraint_requirements: Requirements
 
     all_requirements: Requirements

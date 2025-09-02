@@ -28,13 +28,13 @@ class MemOp:
     Symbolic memory operation (load or store).
     """
     pc: int
-    addr: claripy.BV
-    val: claripy.BV
+    addr: claripy.ast.BV
+    val: claripy.ast.BV
     size: int
     id: int
     op_type: MemOpType
 
-    def __init__(self, pc: int, addr: claripy.BV, val: claripy.BV, size: int, id: int, op_type: MemOpType):
+    def __init__(self, pc: int, addr: claripy.ast.BV, val: claripy.ast.BV, size: int, id: int, op_type: MemOpType):
         self.pc = pc
         self.addr = addr
         self.val = val
@@ -57,7 +57,7 @@ class RangedSymbol:
     """
     Represents a slice of a symbolic variable.
     """
-    sym: claripy.BV
+    sym: claripy.ast.BV
     min: int
     max: int
 
@@ -66,7 +66,7 @@ class RangedSymbol:
         self.min = min
         self.max = max
 
-    def to_BV(self) -> claripy.BV:
+    def to_BV(self) -> claripy.ast.BV:
         return self.sym[self.max:self.min]
 
     def __repr__(self) -> str:
@@ -223,7 +223,7 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
 def get_previous_stores(state: angr.SimState):
     return filter(lambda x: (isinstance(x, MemOp) and x.op_type == MemOpType.STORE), state.globals.values())
 
-def get_aliasing_store(load_addr: claripy.BV, load_size: int, state: angr.SimState):
+def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, state: angr.SimState):
     """
     Return the latest store that aliases with the given load and its value.
     """

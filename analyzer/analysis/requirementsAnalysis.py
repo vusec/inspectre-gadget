@@ -20,7 +20,7 @@ from ..scanner.annotations import *
 l = get_logger("ReqAnalysis")
 
 
-def get_requirements(expr: claripy.BV) -> Requirements:
+def get_requirements(expr: claripy.ast.BV) -> Requirements:
     req = Requirements()
     syms = get_vars(expr)
 

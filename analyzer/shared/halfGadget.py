@@ -35,16 +35,16 @@ class HalfGadget():
     uncontrolled_base: TransmissionComponent
 
     # Properties found at scanning time.
-    aliases: list[claripy.BV]
-    branches: list[tuple[int, claripy.BV]]
+    aliases: list[claripy.ast.BV]
+    branches: list[tuple[int, claripy.ast.BV]]
     branch_requirements: Requirements
 
-    constraints: list[claripy.BV]
+    constraints: list[claripy.ast.BV]
     constraint_requirements: Requirements
 
     all_requirements: Requirements
 
-    def __init__(self, expr: claripy.BV, pc: int, n_instr: int,
+    def __init__(self, expr: claripy.ast.BV, pc: int, n_instr: int,
                  contains_spec_stop: bool, aliases, constraints, branches, bbls):
         self.uuid = ""
         self.name = ""

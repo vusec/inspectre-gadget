@@ -15,7 +15,7 @@ class LoadAnnotation(claripy.Annotation):
     This annotation is attached to any symbol that is created as a result
     of a load (both concrete loads and symbolic loads).
     """
-    read_address_ast: claripy.BV
+    read_address_ast: claripy.ast.BV
     name: str
     address: int
     requirements: Requirements
@@ -158,7 +158,7 @@ class UncontrolledAnnotation(claripy.Annotation):
         return UncontrolledAnnotation(self.register)
 
 
-def propagate_annotations(ast: claripy.BV, address):
+def propagate_annotations(ast: claripy.ast.BV, address):
     """
     Given the AST of a symbolic address, return the annotation of the loaded value.
     This basically implements how taint evolves through memory operations.
@@ -196,7 +196,7 @@ def propagate_annotations(ast: claripy.BV, address):
         return UncontrolledLoadAnnotation(ast, address)
 
 
-def contains_secret(ast: claripy.BV):
+def contains_secret(ast: claripy.ast.BV):
     if not is_sym_expr(ast):
         return False
 
@@ -262,7 +262,7 @@ def is_attacker_controlled(ast):
             return True
     return False
 
-def is_directly_controlled(ast: claripy.BV):
+def is_directly_controlled(ast: claripy.ast.BV):
     if not is_sym_expr(ast):
         return False
 
