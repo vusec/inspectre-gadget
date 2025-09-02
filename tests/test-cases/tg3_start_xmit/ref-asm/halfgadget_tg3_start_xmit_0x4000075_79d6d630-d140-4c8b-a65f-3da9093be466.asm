@@ -28,8 +28,8 @@
 4000063  shr     rax, 0x3d
 4000067  test    al, 0x1
 4000069  cmovne  r12, rdx
-400006d  mov     esi, dword ptr [r12+0x240] ; {Attacker@rsi, Attacker@0x4000029} -> HALF GADGET
-4000075  mov     edx, dword ptr [r12+0x248]
+400006d  mov     esi, dword ptr [r12+0x240]
+4000075  mov     edx, dword ptr [r12+0x248] ; {Attacker@0x4000029, Attacker@rsi} -> HALF GADGET
 400007d  mov     rdi, qword ptr [rdi+0xc8]
 4000084  mov     eax, esi
 4000086  sub     eax, dword ptr [r12+0x244]
@@ -44,14 +44,14 @@
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: a9dc4027-cdce-40d7-8c67-1c95bfbb5218
+uuid: 79d6d630-d140-4c8b-a65f-3da9093be466
 
-Expr: <BV64 0xf40 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
-Base: <BV64 0xf40>
-Attacker: <BV64 rsi + ((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6)>
+Expr: <BV64 0xc88 + rsi + (((0#6 .. (0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x6) + ((0#6 .. ((0#1 .. (0#41 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x1) + ((0#1 .. (0#39 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2)) << 0x1)) << 0x6))>
+Base: <BV64 0xc88>
+Attacker: <BV64 rsi + ((0#6 .. (0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x6) + ((0#6 .. ((0#1 .. (0#41 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x1) + ((0#1 .. (0#39 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2)) << 0x1)) << 0x6)>
 ControlType: ControlType.CONTROLLED
 
-Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE')]
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE')]
 Branches: []
 
 

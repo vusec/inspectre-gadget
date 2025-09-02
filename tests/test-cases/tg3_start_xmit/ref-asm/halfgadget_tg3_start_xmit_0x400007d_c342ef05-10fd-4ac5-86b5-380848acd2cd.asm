@@ -14,7 +14,7 @@
 400001b  xor     eax, eax
 400001d  lea     rax, [rsi+0x900]
 4000024  mov     qword ptr [rsp+0x10], rax
-4000029  movzx   eax, word ptr [rdi+0x7c] ; {Attacker@rdi} -> HALF GADGET
+4000029  movzx   eax, word ptr [rdi+0x7c]
 400002d  lea     rdx, [rax+rax*0x4]
 4000031  mov     r12, rdx
 4000034  lea     rax, [rax+rdx*0x2]
@@ -30,7 +30,7 @@
 4000069  cmovne  r12, rdx
 400006d  mov     esi, dword ptr [r12+0x240]
 4000075  mov     edx, dword ptr [r12+0x248]
-400007d  mov     rdi, qword ptr [rdi+0xc8]
+400007d  mov     rdi, qword ptr [rdi+0xc8] ; {Attacker@rdi} -> HALF GADGET
 4000084  mov     eax, esi
 4000086  sub     eax, dword ptr [r12+0x244]
 400008e  and     eax, 0x1ff
@@ -44,14 +44,14 @@
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 0596d3d8-8b21-4a6b-a459-2cb589740a6b
+uuid: c342ef05-10fd-4ac5-86b5-380848acd2cd
 
-Expr: <BV64 0x7c + rdi>
-Base: <BV64 0x7c>
+Expr: <BV64 0xc8 + rdi>
+Base: <BV64 0xc8>
 Attacker: <BV64 rdi>
 ControlType: ControlType.CONTROLLED
 
-Constraints: []
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE')]
 Branches: []
 
 

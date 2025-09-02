@@ -1,4 +1,4 @@
------------------ TRANSMISSION -----------------
+--------------------- HALF GADGET ----------------------
          tg3_start_xmit:
 4000000  push    r15
 4000002  push    r14
@@ -30,41 +30,29 @@
 4000069  cmovne  r12, rdx
 400006d  mov     esi, dword ptr [r12+0x240]
 4000075  mov     edx, dword ptr [r12+0x248]
-400007d  mov     rdi, qword ptr [rdi+0xc8] ; {Attacker@rdi} -> {Secret@0x400007d}
+400007d  mov     rdi, qword ptr [rdi+0xc8]
 4000084  mov     eax, esi
 4000086  sub     eax, dword ptr [r12+0x244]
 400008e  and     eax, 0x1ff
 4000093  sub     edx, eax
-4000095  mov     eax, dword ptr [r13+0xc0] ; {Attacker@rdi} -> {Attacker@0x4000095}
+4000095  mov     eax, dword ptr [r13+0xc0] ; {Attacker@rdi} -> HALF GADGET
 400009c  mov     dword ptr [rsp+0x4c], edx
 40000a0  add     rax, rdi
-40000a3  movzx   ecx, byte ptr [rax+0x2] ; {Attacker@0x4000095, Secret@0x400007d} -> TRANSMISSION
+40000a3  movzx   ecx, byte ptr [rax+0x2]
 40000a7  add     ecx, 0x1
 40000aa  cmp     ecx, edx
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 9947d450-fae8-4512-8b96-97bdab905980
-transmitter: TransmitterType.LOAD
+uuid: b90bc595-bd65-4977-be05-0fc06b89701d
 
-Secret Address:
-  - Expr: <BV64 rdi + 0xc8>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
-Transmitted Secret:
-  - Expr: <BV64 LOAD_64[<BV64 rdi + 0xc8>]_52>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
-  - Spread: 0 - 63
-  - Number of Bits Inferable: 64
-Base:
-  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_63)>
-  - Range: (0x2,0x100000001, 0x1) Exact: True
-  - Independent Expr: <BV64 0x2>
-  - Independent Range: 0x2
-Transmission:
-  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_63) + LOAD_64[<BV64 rdi + 0xc8>]_52>
-  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+Expr: <BV64 0xc0 + rdi>
+Base: <BV64 0xc0>
+Attacker: <BV64 rdi>
+ControlType: ControlType.CONTROLLED
 
-Register Requirements: {<BV64 rdi>, <BV64 rsi>}
 Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE')]
 Branches: []
+
+
 ------------------------------------------------

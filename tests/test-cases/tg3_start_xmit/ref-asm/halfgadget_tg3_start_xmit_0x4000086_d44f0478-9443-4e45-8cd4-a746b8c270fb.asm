@@ -14,13 +14,13 @@
 400001b  xor     eax, eax
 400001d  lea     rax, [rsi+0x900]
 4000024  mov     qword ptr [rsp+0x10], rax
-4000029  movzx   eax, word ptr [rdi+0x7c]
+4000029  movzx   eax, word ptr [rdi+0x7c] ; {Attacker@rdi} -> {Attacker@0x4000029}
 400002d  lea     rdx, [rax+rax*0x4]
 4000031  mov     r12, rdx
 4000034  lea     rax, [rax+rdx*0x2]
 4000038  shl     rax, 0x6
 400003c  shl     r12, 0x6
-4000040  add     r12, qword ptr [rsi+0x380] ; {Attacker@rsi} -> HALF GADGET
+4000040  add     r12, qword ptr [rsi+0x380]
 4000047  mov     qword ptr [rsp+0x8], r12
 400004c  lea     r12, [rsi+rax+0xa40]
 4000054  mov     rax, qword ptr [rsi+0x1b58]
@@ -32,7 +32,7 @@
 4000075  mov     edx, dword ptr [r12+0x248]
 400007d  mov     rdi, qword ptr [rdi+0xc8]
 4000084  mov     eax, esi
-4000086  sub     eax, dword ptr [r12+0x244]
+4000086  sub     eax, dword ptr [r12+0x244] ; {Attacker@0x4000029, Attacker@rsi} -> HALF GADGET
 400008e  and     eax, 0x1ff
 4000093  sub     edx, eax
 4000095  mov     eax, dword ptr [r13+0xc0]
@@ -44,14 +44,14 @@
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: f89c5014-1b57-412f-ac83-693c688fe0ea
+uuid: d44f0478-9443-4e45-8cd4-a746b8c270fb
 
-Expr: <BV64 0x380 + rsi>
-Base: <BV64 0x380>
-Attacker: <BV64 rsi>
+Expr: <BV64 0xf44 + rsi + (((0#6 .. (0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x6) + ((0#6 .. ((0#1 .. (0#41 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x1) + ((0#1 .. (0#39 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2)) << 0x1)) << 0x6))>
+Base: <BV64 0xf44>
+Attacker: <BV64 rsi + ((0#6 .. (0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x6) + ((0#6 .. ((0#1 .. (0#41 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x1) + ((0#1 .. (0#39 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2)) << 0x1)) << 0x6)>
 ControlType: ControlType.CONTROLLED
 
-Constraints: []
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE')]
 Branches: []
 
 

@@ -29,10 +29,10 @@
 4000067  test    al, 0x1
 4000069  cmovne  r12, rdx
 400006d  mov     esi, dword ptr [r12+0x240]
-4000075  mov     edx, dword ptr [r12+0x248]
+4000075  mov     edx, dword ptr [r12+0x248] ; {Attacker@rsi, Secret@0x4000029} -> TRANSMISSION
 400007d  mov     rdi, qword ptr [rdi+0xc8]
 4000084  mov     eax, esi
-4000086  sub     eax, dword ptr [r12+0x244] ; {Attacker@rsi, Secret@0x4000029} -> TRANSMISSION
+4000086  sub     eax, dword ptr [r12+0x244]
 400008e  and     eax, 0x1ff
 4000093  sub     edx, eax
 4000095  mov     eax, dword ptr [r13+0xc0]
@@ -44,27 +44,27 @@
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 96621bfc-5818-4ad4-b688-94a9dc0d99da
+uuid: d3571d13-9080-43ea-955d-27b7b2784249
 transmitter: TransmitterType.LOAD
 
 Secret Address:
   - Expr: <BV64 rdi + 0x7c>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmitted Secret:
-  - Expr: <BV64 ((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6)>
+  - Expr: <BV64 ((0#6 .. (0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x6) + ((0#6 .. ((0#1 .. (0#41 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x1) + ((0#1 .. (0#39 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2)) << 0x1)) << 0x6)>
   - Range: (0x0,0x2bffd40, 0x40) Exact: False
   - Spread: 6 - 26
   - Number of Bits Inferable: 16
 Base:
-  - Expr: <BV64 0xf44 + rsi>
+  - Expr: <BV64 0xc88 + rsi>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
-  - Independent Expr: <BV64 0xf44 + rsi>
+  - Independent Expr: <BV64 0xc88 + rsi>
   - Independent Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 Transmission:
-  - Expr: <BV64 0xf44 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
+  - Expr: <BV64 0xc88 + rsi + (((0#6 .. (0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x6) + ((0#6 .. ((0#1 .. (0#41 .. LOAD_16[<BV64 rdi + 0x7c>]_28)) << 0x1) + ((0#1 .. (0#39 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2)) << 0x1)) << 0x6))>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
-Register Requirements: {<BV64 rdi>, <BV64 rsi>}
-Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) != 0>, 'ConditionType.CMOVE')]
+Register Requirements: {<BV64 rsi>, <BV64 rdi>}
+Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE')]
 Branches: []
 ------------------------------------------------

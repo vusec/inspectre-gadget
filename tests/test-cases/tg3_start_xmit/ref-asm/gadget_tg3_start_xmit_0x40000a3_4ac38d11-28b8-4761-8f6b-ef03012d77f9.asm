@@ -1,4 +1,4 @@
---------------------- HALF GADGET ----------------------
+----------------- TRANSMISSION -----------------
          tg3_start_xmit:
 4000000  push    r15
 4000002  push    r14
@@ -14,7 +14,7 @@
 400001b  xor     eax, eax
 400001d  lea     rax, [rsi+0x900]
 4000024  mov     qword ptr [rsp+0x10], rax
-4000029  movzx   eax, word ptr [rdi+0x7c] ; {Attacker@rdi} -> {Attacker@0x4000029}
+4000029  movzx   eax, word ptr [rdi+0x7c]
 400002d  lea     rdx, [rax+rax*0x4]
 4000031  mov     r12, rdx
 4000034  lea     rax, [rax+rdx*0x2]
@@ -30,29 +30,41 @@
 4000069  cmovne  r12, rdx
 400006d  mov     esi, dword ptr [r12+0x240]
 4000075  mov     edx, dword ptr [r12+0x248]
-400007d  mov     rdi, qword ptr [rdi+0xc8]
+400007d  mov     rdi, qword ptr [rdi+0xc8] ; {Attacker@rdi} -> {Secret@0x400007d}
 4000084  mov     eax, esi
-4000086  sub     eax, dword ptr [r12+0x244] ; {Attacker@0x4000029, Attacker@rsi} -> HALF GADGET
+4000086  sub     eax, dword ptr [r12+0x244]
 400008e  and     eax, 0x1ff
 4000093  sub     edx, eax
-4000095  mov     eax, dword ptr [r13+0xc0]
+4000095  mov     eax, dword ptr [r13+0xc0] ; {Attacker@rdi} -> {Attacker@0x4000095}
 400009c  mov     dword ptr [rsp+0x4c], edx
 40000a0  add     rax, rdi
-40000a3  movzx   ecx, byte ptr [rax+0x2]
+40000a3  movzx   ecx, byte ptr [rax+0x2] ; {Secret@0x400007d, Attacker@0x4000095} -> TRANSMISSION
 40000a7  add     ecx, 0x1
 40000aa  cmp     ecx, edx
 40000ac  jmp     0x400dead
 
 ------------------------------------------------
-uuid: 0f4acc36-2c3d-4a8e-a877-636c59bcc2ef
+uuid: 4ac38d11-28b8-4761-8f6b-ef03012d77f9
+transmitter: TransmitterType.LOAD
 
-Expr: <BV64 0xc84 + rsi + (((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6))>
-Base: <BV64 0xc84>
-Attacker: <BV64 rsi + ((0#48 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x6) + ((0#6 .. ((0#42 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x1) + ((0#40 .. (0#2 .. LOAD_16[<BV64 rdi + 0x7c>]_28) << 0x2) << 0x1)) << 0x6)>
-ControlType: ControlType.CONTROLLED
+Secret Address:
+  - Expr: <BV64 rdi + 0xc8>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+Transmitted Secret:
+  - Expr: <BV64 LOAD_64[<BV64 rdi + 0xc8>]_52>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Spread: 0 - 63
+  - Number of Bits Inferable: 64
+Base:
+  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_63)>
+  - Range: (0x2,0x100000001, 0x1) Exact: True
+  - Independent Expr: <BV64 0x2>
+  - Independent Range: 0x2
+Transmission:
+  - Expr: <BV64 0x2 + (0#32 .. LOAD_32[<BV64 rdi + 0xc0>]_63) + LOAD_64[<BV64 rdi + 0xc8>]_52>
+  - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
+Register Requirements: {<BV64 rsi>, <BV64 rdi>}
 Constraints: [('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE'), ('0x4000069', <Bool ((0 .. LOAD_64[<BV64 rsi + 0x1b58>]_31[63:61]) & 1) == 0>, 'ConditionType.CMOVE')]
 Branches: []
-
-
 ------------------------------------------------

@@ -125,11 +125,11 @@ class Scanner:
         Mark stack locations and registers as attacker-controlled.
         """
         state.regs.rbp = claripy.BVS(
-            'rbp', 64, annotations=(UncontrolledAnnotation('rbp'),))
+            'rbp', 64, annotations=(UncontrolledAnnotation('rbp'),), explicit_name=True)
         state.regs.rsp = claripy.BVS(
-            'rsp', 64, annotations=(UncontrolledAnnotation('rsp'),))
+            'rsp', 64, annotations=(UncontrolledAnnotation('rsp'),), explicit_name=True)
         state.regs.gs = claripy.BVS(
-            'gs', 64, annotations=(UncontrolledAnnotation('gs'),))
+            'gs', 64, annotations=(UncontrolledAnnotation('gs'),), explicit_name=True)
 
         # Initialize non-controlled registers.
         for reg in get_x86_registers():
@@ -137,7 +137,7 @@ class Scanner:
                 try:
                     length = getattr(state.regs, reg).length
                     bvs = claripy.BVS(reg, length, annotations=(
-                        UncontrolledAnnotation(reg),))
+                        UncontrolledAnnotation(reg),), explicit_name=True)
                     setattr(state.regs, reg, bvs)
                 except AttributeError:
                     l.critical(
@@ -149,7 +149,7 @@ class Scanner:
             try:
                 length = getattr(state.regs, reg).length
                 bvs = claripy.BVS(reg, length, annotations=(
-                    AttackerAnnotation(reg),))
+                    AttackerAnnotation(reg),), explicit_name=True)
                 setattr(state.regs, reg, bvs)
             except AttributeError:
                 l.critical(f"Invalid register in config! {reg}")
@@ -166,7 +166,7 @@ class Scanner:
                     addr = state.regs.rsp + (offset)
                     name = f"rsp_{offset}"
                     bvs = claripy.BVS(
-                        name, size * 8, annotations=(AttackerAnnotation(name),))
+                        name, size * 8, annotations=(AttackerAnnotation(name),), explicit_name=True)
 
                     cur_store = memory.MemOp(pc=state.addr,
                                              addr=addr,
@@ -451,7 +451,7 @@ class Scanner:
 
         # Check if we should forward an existing value (STL) or create a new symbol.
         alias_store, stored_val = memory.get_aliasing_store(
-            load_addr, load_len, state)
+            load_addr, load_len, self.cur_id, state)
         if alias_store:
             # Perform Store-to-Load forwarding.
             load_val = stored_val
@@ -462,7 +462,7 @@ class Scanner:
             annotation = propagate_annotations(load_addr, state.addr)
             load_val = claripy.BVS(name=f'LOAD_{load_len*8}[{load_addr}]_{self.cur_id}',
                                    size=load_len * 8,
-                                   annotations=(annotation,))
+                                   annotations=(annotation,), explicit_name=True)
 
             # Save it, in case we later need to split this state manually.
             recordSubstitution(self.cur_state, state.addr,
