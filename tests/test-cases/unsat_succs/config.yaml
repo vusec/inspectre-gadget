@@ -21,7 +21,7 @@ controlled_stack:
     end: 160
     size: 8
 
-LogLevel: 100
+LogLevel: 1
 STLForwarding: True
 
 Z3Timeout: 10000 # ms = 10s

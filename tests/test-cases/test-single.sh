@@ -27,6 +27,9 @@ fi
 f=$1/gadget
 name=`basename $1`
 
+# Select default or test-case specific config
+if [ -f $1/config.yaml ]; then cfg=config.yaml; else cfg=../config_all.yaml; fi
+
 echo "    testing: ${name}"
 
 cd $1
@@ -44,7 +47,7 @@ objdump --adjust-vma=0x4000000 -d -Mintel gadget > ${OUT_FOLDER}/out.txt
 
 echo ""  >> ${OUT_FOLDER}/out.txt
 echo "== SCANNER ==" >> ${OUT_FOLDER}/out.txt
-python3 ../../../inspectre analyze --config ../config_all.yaml --base-address 0x4000000 --address 0x4000000 --name $name --output gadgets.csv --tfp-output tfp.csv --asm asm --half-gadget-output half.csv gadget 2> /dev/null >> ${OUT_FOLDER}/out.txt || true
+python3 ../../../inspectre analyze --config $cfg --base-address 0x4000000 --address 0x4000000 --name $name --output gadgets.csv --tfp-output tfp.csv --asm asm --half-gadget-output half.csv gadget 2> /dev/null >> ${OUT_FOLDER}/out.txt || true
 [ -f fail.txt ] && mv fail.txt ${OUT_FOLDER}/fail.txt
 
 # ------------------------------------------------------------------------------

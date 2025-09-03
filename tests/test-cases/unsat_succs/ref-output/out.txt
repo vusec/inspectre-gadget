@@ -1,0 +1,47 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <setup>:
+ 4000000:	48 c7 04 25 00 00 00 	mov    QWORD PTR ds:0xffffffff81000000,0xffffffff81000010
+ 4000007:	81 10 00 00 81 
+ 400000c:	48 c7 04 25 10 00 00 	mov    QWORD PTR ds:0xffffffff81000010,0xffffffff81000020
+ 4000013:	81 20 00 00 81 
+ 4000018:	48 c7 04 25 20 00 00 	mov    QWORD PTR ds:0xffffffff81000020,0xffffffff81000000
+ 400001f:	81 00 00 00 81 
+ 4000024:	48 89 3c 25 08 00 00 	mov    QWORD PTR ds:0xffffffff81000008,rdi
+ 400002b:	81 
+ 400002c:	48 c7 04 25 18 00 00 	mov    QWORD PTR ds:0xffffffff81000018,0xffffffffdeadbeef
+ 4000033:	81 ef be ad de 
+ 4000038:	48 c7 04 25 28 00 00 	mov    QWORD PTR ds:0xffffffff81000028,0xffffffffcacacafe
+ 400003f:	81 fe ca ca ca 
+ 4000044:	48 c7 c0 00 00 00 81 	mov    rax,0xffffffff81000000
+ 400004b:	49 c7 c4 00 00 00 81 	mov    r12,0xffffffff81000000
+
+0000000004000052 <loopy>:
+ 4000052:	48 8b 18             	mov    rbx,QWORD PTR [rax]
+ 4000055:	4c 39 e3             	cmp    rbx,r12
+ 4000058:	74 10                	je     400006a <end>
+ 400005a:	48 83 c3 08          	add    rbx,0x8
+ 400005e:	48 8b 0b             	mov    rcx,QWORD PTR [rbx]
+ 4000061:	48 8b 11             	mov    rdx,QWORD PTR [rcx]
+ 4000064:	48 83 c0 10          	add    rax,0x10
+ 4000068:	eb e8                	jmp    4000052 <loopy>
+
+000000000400006a <end>:
+ 400006a:	e9 00 00 00 00       	jmp    400006f <end+0x5>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000061: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[MAIN]  Found 0 potential transmissions.
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 1 potential half-spectre gadgets.
+[MAIN]  Outputted 0 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 1 half-spectre gadgets.
