@@ -223,7 +223,7 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
 def get_previous_stores(state: angr.SimState):
     return filter(lambda x: (isinstance(x, MemOp) and x.op_type == MemOpType.STORE), state.globals.values())
 
-def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, state: angr.SimState):
+def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, state: angr.SimState):
     """
     Return the latest store that aliases with the given load and its value.
     """
@@ -246,9 +246,13 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, state: angr.Si
 
         if load_size > store.size:
             # TODO: What to do if the load size is greater than the store size?
-            upper_bits = claripy.BVS(name=f"mem@[({load_addr}) + {store.size}]",
-                                     size=(load_size - store.size) * 8,
-                                     annotations=(UncontrolledAnnotation(f'mem@[({load_addr}) + {store.size}]'),))
+            # Strictly speaking this upper part should have a secret annotation if the load
+            # address is attacker controlled. We leave it for now.
+            load_len = load_size - store.size
+            upper_bits = claripy.BVS(name=f"MEM_{load_len*8}[{load_addr} + {store.size * 8}]_{load_id}",
+                                     size=load_len * 8,
+                                     annotations=(UncontrolledAnnotation(f'MEM_{load_len*8}[{load_addr} + {store.size * 8}]_{load_id}'),),
+                                     explicit_name=True)
             returned_sym = claripy.Concat(upper_bits, store.val)
 
         return returned_store, returned_sym
