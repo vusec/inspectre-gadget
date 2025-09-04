@@ -251,7 +251,8 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
             load_len = load_size - store.size
             upper_bits = claripy.BVS(name=f"MEM_{load_len*8}[{load_addr} + {store.size * 8}]_{load_id}",
                                      size=load_len * 8,
-                                     annotations=(UncontrolledAnnotation(f'MEM_{load_len*8}[{load_addr} + {store.size * 8}]_{load_id}'),),
+                                     annotations=(UncontrolledAnnotation(
+                                         f'MEM_{load_len*8}[{load_addr} + {store.size * 8}]_{load_id}'),),
                                      explicit_name=True)
             returned_sym = claripy.Concat(upper_bits, store.val)
 

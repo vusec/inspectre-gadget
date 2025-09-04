@@ -8,7 +8,7 @@ from analyzer.shared.config import *
 
 class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
 
-    range_strategy : RangeStrategyInferIsolated
+    range_strategy: RangeStrategyInferIsolated
 
     def setUp(self):
         init_config({})
@@ -21,11 +21,10 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         ast_range = self.range_strategy.find_range([], ast)
 
         self.assertEqual(ast_range.min, 0)
-        self.assertEqual(ast_range.max, 2 ** 64 -1)
+        self.assertEqual(ast_range.max, 2 ** 64 - 1)
         self.assertEqual(ast_range.stride, 1)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
-
 
     def test_linear_mask_concrete_add(self):
 
@@ -55,7 +54,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
 
         a = claripy.BVS("a", 32)
         b = claripy.BVS("b", 32)
-        ast =  claripy.Concat(a << 2, b << 4)
+        ast = claripy.Concat(a << 2, b << 4)
         ast_range = self.range_strategy.find_range([], ast)
 
         self.assertEqual(ast_range.min, 0)
@@ -103,8 +102,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.and_mask, 0x13)
         self.assertEqual(ast_range.or_mask, None)
 
-
-
     def test_right_left_shift(self):
 
         a = claripy.BVS("a", 64)
@@ -130,7 +127,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
 
-
     def test_shift_mul(self):
 
         a = claripy.BVS("a", 32)
@@ -147,7 +143,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
     def test_and_or_and_normal(self):
 
         a = claripy.BVS("a", 64)
-        ast =  ((a & 0xff) | 0x8) & 0x7
+        ast = ((a & 0xff) | 0x8) & 0x7
 
         ast_range = self.range_strategy.find_range([], ast)
 
@@ -160,7 +156,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
     def test_and_or_and_or_mask(self):
 
         a = claripy.BVS("a", 64)
-        ast =  (a & 0xe | 0x4) & 0xff
+        ast = (a & 0xe | 0x4) & 0xff
 
         ast_range = self.range_strategy.find_range([], ast)
 
@@ -178,7 +174,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         ast_range = self.range_strategy.find_range([], ast)
 
         self.assertEqual(ast_range.min, 0)
-        self.assertEqual(ast_range.max, 2 ** 64 -1)
+        self.assertEqual(ast_range.max, 2 ** 64 - 1)
         self.assertEqual(ast_range.stride, 1)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -243,7 +239,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
 
-
         # We do not support a overflow with a stride != power of 2
         a = claripy.BVS("a", 64)
 
@@ -301,7 +296,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.stride, 4)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
-
 
         # Non-linear range: we should bail out
         a = claripy.BVS("a", 64)

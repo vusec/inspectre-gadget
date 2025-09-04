@@ -31,7 +31,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(set(flow_map.spread), set(range(4, 37)))
 
     def test_multiplicaton(self):
-        ### Mul base of 2
+        # Mul base of 2
         a = claripy.BVS("a", 32)
         a_ext = claripy.Concat(claripy.BVV(0, 32), a)
         ast = (a_ext << 2) * 8
@@ -43,12 +43,11 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.spread_high, 36)
         self.assertEqual(flow_map.all_inferable_bits, list(range(0, 32)))
 
-        ### Mul then shift
+        # Mul then shift
         a = claripy.BVS("a", 32)
         a_ext = a.zero_extend(32)
         ast = ((a_ext * 5) + 10) << 2
         flow_map = get_inferable_bits(ast, a)
-
 
         self.assertEqual(flow_map.is_direct, 0)
         self.assertEqual(flow_map.number_of_bits_inferable, 32)
@@ -56,7 +55,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.spread_high, 37)
         self.assertEqual(flow_map.all_inferable_bits, list(range(0, 32)))
 
-        ### Shift then mul
+        # Shift then mul
         a = claripy.BVS("a", 32)
         a_ext = a.zero_extend(32)
         ast = ((a_ext << 4) + 20) * 9
@@ -70,7 +69,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
 
     def test_addition(self):
 
-        ### Concrete add
+        # Concrete add
         a = claripy.BVS("a", 32)
         a_ext = a.zero_extend(32)
         ast = (a_ext + 9)
@@ -82,8 +81,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.spread_high, 32)
         self.assertEqual(flow_map.all_inferable_bits, list(range(0, 32)))
 
-
-        ### Concrete add big value
+        # Concrete add big value
         a = claripy.BVS("a", 16)
         a_ext = a.zero_extend(48)
         ast = (a_ext + 0xffffffff) * 2
@@ -95,7 +93,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.spread_high, 34)
         self.assertEqual(flow_map.all_inferable_bits, list(range(0, 16)))
 
-        ### Symbolic add
+        # Symbolic add
         a = claripy.BVS("a", 32)
         a_ext = a.zero_extend(32)
 
@@ -122,7 +120,8 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.number_of_bits_inferable, 30)
         self.assertEqual(flow_map.spread_low, 0)
         self.assertEqual(flow_map.spread_high, 36)
-        self.assertEqual(flow_map.all_inferable_bits, [0, 1] + list(range(4, 32)))
+        self.assertEqual(flow_map.all_inferable_bits,
+                         [0, 1] + list(range(4, 32)))
 
     def test_and_operation(self):
 
@@ -184,7 +183,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
     def test_and_or_and_or_mask(self):
 
         a = claripy.BVS("a", 64)
-        ast =  (a & 0xe | 0x4) & 0xff
+        ast = (a & 0xe | 0x4) & 0xff
 
         flow_map = get_inferable_bits(ast, a)
 
@@ -206,7 +205,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.number_of_bits_inferable, 8)
         self.assertEqual(flow_map.spread_low, 0)
         self.assertEqual(flow_map.spread_high, 7)
-        self.assertEqual(flow_map.all_inferable_bits, list(range(8,16)))
+        self.assertEqual(flow_map.all_inferable_bits, list(range(8, 16)))
 
         # Extract spread
         a = claripy.BVS("a", 32)
@@ -219,7 +218,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.number_of_bits_inferable, 32)
         self.assertEqual(flow_map.spread_low, 0)
         self.assertEqual(flow_map.spread_high, 7)
-        self.assertEqual(flow_map.all_inferable_bits, list(range(0,32)))
+        self.assertEqual(flow_map.all_inferable_bits, list(range(0, 32)))
 
     def test_concat(self):
 
@@ -233,12 +232,13 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.number_of_bits_inferable, 32)
         self.assertEqual(flow_map.spread_low, 0)
         self.assertEqual(flow_map.spread_high, 31)
-        self.assertEqual(flow_map.all_inferable_bits, list(range(0,32)))
+        self.assertEqual(flow_map.all_inferable_bits, list(range(0, 32)))
 
         # concat spread
         a = claripy.BVS("a", 32)
         a_spread = a + 20
-        ast = claripy.Concat(a_spread[31:31], a_spread[31:31], a_spread[31:31], a_spread[31:3])
+        ast = claripy.Concat(
+            a_spread[31:31], a_spread[31:31], a_spread[31:31], a_spread[31:3])
 
         flow_map = get_inferable_bits(ast, a)
 
@@ -246,12 +246,4 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.number_of_bits_inferable, 32)
         self.assertEqual(flow_map.spread_low, 0)
         self.assertEqual(flow_map.spread_high, 31)
-        self.assertEqual(flow_map.all_inferable_bits, list(range(0,32)))
-
-
-
-
-
-
-
-
+        self.assertEqual(flow_map.all_inferable_bits, list(range(0, 32)))

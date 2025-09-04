@@ -162,7 +162,8 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
         for i in range(0, len(ast.args)):
             if not is_sym_expr(ast.args[i]):
                 continue
-            new_expr = claripy.replace(new_expr, ast.args[i], combination[i].expr)
+            new_expr = claripy.replace(
+                new_expr, ast.args[i], combination[i].expr)
             new_conds.extend(combination[i].conditions)
         splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
 
