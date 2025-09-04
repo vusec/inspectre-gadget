@@ -93,11 +93,27 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, typ
         proj.kb.comments[pc] = str(set(annotations))
         proj.kb.comments[pc] += " -> " + "TRANSMISSION"
 
+    prev_symbol = None
     output = ""
     for bbl_addr in bbls:
+        # Symbol
+        symbol = proj.loader.find_symbol(bbl_addr, fuzzy=True)
+        # Disassembly adds symbol at the start of the function, we only
+        # add if we are not at the start and symbol differs from prev
+        if symbol != None and symbol.rebased_addr != bbl_addr and symbol != prev_symbol:
+            # Capstone did not add a symbol
+            max_bytes_per_line = 5
+            bytes_width = max_bytes_per_line * 3 + 3
+            output += " " * bytes_width + \
+                f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
+
+        prev_symbol = symbol
+
+        # Add the assembly code
         block = proj.factory.block(bbl_addr)
         output += proj.analyses.Disassembly(
             ranges=[(block.addr, block.addr + block.size)]).render(color=color)
+
         output += "\n"
 
     proj.kb.comments = {}
