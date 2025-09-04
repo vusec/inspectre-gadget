@@ -772,12 +772,14 @@ class Scanner:
                     # If there's no splitting, just add the successor as-is.
                     self.states.append(ns)
 
-        # Print all loads.
-        from tabulate import tabulate
-        l.info(tabulate([[hex(x.pc), str(x.addr),
-                          "0" if get_load_annotation(
-                              x.val) == None else get_load_annotation(x.val).depth,
-                          str(x.val), str(get_annotations(x.addr)), str(
-                              get_annotations(x.val)),
-                          "none" if get_load_annotation(x.val) == None else get_load_annotation(x.val).requirements] for x in self.loads],
-                        headers=["pc", "addr", "depth", "val", "addr annotations", "val annotations", "deps"]))
+        if not l.disabled:
+            # Print all loads. (If less than 50)
+            if len(self.loads) < 50:
+                from tabulate import tabulate
+                l.info(tabulate([[hex(x.pc), str(x.addr),
+                                "0" if get_load_annotation(
+                                    x.val) == None else get_load_annotation(x.val).depth,
+                                  str(x.val), str(get_annotations(x.addr)), str(
+                                    get_annotations(x.val)),
+                                  "none" if get_load_annotation(x.val) == None else get_load_annotation(x.val).requirements] for x in self.loads],
+                                headers=["pc", "addr", "depth", "val", "addr annotations", "val annotations", "deps"]))
