@@ -13,6 +13,13 @@ from .logger import *
 
 l = get_logger("AstTransform")
 
+class SplitTooManyNestedIfException(Exception):
+    "Too many if statements in expr, skipping"
+    pass
+
+    def __str__(self):
+        return f"SplitTooManyNestedIfException: Too many if statements in expr, skipping"
+
 class ConditionType(Enum):
     """
     Track which instruction is associated to a given condition.
@@ -337,6 +344,14 @@ def split_conditions(expr: claripy.ast.BV, simplify: bool, addr) -> list[Conditi
         new_expr = simplify_conservative(new_expr)
 
     # Split if-then-else statements into separate ConditionalASTs.
+    # Skip if we have more than 10 (nested) if statements
+    if str(new_expr).count("else") > 10:
+        l.warning(
+            f"split_conditions: Too many (nested) if conditions: {str(new_expr).count('else')}")
+        print(
+            f"split_conditions: Too many (nested) if conditions: {str(new_expr).count('else')}")
+        raise SplitTooManyNestedIfException
+
     return split_if_statements(new_expr, addr)
 
 def simplify_conservative(e: claripy.ast.BV) -> claripy.ast.BV:

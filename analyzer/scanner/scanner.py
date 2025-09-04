@@ -757,8 +757,14 @@ class Scanner:
                 ns.globals[f'hist_{self.n_hist}'] = ns.addr
 
                 # Check if the last branch condition contains an if-then-else statement.
-                asts = split_conditions(
-                    ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
+                try:
+                    asts = split_conditions(
+                        ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
+                except SplitTooManyNestedIfException as e:
+                    report_error(e, hex(self.cur_state.addr), hex(
+                        start_address), error_type="SCANNER")
+                    continue
+
                 if len(asts) > 1:
                     # If this is the case, we need to further split the successors.
                     self.split_state(ns, asts, ns.addr, branch_split=True)
