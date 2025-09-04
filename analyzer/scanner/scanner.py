@@ -711,7 +711,7 @@ class Scanner:
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, hex(self.cur_state.addr), hex(
+                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except angr.errors.UnsupportedDirtyError as e:
@@ -719,7 +719,7 @@ class Scanner:
                     continue
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, hex(self.cur_state.addr), hex(
+                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except Exception as e:
