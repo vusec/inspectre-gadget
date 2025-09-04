@@ -78,7 +78,7 @@ class AstRange:
             ('min', self.min),
             ('max', self.max),
             ('window', self.window),
-            ('stride', 'None' if self.stride == None else self.stride),
+            ('stride', 0 if self.stride == None else self.stride),
             ('and_mask', 'None' if self.and_mask == None else self.and_mask),
             ('or_mask', 'None' if self.or_mask == None else self.or_mask),
             ('exact', self.exact)
