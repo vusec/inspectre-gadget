@@ -337,11 +337,11 @@ class Transmission():
         d['secret_val'] = self.secret_val.to_dict()
 
         d['branches'] = utils.ordered_branches(self.branches)
-        d['branch_requirements'] = self.branch_requirements
+        d['branch_requirements'] = self.branch_requirements.to_dict()
         d['constraints'] = utils.ordered_constraints(self.constraints)
-        d['constraint_requirements'] = self.constraint_requirements
-        d['all_requirements'] = self.all_requirements
-        d['all_requirements_w_branches'] = self.all_requirements_w_branches
+        d['constraint_requirements'] = self.constraint_requirements.to_dict()
+        d['all_requirements'] = self.all_requirements.to_dict()
+        d['all_requirements_w_branches'] = self.all_requirements_w_branches.to_dict()
 
         d['inferable_bits'] = self.inferable_bits.to_dict()
         d['aliases'] = [str(x.to_BV()) for x in self.aliases]

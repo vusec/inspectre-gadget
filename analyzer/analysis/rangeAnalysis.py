@@ -20,6 +20,7 @@ __range_strategies = [
     RangeStrategyFindMasking()
 ]
 
+
 def get_constraints_on_ast(ast, constraints):
     """
     get_relevant_asts returns a list with ast's which have at least 1
@@ -83,14 +84,21 @@ def analyse(t: Transmission):
 
     # Calculate ranges for each component
     for c in [t.base, t.transmitted_secret, t.secret_address, t.transmission]:
-        calculate_range(c, constr, constr_with_branches)
+        if c != None:
+            constr = [x[1] for x in c.constraints]
+            constr_with_branches = [x[1] for x in c.branches]
+            constr_with_branches.extend(constr)
+            calculate_range(c, constr, constr_with_branches)
 
     # Calculate ranges for base sub-components.
-    if t.base != None:
+    if t.base != None and t.independent_base != None:
         if t.properties['direct_dependent_base_expr'] == None and t.properties['indirect_dependent_base_expr'] == None:
             t.independent_base.range = t.base.range
             t.independent_base.range_with_branches = t.base.range_with_branches
         else:
+            constr = [x[1] for x in t.independent_base.constraints]
+            constr_with_branches = [x[1] for x in t.independent_base.branches]
+            constr_with_branches.extend(constr)
             calculate_range(t.independent_base, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if t.base == None else t.base.range}")
