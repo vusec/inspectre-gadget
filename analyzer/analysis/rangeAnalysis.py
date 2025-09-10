@@ -104,14 +104,31 @@ def analyse(t: Transmission):
 
 def analyse_tfp(t: TaintedFunctionPointer):
     l.warning(f"========= [RANGE] ==========")
-    for r in t.registers:
-        if t.registers[r].control == TFPRegisterControlType.CONTROLLED or t.registers[r].control == TFPRegisterControlType.POTENTIAL_SECRET:
-            t.registers[r].range = get_ast_ranges(
-                [x[1] for x in t.registers[r].constraints], t.registers[r].expr)
 
-    t.range = get_ast_ranges([x[1] for x in t.constraints], t.expr)
+    for r in t.registers.values():
+        if r.control in (ControlType.REQUIRES_MEM_LEAK, ControlType.REQUIRES_MEM_MASSAGING, ControlType.CONTROLLED) \
+                or r.control_type == TFPRegisterControlType.IS_TFP_REGISTER:
+            constr = [x[1] for x in r.constraints]
+            constr_with_branches = [x[1] for x in r.branches]
+            constr_with_branches.extend(constr)
+            calculate_range(r, constr, constr_with_branches)
+
+            if r.controlled_expr != None:
+                r.controlled_range = get_ast_ranges(constr, r.controlled_expr)
+                if len(r.branches) > 0:
+                    r.controlled_range_with_branches = get_ast_ranges(
+                        constr_with_branches, r.controlled_expr)
+                else:
+                    r.controlled_range_with_branches = r.controlled_range
+
+    # Calculate for tfp expr
+    constr = [x[1] for x in t.constraints]
+    constr_with_branches = [x[1] for x in t.branches]
+    constr_with_branches.extend(constr)
+    calculate_range(t, constr, constr_with_branches)
 
     l.warning("==========================")
+
 
 def analyse_half_gadget(g: HalfGadget):
     l.warning(f"========= [RANGE] ==========")
