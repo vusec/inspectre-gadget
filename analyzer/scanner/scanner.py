@@ -283,6 +283,10 @@ class Scanner:
         Loads and Stores that have at least a symbol marked as secret
         in their expression are saved as potential transmissions.
         """
+
+        if not global_config['TransmissionGadgets']:
+            return
+
         if contains_secret(expr):
             # Create a new transmission object.
             t = TransmissionExpr(pc=state.scratch.ins_addr,
@@ -294,6 +298,8 @@ class Scanner:
                                  constraints=self.get_constraints(state),
                                  n_instr=self.count_instructions(
                                      state, state.scratch.ins_addr),
+                                 n_control_flow_changes=self.count_control_flow_changes(
+                                     state),
                                  contains_spec_stop=self.history_contains_speculation_stop(
                                      state)
                                  )
