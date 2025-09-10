@@ -37,14 +37,17 @@ MAX_ENTROPY = 16
 
 with_branches = False
 
+
 def is_in_range(n, min, max):
     if min <= max:
         return n >= min and n <= max
     else:
         return n >= min or n <= max
 
+
 def is_overlapping(x_min, x_max, y_min, y_max):
     return x_max >= y_min and y_max >= x_min
+
 
 def calc_base_size(t: pd.Series):
     if t['base_control'] == 'BaseControlType.NO_BASE' or t['base_expr'] == '':
@@ -54,6 +57,7 @@ def calc_base_size(t: pd.Series):
     except:
         return 0
     return int(t['base_expr'].split(' ')[0].replace('<BV', ''))
+
 
 def calc_transmitted_secret_size(t: pd.Series):
     assert (t['transmitted_secret_expr'].startswith('<BV'))
@@ -65,12 +69,14 @@ def get_pc_as_number(t: pd.Series):
 
 # ----------------- Basic checks
 
+
 def is_secret_inferable(t: pd.Series):
     """
     Check if the transmission is able to transmit a significant portion of
     the secret.
     """
     return t['inferable_bits_n_inferable_bits'] >= MIN_INFERABLE_BITS
+
 
 def has_valid_base(t: pd.Series):
     """
@@ -88,6 +94,7 @@ def has_valid_base(t: pd.Series):
             return True
 
     return False
+
 
 def has_valid_secret_address(t: pd.Series):
     """
@@ -112,13 +119,16 @@ def has_valid_secret_address(t: pd.Series):
 
     return True
 
+
 def is_cmove_independent_from_secret(t: pd.Series):
     return t['cmove_control_type'] == 'BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET'
+
 
 def has_no_speculation_stop(t: pd.Series):
     return t['contains_spec_stop'] == False
 
 # ----------------- Imperfect gadget checks
+
 
 def is_secret_below_cache_granularity(t: pd.Series):
     """
@@ -127,6 +137,7 @@ def is_secret_below_cache_granularity(t: pd.Series):
     If not, we need to apply the sliding technique.
     """
     return t['inferable_bits_spread_low'] < CACHE_SHIFT and t['inferable_bits_spread_high'] < (CACHE_SHIFT + 8)
+
 
 def is_secret_entropy_high(t: pd.Series):
     """
@@ -137,6 +148,7 @@ def is_secret_entropy_high(t: pd.Series):
     secret_entropy = min(t['inferable_bits_spread_total'],
                          t['inferable_bits_n_inferable_bits'])
     return secret_entropy > MAX_ENTROPY
+
 
 def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
     """
@@ -197,22 +209,28 @@ def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
 
     return True
 
+
 def base_has_direct_secret_dependency(t: pd.Series):
     return t['base_control_type'] == 'BaseControlType.BASE_DEPENDS_ON_SECRET_ADDR'
+
 
 def base_has_indirect_secret_dependency(t: pd.Series):
     return t['base_control_type'] == 'BaseControlType.BASE_INDIRECTLY_DEPENDS_ON_SECRET_ADDR'
 
+
 def is_base_controlled(t: pd.Series):
     return t['base_control'] in ['ControlType.CONTROLLED', 'ControlType.REQUIRES_MEM_LEAK']
 
+
 def is_branch_dependent_from_secret(t: pd.Series):
     return t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS' or t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE'
+
 
 def is_branch_dependent_from_uncontrolled(t: pd.Series):
     return t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED'
 
 # ----------------- Transformations
+
 
 def _has_valid_independent_base(t: pd.Series):
     """
@@ -234,6 +252,7 @@ def _has_valid_independent_base(t: pd.Series):
             return True
 
     return False
+
 
 def transform_partial_control_into_aliasing(t: pd.Series):
     """
@@ -265,6 +284,7 @@ def transform_partial_control_into_aliasing(t: pd.Series):
 
 # ----------------- Techniques to overcome gadget imperfections
 
+
 def can_perform_sliding(t: pd.Series):
     """
     Check if we have enough control over the least significant bits of the
@@ -278,6 +298,7 @@ def can_perform_sliding(t: pd.Series):
 
     return t[f'independent_base_range{"" if not with_branches else "_w_branches"}_stride'] <= 2**t['inferable_bits_spread_low'] and t[f'independent_base_range{"" if not with_branches else "_w_branches"}_window'] >= 4096
 
+
 def can_perform_known_prefix(t: pd.Series):
     """
     If we can adjust the secret address with enough precision and independently
@@ -290,6 +311,7 @@ def can_perform_known_prefix(t: pd.Series):
 
     # TODO: should we check the secret address window also?
     return t[f'secret_address_range{"" if not with_branches else "_w_branches"}_stride'] <= MAX_ENTROPY
+
 
 def can_adjust_base(t: pd.Series):
     """
@@ -325,6 +347,7 @@ def can_adjust_base(t: pd.Series):
             return True
 
     return False
+
 
 def can_ignore_direct_dependency(t: pd.Series, slam=False):
     """
@@ -425,11 +448,14 @@ def slam_is_an_user_address_translation(t: pd.Series):
 def slam_can_ignore_direct_dependency(t: pd.Series):
     return can_ignore_direct_dependency(t, slam=True)
 
+
 def perform_training(t: pd.Series):
     return True
 
+
 def perform_out_of_place_training(t: pd.Series):
     return True
+
 
 def leak_secret_near_valid_base(t: pd.Series):
     return True
@@ -511,6 +537,7 @@ def is_exploitable(t: pd.Series):
 
     return exploitable, required_solutions if exploitable else [], fail_reasons
 
+
 def slam_is_exploitable(t: pd.Series):
     exploitable = True
 
@@ -532,6 +559,7 @@ def slam_is_exploitable(t: pd.Series):
 
     return exploitable, required_solutions if exploitable else [], fail_reasons
 
+
 def run(in_csv, out_csv):
     global with_branches
 
@@ -551,6 +579,10 @@ def run(in_csv, out_csv):
                     'base_range_min',
                     'base_range_stride',
                     'base_range_window',
+                    'independent_base_range_max',
+                    'independent_base_range_min',
+                    'independent_base_range_stride',
+                    'independent_base_range_window',
                     # 'base_size',
                     'inferable_bits_n_inferable_bits',
                     'inferable_bits_spread_high',
@@ -582,7 +614,8 @@ def run(in_csv, out_csv):
     # Transform columns.
     for i in integer_cols:
         df[i] = df[i].fillna(0)
-        df[i] = df[i].astype('float64', errors='ignore')
+        df[i] = df[i].replace('', 0)
+        df[i] = df[i].astype('float64')
 
     df['base_size'] = df.apply(calc_base_size, axis=1)
     df['transmitted_secret_size'] = df.apply(
