@@ -21,6 +21,7 @@ from .asmprinter.asmprinter import *
 l = get_logger("MAIN")
 l_verbose = get_logger("MAIN_VERBOSE")
 
+
 def load_config(config_file):
     """
     Read the YAML configuration.
@@ -79,9 +80,15 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
     s = Scanner(analysis_pipeline=analysis_pipeline)
     s.run(proj, gadget_address)
 
-    l.info(f"Found {len(s.transmissions)} potential transmissions.")
-    l.info(f"Found {len(s.calls)} potential tainted function pointers.")
-    l.info(f"Found {len(s.half_gadgets)} potential half-spectre gadgets.")
+    if global_config['TransmissionGadgets']:
+        l.info(f"Found {len(s.transmissions)} potential transmissions.")
+    if global_config['TaintedFunctionPointers']:
+        l.info(f"Found {len(s.calls)} potential tainted function pointers.")
+    if global_config['HalfSpectre']:
+        l.info(f"Found {len(s.half_gadgets)} potential half-spectre gadgets.")
+    if global_config['SecretDependentBranches']:
+        l.info(
+            f"Found {len(s.secretDependentBranches)} potential secret dependent branches.")
 
     # Step 3. Analyze found gadgets (if not analyzed during scanning)
     if not global_config['AnalyzeDuringScanning']:
@@ -95,12 +102,19 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
         for half in s.half_gadgets:
             analysis_pipeline.analyze_half_gadget(half)
 
-    l.info(
-        f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
-    l.info(
-        f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
-    l.info(
-        f"Outputted {analysis_pipeline.n_final_half_gadgets} half-spectre gadgets.")
+    if global_config['TransmissionGadgets']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
+    if global_config['TaintedFunctionPointers']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
+    if global_config['HalfSpectre']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_half_gadgets} half-spectre gadgets.")
+    if global_config['SecretDependentBranches']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_secret_dependent_branches} secret dependent branches.")
+
 
 def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary="", half_gadget_filename=""):
     """

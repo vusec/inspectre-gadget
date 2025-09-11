@@ -15,6 +15,7 @@ class TransmitterType(Enum):
     LOAD = 1,
     STORE = 2,
     CODE_LOAD = 3
+    SECRET_DEP_BRANCH = 4
 
 
 class ControlType(Enum):
@@ -348,5 +349,12 @@ class Transmission():
 
         for p in self.properties:
             d[p] = str(self.properties[p])
+
+       # Properties only used for child class Secret Dependent branch
+        # We initialize them to None to have consisted data columns
+        d['sdb_expr'] = None
+        d['cmp_operation'] = None
+        d['cmp_value'] = component_to_dict(None)
+        d['controlled_cmp_value'] = component_to_dict(None)
 
         return d

@@ -575,6 +575,17 @@ def run(in_csv, out_csv):
     df = pd.read_csv(StringIO(data), delimiter=';')
     # df.fillna(0, inplace=True)
 
+    # TODO: Add support for Secret Dependent Branch
+    # for now we filter them out and add them in the end
+    df_sdb = df[df['transmitter'] == 'TransmitterType.SECRET_DEP_BRANCH']
+    print(f"Total {len(df_sdb)} Secret Dependent Branches (not reasoned)")
+
+    df = df[df['transmitter'] != 'TransmitterType.SECRET_DEP_BRANCH']
+
+    if df.empty:
+        print(f"[-] Imported {len(df)} gadgets")
+        return
+
     integer_cols = ['base_range_max',
                     'base_range_min',
                     'base_range_stride',
@@ -686,6 +697,9 @@ def run(in_csv, out_csv):
 
     print(
         f"Found {len(df[df['exploitable_w_slam'] == True])} exploitable gadgets!")
+
+    # add the DSP gadgets
+    df = pd.concat([df, df_sdb])
 
     # Save to new file.
     print(f"[-] Saving to {out_csv}")

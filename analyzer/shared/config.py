@@ -31,6 +31,8 @@ def init_config(config):
     global_config["TaintedFunctionPointersRegisterDereference"] = True
     # Enable search for Half Spectre gadgets
     global_config["HalfSpectre"] = False
+    # Enable search for secret dependent branches
+    global_config["SecretDependentBranches"] = False
     # Verbosity of the logging output. 0-3: No / coarse-grained / fine-grained
     global_config["LogLevel"] = 1
 

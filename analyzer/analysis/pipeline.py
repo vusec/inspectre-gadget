@@ -11,11 +11,13 @@ import os
 import csv
 from collections.abc import MutableMapping
 
-from . import transmissionAnalysis, baseControlAnalysis, branchControlAnalysis, pathAnalysis, requirementsAnalysis, rangeAnalysis, bitsAnalysis, tfpAnalysis, halfGadgetAnalysis
+from . import transmissionAnalysis, tfpAnalysis, halfGadgetAnalysis, secretDependentBranchAnalysis
+from . import baseControlAnalysis, branchControlAnalysis, pathAnalysis, requirementsAnalysis, rangeAnalysis, bitsAnalysis, tfpAnalysis
 from ..asmprinter.asmprinter import *
 from ..shared.logger import *
 from ..shared.transmission import *
 from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
 from ..shared.utils import report_error
 from ..shared.config import global_config
 
@@ -49,6 +51,8 @@ class AnalysisPipeline:
     n_final_tainted_function_pointers: int
     n_found_half_gadgets: int
     n_final_half_gadgets: int
+    n_found_secret_dependent_branches: int
+    n_final_secret_dependent_branches: int
 
     def __init__(self, name, gadget_address, proj, asm_folder, csv_filename, tfp_csv_filename, half_gadget_filename):
         self.name = name
@@ -69,6 +73,8 @@ class AnalysisPipeline:
         self.n_final_tainted_function_pointers = 0
         self.n_found_half_gadgets = 0
         self.n_final_half_gadgets = 0
+        self.n_found_secret_dependent_branches = 0
+        self.n_final_secret_dependent_branches = 0
 
     def analyze_transmission(self, potential_t: TransmissionExpr):
 
@@ -197,6 +203,56 @@ class AnalysisPipeline:
             if self.half_gadget_filename != "":
                 append_to_csv(self.half_gadget_filename, [g])
                 l.info(f"Dumped CSV to {self.half_gadget_filename}")
+
+    def analyze_secret_dependent_branch(self, s: SecretDependentBranch):
+
+        self.n_found_secret_dependent_branches += 1
+        secret_dependent_branches = secretDependentBranchAnalysis.get_secret_dependent_branches(
+            s)
+
+        for sdb in secret_dependent_branches:
+            l.info(
+                f"Analyzing SDB   @{hex(sdb.pc)}: {sdb.sdb_expr} <> {sdb.cmp_value.expr}")
+            sdb.uuid = str(uuid.uuid4())
+            sdb.name = self.name
+            sdb.address = self.gadget_address
+            pc_symbol = self.proj.loader.find_symbol(sdb.pc, fuzzy=True)
+            sdb.pc_symbol = pc_symbol.name if pc_symbol else ""
+            sdb.address_symbol = self.gadget_symbol
+            baseControlAnalysis.analyse_secret_dependent_branch(sdb)
+            pathAnalysis.analyse(sdb)
+            requirementsAnalysis.analyse_secret_dependent_branch(sdb)
+
+            try:
+                rangeAnalysis.analyze_secret_dependent_branch(sdb)
+            except Exception as e:
+                # TODO: In very few instances, our range analysis fails. Instead of
+                # interrupting the analysis right away, we want to continue to
+                # the next gadget. There are many reasons why the range analysis
+                # can fail, and some of them might be fixed.
+                # However, since the number of errors we encountered is very low,
+                # this has not been deemed to be a priority for now.
+                l.critical("Range analysis error: bailing out")
+                report_error(e, where="range_analysis", start_addr=hex(
+                    self.gadget_address), error_type="RANGE")
+                continue
+
+            bitsAnalysis.analyse(sdb)
+            branchControlAnalysis.analyse(sdb)
+
+            # Remove the dependency graph before printing.
+            sdb.properties["deps"] = None
+
+            self.n_final_secret_dependent_branches += 1
+            l_verbose.info(sdb)
+
+            if self.asm_folder != "":
+                output_secret_dependent_branch_to_file(
+                    sdb, self.proj, self.asm_folder)
+                l.info(f"Dumped annotated ASM to {self.asm_folder}")
+            if self.csv_filename != "":
+                append_to_csv(self.csv_filename, [sdb])
+            l.info(f"Dumped properties to {self.csv_filename}")
 
 
 def flatten_dict(dictionary, parent_key='', separator='_'):

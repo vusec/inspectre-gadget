@@ -15,10 +15,12 @@ from ..shared.astTransform import ConditionType
 from ..scanner.annotations import *
 from ..scanner.memory import *
 from ..shared.transmission import *
+from ..shared.secretDependentBranch import *
 from ..shared.logger import *
 # autopep8: on
 
 l = get_logger("BranchControlAnalysis")
+
 
 class BranchControlType(Enum):
     BRANCH_DEPENDS_ON_UNCONTROLLED = 0,
@@ -61,6 +63,7 @@ def get_branch_control(t: Transmission, d: DepGraph, constraints: bool):
         else:
             return BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET
 
+
 def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
     constraint_expr = claripy.BVV(0, 1)
     for c in t.constraints:
@@ -95,6 +98,7 @@ def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
         else:
             return BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET
 
+
 def analyse(t: Transmission):
     """
     Check if any branch depends on the secret or secret address.
@@ -114,3 +118,10 @@ def analyse(t: Transmission):
         f"Cmove control with constraints: {t.properties['cmove_control_type']}")
 
     l.warning(f"===========================")
+
+
+def analyse_secret_dependent_branch(sdb: SecretDependentBranch):
+    # First analyze the transmission component
+    analyse(sdb)
+
+    # TODO: Should we do branch control analysis for cmp_value?

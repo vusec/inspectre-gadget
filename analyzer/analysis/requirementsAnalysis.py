@@ -11,6 +11,7 @@ import sys
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
 from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import *
 from ..shared.utils import *
 from ..shared.astTransform import *
 from ..shared.logger import *
@@ -229,4 +230,28 @@ def analyse_half_gadget(g: HalfGadget):
     l.warning(
         f"uncontrolled_base_requirements:  {'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.requirements}")
     l.warning(f"attacker_requirements:  {g.attacker.requirements}")
+    l.warning("==========================")
+
+
+def analyse_secret_dependent_branch(sdb: SecretDependentBranch):
+
+    # First collect requirements for the transmission component
+    analyse(sdb)
+
+    # Add requirements for cmp_value
+    sdb.cmp_value.requirements = get_requirements(sdb.cmp_value.expr)
+    sdb.cmp_value.control = get_control(sdb.cmp_value)
+
+    if sdb.controlled_cmp_value != None:
+        sdb.controlled_cmp_value.requirements = get_requirements(
+            sdb.controlled_cmp_value.expr)
+        sdb.controlled_cmp_value.control = get_control(
+            sdb.controlled_cmp_value)
+
+    sdb.all_requirements.merge(sdb.cmp_value.requirements)
+    sdb.all_requirements_w_branches.merge(sdb.cmp_value.requirements)
+
+    l.warning(f"cmp_value_requirements:  {sdb.cmp_value.requirements}")
+    l.warning(
+        f"controlled_cmp_value_requirements: {'NONE' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.requirements}")
     l.warning("==========================")
