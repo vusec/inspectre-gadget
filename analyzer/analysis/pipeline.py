@@ -33,6 +33,7 @@ class AnalysisPipeline:
     name: str
     # Entrypoint address
     gadget_address: int
+    gadget_symbol: str
     proj: angr.Project
     # Output configurations
     asm_folder: str
@@ -52,6 +53,9 @@ class AnalysisPipeline:
         self.name = name
         self.gadget_address = gadget_address
         self.proj = proj
+
+        symbol = self.proj.loader.find_symbol(self.gadget_address, fuzzy=True)
+        self.gadget_symbol = symbol.name if symbol else ""
 
         self.asm_folder = asm_folder
         self.csv_filename = csv_filename
@@ -75,6 +79,9 @@ class AnalysisPipeline:
             t.uuid = str(uuid.uuid4())
             t.name = self.name
             t.address = self.gadget_address
+            pc_symbol = self.proj.loader.find_symbol(t.pc, fuzzy=True)
+            t.pc_symbol = pc_symbol.name if pc_symbol else ""
+            t.address_symbol = self.gadget_symbol
             baseControlAnalysis.analyse(t)
             pathAnalysis.analyse(t)
             requirementsAnalysis.analyse(t)
@@ -121,6 +128,9 @@ class AnalysisPipeline:
             tfp.uuid = str(uuid.uuid4())
             tfp.name = self.name
             tfp.address = self.gadget_address
+            pc_symbol = self.proj.loader.find_symbol(tfp.pc, fuzzy=True)
+            tfp.pc_symbol = pc_symbol.name if pc_symbol else ""
+            tfp.address_symbol = self.gadget_symbol
             pathAnalysis.analyse_tfp(tfp)
             requirementsAnalysis.analyse_tfp(tfp)
 

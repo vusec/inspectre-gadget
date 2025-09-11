@@ -28,6 +28,8 @@ from ..shared.halfGadget import *
 from ..shared.config import *
 from ..shared.astTransform import *
 from ..shared.utils import get_x86_registers
+from ..asmprinter.asmprinter import get_stack_trace_text
+
 # autopep8: on
 
 l = get_logger("Scanner")
@@ -634,6 +636,33 @@ class Scanner:
         # Stop exploration here
         raise SplitException
 
+    def print_stack_trace(self, state):
+        output = ""
+        prev_symbol = None
+
+        for bbl_addr in state.history.bbl_addrs:
+            # Symbol
+            symbol = self.proj.loader.find_symbol(bbl_addr, fuzzy=True)
+            # Disassembly adds symbol at the start of the function, we only
+            # add if we are not at the start and symbol differs from prev
+            if symbol.rebased_addr != bbl_addr and symbol != prev_symbol:
+                # Capstone did not add a symbol
+                max_bytes_per_line = 5
+                bytes_width = max_bytes_per_line * 3 + 3
+                output += " " * bytes_width + \
+                    f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
+
+            prev_symbol = symbol
+
+            # Add the assembly code
+            block = self.proj.factory.block(bbl_addr)
+            output += self.proj.analyses.Disassembly(
+                ranges=[(block.addr, block.addr + block.size)]).render(color=color)
+
+            output += "\n"
+
+        print(output)
+
     def run(self, proj: angr.Project, start_address) -> list[TransmissionExpr]:
         """
         Run the symbolic execution engine for a given number of basic blocks.
@@ -711,7 +740,7 @@ class Scanner:
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, hex(self.cur_state.addr), hex(
+                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except angr.errors.UnsupportedDirtyError as e:
@@ -719,7 +748,7 @@ class Scanner:
                     continue
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, hex(self.cur_state.addr), hex(
+                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except Exception as e:
@@ -734,6 +763,9 @@ class Scanner:
                 # we want to report the error without crashing
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
+                if str(e) == 'timeout':
+                    print(get_stack_trace_text(
+                        self.proj, state.history.bbl_addrs))
                 if not l.disabled:
                     traceback.format_exc()
                 report_error(e, hex(self.cur_state.addr), hex(
@@ -757,8 +789,14 @@ class Scanner:
                 ns.globals[f'hist_{self.n_hist}'] = ns.addr
 
                 # Check if the last branch condition contains an if-then-else statement.
-                asts = split_conditions(
-                    ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
+                try:
+                    asts = split_conditions(
+                        ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
+                except SplitTooManyNestedIfException as e:
+                    report_error(e, hex(self.cur_state.addr), hex(
+                        start_address), error_type="SCANNER")
+                    continue
+
                 if len(asts) > 1:
                     # If this is the case, we need to further split the successors.
                     self.split_state(ns, asts, ns.addr, branch_split=True)
@@ -766,12 +804,14 @@ class Scanner:
                     # If there's no splitting, just add the successor as-is.
                     self.states.append(ns)
 
-        # Print all loads.
-        from tabulate import tabulate
-        l.info(tabulate([[hex(x.pc), str(x.addr),
-                          "0" if get_load_annotation(
-                              x.val) == None else get_load_annotation(x.val).depth,
-                          str(x.val), str(get_annotations(x.addr)), str(
-                              get_annotations(x.val)),
-                          "none" if get_load_annotation(x.val) == None else get_load_annotation(x.val).requirements] for x in self.loads],
-                        headers=["pc", "addr", "depth", "val", "addr annotations", "val annotations", "deps"]))
+        if not l.disabled:
+            # Print all loads. (If less than 50)
+            if len(self.loads) < 50:
+                from tabulate import tabulate
+                l.info(tabulate([[hex(x.pc), str(x.addr),
+                                "0" if get_load_annotation(
+                                    x.val) == None else get_load_annotation(x.val).depth,
+                                  str(x.val), str(get_annotations(x.addr)), str(
+                                    get_annotations(x.val)),
+                                  "none" if get_load_annotation(x.val) == None else get_load_annotation(x.val).requirements] for x in self.loads],
+                                headers=["pc", "addr", "depth", "val", "addr annotations", "val annotations", "deps"]))
