@@ -9,6 +9,7 @@ import yaml
 import pickle
 import angr
 import claripy.ast.base
+from cle import Symbol
 
 from .scanner.scanner import Scanner
 from .analysis.pipeline import AnalysisPipeline
@@ -125,9 +126,30 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
         symbol_proj = load_angr_project(
             symbol_binary, base_address, cache_project)
 
-        proj.loader.all_objects[0]._symbol_cache = symbol_proj.loader.all_objects[0]._symbol_cache
         proj.loader.all_objects[0].symbols = symbol_proj.loader.all_objects[0].symbols
         proj.loader.all_objects[0]._symbols_by_name = symbol_proj.loader.all_objects[0]._symbols_by_name
+
+        # This works for the Linux kernel binary, not tested on other inputs
+        # Adding the symbols to the text object ensures that fuzzy search
+        # using proj.loader.find_symbol() works
+        text_obj = proj.loader.find_object_containing(base_address)
+
+        if text_obj:
+            for symbol in symbol_proj.loader.all_objects[0].symbols:
+                if symbol.rebased_addr < text_obj.min_addr or\
+                        symbol.rebased_addr > text_obj.max_addr:
+                    continue
+
+                relative_addr = symbol.relative_addr - \
+                    text_obj.mapped_base + symbol.owner.mapped_base
+                new_symbol = Symbol(owner=text_obj, name=symbol.name,
+                                    relative_addr=relative_addr, size=symbol.size,
+                                    sym_type=symbol._type)
+                new_symbol.resolved = symbol.resolved
+                new_symbol.resolvedby = symbol.resolvedby
+
+                text_obj.symbols.add(new_symbol)
+
         del symbol_proj
 
     # Run the Analyzer.

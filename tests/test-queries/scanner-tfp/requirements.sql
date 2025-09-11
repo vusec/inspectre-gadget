@@ -1,7 +1,11 @@
 SELECT
     pc,
     constraints,
-    requirements,
+    requirements_regs,
+    requirements_indirect_regs,
+    requirements_direct_regs,
+    requirements_mem,
+    requirements_const_mem,
     branches
 FROM
     tfps

@@ -25,7 +25,11 @@ def analyse(gadget: HalfGadget):
     l.warning(f"Analyzing @{hex(gadget.pc)}: {gadget.loaded.expr}")
 
     # Extract members of the transmission.
-    canonical_exprs = canonicalize(gadget.loaded.expr, gadget.pc)
+    try:
+        canonical_exprs = canonicalize(gadget.loaded.expr, gadget.pc)
+    except SplitTooManyNestedIfException:
+        l.error("half_gadget analyse: Failed canonicalizing expression")
+        return []
 
     gadgets = []
     for canonical_expr in canonical_exprs:

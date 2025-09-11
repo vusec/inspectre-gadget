@@ -23,6 +23,7 @@ from ..shared.config import global_config
 l = get_logger("AnalysisMAIN")
 l_verbose = get_logger("Analysis")
 
+
 class AnalysisPipeline:
     """
     Analyzes potential gadgets found by the scanner and outputs the final
@@ -33,6 +34,7 @@ class AnalysisPipeline:
     name: str
     # Entrypoint address
     gadget_address: int
+    gadget_symbol: str
     proj: angr.Project
     # Output configurations
     asm_folder: str
@@ -53,6 +55,9 @@ class AnalysisPipeline:
         self.gadget_address = gadget_address
         self.proj = proj
 
+        symbol = self.proj.loader.find_symbol(self.gadget_address, fuzzy=True)
+        self.gadget_symbol = symbol.name if symbol else ""
+
         self.asm_folder = asm_folder
         self.csv_filename = csv_filename
         self.tfp_csv_filename = tfp_csv_filename
@@ -71,10 +76,13 @@ class AnalysisPipeline:
         transmissions = transmissionAnalysis.get_transmissions(potential_t)
 
         for t in transmissions:
-            l.info(f"Analyzing {t.transmission.expr}...")
+            l.info(f"Analyzing TRANS @{hex(t.pc)}: {t.transmission.expr}")
             t.uuid = str(uuid.uuid4())
             t.name = self.name
             t.address = self.gadget_address
+            pc_symbol = self.proj.loader.find_symbol(t.pc, fuzzy=True)
+            t.pc_symbol = pc_symbol.name if pc_symbol else ""
+            t.address_symbol = self.gadget_symbol
             baseControlAnalysis.analyse(t)
             pathAnalysis.analyse(t)
             requirementsAnalysis.analyse(t)
@@ -114,13 +122,16 @@ class AnalysisPipeline:
     def analyze_tainted_function_pointer(self, t: TaintedFunctionPointer):
 
         self.n_found_tainted_function_pointers += 1
-        tfps = tfpAnalysis.analyse(t)
+        tainted_function_pointers = tfpAnalysis.analyse(t)
 
-        for tfp in tfps:
+        for tfp in tainted_function_pointers:
             l.info(f"Analyzing TFP @{hex(tfp.pc)}: {tfp.expr}")
             tfp.uuid = str(uuid.uuid4())
             tfp.name = self.name
             tfp.address = self.gadget_address
+            pc_symbol = self.proj.loader.find_symbol(tfp.pc, fuzzy=True)
+            tfp.pc_symbol = pc_symbol.name if pc_symbol else ""
+            tfp.address_symbol = self.gadget_symbol
             pathAnalysis.analyse_tfp(tfp)
             requirementsAnalysis.analyse_tfp(tfp)
 
@@ -186,6 +197,7 @@ class AnalysisPipeline:
             if self.half_gadget_filename != "":
                 append_to_csv(self.half_gadget_filename, [g])
                 l.info(f"Dumped CSV to {self.half_gadget_filename}")
+
 
 def flatten_dict(dictionary, parent_key='', separator='_'):
     """

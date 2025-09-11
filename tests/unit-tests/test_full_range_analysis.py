@@ -15,7 +15,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
 
     def test_constraints(self):
 
-
         a = claripy.BVS("a", 64)
 
         ast = a << 4
@@ -57,7 +56,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.or_mask, 32)
         self.assertTrue(ast_range.exact)
 
-
         # We fail to do this one exact. The double constraints makes it hard
         # to invert them in _find_sat_distribution
         a = claripy.BVS("a", 32)
@@ -75,7 +73,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
 
     def test_disjoint_with_constraints_range(self):
 
-
         a = claripy.BVS("a", 32)
 
         ast = a << 4
@@ -89,7 +86,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.or_mask, None)
         self.assertTrue(ast_range.exact)
 
-
         a = claripy.BVS("a", 32)
 
         ast = a
@@ -102,9 +98,6 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
         self.assertFalse(ast_range.exact)
-
-
-
 
     def test_disjoint_range(self):
 
@@ -160,19 +153,16 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.or_mask, None)
         self.assertTrue(ast_range.exact)
 
-
         # Non-linear range: we have to make a estimation
         a = claripy.BVS("a", 64)
 
         ast = ((a << 2) & ~0x16) + 0xffffffff81000002
         ast_range = get_ast_ranges([], ast)
 
-
         self.assertEqual(ast_range.min, 2)
         self.assertEqual(ast_range.max, 0xffffffffffffffea)
         self.assertEqual(ast_range.stride, 8)
         self.assertFalse(ast_range.exact)
-
 
     def test_disjoint_with_sign_ext_range(self):
 

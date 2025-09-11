@@ -28,11 +28,15 @@ from ..shared.halfGadget import *
 from ..shared.config import *
 from ..shared.astTransform import *
 from ..shared.utils import get_x86_registers
+from ..asmprinter.asmprinter import get_stack_trace_text
+
 # autopep8: on
 
 l = get_logger("Scanner")
 
 n_concrete_addr = 0
+
+
 class DummyConcretizationStrategy(SimConcretizationStrategy):
     """
     Dummy concretization strategy to make ANGR happy. We never use this.
@@ -42,6 +46,7 @@ class DummyConcretizationStrategy(SimConcretizationStrategy):
         global n_concrete_addr
         n_concrete_addr += 8
         return [n_concrete_addr]
+
 
 def skip_concretization(state: angr.SimState):
     """
@@ -60,6 +65,7 @@ class SubstType(Enum):
     CALL_SUBST = 3,
     UNKNOWN_SUBST = 4
 
+
 def getPrefix(stype: SubstType):
     if stype == SubstType.ADDR_SUBST:
         return "addr_subst_"
@@ -71,8 +77,10 @@ def getPrefix(stype: SubstType):
         return "call_subst_"
     return ""
 
+
 def recordSubstitution(state, addr, value, type):
     state.globals[getPrefix(type) + str(addr)] = value
+
 
 def getSubstitution(state, addr, type: SubstType):
     key = getPrefix(type) + str(addr)
@@ -86,6 +94,7 @@ def getSubstitution(state, addr, type: SubstType):
 class SplitException(Exception):
     "Splitted state, skipping"
     pass
+
 
 class Scanner:
     """
@@ -208,6 +217,28 @@ class Scanner:
                 break
         return n_instr
 
+    def count_control_flow_changes(self, state):
+        # Count the number of control flow changes
+        # - All TAKEN Direct/Indirect Calls/Jumps
+        # - Returns
+        n_control_flow_changes = 0
+
+        for bbl_addr, jump_kind, jump_target in zip(self.get_bbls(state)[:-1], list(state.history.jumpkinds)[1:], state.history.jump_targets):
+            if jump_kind == 'Ijk_Ret':
+                n_control_flow_changes += 1
+
+            elif jump_kind == 'Ijk_Call':
+                n_control_flow_changes += 1
+
+            elif jump_kind == 'Ijk_Boring':
+
+                if len(self.bbs[bbl_addr]['block'].vex.constant_jump_targets_and_jumpkinds.keys()) > 1:
+                    # conditional jump, only count if we took non-default target
+                    if self.bbs[bbl_addr]['block'].vex.default_exit_target != jump_target.args[0]:
+                        n_control_flow_changes += 1
+
+        return n_control_flow_changes
+
     def get_aliases(self, state):
         aliases = []
         for v in state.globals.keys():
@@ -252,6 +283,10 @@ class Scanner:
         Loads and Stores that have at least a symbol marked as secret
         in their expression are saved as potential transmissions.
         """
+
+        if not global_config['TransmissionGadgets']:
+            return
+
         if contains_secret(expr):
             # Create a new transmission object.
             t = TransmissionExpr(pc=state.scratch.ins_addr,
@@ -263,6 +298,8 @@ class Scanner:
                                  constraints=self.get_constraints(state),
                                  n_instr=self.count_instructions(
                                      state, state.scratch.ins_addr),
+                                 n_control_flow_changes=self.count_control_flow_changes(
+                                     state),
                                  contains_spec_stop=self.history_contains_speculation_stop(
                                      state)
                                  )
@@ -276,6 +313,10 @@ class Scanner:
         Indirect calls that are attacker-controlled are saved
         as tainted function pointers (a.k.a Dispatch Gadgets).
         """
+
+        if not global_config['TaintedFunctionPointers']:
+            return
+
         l.warning(
             f"Found new Dispatch Gadget! {func_ptr_ast} {get_annotations(func_ptr_ast)}")
         # Create a new TFP object.
@@ -288,6 +329,8 @@ class Scanner:
                                      constraints=self.get_constraints(state),
                                      n_instr=self.count_instructions(
                                          state, state.scratch.ins_addr),
+                                     n_control_flow_changes=self.count_control_flow_changes(
+                                         state),
                                      contains_spec_stop=self.history_contains_speculation_stop(
                                          state),
                                      n_dependent_loads=get_load_depth(
@@ -297,6 +340,32 @@ class Scanner:
         for reg in get_x86_registers():
             reg_ast = getattr(state.regs, reg)
             tfp.registers[reg] = TFPRegister(reg, reg_ast)
+
+        if global_config['TaintedFunctionPointersRegisterDereference']:
+            # Check if there is a register at dereference
+            for reg in get_x86_registers():
+                reg_expr = tfp.registers[reg].expr
+
+                # If the instruction is a call, it will add 8 to rsp, so we also
+                # need to add + 8
+                call_offset = 0
+                if reg == 'rsp':
+                    block = state.block()
+                    _, regs_write = block.capstone.insns[-1].insn.regs_access()
+                    if 'rsp' in regs_write:
+                        call_offset = 8
+
+                for offset in range(-0x40, 0xa0, 8):
+                    reg_str = f'{reg}_{offset + call_offset}'
+
+                    alias_store, stored_val = memory.get_aliasing_store(
+                        reg_expr + offset + call_offset, 8, self.cur_id, state)
+
+                    if alias_store and is_attacker_controlled(stored_val) and 'gs' not in str(stored_val):
+                        tfp.registers[reg_str] = TFPRegister(
+                            reg_str, stored_val, is_dereferenced=True)
+                        tfp.registers[reg].reg_dereferenced.append(
+                            tfp.registers[reg_str])
 
         self.calls.append(tfp)
 
@@ -634,6 +703,33 @@ class Scanner:
         # Stop exploration here
         raise SplitException
 
+    def print_stack_trace(self, state):
+        output = ""
+        prev_symbol = None
+
+        for bbl_addr in state.history.bbl_addrs:
+            # Symbol
+            symbol = self.proj.loader.find_symbol(bbl_addr, fuzzy=True)
+            # Disassembly adds symbol at the start of the function, we only
+            # add if we are not at the start and symbol differs from prev
+            if symbol.rebased_addr != bbl_addr and symbol != prev_symbol:
+                # Capstone did not add a symbol
+                max_bytes_per_line = 5
+                bytes_width = max_bytes_per_line * 3 + 3
+                output += " " * bytes_width + \
+                    f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
+
+            prev_symbol = symbol
+
+            # Add the assembly code
+            block = self.proj.factory.block(bbl_addr)
+            output += self.proj.analyses.Disassembly(
+                ranges=[(block.addr, block.addr + block.size)]).render(color=color)
+
+            output += "\n"
+
+        print(output)
+
     def run(self, proj: angr.Project, start_address) -> list[TransmissionExpr]:
         """
         Run the symbolic execution engine for a given number of basic blocks.
@@ -711,7 +807,7 @@ class Scanner:
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, hex(self.cur_state.addr), hex(
+                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except angr.errors.UnsupportedDirtyError as e:
@@ -719,7 +815,7 @@ class Scanner:
                     continue
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, hex(self.cur_state.addr), hex(
+                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except Exception as e:
@@ -734,6 +830,9 @@ class Scanner:
                 # we want to report the error without crashing
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
+                if str(e) == 'timeout':
+                    print(get_stack_trace_text(
+                        self.proj, state.history.bbl_addrs))
                 if not l.disabled:
                     traceback.format_exc()
                 report_error(e, hex(self.cur_state.addr), hex(
@@ -757,8 +856,14 @@ class Scanner:
                 ns.globals[f'hist_{self.n_hist}'] = ns.addr
 
                 # Check if the last branch condition contains an if-then-else statement.
-                asts = split_conditions(
-                    ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
+                try:
+                    asts = split_conditions(
+                        ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
+                except SplitTooManyNestedIfException as e:
+                    report_error(e, hex(self.cur_state.addr), hex(
+                        start_address), error_type="SCANNER")
+                    continue
+
                 if len(asts) > 1:
                     # If this is the case, we need to further split the successors.
                     self.split_state(ns, asts, ns.addr, branch_split=True)
@@ -766,12 +871,14 @@ class Scanner:
                     # If there's no splitting, just add the successor as-is.
                     self.states.append(ns)
 
-        # Print all loads.
-        from tabulate import tabulate
-        l.info(tabulate([[hex(x.pc), str(x.addr),
-                          "0" if get_load_annotation(
-                              x.val) == None else get_load_annotation(x.val).depth,
-                          str(x.val), str(get_annotations(x.addr)), str(
-                              get_annotations(x.val)),
-                          "none" if get_load_annotation(x.val) == None else get_load_annotation(x.val).requirements] for x in self.loads],
-                        headers=["pc", "addr", "depth", "val", "addr annotations", "val annotations", "deps"]))
+        if not l.disabled:
+            # Print all loads. (If less than 50)
+            if len(self.loads) < 50:
+                from tabulate import tabulate
+                l.info(tabulate([[hex(x.pc), str(x.addr),
+                                "0" if get_load_annotation(
+                                    x.val) == None else get_load_annotation(x.val).depth,
+                                  str(x.val), str(get_annotations(x.addr)), str(
+                                    get_annotations(x.val)),
+                                  "none" if get_load_annotation(x.val) == None else get_load_annotation(x.val).requirements] for x in self.loads],
+                                headers=["pc", "addr", "depth", "val", "addr annotations", "val annotations", "deps"]))

@@ -13,12 +13,14 @@ from ..shared.utils import *
 from ..scanner.annotations import *
 # autopep8: on
 
+
 def get_branch_comments(branches):
     comments = {}
     for addr, condition, taken in branches:
         comments[addr] = str(taken) + "   " + str(condition)
 
     return comments
+
 
 def replace_secret_annotations_with_name(annotations, name):
     new_annotations = []
@@ -56,6 +58,7 @@ def get_load_comments(expr: claripy.ast.BV, secret_load_pc):
 
     return annotations
 
+
 def print_annotations(t: Transmission):
     print(f"Printing comments for {t.transmission.expr}")
     a = get_load_comments(t.transmission.expr)
@@ -68,7 +71,36 @@ class GadgetType(Enum):
     HALF = 2,
     UNKNOWN = 3
 
-def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, type=GadgetType.TRANSMISSION, color=True):
+
+def get_stack_trace_text(proj, bbls, color=True):
+
+    prev_symbol = None
+    output = ""
+    for bbl_addr in bbls:
+        # Symbol
+        symbol = proj.loader.find_symbol(bbl_addr, fuzzy=True)
+        # Disassembly adds symbol at the start of the function, we only
+        # add if we are not at the start and symbol differs from prev
+        if symbol != None and symbol.rebased_addr != bbl_addr and symbol != prev_symbol:
+            # Capstone did not add a symbol
+            max_bytes_per_line = 5
+            bytes_width = max_bytes_per_line * 3 + 3
+            output += " " * bytes_width + \
+                f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
+
+        prev_symbol = symbol
+
+        # Add the assembly code
+        block = proj.factory.block(bbl_addr)
+        output += proj.analyses.Disassembly(
+            ranges=[(block.addr, block.addr + block.size)]).render(color=color)
+
+        output += "\n"
+
+    return output
+
+
+def print_annotated_assembly(proj: angr.Project, bbls, branches, expr, pc, secret_load_pc, type: GadgetType, color=True):
     # Branches.
     proj.kb.comments = get_branch_comments(branches)
     # Loads.
@@ -82,7 +114,7 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, typ
         proj.kb.comments[pc] = str(
             set(replace_secret_annotations_with_name(get_annotations(expr), "Attacker")))
         proj.kb.comments[pc] += " -> " + "HALF GADGET"
-    else:
+    elif type == GadgetType.TRANSMISSION:
         all_annotations = set(get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(
             a, LoadAnnotation) and a.address == secret_load_pc}
@@ -93,15 +125,11 @@ def print_annotated_assembly(proj, bbls, branches, expr, pc, secret_load_pc, typ
         proj.kb.comments[pc] = str(set(annotations))
         proj.kb.comments[pc] += " -> " + "TRANSMISSION"
 
-    output = ""
-    for bbl_addr in bbls:
-        block = proj.factory.block(bbl_addr)
-        output += proj.analyses.Disassembly(
-            ranges=[(block.addr, block.addr + block.size)]).render(color=color)
-        output += "\n"
+    output = get_stack_trace_text(proj, bbls, color)
 
     proj.kb.comments = {}
     return output
+
 
 def output_gadget_to_file(t: Transmission, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
@@ -139,9 +167,6 @@ Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
     o.close()
 
 
-def has_aliasing(reg):
-    return reg.control == TFPRegisterControlType.DEPENDS_ON_TFP_EXPR or reg.control == TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
-
 def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/tfp_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
@@ -154,19 +179,35 @@ uuid: {t.uuid}
 
 Reg: {t.reg}
 Expr: {t.expr}
+Tainted Function Pointer:
+  - Reg: {t.reg}
+  - Expr: {t.expr}
+  - Control: {t.control}
+  - Register Requirements: {t.requirements.regs}
 
 Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
 Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
 
 """)
 
-    o.write(f"CONTROLLED:\n")
+    o.write(f"Controlled Regs:\n")
     for r in t.controlled:
-        o.write(f"{r}: {t.registers[r].expr}\n")
+        o.write(f"  - Reg: {r}\n")
+        o.write(f"    Expr: {t.registers[r].expr}\n")
+        o.write(f"    ControlType: {t.registers[r].control_type}\n")
+        o.write(f"    Controlled Expr: {t.registers[r].controlled_expr}\n")
+        o.write(f"    Controlled Range: {t.registers[r].controlled_range}\n")
+        o.write(f"    Controlled Range w Branches:"
+                f"{t.registers[r].controlled_range_with_branches}\n")
 
-    o.write(f"\nREGS ALIASING WITH TFP:\n")
+    o.write(f"\nRegisters aliasing with tfp:\n")
+
+    o.write(f"\nRegisters aliasing with tfp:\n")
     for r in t.aliasing:
-        o.write(f"{r}: {t.registers[r].expr}\n")
+        o.write(f"  - Reg: {r}\n")
+        o.write(f"    Expr: {t.registers[r].expr}\n")
+        o.write(f"    Range: {t.registers[r].range}\n")
+        o.write(f"    ControlType: {t.registers[r].control_type}\n")
 
     o.write(f"\n")
     o.write(f"Uncontrolled Regs: {t.uncontrolled}\n")
@@ -177,6 +218,7 @@ Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
 {'-'*48}
 """)
     o.close()
+
 
 def output_half_gadget_to_file(g: HalfGadget, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)

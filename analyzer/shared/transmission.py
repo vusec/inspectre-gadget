@@ -10,10 +10,12 @@ from collections import OrderedDict
 from . import ranges
 from . import utils
 
+
 class TransmitterType(Enum):
     LOAD = 1,
     STORE = 2,
     CODE_LOAD = 3
+
 
 class ControlType(Enum):
     NO_CONTROL = 0,
@@ -22,8 +24,10 @@ class ControlType(Enum):
     CONTROLLED = 3,
     UNKNOWN = 4
 
+
 def component_to_dict(component):
     return TransmissionComponent().to_dict() if component == None else component.to_dict()
+
 
 class Requirements():
     """
@@ -93,9 +97,10 @@ class TransmissionExpr:
     branches: list[tuple[int, claripy.ast.BV, str],]
     constraints: list[tuple[int, claripy.ast.BV]]
     n_instr: int
+    n_control_flow_changes: int
     contains_spec_stop: bool
 
-    def __init__(self, pc: int, expr: claripy.ast.BV, transmitter: TransmitterType, bbls, branches, aliases, constraints, n_instr, contains_spec_stop):
+    def __init__(self, pc: int, expr: claripy.ast.BV, transmitter: TransmitterType, bbls, branches, aliases, constraints, n_instr, n_control_flow_changes, contains_spec_stop):
         self.pc = pc
         self.expr = expr
         self.transmitter = transmitter
@@ -105,6 +110,7 @@ class TransmissionExpr:
         self.branches = branches
         self.bbls = bbls
         self.n_instr = n_instr
+        self.n_control_flow_changes = n_control_flow_changes
         self.contains_spec_stop = contains_spec_stop
 
     def __repr__(self):
@@ -119,6 +125,7 @@ class TransmissionExpr:
                 n_instr: {self.n_instr}
                 contains_spec_stop: {self.contains_spec_stop}
                 """
+
 
 class TransmissionComponent():
     """
@@ -185,8 +192,11 @@ class Transmission():
     address: int
     pc: int
     secret_load_pc: int
+    pc_symbol: str
+    address_symbol: str
     transmitter: TransmitterType
     n_instr: int
+    n_control_flow_changes: int
     contains_spec_stop: bool
     max_load_depth: int
 
@@ -219,8 +229,11 @@ class Transmission():
         self.address = 0
         self.pc = t.pc
         self.secret_load_pc = 0
+        self.pc_symbol = ""
+        self.address_symbol = ""
         self.transmitter = t.transmitter
         self.n_instr = t.n_instr
+        self.n_control_flow_changes = t.n_control_flow_changes
         self.contains_spec_stop = t.contains_spec_stop
         self.max_load_depth = 0
 
@@ -303,10 +316,13 @@ class Transmission():
         d['uuid'] = self.uuid
         d['name'] = self.name
         d['address'] = hex(self.address)
+        d['address_symbol'] = self.address_symbol
         d['pc'] = hex(self.pc)
+        d['pc_symbol'] = self.pc_symbol
         d['secret_load_pc'] = hex(self.secret_load_pc)
         d['transmitter'] = str(self.transmitter)
         d['n_instr'] = self.n_instr
+        d['n_control_flow_changes'] = self.n_control_flow_changes
         d['n_dependent_loads'] = self.max_load_depth
         d['contains_spec_stop'] = self.contains_spec_stop
         d['bbls'] = str([hex(x) for x in self.bbls])
@@ -321,11 +337,11 @@ class Transmission():
         d['secret_val'] = self.secret_val.to_dict()
 
         d['branches'] = utils.ordered_branches(self.branches)
-        d['branch_requirements'] = self.branch_requirements
+        d['branch_requirements'] = self.branch_requirements.to_dict()
         d['constraints'] = utils.ordered_constraints(self.constraints)
-        d['constraint_requirements'] = self.constraint_requirements
-        d['all_requirements'] = self.all_requirements
-        d['all_requirements_w_branches'] = self.all_requirements_w_branches
+        d['constraint_requirements'] = self.constraint_requirements.to_dict()
+        d['all_requirements'] = self.all_requirements.to_dict()
+        d['all_requirements_w_branches'] = self.all_requirements_w_branches.to_dict()
 
         d['inferable_bits'] = self.inferable_bits.to_dict()
         d['aliases'] = [str(x.to_BV()) for x in self.aliases]
