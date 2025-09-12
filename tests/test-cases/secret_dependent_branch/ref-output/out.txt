@@ -1,0 +1,73 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <secret_dependent_branch>:
+ 4000000:	4c 0f b7 0f          	movzx  r9,WORD PTR [rdi]
+ 4000004:	4c 8b 06             	mov    r8,QWORD PTR [rsi]
+ 4000007:	49 83 c0 50          	add    r8,0x50
+ 400000b:	4d 39 c1             	cmp    r9,r8
+ 400000e:	74 3f                	je     400004f <end>
+
+0000000004000010 <t1>:
+ 4000010:	4c 0f b7 4f 10       	movzx  r9,WORD PTR [rdi+0x10]
+ 4000015:	49 81 f9 ad de 00 00 	cmp    r9,0xdead
+ 400001c:	74 31                	je     400004f <end>
+
+000000000400001e <t2>:
+ 400001e:	4c 0f b7 4f 20       	movzx  r9,WORD PTR [rdi+0x20]
+ 4000023:	49 39 f9             	cmp    r9,rdi
+ 4000026:	74 27                	je     400004f <end>
+
+0000000004000028 <t3>:
+ 4000028:	48 8b 04 25 00 00 00 	mov    rax,QWORD PTR ds:0xffffffff81000000
+ 400002f:	81 
+ 4000030:	4c 0f b7 4f 30       	movzx  r9,WORD PTR [rdi+0x30]
+ 4000035:	49 39 c1             	cmp    r9,rax
+ 4000038:	74 15                	je     400004f <end>
+
+000000000400003a <t4>:
+ 400003a:	48 8b 04 25 00 00 00 	mov    rax,QWORD PTR ds:0xffffffff81000000
+ 4000041:	81 
+ 4000042:	4c 0f b7 4f 30       	movzx  r9,WORD PTR [rdi+0x30]
+ 4000047:	49 01 c1             	add    r9,rax
+ 400004a:	49 39 f1             	cmp    r9,rsi
+ 400004d:	74 00                	je     400004f <end>
+
+000000000400004f <end>:
+ 400004f:	e9 00 00 00 00       	jmp    4000054 <end+0x5>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing SDB   @0x400000e: <Bool (0#48 .. LOAD_16[<BV64 rdi>]_20) == LOAD_64[<BV64 rsi>]_21 + 0x50> <> <BV64 LOAD_64[<BV64 rsi>]_21 + 0x50>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x400000e: <Bool (0#48 .. LOAD_16[<BV64 rdi>]_20) == LOAD_64[<BV64 rsi>]_21 + 0x50> <> <BV64 0#48 .. LOAD_16[<BV64 rdi>]_20>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x400001c: <Bool LOAD_16[<BV64 rdi + 0x10>]_22 == 0xdead> <> <BV16 0xdead>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x4000026: <Bool (0#48 .. LOAD_16[<BV64 rdi + 0x20>]_23) == rdi> <> <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x4000038: <Bool (0#48 .. LOAD_16[<BV64 rdi + 0x30>]_25) == LOAD_64[<BV64 0xffffffff81000000>]_24> <> <BV64 LOAD_64[<BV64 0xffffffff81000000>]_24>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x400004d: <Bool (0#48 .. LOAD_16[<BV64 rdi + 0x30>]_27) + LOAD_64[<BV64 0xffffffff81000000>]_26 == rsi> <> <BV64 rsi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[MAIN]  Found 0 potential transmissions.
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 5 potential secret dependent branches.
+[MAIN]  Outputted 0 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 6 secret dependent branches.
+
+== REASONER TRANSMISSION ==
+ERROR    | 2025-09-11 16:45:59,177 | angr.state_plugins.unicorn_engine | Unicorn engine has an incompatible API. Support disabled.
+Total 6 Secret Dependent Branches (not reasoned)
+[-] Imported 0 gadgets

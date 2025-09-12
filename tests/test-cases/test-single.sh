@@ -55,9 +55,16 @@ python3 ../../../inspectre analyze --config $cfg --base-address 0x4000000 --addr
 
 if [ -f gadgets.csv ]; then
     echo ""  >> ${OUT_FOLDER}/out.txt
-    echo "== REASONER ==" >> ${OUT_FOLDER}/out.txt
+    echo "== REASONER TRANSMISSION ==" >> ${OUT_FOLDER}/out.txt
     python3 ../../../inspectre reason gadgets.csv gadgets-reasoned.csv &>> ${OUT_FOLDER}/out.txt
 fi
+
+if [ -f tfp.csv ]; then
+    echo ""  >> ${OUT_FOLDER}/out.txt
+    echo "== REASONER DISPATCH ==" >> ${OUT_FOLDER}/out.txt
+    python3 ../../../inspectre reason tfp.csv tfp-reasoned.csv &>> ${OUT_FOLDER}/out.txt
+fi
+
 
 # ------------------------------------------------------------------------------
 # Execute queries for disclosure gadgets
@@ -104,6 +111,26 @@ if [ -f tfp.csv ]; then
         echo $sql >> ${OUT_FOLDER}/scanner_data.txt
         sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
         echo "" >> ${OUT_FOLDER}/scanner_data.txt
+    done
+fi
+
+if [ -f tfp-reasoned.csv ]; then
+    # First reasoner specific fields
+    for sql in in ../../test-queries/reasoner-tfp/*.sql;
+    do
+        [ -e "$sql" ] || continue
+        echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp-reasoned.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
+        echo "" >> ${OUT_FOLDER}/reasoner_data.txt
+    done
+
+     # Next again the scanner fields, in case we screwed something up in the reasoner
+    for sql in in ../../test-queries/scanner-tfp/*.sql;
+    do
+        [ -e "$sql" ] || continue
+        echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp-reasoned.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
+        echo "" >> ${OUT_FOLDER}/reasoner_data.txt
     done
 fi
 

@@ -1,11 +1,27 @@
 SELECT
     pc,
     branches,
-    branch_requirements,
+    branch_requirements_regs,
+    branch_requirements_indirect_regs,
+    branch_requirements_direct_regs,
+    branch_requirements_mem,
+    branch_requirements_const_mem,
     constraints,
-    constraint_requirements,
-    all_requirements,
-    all_requirements_w_branches
+    constraint_requirements_regs,
+    constraint_requirements_indirect_regs,
+    constraint_requirements_direct_regs,
+    constraint_requirements_mem,
+    constraint_requirements_const_mem,
+    all_requirements_regs,
+    all_requirements_indirect_regs,
+    all_requirements_direct_regs,
+    all_requirements_mem,
+    all_requirements_const_mem,
+    all_requirements_w_branches_regs,
+    all_requirements_w_branches_indirect_regs,
+    all_requirements_w_branches_direct_regs,
+    all_requirements_w_branches_mem,
+    all_requirements_w_branches_const_mem
 FROM
     gadgets
 order by pc, base_expr, transmitted_secret_expr, secret_address_expr, constraints, branches

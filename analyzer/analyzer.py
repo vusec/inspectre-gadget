@@ -9,6 +9,7 @@ import yaml
 import pickle
 import angr
 import claripy.ast.base
+from cle import Symbol
 
 from .scanner.scanner import Scanner
 from .analysis.pipeline import AnalysisPipeline
@@ -19,6 +20,7 @@ from .asmprinter.asmprinter import *
 
 l = get_logger("MAIN")
 l_verbose = get_logger("MAIN_VERBOSE")
+
 
 def load_config(config_file):
     """
@@ -78,9 +80,15 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
     s = Scanner(analysis_pipeline=analysis_pipeline)
     s.run(proj, gadget_address)
 
-    l.info(f"Found {len(s.transmissions)} potential transmissions.")
-    l.info(f"Found {len(s.calls)} potential tainted function pointers.")
-    l.info(f"Found {len(s.half_gadgets)} potential half-spectre gadgets.")
+    if global_config['TransmissionGadgets']:
+        l.info(f"Found {len(s.transmissions)} potential transmissions.")
+    if global_config['TaintedFunctionPointers']:
+        l.info(f"Found {len(s.calls)} potential tainted function pointers.")
+    if global_config['HalfSpectre']:
+        l.info(f"Found {len(s.half_gadgets)} potential half-spectre gadgets.")
+    if global_config['SecretDependentBranches']:
+        l.info(
+            f"Found {len(s.secretDependentBranches)} potential secret dependent branches.")
 
     # Step 3. Analyze found gadgets (if not analyzed during scanning)
     if not global_config['AnalyzeDuringScanning']:
@@ -94,12 +102,19 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
         for half in s.half_gadgets:
             analysis_pipeline.analyze_half_gadget(half)
 
-    l.info(
-        f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
-    l.info(
-        f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
-    l.info(
-        f"Outputted {analysis_pipeline.n_final_half_gadgets} half-spectre gadgets.")
+    if global_config['TransmissionGadgets']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
+    if global_config['TaintedFunctionPointers']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
+    if global_config['HalfSpectre']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_half_gadgets} half-spectre gadgets.")
+    if global_config['SecretDependentBranches']:
+        l.info(
+            f"Outputted {analysis_pipeline.n_final_secret_dependent_branches} secret dependent branches.")
+
 
 def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary="", half_gadget_filename=""):
     """
@@ -125,9 +140,30 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
         symbol_proj = load_angr_project(
             symbol_binary, base_address, cache_project)
 
-        proj.loader.all_objects[0]._symbol_cache = symbol_proj.loader.all_objects[0]._symbol_cache
         proj.loader.all_objects[0].symbols = symbol_proj.loader.all_objects[0].symbols
         proj.loader.all_objects[0]._symbols_by_name = symbol_proj.loader.all_objects[0]._symbols_by_name
+
+        # This works for the Linux kernel binary, not tested on other inputs
+        # Adding the symbols to the text object ensures that fuzzy search
+        # using proj.loader.find_symbol() works
+        text_obj = proj.loader.find_object_containing(base_address)
+
+        if text_obj:
+            for symbol in symbol_proj.loader.all_objects[0].symbols:
+                if symbol.rebased_addr < text_obj.min_addr or\
+                        symbol.rebased_addr > text_obj.max_addr:
+                    continue
+
+                relative_addr = symbol.relative_addr - \
+                    text_obj.mapped_base + symbol.owner.mapped_base
+                new_symbol = Symbol(owner=text_obj, name=symbol.name,
+                                    relative_addr=relative_addr, size=symbol.size,
+                                    sym_type=symbol._type)
+                new_symbol.resolved = symbol.resolved
+                new_symbol.resolvedby = symbol.resolvedby
+
+                text_obj.symbols.add(new_symbol)
+
         del symbol_proj
 
     # Run the Analyzer.

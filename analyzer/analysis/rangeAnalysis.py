@@ -5,6 +5,7 @@ from .range_strategies import *
 # autopep8: off
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
+from ..shared.secretDependentBranch import *
 from ..shared.halfGadget import HalfGadget
 from ..shared.utils import *
 from ..shared.logger import *
@@ -19,6 +20,7 @@ __range_strategies = [
     RangeStrategyFindConstraintsBounds(RangeStrategyInferIsolated()),
     RangeStrategyFindMasking()
 ]
+
 
 def get_constraints_on_ast(ast, constraints):
     """
@@ -83,14 +85,21 @@ def analyse(t: Transmission):
 
     # Calculate ranges for each component
     for c in [t.base, t.transmitted_secret, t.secret_address, t.transmission]:
-        calculate_range(c, constr, constr_with_branches)
+        if c != None:
+            constr = [x[1] for x in c.constraints]
+            constr_with_branches = [x[1] for x in c.branches]
+            constr_with_branches.extend(constr)
+            calculate_range(c, constr, constr_with_branches)
 
     # Calculate ranges for base sub-components.
-    if t.base != None:
+    if t.base != None and t.independent_base != None:
         if t.properties['direct_dependent_base_expr'] == None and t.properties['indirect_dependent_base_expr'] == None:
             t.independent_base.range = t.base.range
             t.independent_base.range_with_branches = t.base.range_with_branches
         else:
+            constr = [x[1] for x in t.independent_base.constraints]
+            constr_with_branches = [x[1] for x in t.independent_base.branches]
+            constr_with_branches.extend(constr)
             calculate_range(t.independent_base, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if t.base == None else t.base.range}")
@@ -104,14 +113,31 @@ def analyse(t: Transmission):
 
 def analyse_tfp(t: TaintedFunctionPointer):
     l.warning(f"========= [RANGE] ==========")
-    for r in t.registers:
-        if t.registers[r].control == TFPRegisterControlType.CONTROLLED or t.registers[r].control == TFPRegisterControlType.POTENTIAL_SECRET:
-            t.registers[r].range = get_ast_ranges(
-                [x[1] for x in t.registers[r].constraints], t.registers[r].expr)
 
-    t.range = get_ast_ranges([x[1] for x in t.constraints], t.expr)
+    for r in t.registers.values():
+        if r.control in (ControlType.REQUIRES_MEM_LEAK, ControlType.REQUIRES_MEM_MASSAGING, ControlType.CONTROLLED) \
+                or r.control_type == TFPRegisterControlType.IS_TFP_REGISTER:
+            constr = [x[1] for x in r.constraints]
+            constr_with_branches = [x[1] for x in r.branches]
+            constr_with_branches.extend(constr)
+            calculate_range(r, constr, constr_with_branches)
+
+            if r.controlled_expr != None:
+                r.controlled_range = get_ast_ranges(constr, r.controlled_expr)
+                if len(r.branches) > 0:
+                    r.controlled_range_with_branches = get_ast_ranges(
+                        constr_with_branches, r.controlled_expr)
+                else:
+                    r.controlled_range_with_branches = r.controlled_range
+
+    # Calculate for tfp expr
+    constr = [x[1] for x in t.constraints]
+    constr_with_branches = [x[1] for x in t.branches]
+    constr_with_branches.extend(constr)
+    calculate_range(t, constr, constr_with_branches)
 
     l.warning("==========================")
+
 
 def analyse_half_gadget(g: HalfGadget):
     l.warning(f"========= [RANGE] ==========")
@@ -133,4 +159,27 @@ def analyse_half_gadget(g: HalfGadget):
     l.warning(
         f"uncontrolled_base range:  {'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.range}")
     l.warning(f"attacker range:  {g.attacker.range}")
+    l.warning("==========================")
+
+
+def analyze_secret_dependent_branch(sdb: SecretDependentBranch):
+
+    # First analyze the transmission components
+    analyse(sdb)
+
+    # Pre-compute constraint sets.
+    constr = []
+    constr.extend([x[1] for x in sdb.constraints])
+
+    constr_with_branches = []
+    if len(sdb.branches) > 0:
+        constr_with_branches.extend([x[1] for x in sdb.constraints])
+        constr_with_branches.extend([x[1] for x in sdb.branches])
+
+    calculate_range(sdb.cmp_value, constr, constr_with_branches)
+    calculate_range(sdb.controlled_cmp_value, constr, constr_with_branches)
+
+    l.warning(f"cmp_value range:  {sdb.cmp_value.range}")
+    l.warning(
+        f"controlled_cmp_value range:  {'NONE' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range}")
     l.warning("==========================")

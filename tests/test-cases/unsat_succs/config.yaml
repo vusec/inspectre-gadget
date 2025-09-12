@@ -30,6 +30,7 @@ MaxBB: 10
 DistributeShifts: True
 TaintedFunctionPointers: True
 HalfSpectre: True
+SecretDependentBranches: True
 CrashOnExceptions: True
 AggressiveSpeculation: True
 AnalyzeDuringScanning: True
