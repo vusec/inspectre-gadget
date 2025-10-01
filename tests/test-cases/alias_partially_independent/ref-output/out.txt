@@ -22,47 +22,27 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[AnalysisMAIN]  Analyzing half-spectre @0x4000005: <BV64 0x28 + r12>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + r12 + LOAD_64[<BV64 r12 + 0x28>]_20>...
+[AnalysisMAIN]  Analyzing TRANS @0x400000a: <BV64 (0#32 .. rdi[31:0]) + r12 + LOAD_64[<BV64 r12 + 0x28>]_20>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing half-spectre @0x400000a: <BV64 (0#32 .. rdi[31:0]) + r12 + LOAD_64[<BV64 r12 + 0x28>]_20>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing half-spectre @0x4000013: <BV64 0x28 + r12>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + r12 + (0#32 .. LOAD_32[<BV64 r12 + 0x28>]_22)>...
+[AnalysisMAIN]  Analyzing TRANS @0x4000018: <BV64 (0#32 .. rdi[31:0]) + r12 + (0#32 .. LOAD_32[<BV64 r12 + 0x28>]_22)>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing half-spectre @0x4000018: <BV64 (0#32 .. rdi[31:0]) + r12 + (0#32 .. LOAD_32[<BV64 r12 + 0x28>]_22)>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing half-spectre @0x400001e: <BV64 0x20 + r12>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing half-spectre @0x4000023: <BV64 0x28 + r12>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + LOAD_64[<BV64 r12 + 0x20>]_24 + LOAD_64[<BV64 r12 + 0x28>]_25>...
+[AnalysisMAIN]  Analyzing TRANS @0x4000028: <BV64 (0#32 .. rdi[31:0]) + LOAD_64[<BV64 r12 + 0x20>]_24 + LOAD_64[<BV64 r12 + 0x28>]_25>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing <BV64 (0#32 .. rdi[31:0]) + LOAD_64[<BV64 r12 + 0x20>]_24 + LOAD_64[<BV64 r12 + 0x28>]_25>...
+[AnalysisMAIN]  Analyzing TRANS @0x4000028: <BV64 (0#32 .. rdi[31:0]) + LOAD_64[<BV64 r12 + 0x20>]_24 + LOAD_64[<BV64 r12 + 0x28>]_25>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing half-spectre @0x4000028: <BV64 (0#32 .. rdi[31:0]) + LOAD_64[<BV64 r12 + 0x20>]_24 + LOAD_64[<BV64 r12 + 0x28>]_25>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
 [MAIN]  Found 3 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
-[MAIN]  Found 7 potential half-spectre gadgets.
+[MAIN]  Found 0 potential secret dependent branches.
 [MAIN]  Outputted 4 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
-[MAIN]  Outputted 7 half-spectre gadgets.
+[MAIN]  Outputted 0 secret dependent branches.
 
-== REASONER ==
+== REASONER TRANSMISSION ==
+Total 0 Secret Dependent Branches (not reasoned)
 [-] Imported 4 gadgets
 [-] Performing exploitability analysis...
 Found 1 exploitable gadgets!

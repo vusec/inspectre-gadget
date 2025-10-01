@@ -14,11 +14,13 @@ from .dependencyGraph import DepGraph, is_expr_controlled
 from ..scanner.annotations import *
 from ..scanner.memory import *
 from ..shared.transmission import *
+from ..shared.secretDependentBranch import *
 from ..shared.logger import *
 from ..shared.astTransform import *
 # autopep8: on
 
 l = get_logger("BaseControlAnalysis")
+
 
 class BaseControlType(Enum):
     NO_BASE = 0,
@@ -40,6 +42,7 @@ class BaseControlType(Enum):
 
     BASE_INDEPENDENT_FROM_SECRET = 7,
     UNKNOWN = 8
+
 
 def get_expr_base_control(base_expr, transmitted_secret_expr, secret_address_expr, d: DepGraph, constraints: bool):
     secrets = set(get_vars(transmitted_secret_expr))
@@ -113,3 +116,10 @@ def analyse(t: Transmission):
     t.properties["deps"] = d
 
     l.warning(f"===========================")
+
+
+def analyse_secret_dependent_branch(sdb: SecretDependentBranch):
+    # First analyze the transmission components
+    analyse(sdb)
+
+    # TODO: Check if the cmp_value depends on the transmission or secret address

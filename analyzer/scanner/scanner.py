@@ -25,10 +25,11 @@ from ..shared.logger import *
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
 from ..shared.halfGadget import *
+from ..shared.secretDependentBranch import SecretDependentBranchExpr
 from ..shared.config import *
 from ..shared.astTransform import *
 from ..shared.utils import get_x86_registers
-from ..asmprinter.asmprinter import get_stack_trace_text
+from ..asmprinter.asmprinter import get_disassembled_trace_text
 
 # autopep8: on
 
@@ -103,6 +104,9 @@ class Scanner:
     """
 
     transmissions: list[TransmissionExpr]
+    calls: list[TaintedFunctionPointer]
+    half_gadgets: list[HalfGadget]
+    secretDependentBranches: list[SecretDependentBranchExpr]
     loads: list[memory.MemOp]
     stores: list[memory.MemOp]
 
@@ -115,8 +119,9 @@ class Scanner:
         self.analysis_pipeline = analysis_pipeline
 
         self.transmissions = []
-        self.half_gadgets = []
         self.calls = []
+        self.half_gadgets = []
+        self.secretDependentBranches = []
 
         self.loads = []
         self.stores = []
@@ -395,6 +400,58 @@ class Scanner:
             if global_config['AnalyzeDuringScanning']:
                 self.analysis_pipeline.analyze_half_gadget(g)
 
+    def check_secret_dependent_branch(self, expr, state):
+        """
+        Branches that have at least a symbol marked as secret in their
+        branch condition expression (guard) are saved as potential
+        secret dependent branches.
+        """
+        if not global_config['SecretDependentBranches']:
+            return
+
+        if contains_secret(expr):
+
+            pc = state.scratch.ins_addr
+            bbls = self.get_bbls(state)
+            constraints = self.get_constraints(state)
+
+            # Filter out for duplicates: angr triggers the exit_hook twice
+            # for each conditional branch (e.g., for both == and != cases),
+            # we only capture one case
+            if self.secretDependentBranches \
+                    and pc == self.secretDependentBranches[-1].pc \
+                    and bbls == self.secretDependentBranches[-1].bbls \
+                    and len(constraints) == len(self.secretDependentBranches[-1].constraints):
+
+                # Check if the constraints are equal (We compare the PC +
+                # AST cache key of each constraint)
+                if all(constraints[i][0] == self.secretDependentBranches[-1].constraints[i][0] and
+                        constraints[i][1].identical(
+                            self.secretDependentBranches[-1].constraints[i][1])
+                        for i in range(len(constraints))):
+                    # duplicate, thus return
+                    return
+
+            # Create a new secret dependent branch object.
+            sdb = SecretDependentBranchExpr(pc=pc,
+                                            expr=expr,
+                                            transmitter=TransmitterType.SECRET_DEP_BRANCH,
+                                            bbls=bbls,
+                                            branches=self.get_history(state),
+                                            aliases=self.get_aliases(state),
+                                            constraints=constraints,
+                                            n_instr=self.count_instructions(
+                                                state, state.scratch.ins_addr),
+                                            n_control_flow_changes=self.count_control_flow_changes(
+                                                state),
+                                            contains_spec_stop=self.history_contains_speculation_stop(
+                                                state))
+
+            self.secretDependentBranches.append(sdb)
+
+            if global_config['AnalyzeDuringScanning']:
+                self.analysis_pipeline.analyze_secret_dependent_branch(sdb)
+
     # ---------------- STATE SPLITTING ----------------------------
 
     def split_state(self, state, asts, addr, branch_split=False, subst_type=SubstType.ADDR_SUBST):
@@ -631,7 +688,7 @@ class Scanner:
 
     def exit_hook_before(self, state: angr.SimState):
         """
-        Hook on indirect calls, for Tainted Function Pointers.
+        Hook on branches calls, for dispatch and secret dep. branch gadgets.
         """
         l.warning(f"Exit hook @{hex(state.scratch.ins_addr)}")
         func_ptr_ast = state.inspect.exit_target
@@ -641,94 +698,97 @@ class Scanner:
             # TODO: inspect the target to see if it's an indirect call thunk?
             return
 
-        # First case: symbolic target
-        if func_ptr_ast.symbolic:
-            # Whenever the target is symbolic, and it is not a return, we
-            # know we are performing an indirect call.
-            block = state.block()
-            if block.vex.jumpkind == 'Ijk_Ret':
-                return
+        # ----------- Dispatch gadgets (tainted function pointers)
+        if func_ptr_ast.symbolic or state.inspect.exit_target.args[0] in self.thunk_list:
+            # First case: symbolic target
+            if func_ptr_ast.symbolic:
+                # Whenever the target is symbolic, and it is not a return, we
+                # know we are performing an indirect call.
+                block = state.block()
+                if state.inspect.exit_jumpkind == 'Ijk_Ret' or block.vex.jumpkind == 'Ijk_Ret':
+                    return
 
-            # get the register
-            instruction = block.capstone.insns[-1].insn
+                # get the register
+                instruction = block.capstone.insns[-1].insn
 
-            if 'ptr' in instruction.op_str:
-                # Jump to pointer in memory (e.g, jmp qword ptr [rax])
-                func_ptr_reg = 'mem'
+                if 'ptr' in instruction.op_str:
+                    # Jump to pointer in memory (e.g, jmp qword ptr [rax])
+                    func_ptr_reg = 'mem'
+                else:
+                    # Jump to registers
+                    regs_read, regs_write = instruction.regs_access()
+
+                    # exclude all written registers; RSP in case of a call instruction
+                    if len(regs_read) > len(regs_write):
+                        regs_read = [
+                            x for x in regs_read if x not in regs_write]
+
+                    reg_id = regs_read[0]
+                    func_ptr_reg = instruction.reg_name(reg_id)
+
+            # Second case: jump to indirect thunk
             else:
-                # Jump to registers
-                regs_read, regs_write = instruction.regs_access()
+                exit_target = state.inspect.exit_target.args[0]
+                func_ptr_reg = self.thunk_list[exit_target]
+                func_ptr_ast = getattr(state.regs, func_ptr_reg)
 
-                # exclude all written registers; RSP in case of a call instruction
-                if len(regs_read) > len(regs_write):
-                    regs_read = [x for x in regs_read if x not in regs_write]
+            # Process first and second case: TFP
+            # Check if we need to substitute the expression (happens with manual splits).
+            subst = getSubstitution(
+                state, state.scratch.ins_addr, SubstType.CALL_SUBST)
+            if subst != None:
+                l.warning(
+                    f"Substituting {func_ptr_ast}   with   {subst}")
+                func_ptr_ast = subst
+            else:
+                # Check if the symbolic address contains an if-then-else node.
+                asts = split_conditions(
+                    func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
+                assert (len(asts) >= 1)
 
-                reg_id = regs_read[0]
-                func_ptr_reg = instruction.reg_name(reg_id)
+                l.warning(f"  Before transformations: {func_ptr_ast}")
+                l.warning(f"  After transformations: {asts}")
 
-        # Second case: jump to indirect thunk
-        elif state.inspect.exit_target.args[0] in self.thunk_list:
-            exit_target = state.inspect.exit_target.args[0]
-            func_ptr_reg = self.thunk_list[exit_target]
-            func_ptr_ast = getattr(state.regs, func_ptr_reg)
+                if len(asts) > 1:
+                    self.split_state(state, asts, state.scratch.ins_addr,
+                                     branch_split=False, subst_type=SubstType.CALL_SUBST)
+                    raise SplitException
 
-        else:
+            # process the TFP
+            self.check_tfp(state, func_ptr_reg, func_ptr_ast)
+            # check if it is also a transmission
+            self.check_transmission(
+                func_ptr_ast, TransmitterType.CODE_LOAD, state)
+
+            # Stop exploration here
+            raise SplitException
+
+        # ----------- Secret dependent branches (conditional jumps)
+        elif type(state.inspect.exit_guard.args[0]) != bool:
+            exit_guard = state.inspect.exit_guard
+
+            # Check if we need to substitute the expression (happens with manual splits).
+            subst = getSubstitution(
+                state, state.scratch.ins_addr, SubstType.CALL_SUBST)
+            if subst != None:
+                l.warning(f"Substituting {exit_guard}   with   {subst}")
+                exit_guard = subst
+            else:
+                # Check if the address contains an if-then-else node.
+                asts = split_conditions(
+                    exit_guard, simplify=False, addr=state.scratch.ins_addr)
+                assert (len(asts) >= 1)
+
+                l.warning(f"  Before transformations: {exit_guard}")
+                l.warning(f"  After transformations: {asts}")
+
+                if len(asts) > 1:
+                    self.split_state(state, asts, state.scratch.ins_addr,
+                                     branch_split=False, subst_type=SubstType.CALL_SUBST)
+                    raise SplitException
+
+            self.check_secret_dependent_branch(exit_guard, state)
             return
-
-        # Check if we need to substitute the expression (happens with manual splits).
-        subst = getSubstitution(
-            state, state.scratch.ins_addr, SubstType.CALL_SUBST)
-        if subst != None:
-            l.warning(f"Substituting {func_ptr_ast}   with   {subst}")
-            func_ptr_ast = subst
-        else:
-            # Check if the symbolic address contains an if-then-else node.
-            asts = split_conditions(
-                func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
-            assert (len(asts) >= 1)
-
-            l.warning(f"  Before transformations: {func_ptr_ast}")
-            l.warning(f"  After transformations: {asts}")
-
-            if len(asts) > 1:
-                self.split_state(state, asts, state.scratch.ins_addr,
-                                 branch_split=False, subst_type=SubstType.CALL_SUBST)
-                raise SplitException
-
-        # process the TFP
-        self.check_tfp(state, func_ptr_reg, func_ptr_ast)
-        # check if it is also a transmission
-        self.check_transmission(func_ptr_ast, TransmitterType.CODE_LOAD, state)
-
-        # Stop exploration here
-        raise SplitException
-
-    def print_stack_trace(self, state):
-        output = ""
-        prev_symbol = None
-
-        for bbl_addr in state.history.bbl_addrs:
-            # Symbol
-            symbol = self.proj.loader.find_symbol(bbl_addr, fuzzy=True)
-            # Disassembly adds symbol at the start of the function, we only
-            # add if we are not at the start and symbol differs from prev
-            if symbol.rebased_addr != bbl_addr and symbol != prev_symbol:
-                # Capstone did not add a symbol
-                max_bytes_per_line = 5
-                bytes_width = max_bytes_per_line * 3 + 3
-                output += " " * bytes_width + \
-                    f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
-
-            prev_symbol = symbol
-
-            # Add the assembly code
-            block = self.proj.factory.block(bbl_addr)
-            output += self.proj.analyses.Disassembly(
-                ranges=[(block.addr, block.addr + block.size)]).render(color=color)
-
-            output += "\n"
-
-        print(output)
 
     def run(self, proj: angr.Project, start_address) -> list[TransmissionExpr]:
         """
@@ -802,7 +862,6 @@ class Scanner:
 
             except SplitException as e:
                 # The state has been manually splitted: don't explore it further.
-                l.error(str(e))
                 continue
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
@@ -822,19 +881,29 @@ class Scanner:
                 # Catch test-case end error
                 if 'No bytes in memory for block starting at 0x400dead.' == str(e):
                     continue
+
+                if str(e).startswith("Cannot execute following jumpkind"):
+                    # E.g., Ijk_SigSEGV
+                    l.error("=============== UNSUPPORTED JUMPKIND ===============")
+                    l.error(str(e))
+                    continue
+
                 # Debug setting to print the trace and immediately exit
                 if global_config['CrashOnExceptions']:
+                    print(get_disassembled_trace_text(
+                        proj, self.cur_state.history.bbl_addrs))
                     raise e
 
                 # On long runs (e.g. running on the whole Linux Kernel)
                 # we want to report the error without crashing
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
-                if str(e) == 'timeout':
-                    print(get_stack_trace_text(
-                        self.proj, state.history.bbl_addrs))
+
                 if not l.disabled:
+                    print(get_disassembled_trace_text(
+                        proj, self.cur_state.history.bbl_addrs))
                     traceback.format_exc()
+
                 report_error(e, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue

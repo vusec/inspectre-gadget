@@ -9,6 +9,7 @@ from ..shared.logger import *
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
 from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
 from ..shared.utils import *
 from ..scanner.annotations import *
 # autopep8: on
@@ -69,29 +70,29 @@ class GadgetType(Enum):
     TRANSMISSION = 0,
     TFP = 1,
     HALF = 2,
+    SDB = 3,
     UNKNOWN = 3
 
 
-def get_stack_trace_text(proj, bbls, color=True):
+def get_disassembled_trace_text(proj, bbls, color=True):
 
-    prev_symbol = None
+    prev_block = None
     output = ""
     for bbl_addr in bbls:
         # Symbol
         symbol = proj.loader.find_symbol(bbl_addr, fuzzy=True)
-        # Disassembly adds symbol at the start of the function, we only
-        # add if we are not at the start and symbol differs from prev
-        if symbol != None and symbol.rebased_addr != bbl_addr and symbol != prev_symbol:
-            # Capstone did not add a symbol
-            max_bytes_per_line = 5
-            bytes_width = max_bytes_per_line * 3 + 3
+        # We want a symbol add every non-fallthrough
+        # As Disassembly adds a symbol at the start of the function, we do not
+        if symbol != None and symbol.rebased_addr != bbl_addr and \
+                (prev_block == None or prev_block.addr + prev_block.size != bbl_addr):
+            # Non-fallthrough and Capstone did not add a symbol
+            bytes_width = (bbl_addr.bit_length() + 3) // 4 + 2
             output += " " * bytes_width + \
                 f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
 
-        prev_symbol = symbol
-
         # Add the assembly code
         block = proj.factory.block(bbl_addr)
+        prev_block = block
         output += proj.analyses.Disassembly(
             ranges=[(block.addr, block.addr + block.size)]).render(color=color)
 
@@ -124,8 +125,18 @@ def print_annotated_assembly(proj: angr.Project, bbls, branches, expr, pc, secre
             all_annotations - secret_annotations, "Attacker")
         proj.kb.comments[pc] = str(set(annotations))
         proj.kb.comments[pc] += " -> " + "TRANSMISSION"
+    elif type == GadgetType.SDB:
+        all_annotations = set(get_annotations(expr))
+        secret_annotations = {a for a in all_annotations if isinstance(
+            a, LoadAnnotation) and a.address == secret_load_pc}
+        annotations = replace_secret_annotations_with_name(
+            secret_annotations, "Secret")
+        annotations += replace_secret_annotations_with_name(
+            all_annotations - secret_annotations, "Attacker")
+        proj.kb.comments[pc] = str(set(annotations))
+        proj.kb.comments[pc] += " -> " + "SECRET DEPENDENT BRANCH"
 
-    output = get_stack_trace_text(proj, bbls, color)
+    output = get_disassembled_trace_text(proj, bbls, color)
 
     proj.kb.comments = {}
     return output
@@ -241,6 +252,55 @@ Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in g.branches]}
 """)
 
     o.write(f"""
+{'-'*48}
+""")
+    o.close()
+
+
+def output_secret_dependent_branch_to_file(sdb: SecretDependentBranch, proj, path):
+    Path(path).mkdir(parents=True, exist_ok=True)
+    o = open(f"{path}/sdb_{sdb.name}_{hex(sdb.pc)}_{sdb.uuid}.asm", "a+")
+    o.write(f"------------ SECRET DEPENDENT BRANCH ------------\n")
+    o.write(print_annotated_assembly(proj, sdb.bbls, sdb.branches, sdb.sdb_expr,
+            sdb.pc, sdb.secret_load_pc, GadgetType.SDB, color=False))
+    o.write(f"""
+{'-'*48}
+uuid: {sdb.uuid}
+transmitter: {sdb.transmitter}
+CMP operation: {sdb.cmp_operation}
+
+Secret Dependent Branch:
+  - Expr: {sdb.sdb_expr}
+Secret Address:
+  - Expr: {sdb.secret_address.expr}
+  - Range: {sdb.secret_address.range}
+Transmitted Secret:
+  - Expr: {sdb.transmitted_secret.expr}
+  - Range: {sdb.transmitted_secret.range}
+  - Spread: {sdb.inferable_bits.spread_low} - {sdb.inferable_bits.spread_high}
+  - Number of Bits Inferable: {sdb.inferable_bits.number_of_bits_inferable}
+Base:
+  - Expr: {'None' if sdb.base == None else sdb.base.expr}
+  - Range: {'None' if sdb.base == None else sdb.base.range}
+  - Independent Expr: {'None' if sdb.independent_base == None else sdb.independent_base.expr}
+  - Independent Range: {'None' if sdb.independent_base == None else sdb.independent_base.range}
+Transmission:
+  - Expr: {sdb.transmission.expr}
+  - Range: {sdb.transmission.range}
+
+CMP Value:
+  - Expr: {sdb.cmp_value.expr}
+  - Range: {sdb.cmp_value.range}
+  - Controlled Expr: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.expr}
+  - Controlled Range: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range}
+
+Register Requirements:
+  - All: {sdb.all_requirements.regs}
+  - Transmission: {sdb.transmission.requirements.regs}
+  - CMP Value: {sdb.cmp_value.requirements.regs}
+
+Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in sdb.constraints]}
+Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in sdb.branches]}
 {'-'*48}
 """)
     o.close()

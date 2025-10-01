@@ -563,18 +563,6 @@ def slam_is_exploitable(t: pd.Series):
 def run(in_csv, out_csv):
     global with_branches
 
-    # Replace 'None' with 0
-    # TODO: Hack, we should adjust the analyzer output.
-    file = open(in_csv, 'r')
-    data = file.read()
-    data = data.replace('None', '')
-    data = data.replace('nan', '')
-    data = data.replace('Nan', '')
-    file.close()
-
-    df = pd.read_csv(StringIO(data), delimiter=';')
-    # df.fillna(0, inplace=True)
-
     integer_cols = ['base_range_max',
                     'base_range_min',
                     'base_range_stride',
@@ -611,11 +599,31 @@ def run(in_csv, out_csv):
                     'transmitted_secret_range_w_branches_min'
                     ]
 
+    file = open(in_csv, 'r')
+    data = file.read()
+    file.close()
+
+    df_header = pd.read_csv(StringIO(data), delimiter=';')
+    types_dict = {
+        col: 'UInt64' if col in integer_cols else df_header[col].dtype.name for col in df_header}
+
+    # Via this method we avoid pandas mixing types
+    df = pd.read_csv(StringIO(data), delimiter=';', dtype=types_dict)
+
+    # TODO: Add support for Secret Dependent Branch
+    # for now we filter them out and add them in the end
+    df_sdb = df[df['transmitter'] == 'TransmitterType.SECRET_DEP_BRANCH']
+    print(f"Total {len(df_sdb)} Secret Dependent Branches (not reasoned)")
+
+    df = df[df['transmitter'] != 'TransmitterType.SECRET_DEP_BRANCH']
+
+    if df.empty:
+        print(f"[-] Imported {len(df)} gadgets")
+        return
+
     # Transform columns.
     for i in integer_cols:
         df[i] = df[i].fillna(0)
-        df[i] = df[i].replace('', 0)
-        df[i] = df[i].astype('float64')
 
     df['base_size'] = df.apply(calc_base_size, axis=1)
     df['transmitted_secret_size'] = df.apply(
@@ -686,6 +694,9 @@ def run(in_csv, out_csv):
 
     print(
         f"Found {len(df[df['exploitable_w_slam'] == True])} exploitable gadgets!")
+
+    # add the DSP gadgets
+    df = pd.concat([df, df_sdb])
 
     # Save to new file.
     print(f"[-] Saving to {out_csv}")

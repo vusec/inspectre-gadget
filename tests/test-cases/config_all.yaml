@@ -29,5 +29,8 @@ AnalysisTimeout: 1000 #s
 MaxBB: 5
 DistributeShifts: True
 TaintedFunctionPointers: True
-HalfSpectre: True
+# We disable half-spectre by default to reduce the test output
+# its enabled for the half-spectre test-cases
+HalfSpectre: False
+SecretDependentBranches: True
 CrashOnExceptions: True

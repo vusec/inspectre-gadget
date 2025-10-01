@@ -5,6 +5,7 @@ from .range_strategies import *
 # autopep8: off
 from ..shared.transmission import *
 from ..shared.taintedFunctionPointer import *
+from ..shared.secretDependentBranch import *
 from ..shared.halfGadget import HalfGadget
 from ..shared.utils import *
 from ..shared.logger import *
@@ -158,4 +159,27 @@ def analyse_half_gadget(g: HalfGadget):
     l.warning(
         f"uncontrolled_base range:  {'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.range}")
     l.warning(f"attacker range:  {g.attacker.range}")
+    l.warning("==========================")
+
+
+def analyze_secret_dependent_branch(sdb: SecretDependentBranch):
+
+    # First analyze the transmission components
+    analyse(sdb)
+
+    # Pre-compute constraint sets.
+    constr = []
+    constr.extend([x[1] for x in sdb.constraints])
+
+    constr_with_branches = []
+    if len(sdb.branches) > 0:
+        constr_with_branches.extend([x[1] for x in sdb.constraints])
+        constr_with_branches.extend([x[1] for x in sdb.branches])
+
+    calculate_range(sdb.cmp_value, constr, constr_with_branches)
+    calculate_range(sdb.controlled_cmp_value, constr, constr_with_branches)
+
+    l.warning(f"cmp_value range:  {sdb.cmp_value.range}")
+    l.warning(
+        f"controlled_cmp_value range:  {'NONE' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range}")
     l.warning("==========================")

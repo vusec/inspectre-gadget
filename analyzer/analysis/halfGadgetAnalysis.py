@@ -20,6 +20,7 @@ from .transmissionAnalysis import canonicalize
 
 l = get_logger("HalfSpectreAnalysis")
 
+
 def analyse(gadget: HalfGadget):
     l.warning(f"========= [HalfGadget] ==========")
     l.warning(f"Analyzing @{hex(gadget.pc)}: {gadget.loaded.expr}")
@@ -76,7 +77,11 @@ def analyse(gadget: HalfGadget):
         else:
             g.uncontrolled_base = None
         # Create the attacker-controlled component.
-        assert (len(attacker_members) > 0)
+        if len(attacker_members) == 0:
+            # This may happen if the attacker controlled expr is simplified to 0
+            l.warning(f"Uncontrolled half gadget, skipping...")
+            continue
+
         g.attacker.expr = generate_addition(attacker_members)
 
         # Calculate size.

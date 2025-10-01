@@ -31,6 +31,8 @@ Disassembly of section .text:
 [MAIN]  Found 0 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
 [MAIN]  Found 3 potential half-spectre gadgets.
+[MAIN]  Found 0 potential secret dependent branches.
 [MAIN]  Outputted 0 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
 [MAIN]  Outputted 3 half-spectre gadgets.
+[MAIN]  Outputted 0 secret dependent branches.
