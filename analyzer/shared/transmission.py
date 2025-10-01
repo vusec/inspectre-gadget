@@ -185,6 +185,8 @@ class Transmission():
     address: int
     pc: int
     secret_load_pc: int
+    pc_symbol: str
+    address_symbol: str
     transmitter: TransmitterType
     n_instr: int
     contains_spec_stop: bool
@@ -219,6 +221,8 @@ class Transmission():
         self.address = 0
         self.pc = t.pc
         self.secret_load_pc = 0
+        self.pc_symbol = ""
+        self.address_symbol = ""
         self.transmitter = t.transmitter
         self.n_instr = t.n_instr
         self.contains_spec_stop = t.contains_spec_stop
@@ -303,7 +307,9 @@ class Transmission():
         d['uuid'] = self.uuid
         d['name'] = self.name
         d['address'] = hex(self.address)
+        d['address_symbol'] = self.address_symbol
         d['pc'] = hex(self.pc)
+        d['pc_symbol'] = self.pc_symbol
         d['secret_load_pc'] = hex(self.secret_load_pc)
         d['transmitter'] = str(self.transmitter)
         d['n_instr'] = self.n_instr

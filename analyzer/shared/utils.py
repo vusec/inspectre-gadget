@@ -1,4 +1,5 @@
 import claripy
+import capstone
 import itertools
 import traceback
 
@@ -68,14 +69,23 @@ def report_error(error: Exception, where="dunno", start_addr="dunno", error_type
     o.write("\n")
     o.close()
 
-def report_unsupported(error: Exception, where="dunno", start_addr="dunno", error_type="GENERIC"):
+def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno", error_type="GENERIC"):
     if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
         where = hex(error.ins_addr)
+
+    try:
+        mnemonic = get_mnemonic_at_address(proj, int(where, 16))
+    except ValueError:
+        mnemonic = ''
+
+    if mnemonic == 'ud2':
+        return
 
     o = open("unsupported.txt", "a+")
     o.write(
         f"---------------- [ {error_type} UNSUPPORTED INSTRUCTION ] ----------------\n")
-    o.write(f"instruction addr: {where}     started at: {start_addr}\n")
+    o.write(
+        f"instruction addr: {where}     started at: {start_addr}     mnemonic: '{mnemonic}'\n")
     o.write(str(error) + "\n")
     o.write("\n")
     o.close()
@@ -106,8 +116,22 @@ def branch_outcomes(history):
 
 def ordered_branches(branches):
     branches = sorted(branches, key=lambda x: x[0])
-    return [(hex(addr), cond, taken) for addr, cond, taken in branches]
+    return [(hex(addr), str(cond), taken) for addr, cond, taken in branches]
 
 def ordered_constraints(constraints):
     constraints = sorted(constraints, key=lambda x: x[0])
     return [(hex(addr), cond, str(ctype)) for addr, cond, ctype in constraints]
+
+def get_mnemonic_at_address(proj, address):
+    proj.loader.memory.seek(address)
+    bytes = proj.loader.memory.read(10)
+    if not bytes:
+        return ''
+
+    md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
+    md.detail = True
+    instructions = list(md.disasm(bytes, 0))
+    if not instructions:
+        return ''
+
+    return instructions[0].mnemonic

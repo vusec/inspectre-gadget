@@ -5,7 +5,7 @@ import csv
 import subprocess
 import os
 
-from  analyzer import analyzer
+from analyzer import analyzer
 from reasoner import reasoner
 
 def parse_gadget_list(filename):
@@ -29,11 +29,13 @@ def run_analyzer(args):
     # Parse entrypoint list.
     entrypoints = []
     if args.address != "":
-        entrypoints = [[args.address, args.name if args.name != "" else  os.path.basename(args.binary)]]
+        entrypoints = [[args.address, args.name if args.name !=
+                        "" else os.path.basename(args.binary)]]
     elif args.address_list != "":
         entrypoints = parse_gadget_list(args.address_list)
 
-    parsed_entrypoints = [[int(x[0], 16), str(x[1]).strip()] for x in entrypoints]
+    parsed_entrypoints = [[int(x[0], 16), str(x[1]).strip()]
+                          for x in entrypoints]
 
     # Base address is by default the address of the first entrypoint.
     if args.base_address == "":
@@ -59,7 +61,7 @@ def run_reasoner(args):
 
 def run_viewer(args):
     asm_files = os.listdir(args.folder)
-    asm = [ f"{args.folder}/{x}" for x in asm_files if args.id in x ]
+    asm = [f"{args.folder}/{x}" for x in asm_files if args.id in x]
     if len(asm) == 0:
         print("Not found")
         exit()
@@ -68,42 +70,60 @@ def run_viewer(args):
 
 
 if __name__ == '__main__':
-    arg_parser = argparse.ArgumentParser(description='An inspector for Spectre gadgets')
-    subparsers = arg_parser.add_subparsers(dest='command', help='command to run', required=True)
+    arg_parser = argparse.ArgumentParser(
+        description='An inspector for Spectre gadgets')
+    subparsers = arg_parser.add_subparsers(
+        dest='command', help='command to run', required=True)
 
     # ----------- Analyzer
-    analyzer_args = subparsers.add_parser('analyze', help='Extract a list of transmission gadgets from a binary')
+    analyzer_args = subparsers.add_parser(
+        'analyze', help='Extract a list of transmission gadgets from a binary')
     # Required args.
     analyzer_args.add_argument('binary')
-    analyzer_args.add_argument('--config', type=str, required=True, help='which configuration file to use')
+    analyzer_args.add_argument(
+        '--config', type=str, required=True, help='which configuration file to use')
     group = analyzer_args.add_mutually_exclusive_group(required=True)
-    group.add_argument('--address', default='', help='inspect a single entrypoint at the given (hex) address')
-    analyzer_args.add_argument('--name', default='', help='give a name to the single entrypoint to analyze (you can choose any name)')
-    group.add_argument('--address-list', default='', help='read entrypoints from a file with the format <HEX_ADDRESS>,<NAME> (you can choose any name)')
+    group.add_argument('--address', default='',
+                       help='inspect a single entrypoint at the given (hex) address')
+    analyzer_args.add_argument(
+        '--name', default='', help='give a name to the single entrypoint to analyze (you can choose any name)')
+    group.add_argument('--address-list', default='',
+                       help='read entrypoints from a file with the format <HEX_ADDRESS>,<NAME> (you can choose any name)')
 
     # Optional args.
-    analyzer_args.add_argument('--cache-project', action='store_true', help='load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist')
-    analyzer_args.add_argument('--base-address', required=False, default='', help='base address of the binary to analyze')
-    analyzer_args.add_argument("--symbol-binary", default='', help='binary that contains function symbols')
+    analyzer_args.add_argument('--cache-project', action='store_true',
+                               help='load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist')
+    analyzer_args.add_argument('--base-address', required=False,
+                               default='', help='base address of the binary to analyze')
+    analyzer_args.add_argument(
+        "--symbol-binary", default='', help='binary that contains function symbols')
 
     # Outputs.
-    analyzer_args.add_argument('--output', required=False, default='', help='output all found gadgets to a CSV')
-    analyzer_args.add_argument('--tfp-output', required=False, default='', help='output all found dispatch gadgets to a CSV')
-    analyzer_args.add_argument('--half-gadget-output', required=False, default='', help='output all found half-spectre gadgets to a CSV')
-    analyzer_args.add_argument('--asm', required=False, default='', help='output an annotated ASM file for each gadget to the specified folder')
+    analyzer_args.add_argument(
+        '--output', required=False, default='', help='output all found gadgets to a CSV')
+    analyzer_args.add_argument('--tfp-output', required=False,
+                               default='', help='output all found dispatch gadgets to a CSV')
+    analyzer_args.add_argument('--half-gadget-output', required=False,
+                               default='', help='output all found half-spectre gadgets to a CSV')
+    analyzer_args.add_argument('--asm', required=False, default='',
+                               help='output an annotated ASM file for each gadget to the specified folder')
     # Run.
     analyzer_args.set_defaults(func=run_analyzer)
 
     # ----------- Reasoner
-    reasoner_args = subparsers.add_parser('reason', help='Reason about gadget exploitability')
+    reasoner_args = subparsers.add_parser(
+        'reason', help='Reason about gadget exploitability')
     reasoner_args.add_argument('csv_in')
     reasoner_args.add_argument('csv_out')
     reasoner_args.set_defaults(func=run_reasoner)
 
     # ----------- Viewer
-    viewer_args = subparsers.add_parser('show', help='Inspect a specific gadget')
-    viewer_args.add_argument('folder', help='folder containing the annotated assembly files')
-    viewer_args.add_argument('id', help='uuid or pc reported by the analyzer (in hex)')
+    viewer_args = subparsers.add_parser(
+        'show', help='Inspect a specific gadget')
+    viewer_args.add_argument(
+        'folder', help='folder containing the annotated assembly files')
+    viewer_args.add_argument(
+        'id', help='uuid or pc reported by the analyzer (in hex)')
     viewer_args.set_defaults(func=run_viewer)
 
     args = arg_parser.parse_args()

@@ -147,7 +147,11 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
     l.warning(f"Analyzing @{hex(potential_t.pc)}: {potential_t.expr}")
 
     # Extract members of the transmission.
-    canonical_exprs = canonicalize(potential_t.expr, potential_t.pc)
+    try:
+        canonical_exprs = canonicalize(potential_t.expr, potential_t.pc)
+    except SplitTooManyNestedIfException:
+        l.error("get_transmissions: Failed canonicalizing expression")
+        return []
 
     transmissions = []
     for canonical_expr in canonical_exprs:

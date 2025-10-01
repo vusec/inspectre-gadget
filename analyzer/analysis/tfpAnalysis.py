@@ -62,8 +62,12 @@ def analyse(t: TaintedFunctionPointer):
 
     # Handle if-then-else statements in register expressions.
     for r in t.registers:
-        asts = split_conditions(
-            t.registers[r].expr, simplify=False, addr=t.address)
+        try:
+            asts = split_conditions(
+                t.registers[r].expr, simplify=False, addr=t.address)
+        except SplitTooManyNestedIfException:
+            # Lets continue with the non-splitted register expr
+            continue
 
         assert (len(asts) >= 1)
         if len(asts) > 1:
