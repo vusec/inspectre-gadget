@@ -301,8 +301,6 @@ def run(in_csv, out_csv):
             # integer_cols.append(f'{reg}_controlled_range{"" if not with_branches else "_with_branches"}_and_mask')
             # integer_cols.append(f'{reg}_controlled_range{"" if not with_branches else "_with_branches"}_or_mask')
 
-    # Replace 'None' with 0
-    # TODO: Hack, we should adjust the analyzer output.
     file = open(in_csv, 'r')
     data = file.read()
     file.close()
@@ -311,6 +309,7 @@ def run(in_csv, out_csv):
     types_dict = {
         col: 'UInt64' if col in integer_cols else df_header[col].dtype.name for col in df_header}
 
+    # Via this method we avoid pandas mixing types
     df = pd.read_csv(StringIO(data), delimiter=';', dtype=types_dict)
 
     print(f"[-] Imported {len(df)} gadgets")
