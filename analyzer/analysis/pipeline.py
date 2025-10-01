@@ -23,6 +23,7 @@ from ..shared.config import global_config
 l = get_logger("AnalysisMAIN")
 l_verbose = get_logger("Analysis")
 
+
 class AnalysisPipeline:
     """
     Analyzes potential gadgets found by the scanner and outputs the final
@@ -75,7 +76,7 @@ class AnalysisPipeline:
         transmissions = transmissionAnalysis.get_transmissions(potential_t)
 
         for t in transmissions:
-            l.info(f"Analyzing {t.transmission.expr}...")
+            l.info(f"Analyzing TRANS @{hex(t.pc)}: {t.transmission.expr}")
             t.uuid = str(uuid.uuid4())
             t.name = self.name
             t.address = self.gadget_address
@@ -121,9 +122,9 @@ class AnalysisPipeline:
     def analyze_tainted_function_pointer(self, t: TaintedFunctionPointer):
 
         self.n_found_tainted_function_pointers += 1
-        tfps = tfpAnalysis.analyse(t)
+        tainted_function_pointers = tfpAnalysis.analyse(t)
 
-        for tfp in tfps:
+        for tfp in tainted_function_pointers:
             l.info(f"Analyzing TFP @{hex(tfp.pc)}: {tfp.expr}")
             tfp.uuid = str(uuid.uuid4())
             tfp.name = self.name
@@ -196,6 +197,7 @@ class AnalysisPipeline:
             if self.half_gadget_filename != "":
                 append_to_csv(self.half_gadget_filename, [g])
                 l.info(f"Dumped CSV to {self.half_gadget_filename}")
+
 
 def flatten_dict(dictionary, parent_key='', separator='_'):
     """

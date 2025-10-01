@@ -72,6 +72,7 @@ def get_requirements(expr: claripy.ast.BV) -> Requirements:
     l.info(f"   direct: {req.direct_regs},   indirect: {ind_regs}")
     return req
 
+
 def get_control(c: TransmissionComponent, report_massaging=False) -> ControlType:
     # TODO: check aliasing
     if len(c.requirements.const_mem) == 0 and len(c.requirements.mem) == 0 and len(c.requirements.regs) == 0:
@@ -125,6 +126,7 @@ def get_control(c: TransmissionComponent, report_massaging=False) -> ControlType
     # Unreachable
     return ControlType.NO_CONTROL
 
+
 def get_transmission_control(t: Transmission):
     if t.secret_address.control == ControlType.NO_CONTROL:
         return ControlType.NO_CONTROL
@@ -175,12 +177,19 @@ def analyse(t: Transmission):
     # t.properties["secret_address_requirements_w_constraints"] = get_requirements(t.secret_addr, constraints=True)
     # t.properties["transmission_requirements_w_constraints"] = get_requirements(t.transmission_expr, constraints=True)
 
+
 def analyse_tfp(t: TaintedFunctionPointer):
     l.warning(f"========= [REQS] ==========")
     for r in t.registers:
         t.registers[r].requirements = get_requirements(t.registers[r].expr)
+        t.registers[r].control = get_control(t.registers[r])
+
+        if t.registers[r].control in (ControlType.REQUIRES_MEM_LEAK, ControlType.REQUIRES_MEM_MASSAGING, ControlType.CONTROLLED):
+            t.controlled.append(r)
 
     t.requirements = get_requirements(t.expr)
+    t.control = get_control(t)
+
     l.warning("==========================")
 
 

@@ -4,10 +4,28 @@ TaintedFunctionPointer object (a.k.a. dispatch gadget).
 
 from enum import Enum
 from collections import OrderedDict
+from collections.abc import MutableMapping
 from claripy import BVS
 
 from .utils import ordered_branches, ordered_constraints
 from . import ranges
+from .transmission import ControlType, Requirements
+
+
+def flatten_dict(dictionary, parent_key='', separator='_'):
+    """
+    Transform a hierarchy of nested objects into a flat dictionary.
+    """
+    items = []
+    for key, value in dictionary.items():
+        new_key = parent_key + separator + key if parent_key else key
+        if isinstance(value, MutableMapping):
+            items.extend(flatten_dict(value, new_key,
+                         separator=separator).items())
+        else:
+            items.append((new_key, value))
+    return dict(items)
+
 
 class TFPRegisterControlType(Enum):
     UNMODIFIED = 1,
@@ -19,49 +37,109 @@ class TFPRegisterControlType(Enum):
     POTENTIAL_SECRET = 7,
     UNKNOWN = 8
 
-class TFPRegister():
-    control: TFPRegisterControlType
-    expr: BVS
 
-    def __init__(self, reg, expr) -> None:
+class TFPRegister():
+    reg: str
+    expr: BVS
+    controlled_expr: BVS
+    control: ControlType
+    control_type: TFPRegisterControlType
+
+    branches: list
+    constraints: list
+    requirements: Requirements
+
+    range: ranges.AstRange
+    range_with_branches: ranges.AstRange
+    controlled_range: ranges.AstRange
+    controlled_range_with_branches: ranges.AstRange
+
+    is_dereferenced: bool
+    reg_dereferenced: list
+
+    def __init__(self, reg, expr, is_dereferenced=False) -> None:
         self.reg = reg
         self.expr = expr
+        self.is_dereferenced = is_dereferenced
+        self.controlled_expr = None
 
-        self.control = TFPRegisterControlType.UNKNOWN
+        self.control = ControlType.UNKNOWN
+        self.control_type = TFPRegisterControlType.UNKNOWN
         self.branches = []
         self.constraints = []
-        self.requirements = []
+        self.requirements = Requirements()
         self.range = None
+        self.range_with_branches = None
+        self.controlled_range = None
+        self.controlled_range_with_branches = None
+        self.reg_dereferenced = []
 
     def __repr__(self) -> str:
         return f"""
         reg: {self.reg}
         expr: {self.expr}
+        controlled_expr: {self.controlled_expr}
         control: {self.control}
+        control_type: {self.control_type}
         branches: {ordered_branches(self.branches)}
         constraints: {ordered_constraints(self.constraints)}
         requirements: {self.requirements}
         range: {self.range}
+        range_with_branches: {self.range_with_branches}
+        controlled_range: {self.controlled_range}
+        controlled_range_with_branches: {self.controlled_range_with_branches}
         """
 
     def to_dict(self):
+        reg_dereferenced_dict = {}
+        for r in self.reg_dereferenced:
+            new_dict = {
+                r.reg:
+                {
+                    'reg': r.reg,
+                    'expr': str(r.expr),
+                    'controlled_expr': str(r.controlled_expr),
+                    'control': str(r.control),
+                    'control_type': str(r.control_type),
+                    'branches': ordered_branches(r.branches),
+                    'constraints': ordered_constraints(r.constraints),
+                    'controlled_range': dict(ranges.AstRange(0, 0, 0, False).to_dict()
+                                             if r.controlled_range == None else r.controlled_range.to_dict()),
+                    'controlled_range_with_branches': dict(ranges.AstRange(0, 0, 0, False).to_dict()
+                                                           if r.controlled_range_with_branches == None else r.controlled_range_with_branches.to_dict()),
+                }
+            }
+
+            reg_dereferenced_dict[r.reg] = flatten_dict(new_dict)
+
         return OrderedDict([
             ("reg", self.reg),
             ("expr", self.expr),
+            ("is_dereferenced", self.is_dereferenced),
+            ("controlled_expr", self.expr),
             ("control", self.control),
+            ("control_type", self.control_type),
             ("branches", ordered_branches(self.branches)),
             ("constraints", ordered_constraints(self.constraints)),
-            ("requirements", self.requirements),
-            ("range", self.range)
+            ("requirements", self.requirements.to_dict()),
+            ("range", ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.range == None else self.range.to_dict()),
+            ("range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.range_with_branches == None else self.range_with_branches.to_dict()),
+            ("controlled_range", ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.controlled_range == None else self.controlled_range.to_dict()),
+            ("controlled_range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.controlled_range_with_branches == None else self.controlled_range_with_branches.to_dict()),
+            ("reg_dereferenced", str(reg_dereferenced_dict))
         ])
 
     def copy(self):
-        new_t = TFPRegister(self.reg, self.expr)
-        new_t.control = self.control
-        new_t.branches.extend(self.branches)
-        new_t.constraints.extend(self.constraints)
-        new_t.requirements.extend(self.requirements)
-        new_t.range = self.range
+        new_t = TFPRegister(self.reg, self.expr, self.is_dereferenced)
+        # Copy all values
+        new_t.__dict__.update(self.__dict__)
+        # Shallow copy mutable values
+        new_t.branches = self.branches.copy()
+        new_t.constraints = self.constraints.copy()
         return new_t
 
 
@@ -78,10 +156,17 @@ class TaintedFunctionPointer():
     pc: int
     pc_symbol: str
     address_symbol: str
+    expr: BVS
+    reg: str
+
+    n_instr: int
+    n_control_flow_changes: int
 
     registers: dict[str, TFPRegister]
+    control: ControlType
+    contains_spec_stop: bool
 
-    def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr, contains_spec_stop, n_dependent_loads) -> None:
+    def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr, n_control_flow_changes, contains_spec_stop, n_dependent_loads) -> None:
         self.uuid = ""
         self.name = ""
         self.address = 0
@@ -90,12 +175,15 @@ class TaintedFunctionPointer():
         self.address_symbol = ""
 
         self.n_instr = n_instr
+        self.n_control_flow_changes = n_control_flow_changes
         self.contains_spec_stop = contains_spec_stop
         self.n_dependent_loads = n_dependent_loads
         self.n_branches = len(branches)
         self.reg = reg
         self.expr = expr
+        self.control = ControlType.UNKNOWN
         self.range = None
+        self.range_with_branches = None
         self.all_branches = []
         self.all_branches.extend(branches)
         self.all_constraints = []
@@ -106,7 +194,7 @@ class TaintedFunctionPointer():
         self.bbls.extend(bbls)
 
         # Constraints only applying on tfp.expr
-        self.requirements = []
+        self.requirements = Requirements()
         self.constraints = []
         self.branches = []
 
@@ -131,6 +219,9 @@ class TaintedFunctionPointer():
         pc: {hex(self.pc)}
         reg: {self.reg}
         expr: {self.expr}
+        control: {self.control}
+        range: {self.range}
+        range_with_branches: {self.range_with_branches}
 
         controlled: {self.controlled}
         uncontrolled: {self.uncontrolled}
@@ -156,16 +247,20 @@ class TaintedFunctionPointer():
             ("pc", hex(self.pc)),
             ("pc_symbol", self.pc_symbol),
             ("n_instr", self.n_instr),
+            ("n_control_flow_changes", self.n_control_flow_changes),
             ("n_dependent_loads", self.n_dependent_loads),
             ("n_branches", self.n_branches),
             ("contains_spec_stop", self.contains_spec_stop),
             ("reg", self.reg),
             ("expr", self.expr),
+            ("control", self.control),
             ("range", ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range == None else self.range.to_dict()),
+            ("range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.range_with_branches == None else self.range_with_branches.to_dict()),
             ("branches", ordered_branches(self.constraints)),
             ("constraints", ordered_constraints(self.branches)),
-            ("requirements", self.requirements),
+            ("requirements", self.requirements.to_dict()),
             ("all_branches", ordered_branches(self.all_constraints)),
             ("all_constraints", ordered_constraints(self.all_branches)),
             ("aliases", self.aliases),
@@ -180,7 +275,8 @@ class TaintedFunctionPointer():
         ])
 
         for r in self.registers.values():
-            d[r.reg] = r.to_dict()
+            if not r.is_dereferenced:
+                d[r.reg] = r.to_dict()
 
         return d
 
@@ -193,11 +289,13 @@ class TaintedFunctionPointer():
                                          constraints=self.all_constraints,
                                          aliases=self.aliases,
                                          n_instr=self.n_instr,
+                                         n_control_flow_changes=self.n_control_flow_changes,
                                          contains_spec_stop=self.contains_spec_stop,
                                          n_dependent_loads=self.n_dependent_loads)
+        new_tfp.control = new_tfp.control
         new_tfp.constraints.extend(self.constraints)
         new_tfp.branches.extend(self.branches)
-        new_tfp.requirements.extend(self.requirements)
+        new_tfp.requirements = self.requirements
         new_tfp.range = self.range
         new_tfp.controlled.extend(self.controlled)
         new_tfp.uncontrolled.extend(self.uncontrolled)
@@ -207,4 +305,5 @@ class TaintedFunctionPointer():
 
         for r in self.registers:
             new_tfp.registers[r] = self.registers[r].copy()
+
         return new_tfp

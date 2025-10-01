@@ -29,11 +29,13 @@ ADDRESS_BIT_LEN = 64
 
 with_branches = False
 
+
 def is_in_range(n, min, max):
     if min <= max:
         return n >= min and n <= max
     else:
         return n >= min or n <= max
+
 
 def is_overlapping(x_min, x_max, y_min, y_max):
     return x_max >= y_min and y_max >= x_min
@@ -42,10 +44,12 @@ def is_overlapping(x_min, x_max, y_min, y_max):
 def get_pc_as_number(t: pd.Series):
     return str(int(t['pc'], 16))
 
+
 def get_x86_registers():
     return ["rax", "rbx", "rcx", "rdx", "rsi",
             "rdi", "rbp", "rsp", "r8", "r9",
             "r10", "r11", "r12", "r13", "r14", "r15"]
+
 
 def calc_reg_size(t: pd.Series, reg):
     if t[f'{reg}_expr'] == '':
@@ -55,6 +59,7 @@ def calc_reg_size(t: pd.Series, reg):
     except:
         return 0
     return int(t[f'{reg}_expr'].split(' ')[0].replace('<BV', ''))
+
 
 def eval_column_to_dict(t: pd.Series, column):
 
@@ -97,6 +102,7 @@ def is_register_sufficiently_controlled(t: pd.Series, reg):
 
     return True
 
+
 def is_register_fully_controlled(t: pd.Series, reg):
 
     if not is_register_sufficiently_controlled(t, reg):
@@ -108,6 +114,7 @@ def is_register_fully_controlled(t: pd.Series, reg):
 
     return True
 
+
 def get_indirect_offsets_sufficiently_controlled(t: pd.Series, reg):
 
     sufficiently_controlled = []
@@ -118,6 +125,7 @@ def get_indirect_offsets_sufficiently_controlled(t: pd.Series, reg):
             sufficiently_controlled.append(r_str)
 
     return sufficiently_controlled
+
 
 def get_indirect_offsets_fully_controlled(t: pd.Series, reg):
 
@@ -154,6 +162,7 @@ def get_sufficiently_controlled_registers(t: pd.Series, reg_type):
 
     return controlled, len(controlled)
 
+
 def get_fully_controlled_registers(t: pd.Series, reg_type):
     controlled = []
 
@@ -175,6 +184,7 @@ def get_fully_controlled_registers(t: pd.Series, reg_type):
             controlled += t[f'{reg}_controlled_fully_indirect{"" if not with_branches else "_w_branches"}']
 
     return controlled, len(controlled)
+
 
 def get_tfp_control(t: pd.Series):
 
@@ -300,23 +310,6 @@ def run(in_csv, out_csv):
     df_header = pd.read_csv(StringIO(data), delimiter=';')
     types_dict = {
         col: 'UInt64' if col in integer_cols else df_header[col].dtype.name for col in df_header}
-
-    # Fixes bug before commit "[ranges] Bail out if stride overflows at infer-isolated"
-    # "40c486caa400901239e0c6e5b12544da59879c8e" (inspectre-gadget)
-    for reg in get_x86_registers():
-        for with_branches in [False, True]:
-            values = list(
-                df_header[f'{reg}_range{"" if not with_branches else "_with_branches"}_stride'].unique())
-            values += list(
-                df_header[f'{reg}_controlled_range{"" if not with_branches else "_with_branches"}_stride'].unique())
-
-            for v in values:
-                try:
-                    np.uint64(v)
-                except OverflowError as e:
-                    print(
-                        f"OverflowError for stride {reg}, replacing '{v}' by '1'")
-                    data = data.replace(v, '1')
 
     df = pd.read_csv(StringIO(data), delimiter=';', dtype=types_dict)
 
