@@ -1,0 +1,54 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <unsat_conflicting_brs>:
+ 4000000:	48 83 fb 10          	cmp    rbx,0x10
+ 4000004:	72 04                	jb     400000a <cmp2>
+ 4000006:	4c 0f b7 0f          	movzx  r9,WORD PTR [rdi]
+
+000000000400000a <cmp2>:
+ 400000a:	48 83 fb 05          	cmp    rbx,0x5
+ 400000e:	77 04                	ja     4000014 <end>
+ 4000010:	49 8b 04 31          	mov    rax,QWORD PTR [r9+rsi*1]
+
+0000000004000014 <end>:
+ 4000014:	e9 00 00 00 00       	jmp    4000019 <end+0x5>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing half-spectre @0x4000006: <BV64 rdi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing TRANS @0x4000010: <BV64 (0#48 .. LOAD_16[<BV64 rdi>]_20) + rsi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000010: <BV64 (0#48 .. LOAD_16[<BV64 rdi>]_20) + rsi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[AnalysisMAIN]  Analyzing half-spectre @0x4000010: <BV64 r9 + rsi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to half.csv
+[MAIN]  Found 1 potential transmissions.
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 3 potential half-spectre gadgets.
+[MAIN]  Found 0 potential secret dependent branches.
+[MAIN]  Outputted 1 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 3 half-spectre gadgets.
+[MAIN]  Outputted 0 secret dependent branches.
+
+== REASONER TRANSMISSION ==
+Total 0 Secret Dependent Branches (not reasoned)
+[-] Imported 1 gadgets
+[-] Performing exploitability analysis...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 1 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!
