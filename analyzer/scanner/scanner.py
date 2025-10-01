@@ -426,7 +426,8 @@ class Scanner:
                 # Check if the constraints are equal (We compare the PC +
                 # AST cache key of each constraint)
                 if all(constraints[i][0] == self.secretDependentBranches[-1].constraints[i][0] and
-                        constraints[i][1].cache_key == self.secretDependentBranches[-1].constraints[i][1].cache_key
+                        constraints[i][1].identical(
+                            self.secretDependentBranches[-1].constraints[i][1])
                         for i in range(len(constraints))):
                     # duplicate, thus return
                     return
