@@ -18,23 +18,21 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[AnalysisMAIN]  Analyzing half-spectre @0x4000000: <BV64 rsi>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_32[<BV64 rsi>]_20[15:0])>...
+[AnalysisMAIN]  Analyzing TRANS @0x4000017: <BV64 0xffffffff81000000 + (0#48 .. LOAD_32[<BV64 rsi>]_20[15:0])>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing <BV64 0xffffffff81000000 + (0#48 .. LOAD_32[<BV64 rsi>]_20[15:0])>...
+[AnalysisMAIN]  Analyzing TRANS @0x4000022: <BV64 0xffffffff81000000 + (0#48 .. LOAD_32[<BV64 rsi>]_20[15:0])>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 2 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
-[MAIN]  Found 1 potential half-spectre gadgets.
+[MAIN]  Found 0 potential secret dependent branches.
 [MAIN]  Outputted 2 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
-[MAIN]  Outputted 1 half-spectre gadgets.
+[MAIN]  Outputted 0 secret dependent branches.
 
-== REASONER ==
+== REASONER TRANSMISSION ==
+Total 0 Secret Dependent Branches (not reasoned)
 [-] Imported 2 gadgets
 [-] Performing exploitability analysis...
 Found 2 exploitable gadgets!

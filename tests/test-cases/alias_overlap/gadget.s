@@ -1,7 +1,15 @@
 .intel_syntax noprefix
 
-alias_type_2:
+alias_overlap:
    # Independent stuff that comes from same register
+   nop
+   nop
+test_symbol:
+   jmp $+4
+   nop
+   nop
+   nop
+   nop
    movzx  r8d, WORD PTR [rdx + 0x28]        # secret
    mov    rax, QWORD PTR [rdx + 0x20]        # IND trans base
    mov    rcx, QWORD PTR [rax]               # trans base

@@ -68,6 +68,5 @@ Disassembly of section .text:
 [MAIN]  Outputted 6 secret dependent branches.
 
 == REASONER TRANSMISSION ==
-ERROR    | 2025-09-11 16:45:59,177 | angr.state_plugins.unicorn_engine | Unicorn engine has an incompatible API. Support disabled.
 Total 6 Secret Dependent Branches (not reasoned)
 [-] Imported 0 gadgets

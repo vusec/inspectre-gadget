@@ -26,29 +26,33 @@ Disassembly of section .text:
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[AnalysisMAIN]  Analyzing half-spectre @0x4000000: <BV64 rdi>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing <BV64 0xffffffff80000000 + (0#48 .. LOAD_16[<BV64 rdi>]_20)>...
+[AnalysisMAIN]  Analyzing SDB   @0x400000b: <Bool (0#48 .. LOAD_16[<BV64 rdi>]_20) <= 0xffff> <> <BV64 0xffff>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing half-spectre @0x4000026: <BV64 0x20 + rdi>
-[AnalysisMAIN]  Dumped annotated ASM to asm
-[AnalysisMAIN]  Dumped CSV to half.csv
-[AnalysisMAIN]  Analyzing <BV64 0xffffffffa0000000 + (0#48 .. LOAD_16[<BV64 rdi + 0x20>]_22)>...
+[AnalysisMAIN]  Analyzing TRANS @0x400000d: <BV64 0xffffffff80000000 + (0#48 .. LOAD_16[<BV64 rdi>]_20)>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing <BV64 0xffffffff90000000 + (0#48 .. LOAD_16[<BV64 rdi>]_20)>...
+[AnalysisMAIN]  Analyzing SDB   @0x400001b: <Bool (0x0 .. LOAD_16[<BV64 rdi>]_20) <= 0xff> <> <BV64 0xff>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x400002f: <Bool LOAD_16[<BV64 rdi + 0x20>]_22 == 0x0> <> <BV16 0x0>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing TRANS @0x4000031: <BV64 0xffffffffa0000000 + (0#48 .. LOAD_16[<BV64 rdi + 0x20>]_22)>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing TRANS @0x400001d: <BV64 0xffffffff90000000 + (0#48 .. LOAD_16[<BV64 rdi>]_20)>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 3 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
-[MAIN]  Found 2 potential half-spectre gadgets.
+[MAIN]  Found 3 potential secret dependent branches.
 [MAIN]  Outputted 3 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
-[MAIN]  Outputted 2 half-spectre gadgets.
+[MAIN]  Outputted 3 secret dependent branches.
 
-== REASONER ==
+== REASONER TRANSMISSION ==
+Total 3 Secret Dependent Branches (not reasoned)
 [-] Imported 3 gadgets
 [-] Performing exploitability analysis...
 Found 0 exploitable gadgets!
