@@ -29,7 +29,7 @@ from ..shared.secretDependentBranch import SecretDependentBranchExpr
 from ..shared.config import *
 from ..shared.astTransform import *
 from ..shared.utils import get_x86_registers
-from ..asmprinter.asmprinter import get_stack_trace_text
+from ..asmprinter.asmprinter import get_disassembled_trace_text
 
 # autopep8: on
 
@@ -789,33 +789,6 @@ class Scanner:
             self.check_secret_dependent_branch(exit_guard, state)
             return
 
-    def print_stack_trace(self, state):
-        output = ""
-        prev_symbol = None
-
-        for bbl_addr in state.history.bbl_addrs:
-            # Symbol
-            symbol = self.proj.loader.find_symbol(bbl_addr, fuzzy=True)
-            # Disassembly adds symbol at the start of the function, we only
-            # add if we are not at the start and symbol differs from prev
-            if symbol.rebased_addr != bbl_addr and symbol != prev_symbol:
-                # Capstone did not add a symbol
-                max_bytes_per_line = 5
-                bytes_width = max_bytes_per_line * 3 + 3
-                output += " " * bytes_width + \
-                    f";{symbol.name}+{bbl_addr-symbol.rebased_addr}:\n"
-
-            prev_symbol = symbol
-
-            # Add the assembly code
-            block = self.proj.factory.block(bbl_addr)
-            output += self.proj.analyses.Disassembly(
-                ranges=[(block.addr, block.addr + block.size)]).render(color=color)
-
-            output += "\n"
-
-        print(output)
-
     def run(self, proj: angr.Project, start_address) -> list[TransmissionExpr]:
         """
         Run the symbolic execution engine for a given number of basic blocks.
@@ -907,19 +880,29 @@ class Scanner:
                 # Catch test-case end error
                 if 'No bytes in memory for block starting at 0x400dead.' == str(e):
                     continue
+
+                if str(e).startswith("Cannot execute following jumpkind"):
+                    # E.g., Ijk_SigSEGV
+                    l.error("=============== UNSUPPORTED JUMPKIND ===============")
+                    l.error(str(e))
+                    continue
+
                 # Debug setting to print the trace and immediately exit
                 if global_config['CrashOnExceptions']:
+                    print(get_disassembled_trace_text(
+                        proj, self.cur_state.history.bbl_addrs))
                     raise e
 
                 # On long runs (e.g. running on the whole Linux Kernel)
                 # we want to report the error without crashing
                 l.error("=============== ERROR ===============")
                 l.error(str(e))
-                if str(e) == 'timeout':
-                    print(get_stack_trace_text(
-                        self.proj, state.history.bbl_addrs))
+
                 if not l.disabled:
+                    print(get_disassembled_trace_text(
+                        proj, self.cur_state.history.bbl_addrs))
                     traceback.format_exc()
+
                 report_error(e, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
