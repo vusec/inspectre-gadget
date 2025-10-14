@@ -82,7 +82,7 @@ class AnalysisPipeline:
         transmissions = transmissionAnalysis.get_transmissions(potential_t)
 
         for t in transmissions:
-            l.info(f"Analyzing TRANS @{hex(t.pc)}: {t.transmission.expr}")
+            l.info(f"Analyzing TRANS @{hex(t.pc)}: {truncate_str(t.transmission.expr)}")
             t.uuid = str(uuid.uuid4())
             t.name = self.name
             t.address = self.gadget_address
@@ -131,7 +131,7 @@ class AnalysisPipeline:
         tainted_function_pointers = tfpAnalysis.analyse(t)
 
         for tfp in tainted_function_pointers:
-            l.info(f"Analyzing TFP @{hex(tfp.pc)}: {tfp.expr}")
+            l.info(f"Analyzing TFP @{hex(tfp.pc)}: {truncate_str(tfp.expr)}")
             tfp.uuid = str(uuid.uuid4())
             tfp.name = self.name
             tfp.address = self.gadget_address
@@ -172,7 +172,7 @@ class AnalysisPipeline:
         gadgets = halfGadgetAnalysis.analyse(gadget)
 
         for g in gadgets:
-            l.info(f"Analyzing half-spectre @{hex(g.pc)}: {g.loaded.expr}")
+            l.info(f"Analyzing half-spectre @{hex(g.pc)}: {truncate_str(g.loaded.expr)}")
             g.uuid = str(uuid.uuid4())
             g.name = self.name
             g.address = self.gadget_address
@@ -212,7 +212,7 @@ class AnalysisPipeline:
 
         for sdb in secret_dependent_branches:
             l.info(
-                f"Analyzing SDB   @{hex(sdb.pc)}: {sdb.sdb_expr} <> {sdb.cmp_value.expr}")
+                f"Analyzing SDB   @{hex(sdb.pc)}: {truncate_str(sdb.sdb_expr)} <> {truncate_str(sdb.cmp_value.expr)}")
             sdb.uuid = str(uuid.uuid4())
             sdb.name = self.name
             sdb.address = self.gadget_address

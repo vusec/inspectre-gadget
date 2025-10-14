@@ -2,12 +2,15 @@ import claripy
 import capstone
 import itertools
 import traceback
+from .config import global_config
 
 def is_sym_expr(x) -> bool:
     return isinstance(x, claripy.ast.base.Base) and x.symbolic
 
+
 def is_sym_var(x) -> bool:
     return is_sym_expr(x) and x.depth == 1
+
 
 def get_vars(expr) -> set[claripy.ast.BV]:
     if not is_sym_expr(expr):
@@ -15,12 +18,14 @@ def get_vars(expr) -> set[claripy.ast.BV]:
 
     return set([leaf for leaf in expr.leaf_asts() if is_sym_expr(leaf)])
 
+
 def get_annotations(expr):
     annos = set()
     for v in get_vars(expr):
         annos.update(v.annotations)
 
     return annos
+
 
 def get_x86_indirect_thunks(proj):
     symbol_names = {"__x86_indirect_thunk_array": "rax",
@@ -49,6 +54,7 @@ def get_x86_indirect_thunks(proj):
 
     return ind_calls
 
+
 def get_x86_registers():
     return ["rax", "rbx", "rcx", "rdx", "rsi",
             "rdi", "rbp", "rsp", "r8", "r9",
@@ -68,6 +74,7 @@ def report_error(error: Exception, where="dunno", start_addr="dunno", error_type
     o.write(traceback.format_exc())
     o.write("\n")
     o.close()
+
 
 def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno", error_type="GENERIC"):
     if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
@@ -90,6 +97,7 @@ def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno"
     o.write("\n")
     o.close()
 
+
 def get_outcome(cond, source, target):
     if cond.concrete:
         if cond.is_true():
@@ -107,20 +115,16 @@ def get_outcome(cond, source, target):
         else:
             return "Taken"
 
-def branch_outcomes(history):
-    outcomes = []
-    for cond, source, target in zip(history.jump_guards, history.jump_sources, history.jump_targets):
-        outcomes.append(get_outcome(cond, source, target))
-
-    return outcomes
 
 def ordered_branches(branches):
     branches = sorted(branches, key=lambda x: x[0])
-    return [(hex(addr), str(cond), taken) for addr, cond, taken in branches]
+    return [(hex(addr), truncate_str(cond), taken) for addr, cond, taken in branches]
+
 
 def ordered_constraints(constraints):
     constraints = sorted(constraints, key=lambda x: x[0])
-    return [(hex(addr), cond, str(ctype)) for addr, cond, ctype in constraints]
+    return [(hex(addr), truncate_str(cond), str(ctype)) for addr, cond, ctype in constraints]
+
 
 def get_mnemonic_at_address(proj, address):
     proj.loader.memory.seek(address)
@@ -135,3 +139,17 @@ def get_mnemonic_at_address(proj, address):
         return ''
 
     return instructions[0].mnemonic
+
+def truncate_str(s, width=1000):
+    placeholder = '[...]'
+    s = str(s)
+
+    if not global_config["OutputTruncatedASTs"]:
+        return s
+
+    assert(width > len(placeholder) + 20)
+
+    if len(s) > width:
+        return s[:width - 20 - len(placeholder)] + placeholder + s[-20:]
+
+    return s

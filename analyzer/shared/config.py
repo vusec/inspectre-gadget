@@ -33,6 +33,8 @@ def init_config(config):
     global_config["HalfSpectre"] = False
     # Enable search for secret dependent branches
     global_config["SecretDependentBranches"] = False
+    # Truncate long ASTs in the output
+    global_config["OutputTruncatedASTs"] = True
     # Verbosity of the logging output. 0-3: No / coarse-grained / fine-grained
     global_config["LogLevel"] = 1
 

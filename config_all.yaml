@@ -47,6 +47,9 @@ DistributeShifts: True
 # Also look for tainted function pointers (i.e. dispatch gadgets).
 TaintedFunctionPointers: True
 
+# Enable search for secret dependent branches
+SecretDependentBranches: True
+
 # Also output "Half-Spectre" gadgets, a.k.a MDS gadgets.
 # https://download.vusec.net/papers/halfspectre_sp25.pdf
 HalfSpectre: False

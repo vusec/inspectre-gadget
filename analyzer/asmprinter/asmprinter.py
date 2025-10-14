@@ -18,7 +18,7 @@ from ..scanner.annotations import *
 def get_branch_comments(branches):
     comments = {}
     for addr, condition, taken in branches:
-        comments[addr] = str(taken) + "   " + str(condition)
+        comments[addr] = str(taken) + "   " + truncate_str(str(condition))
 
     return comments
 
@@ -154,25 +154,25 @@ uuid: {t.uuid}
 transmitter: {t.transmitter}
 
 Secret Address:
-  - Expr: {t.secret_address.expr}
+  - Expr: {truncate_str(t.secret_address.expr)}
   - Range: {t.secret_address.range}
 Transmitted Secret:
-  - Expr: {t.transmitted_secret.expr}
+  - Expr: {truncate_str(t.transmitted_secret.expr)}
   - Range: {t.transmitted_secret.range}
   - Spread: {t.inferable_bits.spread_low} - {t.inferable_bits.spread_high}
   - Number of Bits Inferable: {t.inferable_bits.number_of_bits_inferable}
 Base:
-  - Expr: {'None' if t.base == None else t.base.expr}
+  - Expr: {'None' if t.base == None else truncate_str(t.base.expr)}
   - Range: {'None' if t.base == None else t.base.range}
-  - Independent Expr: {'None' if t.independent_base == None else t.independent_base.expr}
-  - Independent Range: {'None' if t.independent_base == None else t.independent_base.range}
+  - Independent Expr: {'None' if t.independent_base == None else truncate_str(t.independent_base.expr)}
+  - Independent Range: {'None' if t.independent_base == None else truncate_str(t.independent_base.range)}
 Transmission:
-  - Expr: {t.transmission.expr}
+  - Expr: {truncate_str(t.transmission.expr)}
   - Range: {t.transmission.range}
 
 Register Requirements: {t.all_requirements.regs}
-Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
-Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
+Constraints: {ordered_constraints(t.constraints)}
+Branches: {ordered_branches(t.branches)}
 {'-'*48}
 """)
     o.close()
@@ -189,24 +189,24 @@ def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
 uuid: {t.uuid}
 
 Reg: {t.reg}
-Expr: {t.expr}
+Expr: {truncate_str(t.expr)}
 Tainted Function Pointer:
   - Reg: {t.reg}
-  - Expr: {t.expr}
+  - Expr: {truncate_str(t.expr)}
   - Control: {t.control}
   - Register Requirements: {t.requirements.regs}
 
-Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in t.constraints]}
-Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
+Constraints: {ordered_constraints(t.constraints)}
+Branches: {ordered_branches(t.branches)}
 
 """)
 
     o.write(f"Controlled Regs:\n")
     for r in t.controlled:
         o.write(f"  - Reg: {r}\n")
-        o.write(f"    Expr: {t.registers[r].expr}\n")
+        o.write(f"    Expr: {truncate_str(t.registers[r].expr)}\n")
         o.write(f"    ControlType: {t.registers[r].control_type}\n")
-        o.write(f"    Controlled Expr: {t.registers[r].controlled_expr}\n")
+        o.write(f"    Controlled Expr: {truncate_str(t.registers[r].controlled_expr)}\n")
         o.write(f"    Controlled Range: {t.registers[r].controlled_range}\n")
         o.write(f"    Controlled Range w Branches:"
                 f"{t.registers[r].controlled_range_with_branches}\n")
@@ -216,7 +216,7 @@ Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in t.branches]}
     o.write(f"\nRegisters aliasing with tfp:\n")
     for r in t.aliasing:
         o.write(f"  - Reg: {r}\n")
-        o.write(f"    Expr: {t.registers[r].expr}\n")
+        o.write(f"    Expr: {truncate_str(t.registers[r].expr)}\n")
         o.write(f"    Range: {t.registers[r].range}\n")
         o.write(f"    ControlType: {t.registers[r].control_type}\n")
 
@@ -241,13 +241,13 @@ def output_half_gadget_to_file(g: HalfGadget, proj, path):
 {'-'*48}
 uuid: {g.uuid}
 
-Expr: {g.loaded.expr}
-Base: {'None' if g.base == None else g.base.expr}
-Attacker: {g.attacker.expr}
+Expr: {truncate_str(g.loaded.expr)}
+Base: {'None' if g.base == None else truncate_str(g.base.expr)}
+Attacker: {truncate_str(g.attacker.expr)}
 ControlType: {g.loaded.control}
 
-Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in g.constraints]}
-Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in g.branches]}
+Constraints: {ordered_constraints(g.constraints)}
+Branches: {ordered_branches(g.branches)}
 
 """)
 
@@ -270,28 +270,28 @@ transmitter: {sdb.transmitter}
 CMP operation: {sdb.cmp_operation}
 
 Secret Dependent Branch:
-  - Expr: {sdb.sdb_expr}
+  - Expr: {truncate_str(sdb.sdb_expr)}
 Secret Address:
-  - Expr: {sdb.secret_address.expr}
+  - Expr: {truncate_str(sdb.secret_address.expr)}
   - Range: {sdb.secret_address.range}
 Transmitted Secret:
-  - Expr: {sdb.transmitted_secret.expr}
+  - Expr: {truncate_str(sdb.transmitted_secret.expr)}
   - Range: {sdb.transmitted_secret.range}
   - Spread: {sdb.inferable_bits.spread_low} - {sdb.inferable_bits.spread_high}
   - Number of Bits Inferable: {sdb.inferable_bits.number_of_bits_inferable}
 Base:
-  - Expr: {'None' if sdb.base == None else sdb.base.expr}
+  - Expr: {'None' if sdb.base == None else truncate_str(sdb.base.expr)}
   - Range: {'None' if sdb.base == None else sdb.base.range}
-  - Independent Expr: {'None' if sdb.independent_base == None else sdb.independent_base.expr}
+  - Independent Expr: {'None' if sdb.independent_base == None else truncate_str(sdb.independent_base.expr)}
   - Independent Range: {'None' if sdb.independent_base == None else sdb.independent_base.range}
 Transmission:
-  - Expr: {sdb.transmission.expr}
+  - Expr: {truncate_str(sdb.transmission.expr)}
   - Range: {sdb.transmission.range}
 
 CMP Value:
-  - Expr: {sdb.cmp_value.expr}
+  - Expr: {truncate_str(sdb.cmp_value.expr)}
   - Range: {sdb.cmp_value.range}
-  - Controlled Expr: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.expr}
+  - Controlled Expr: {'None' if sdb.controlled_cmp_value == None else truncate_str(sdb.controlled_cmp_value.expr)}
   - Controlled Range: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range}
 
 Register Requirements:
@@ -299,8 +299,8 @@ Register Requirements:
   - Transmission: {sdb.transmission.requirements.regs}
   - CMP Value: {sdb.cmp_value.requirements.regs}
 
-Constraints: {[(hex(addr),cond, str(ctype)) for addr,cond,ctype in sdb.constraints]}
-Branches: {[(hex(addr), expr, outcome) for addr, expr, outcome in sdb.branches]}
+Constraints: {ordered_constraints(sdb.constraints)}
+Branches: {ordered_branches(sdb.branches)}
 {'-'*48}
 """)
     o.close()
