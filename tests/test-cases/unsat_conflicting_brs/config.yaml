@@ -34,3 +34,5 @@ SecretDependentBranches: True
 CrashOnExceptions: True
 AggressiveSpeculation: True
 AnalyzeDuringScanning: True
+# Use deterministic UUIDs, for testing purposes
+UseDeterministicUUIDs: True

@@ -153,3 +153,7 @@ def truncate_str(s, width=1000):
         return s[:width - 20 - len(placeholder)] + placeholder + s[-20:]
 
     return s
+
+
+def sorted_set_str(s: set) -> str:
+    return "{" + ", ".join(sorted([str(x) for x in s])) + "}"

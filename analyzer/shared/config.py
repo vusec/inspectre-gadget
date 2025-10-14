@@ -37,6 +37,8 @@ def init_config(config):
     global_config["OutputTruncatedASTs"] = True
     # Verbosity of the logging output. 0-3: No / coarse-grained / fine-grained
     global_config["LogLevel"] = 1
+    # Use deterministic UUIDs (based on gadget properties), only recommended for testing
+    global_config["UseDeterministicUUIDs"] = False
 
     # Apply user config.
     for c in config:

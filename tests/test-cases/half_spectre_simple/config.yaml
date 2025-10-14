@@ -32,3 +32,5 @@ TaintedFunctionPointers: True
 HalfSpectre: True
 SecretDependentBranches: True
 CrashOnExceptions: True
+# Use deterministic UUIDs, for testing purposes
+UseDeterministicUUIDs: True

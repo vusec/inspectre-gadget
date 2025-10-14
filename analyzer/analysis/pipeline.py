@@ -9,6 +9,7 @@ import angr
 import uuid
 import os
 import csv
+import hashlib
 from collections.abc import MutableMapping
 
 from . import transmissionAnalysis, tfpAnalysis, halfGadgetAnalysis, secretDependentBranchAnalysis
@@ -83,9 +84,9 @@ class AnalysisPipeline:
 
         for t in transmissions:
             l.info(f"Analyzing TRANS @{hex(t.pc)}: {truncate_str(t.transmission.expr)}")
-            t.uuid = str(uuid.uuid4())
             t.name = self.name
             t.address = self.gadget_address
+            t.uuid = get_uuid(t, [t.secret_address.expr, t.secret_val.expr, self.n_found_transmissions])
             pc_symbol = self.proj.loader.find_symbol(t.pc, fuzzy=True)
             t.pc_symbol = pc_symbol.name if pc_symbol else ""
             t.address_symbol = self.gadget_symbol
@@ -132,9 +133,10 @@ class AnalysisPipeline:
 
         for tfp in tainted_function_pointers:
             l.info(f"Analyzing TFP @{hex(tfp.pc)}: {truncate_str(tfp.expr)}")
-            tfp.uuid = str(uuid.uuid4())
             tfp.name = self.name
             tfp.address = self.gadget_address
+            tfp.uuid = get_uuid(tfp, [[r.expr for r in t.registers.values()], self.n_found_tainted_function_pointers])
+
             pc_symbol = self.proj.loader.find_symbol(tfp.pc, fuzzy=True)
             tfp.pc_symbol = pc_symbol.name if pc_symbol else ""
             tfp.address_symbol = self.gadget_symbol
@@ -173,9 +175,10 @@ class AnalysisPipeline:
 
         for g in gadgets:
             l.info(f"Analyzing half-spectre @{hex(g.pc)}: {truncate_str(g.loaded.expr)}")
-            g.uuid = str(uuid.uuid4())
             g.name = self.name
             g.address = self.gadget_address
+            g.uuid = get_uuid(g, [g.loaded.expr, self.n_found_half_gadgets])
+
             pathAnalysis.analyse_half_gadget(g)
             requirementsAnalysis.analyse_half_gadget(g)
 
@@ -207,15 +210,15 @@ class AnalysisPipeline:
     def analyze_secret_dependent_branch(self, s: SecretDependentBranch):
 
         self.n_found_secret_dependent_branches += 1
-        secret_dependent_branches = secretDependentBranchAnalysis.get_secret_dependent_branches(
-            s)
+        secret_dependent_branches = secretDependentBranchAnalysis.get_secret_dependent_branches(s)
 
         for sdb in secret_dependent_branches:
             l.info(
                 f"Analyzing SDB   @{hex(sdb.pc)}: {truncate_str(sdb.sdb_expr)} <> {truncate_str(sdb.cmp_value.expr)}")
-            sdb.uuid = str(uuid.uuid4())
             sdb.name = self.name
             sdb.address = self.gadget_address
+            sdb.uuid = get_uuid(sdb, [sdb.sdb_expr, sdb.cmp_value.expr, self.n_found_secret_dependent_branches])
+
             pc_symbol = self.proj.loader.find_symbol(sdb.pc, fuzzy=True)
             sdb.pc_symbol = pc_symbol.name if pc_symbol else ""
             sdb.address_symbol = self.gadget_symbol
@@ -308,3 +311,13 @@ def append_to_csv(csv_filename, transmissions):
         if len(existing_keys) == 0:
             writer.writeheader()
         writer.writerows(flatten_dicts)
+
+
+def get_uuid(t, hash_list):
+
+    if global_config['UseDeterministicUUIDs']:
+        h = hashlib.sha256(f"{t.name}{t.address}{t.pc}{hash_list}".encode()).hexdigest()
+        return str(uuid.UUID(int=(int(h, 16) % 2 ** 128), version=4))
+    else:
+        return str(uuid.uuid4())
+
