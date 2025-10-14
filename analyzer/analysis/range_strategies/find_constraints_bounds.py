@@ -14,6 +14,7 @@ from ...shared.ranges import *
 
 l = get_logger("FindConstraintsBounds")
 
+
 class RangeStrategyFindConstraintsBounds(RangeStrategy):
     infer_isolated_strategy: RangeStrategyInferIsolated
 
@@ -115,7 +116,6 @@ def _find_sat_distribution(constraints, ast, start, end):
 
     if not s.satisfiable(extra_constraints=[ast >= start, ast <= end, not_constraints]):
         # it is not satisfiable, thus we have a full range
-        # print(f"Range: {[(start, end)]}")
         return [(start, end)]
 
     samples = s.eval(ast, 2, extra_constraints=[
@@ -124,10 +124,17 @@ def _find_sat_distribution(constraints, ast, start, end):
 
     if sample_len == 1:
         value = samples[0]
-        if value < start:
-            return [(start, end)]
-        if value > end:
-            return [(start, end)]
+
+        # Should not happen, as this full a range case which taken care of above
+        assert (value >= start and value <= end)
+
+        if value == start:
+            # Range with a "hole" at the start
+            return [(start + 1, end)]
+
+        if value == end:
+            # Range with a "hole" at the end
+            return [(start, end - 1)]
 
         # Range with a "hole"
         return [(value + 1, value - 1)]

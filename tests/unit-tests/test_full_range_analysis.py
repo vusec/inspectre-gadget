@@ -56,6 +56,21 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         self.assertEqual(ast_range.or_mask, 32)
         self.assertTrue(ast_range.exact)
 
+        # Special case: 0 excluded with a OR statement (was a bug before)
+        a = claripy.BVS("a", 64)
+        b = claripy.BVS("b", 64)
+
+        ast = a
+        constraints = [claripy.Or(ast != 0, b != 0)]
+        ast_range = get_ast_ranges(constraints, ast)
+
+        self.assertEqual(ast_range.min, 1)
+        self.assertEqual(ast_range.max, 0xffffffffffffffff)
+        self.assertEqual(ast_range.stride, 1)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
+        self.assertTrue(ast_range.exact)
+
         # We fail to do this one exact. The double constraints makes it hard
         # to invert them in _find_sat_distribution
         a = claripy.BVS("a", 32)
