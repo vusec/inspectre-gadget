@@ -96,6 +96,10 @@ class SplitException(Exception):
     "Splitted state, skipping"
     pass
 
+class GeneralException(Exception):
+    "General exception, skipping"
+    pass
+
 
 class Scanner:
     """
@@ -753,7 +757,7 @@ class Scanner:
                 func_ptr_ast, TransmitterType.CODE_LOAD, state)
 
             # Stop exploration here
-            raise SplitException
+            raise GeneralException
 
         # ----------- Secret dependent branches (conditional jumps)
         elif type(state.inspect.exit_guard.args[0]) != bool:
@@ -850,7 +854,7 @@ class Scanner:
                 if global_config['AggressiveSpeculation']:
                     succs.extend(ns.unsat_successors)
 
-            except SplitException as e:
+            except (SplitException, GeneralException) as e:
                 # The state has been manually splitted: don't explore it further.
                 continue
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
