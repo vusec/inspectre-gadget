@@ -528,15 +528,7 @@ class Scanner:
                     CmoveAnnotation(state.scratch.ins_addr))
 
     # ---------------- LOADS ----------------------------
-    def load_hook_before(self, state: angr.SimState):
-        """
-        Constrain the address of symbolic loads.
-        """
-        if state.inspect.mem_read_address.symbolic:
-            # TODO: Consider only valid addresses?
-            # Rule out stupid edge-cases to avoid confusing the solver.
-            state.solver.add(state.inspect.mem_read_address > 0x8,
-                             state.inspect.mem_read_address < 0xffffffffffffffff - 8)
+
 
     def load_hook_after(self, state: angr.SimState):
         """
@@ -816,8 +808,6 @@ class Scanner:
         state.memory.read_strategies = [DummyConcretizationStrategy()]
 
         # Hooks.
-        state.inspect.b('mem_read', when=angr.BP_BEFORE,
-                        action=self.load_hook_before)
         state.inspect.b('mem_read', when=angr.BP_AFTER,
                         action=self.load_hook_after)
         state.inspect.b('mem_write', when=angr.BP_BEFORE,

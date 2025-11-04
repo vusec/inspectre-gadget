@@ -157,3 +157,26 @@ def truncate_str(s, width=1000):
 
 def sorted_set_str(s: set) -> str:
     return "{" + ", ".join(sorted([str(x) for x in s])) + "}"
+
+def merge_dependent_sets(sets: list) -> list:
+    """
+    Merge a list of sets into a list of independent sets, e.g.:
+    [{1, 2}, {3, 4}, {5, 1}] -> [{1, 2, 5}, {3, 4}]
+    """
+    merged = True
+    while merged:
+        merged = False
+        result = []
+        while sets:
+            first, *rest = sets
+            rest2 = []
+            for s in rest:
+                if first & s:  # overlap
+                    first |= s  # merge
+                    merged = True
+                else:
+                    rest2.append(s)
+            sets = rest2
+            result.append(first)
+        sets = result
+    return sets

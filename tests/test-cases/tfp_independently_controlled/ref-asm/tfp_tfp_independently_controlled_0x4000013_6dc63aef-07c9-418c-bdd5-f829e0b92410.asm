@@ -1,59 +1,61 @@
 --------------------- TFP ----------------------
-         tfp_symbolic:
-4000000  cmp     r15, 0x0
-4000004  je      tfp1
-         tfp0:
-4000006  mov     rax, qword ptr [rcx+rsi] ; {Attacker@rcx, Attacker@rsi} -> {Attacker@0x4000006}
-400000a  call    rax ; {Attacker@0x4000006} -> TAINTED FUNCTION POINTER
+         tfp_independently_controllable:
+4000000  mov     rsi, qword ptr [rdi]
+4000003  mov     rdx, qword ptr [rdx]
+4000006  mov     rbx, qword ptr [rsi]
+4000009  add     rcx, rsi
+400000c  add     rcx, rdx
+400000f  mov     rax, qword ptr [rdi+0x10] ; {Attacker@rdi} -> {Attacker@0x400000f}
+4000013  call    rax ; {Attacker@0x400000f} -> TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: f6dd308d-c4bf-4e52-a86e-902195a2e6e6
+uuid: 6dc63aef-07c9-418c-bdd5-f829e0b92410
 
 Reg: rax
-Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
+Expr: <BV64 LOAD_64[<BV64 rdi + 0x10>]_23>
 Tainted Function Pointer:
   - Reg: rax
-  - Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
+  - Expr: <BV64 LOAD_64[<BV64 rdi + 0x10>]_23>
   - Control: ControlType.CONTROLLED
-  - Register Requirements: ['<BV64 rcx>', '<BV64 rsi>']
+  - Register Requirements: ['<BV64 rdi>']
 
 Constraints: []
 Branches: []
 
 Controlled Regs:
   - Reg: rax
-    Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
+    Expr: <BV64 LOAD_64[<BV64 rdi + 0x10>]_23>
     ControlType: TFPRegisterControlType.IS_TFP_REGISTER
-    Controlled Expr: <BV64 LOAD_64[<BV64 rcx + rsi>]_20>
+    Controlled Expr: <BV64 LOAD_64[<BV64 rdi + 0x10>]_23>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
   - Reg: rbx
-    Expr: <BV64 rbx>
-    ControlType: TFPRegisterControlType.UNMODIFIED
-    Controlled Expr: <BV64 rbx>
+    Expr: <BV64 LOAD_64[<BV64 LOAD_64[<BV64 rdi>]_20>]_22>
+    ControlType: TFPRegisterControlType.POTENTIAL_SECRET
+    Controlled Expr: <BV64 LOAD_64[<BV64 LOAD_64[<BV64 rdi>]_20>]_22>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
   - Reg: rcx
-    Expr: <BV64 rcx>
-    ControlType: TFPRegisterControlType.UNMODIFIED
-    Controlled Expr: <BV64 rcx>
+    Expr: <BV64 rcx + LOAD_64[<BV64 rdi>]_20 + LOAD_64[<BV64 rdx>]_21>
+    ControlType: TFPRegisterControlType.CONTROLLED
+    Controlled Expr: <BV64 rcx + LOAD_64[<BV64 rdi>]_20 + LOAD_64[<BV64 rdx>]_21>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
   - Reg: rdx
-    Expr: <BV64 rdx>
-    ControlType: TFPRegisterControlType.UNMODIFIED
-    Controlled Expr: <BV64 rdx>
+    Expr: <BV64 LOAD_64[<BV64 rdx>]_21>
+    ControlType: TFPRegisterControlType.POTENTIAL_SECRET
+    Controlled Expr: <BV64 LOAD_64[<BV64 rdx>]_21>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
   - Reg: rsi
-    Expr: <BV64 rsi>
-    ControlType: TFPRegisterControlType.UNMODIFIED
-    Controlled Expr: <BV64 rsi>
+    Expr: <BV64 LOAD_64[<BV64 rdi>]_20>
+    ControlType: TFPRegisterControlType.CONTROLLED
+    Controlled Expr: <BV64 LOAD_64[<BV64 rdi>]_20>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
   - Reg: rdi
     Expr: <BV64 rdi>
-    ControlType: TFPRegisterControlType.UNMODIFIED
+    ControlType: TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
     Controlled Expr: <BV64 rdi>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
@@ -104,7 +106,7 @@ Controlled Regs:
     ControlType: TFPRegisterControlType.UNMODIFIED
     Controlled Expr: <BV64 r15>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
-    Controlled Range w Branches:(0x1,0xffffffffffffffff, 0x1) Exact: True
+    Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
   - Reg: rsp_8
     Expr: <BV64 rsp_0>
     ControlType: TFPRegisterControlType.CONTROLLED
@@ -219,13 +221,23 @@ Controlled Regs:
     Controlled Expr: <BV64 rsp_144>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
+  - Reg: rsp_160
+    Expr: <BV64 rsp_152>
+    ControlType: TFPRegisterControlType.CONTROLLED
+    Controlled Expr: <BV64 rsp_152>
+    Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+    Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
 
 Registers aliasing with tfp:
 
 Registers aliasing with tfp:
+  - Reg: rdi
+    Expr: <BV64 rdi>
+    Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
+    ControlType: TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
 
 Uncontrolled Regs: ['rbp', 'rsp']
-Unmodified Regs: ['rbx', 'rcx', 'rdx', 'rsi', 'rdi', 'r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', 'r15']
-Potential Secrets: []
+Unmodified Regs: ['r8', 'r9', 'r10', 'r11', 'r12', 'r13', 'r14', 'r15']
+Potential Secrets: ['rbx', 'rdx']
 
 ------------------------------------------------

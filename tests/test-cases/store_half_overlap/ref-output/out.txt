@@ -5,34 +5,39 @@ gadget:     file format elf64-x86-64
 Disassembly of section .text:
 
 0000000004000000 <store_half_overlap>:
- 4000000:	41 89 30             	mov    DWORD PTR [r8],esi
- 4000003:	49 8b 38             	mov    rdi,QWORD PTR [r8]
- 4000006:	4c 0f b7 1a          	movzx  r11,WORD PTR [rdx]
- 400000a:	49 8b bc 3b 00 00 00 	mov    rdi,QWORD PTR [r11+rdi*1-0x7f000000]
- 4000011:	81 
- 4000012:	e9 00 00 00 00       	jmp    4000017 <store_half_overlap+0x17>
+ 4000000:	49 89 30             	mov    QWORD PTR [r8],rsi
+ 4000003:	49 89 78 0a          	mov    QWORD PTR [r8+0xa],rdi
+ 4000007:	49 8b 78 04          	mov    rdi,QWORD PTR [r8+0x4]
+ 400000b:	4c 0f b7 1a          	movzx  r11,WORD PTR [rdx]
+ 400000f:	49 8b bc 3b 00 00 00 	mov    rdi,QWORD PTR [r11+rdi*1-0x7f000000]
+ 4000016:	81 
+ 4000017:	e9 00 00 00 00       	jmp    400001c <store_half_overlap+0x1c>
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[AnalysisMAIN]  Analyzing TRANS @0x400000a: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_22) + (((0#32 .. MEM_32[<BV64 r8> + 32]_21) << 0x20) + (0#32 .. rsi[31:0]))>
+[AnalysisMAIN]  Analyzing TRANS @0x400000f: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22[47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing TRANS @0x400000f: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22[47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 1 potential transmissions.
 [MAIN]  Found 0 potential tainted function pointers.
 [MAIN]  Found 0 potential secret dependent branches.
-[MAIN]  Outputted 1 transmissions.
+[MAIN]  Outputted 2 transmissions.
 [MAIN]  Outputted 0 tainted function pointers.
 [MAIN]  Outputted 0 secret dependent branches.
 
 == REASONER TRANSMISSION ==
+  import pkg_resources
 Total 0 Secret Dependent Branches (not reasoned)
-[-] Imported 1 gadgets
+[-] Imported 2 gadgets
 [-] Performing exploitability analysis...
-Found 1 exploitable gadgets!
+Found 2 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
-Found 1 exploitable gadgets!
+Found 2 exploitable gadgets!
 [-] Performing exploitability analysis assuming the SLAM covert channel...
-Found 1 exploitable gadgets!
+Found 2 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!
