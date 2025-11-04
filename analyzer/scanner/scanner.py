@@ -359,9 +359,8 @@ class Scanner:
                 # need to add + 8
                 call_offset = 0
                 if reg == 'rsp':
-                    block = state.block()
-                    _, regs_write = block.capstone.insns[-1].insn.regs_access()
-                    if 'rsp' in regs_write:
+                    block = state.project.factory.block(state.scratch.ins_addr)
+                    if block.vex.jumpkind == 'Ijk_Call':
                         call_offset = 8
 
                 for offset in range(-0x40, 0xa0, 8):
