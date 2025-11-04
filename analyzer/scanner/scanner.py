@@ -542,19 +542,19 @@ class Scanner:
         load_addr = state.inspect.mem_read_address
         load_len = state.inspect.mem_read_length
         l.info(
-            f"Load@{hex(state.addr)}: {load_addr}  {get_annotations(load_addr)}")
+            f"Load@{hex(state.scratch.ins_addr)}: {load_addr}  {get_annotations(load_addr)}")
         l.info(state.solver.constraints)
 
         # If the state has been manually splitted after this load, we already
         # have a value for this load: just use that.
-        subst = getSubstitution(state, state.addr, SubstType.VALUE_SUBST)
+        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.VALUE_SUBST)
         if subst != None:
             state.inspect.mem_read_expr = subst
             return
 
         # If the state has been manually splitted _on_ this load, use
         # the substitution recorded for the address.
-        subst = getSubstitution(state, state.addr, SubstType.ADDR_SUBST)
+        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.ADDR_SUBST)
         if subst != None:
             load_addr = subst
             l.info(
@@ -562,13 +562,13 @@ class Scanner:
         else:
             # If the state has _not_ been manually splitted, check if we
             # should split it.
-            asts = split_conditions(load_addr, simplify=False, addr=state.addr)
+            asts = split_conditions(load_addr, simplify=False, addr=state.scratch.ins_addr)
             assert (len(asts) >= 1)
 
             l.info(f"  After transformations: {load_addr}")
 
             if len(asts) > 1:
-                self.split_state(state, asts, state.addr)
+                self.split_state(state, asts, state.scratch.ins_addr)
                 raise SplitException
 
         # Check if we should forward an existing value (STL) or create a new symbol.
@@ -581,20 +581,20 @@ class Scanner:
                 f"Forwarded ({load_val} {get_annotations(load_val)}) from store @({alias_store.addr})")
         else:
             # Create a new symbol to represent the loaded value.
-            annotation = propagate_annotations(load_addr, state.addr)
+            annotation = propagate_annotations(load_addr, state.scratch.ins_addr)
             load_val = claripy.BVS(name=f'LOAD_{load_len*8}[{load_addr}]_{self.cur_id}',
                                    size=load_len * 8,
                                    annotations=(annotation,), explicit_name=True)
 
             # Save it, in case we later need to split this state manually.
-            recordSubstitution(self.cur_state, state.addr,
+            recordSubstitution(self.cur_state, state.scratch.ins_addr,
                                load_val, SubstType.VALUE_SUBST)
 
         # Overwrite loaded val.
         state.inspect.mem_read_expr = load_val
 
         # Check for aliasing loads.
-        cur_load = memory.MemOp(pc=state.addr,
+        cur_load = memory.MemOp(pc=state.scratch.ins_addr,
                                 addr=load_addr,
                                 val=load_val,
                                 size=load_len,
@@ -610,7 +610,7 @@ class Scanner:
             state.solver.add(alias.to_BV())
             l.warning(f"Adding alias {alias.to_BV()}")
             if not state.solver.satisfiable():
-                report_error(Exception(), hex(self.cur_state.addr),
+                report_error(Exception(), hex(self.cur_state.scratch.ins_addr),
                              hex(0), error_type="ALIAS UNSAT")
 
         # Save this load in the angr state.
@@ -638,7 +638,7 @@ class Scanner:
         store_addr = state.inspect.mem_write_address
         store_len = state.inspect.mem_write_length
         stored_value = state.inspect.mem_write_expr
-        l.error(f"Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
+        l.error(f"Store@{hex(state.scratch.ins_addr)}: [{store_addr}] = {stored_value}")
         l.info(state.solver.constraints)
 
         # Don't execute the store architecturally.
@@ -647,27 +647,27 @@ class Scanner:
         # Check if there is a substitution to be made for this address.
         # This can happen if the state comes from a manual splitting.
         is_subst = False
-        subst = getSubstitution(state, state.addr, SubstType.ADDR_SUBST)
+        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.ADDR_SUBST)
         if subst != None:
             store_addr = subst
         else:
             # Check if the address contains an if-then-else node.
             addr_asts = split_conditions(
-                store_addr, simplify=False, addr=state.addr)
-            # value_asts = split_conditions(stored_value, simplify=False, addr=state.addr)
+                store_addr, simplify=False, addr=state.scratch.ins_addr)
+            # value_asts = split_conditions(stored_value, simplify=False, addr=state.scratch.ins_addr)
 
             l.error(
                 f" After ast transformation: [{store_addr}] = {stored_value}")
             if len(addr_asts) > 1:
-                self.split_state(state, addr_asts, state.addr)
+                self.split_state(state, addr_asts, state.scratch.ins_addr)
                 raise SplitException
 
         l.error(
-            f"After substitution: Store@{hex(state.addr)}: [{store_addr}] = {stored_value}")
+            f"After substitution: Store@{hex(state.scratch.ins_addr)}: [{store_addr}] = {stored_value}")
 
         # Save this store in the angr state, so that future loads can check for
         # aliasing.
-        cur_store = memory.MemOp(pc=state.addr,
+        cur_store = memory.MemOp(pc=state.scratch.ins_addr,
                                  addr=store_addr,
                                  val=stored_value,
                                  size=store_len,
