@@ -150,7 +150,7 @@ def is_simple_isolated_expression(state, expr):
     return False
 
 def concrete_value_overlaps_with(val1, size1, val2, size2):
-    return not (val1 + size1 < val2 or val2 + size2 < val1)
+    return not (val1 + size1 <= val2 or val2 + size2 <= val1)
 
 
 def addr_overlaps_with(addr1: claripy.ast.BV, size1 : int, addr2: claripy.ast.BV, size2: int, state: angr.SimState) -> bool:
@@ -364,7 +364,7 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
 
         # We first store a new expr on load_addr, to fill any possible blank spots
         annotation = propagate_annotations(load_addr, state.scratch.ins_addr)
-        gap_expr = claripy.BVS(name=f"LOAD_{load_size*8}[{load_addr}_{load_id}",
+        gap_expr = claripy.BVS(name=f"LOAD_{load_size*8}[{load_addr}_{load_id}]",
                                         size=load_size * 8,
                                         annotations=(annotation,), explicit_name=True)
 
