@@ -7,21 +7,13 @@ from . import transmissionReasoner
 
 def run(in_csv, out_csv):
 
-    # Replace 'None' with 0
-    # TODO: Hack, we should adjust the analyzer output.
-    file = open(in_csv, 'r')
-    data = file.read()
-    data = data.replace('None', '')
-    data = data.replace('nan', '')
-    data = data.replace('Nan', '')
-    file.close()
+    with open(in_csv) as f:
+        columns = f.readline()
 
-    df = pd.read_csv(StringIO(data), delimiter=';')
-
-    if 'transmission_expr' in df.columns:
+    if ';transmission_expr;' in columns:
         return transmissionReasoner.run(in_csv, out_csv)
-    elif 'reg' in df.columns:
+    elif ';reg;' in columns:
         return tfpReasoner.run(in_csv, out_csv)
-    elif 'loaded_expr' in df.columns:
+    elif ';loaded_expr;' in columns:
         print("HalfGadget reasoner not implemented yet, exiting...")
         return
