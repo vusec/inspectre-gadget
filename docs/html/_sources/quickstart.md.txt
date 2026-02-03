@@ -19,8 +19,8 @@ all potential transmissions, and then use `inspectre reason` to mark the exploit
 For the analyzer, the user should provide:
 
 - a **binary**
-- a **list of speculation entrypoints**, in a CSV with the format
-  `<HEX_ADDRESS>,<ENTRYPOINT_NAME>`
+- a **list of speculation entrypoints**, i.e. a CSV with the format
+  `<HEX_ADDRESS>,<ENTRYPOINT_NAME>` (name is used for human-readable output)
 - a **config** file in YAML format (described in the dedicated [doc page](./configuration.md))
 - the name of the CSV output
 - (optionally) a folder where to output the annotated assembly of each gadget
@@ -62,7 +62,7 @@ inspectre show <UUID>
 ```sh
 pip install sphinx myst-parser sphinx_rtd_theme sphinx-rtd-size
 cd docs
-make html
+make html && cp -r _build/* .
 
 # --> open _build/html/index.html in a browser
 ```

@@ -104,8 +104,8 @@ all potential transmissions, and then use <code class="docutils literal notransl
 <p>For the analyzer, the user should provide:</p>
 <ul class="simple">
 <li><p>a <strong>binary</strong></p></li>
-<li><p>a <strong>list of speculation entrypoints</strong>, in a CSV with the format
-<code class="docutils literal notranslate"><span class="pre">&lt;HEX_ADDRESS&gt;,&lt;ENTRYPOINT_NAME&gt;</span></code></p></li>
+<li><p>a <strong>list of speculation entrypoints</strong>, i.e. a CSV with the format
+<code class="docutils literal notranslate"><span class="pre">&lt;HEX_ADDRESS&gt;,&lt;ENTRYPOINT_NAME&gt;</span></code> (name is used for human-readable output)</p></li>
 <li><p>a <strong>config</strong> file in YAML format (described in the dedicated <a class="reference internal" href="configuration.html"><span class="std std-doc">doc page</span></a>)</p></li>
 <li><p>the name of the CSV output</p></li>
 <li><p>(optionally) a folder where to output the annotated assembly of each gadget</p></li>
@@ -143,7 +143,7 @@ inspectre<span class="w"> </span>show<span class="w"> </span>&lt;UUID&gt;
 <h2>Build Docs<a class="headerlink" href="#build-docs" title="Link to this heading"></a></h2>
 <div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>sphinx<span class="w"> </span>myst-parser<span class="w"> </span>sphinx_rtd_theme<span class="w"> </span>sphinx-rtd-size
 <span class="nb">cd</span><span class="w"> </span>docs
-make<span class="w"> </span>html
+make<span class="w"> </span>html<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>-r<span class="w"> </span>_build/*<span class="w"> </span>.
 
 <span class="c1"># --&gt; open _build/html/index.html in a browser</span>
 </pre></div>

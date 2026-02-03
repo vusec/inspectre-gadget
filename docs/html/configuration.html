@@ -82,7 +82,9 @@
 <h1>Configuration<a class="headerlink" href="#configuration" title="Link to this heading"></a></h1>
 <p>A YAML file must be provided to the tool with the <code class="docutils literal notranslate"><span class="pre">--config</span></code> flag.
 The config file defines which registers and stack locations are controlled by the
-user, as well as some analysis parameters. Here’s an example:</p>
+user, as well as some analysis parameters.</p>
+<p>An updated example with an explanation of the flags is available
+<a class="reference external" href="https://github.com/vusec/inspectre-gadget/blob/main/config_all.yaml">in the top folder</a>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Which registers are attacker-controlled.</span>
 <span class="c1"># Note that we generally consider everything controlled,</span>
 <span class="c1"># and later filter the gadgets based on the &quot;Requirements&quot; column.</span>
@@ -131,10 +133,27 @@ user, as well as some analysis parameters. Here’s an example:</p>
 
 <span class="c1"># Also look for tainted function pointers (i.e. dispatch gadgets).</span>
 <span class="nt">TaintedFunctionPointers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="c1"># Also output &quot;Half-Spectre&quot; gadgets, a.k.a MDS gadgets.</span>
+<span class="c1"># https://download.vusec.net/papers/halfspectre_sp25.pdf</span>
+<span class="nt">HalfSpectre</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+
+<span class="c1"># If this is true, any exception thrown during scanning will cause immediate</span>
+<span class="c1"># abort of the execution. This is not desirable during long runs on e.g. the</span>
+<span class="c1"># Linux Kernel because we want the scanning to continue to the next gadget</span>
+<span class="c1"># if, for some reason, the execution crashes on a specific gadget.</span>
+<span class="c1"># It can be however useful for debugging purposes.</span>
+<span class="nt">CrashOnExceptions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+
+<span class="c1"># Should we analyse the transmissions only after scanning the whole gadget,</span>
+<span class="c1"># or should we try to output transmissions as soon as they are found?</span>
+<span class="c1"># This has consequences on interrupting, e.g., if you analyse only _after_ scanning</span>
+<span class="c1"># you won&#39;t have any outputted transmission in case of  e.g.timeouts.</span>
+<span class="nt">AnalyzeDuringScanning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 </pre></div>
 </div>
 <p>Note that, since InSpectre Gadget lists which registers and memory locations are
-really needed for each gadget, the easiest approach is to mark everything as
+needed for each gadget, the easiest approach is to mark everything as
 controlled, and apply filters later on the CSV. However, it is also possible to
 restrict the set of controlled registers beforehand.</p>
 <p>Some other parameters that can be tweaked are:</p>
@@ -146,6 +165,9 @@ to subsequent loads to the same address</p></li>
 <code class="docutils literal notranslate"><span class="pre">(rax</span> <span class="pre">+</span> <span class="pre">rbx)</span> <span class="pre">&lt;&lt;</span> <span class="pre">8</span></code> will be treated as <code class="docutils literal notranslate"><span class="pre">(rax</span> <span class="pre">&lt;&lt;</span> <span class="pre">8)</span> <span class="pre">+</span> <span class="pre">(rbx</span> <span class="pre">&lt;&lt;</span> <span class="pre">8)</span></code> during range and control analysis</p></li>
 <li><p><strong>TaintedFunctionPointers</strong>: When enabled, the scanner will scan also for
 TaintedFunctionPointers (a.k.a dispatch gadgets, see the paper for more details)</p></li>
+<li><p><strong>HalfSpectre</strong>: When enabled, the scanner will scan also for
+Half-Spectre gadgets (a.k.a prefetch gadgets, a.k.a dispatch gadgets,
+see for example<a class="reference external" href="https://download.vusec.net/papers/halfspectre_sp25.pdf">https://download.vusec.net/papers/halfspectre_sp25.pdf</a>).</p></li>
 </ul>
 </section>
 
