@@ -169,16 +169,16 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
     reg_deps = {}
     for r in t.registers:
-        reg_deps[t.registers[r].reg] = d.get_all_deps(
-            get_vars(t.registers[r].expr), include_constraints=False)
+        reg_deps[t.registers[r].reg] = d.get_all_deps(get_vars(t.registers[r].expr),
+                                                            include_constraints=True)
 
     if t.reg not in reg_deps:
         reg_deps[t.reg] = d.get_all_deps(
-            get_vars(t.expr), include_constraints=False)
+            get_vars(t.expr), include_constraints=True)
 
     for addr, condition, taken in t.all_branches:
         br_deps = d.get_all_deps(
-            get_vars(condition), include_constraints=False)
+            get_vars(condition), include_constraints=True)
 
         # Check for all registers
         for r in t.registers:
@@ -190,7 +190,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
             t.branches.append((addr, condition, taken))
 
     for addr, c, ctype in t.all_constraints:
-        constr_deps = d.get_all_deps(get_vars(c), include_constraints=False)
+        constr_deps = d.get_all_deps(get_vars(c), include_constraints=True)
 
         # Check for all registers
         for r in t.registers:
@@ -202,7 +202,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
             t.constraints.append((addr, c, ctype))
 
     for a in t.aliases:
-        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=False)
+        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=True)
 
         # Check for all registers
         for r in t.registers:
@@ -223,17 +223,15 @@ def analyse_half_gadget(g: HalfGadget):
     d.resolve_dependencies()
 
     base_deps = [] if g.base == None else d.get_all_deps(
-        get_vars(g.base.expr), include_constraints=False)
+                        get_vars(g.base.expr), include_constraints=True)
     uncontrolled_base_deps = [] if g.uncontrolled_base == None else d.get_all_deps(
-        get_vars(g.uncontrolled_base.expr), include_constraints=False)
-    attacker_deps = d.get_all_deps(
-        get_vars(g.attacker.expr), include_constraints=False)
-    loaded_deps = d.get_all_deps(
-        get_vars(g.loaded.expr), include_constraints=False)
+                        get_vars(g.uncontrolled_base.expr), include_constraints=True)
+    attacker_deps = d.get_all_deps(get_vars(g.attacker.expr), include_constraints=True)
+    loaded_deps = d.get_all_deps(get_vars(g.loaded.expr), include_constraints=True)
 
     for addr, condition, taken in g.branches:
         br_deps = d.get_all_deps(
-            get_vars(condition), include_constraints=False)
+            get_vars(condition), include_constraints=True)
 
         if len(br_deps.intersection(base_deps)):
             g.base.branches.append((addr, condition, taken))
@@ -252,7 +250,7 @@ def analyse_half_gadget(g: HalfGadget):
     l.warning(f"Loaded branches: {g.loaded.branches}")
 
     for addr, cond, ctype in g.constraints:
-        constr_deps = d.get_all_deps(get_vars(cond), include_constraints=False)
+        constr_deps = d.get_all_deps(get_vars(cond), include_constraints=True)
 
         if len(constr_deps.intersection(base_deps)):
             g.base.constraints.append((addr, cond, ctype))
@@ -271,7 +269,7 @@ def analyse_half_gadget(g: HalfGadget):
     l.warning(f"Loaded constraints: {g.loaded.constraints}")
 
     for a in g.aliases:
-        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=False)
+        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=True)
 
         if len(alias_deps.intersection(base_deps)):
             g.base.aliases.append(a)
