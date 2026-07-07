@@ -1,0 +1,64 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <dispatch>:
+ 4000000:	48 83 f8 00          	cmp    rax,0x0
+ 4000004:	74 02                	je     4000008 <soft_equality>
+ 4000006:	eb 25                	jmp    400002d <soft_inequality>
+
+0000000004000008 <soft_equality>:
+ 4000008:	49 c7 c0 00 00 00 00 	mov    r8,0x0
+ 400000f:	48 8b 3a             	mov    rdi,QWORD PTR [rdx]
+ 4000012:	48 39 f7             	cmp    rdi,rsi
+ 4000015:	0f 85 00 00 00 00    	jne    400001b <soft_equality+0x13>
+ 400001b:	48 83 fe 10          	cmp    rsi,0x10
+ 400001f:	0f 87 00 00 00 00    	ja     4000025 <soft_equality+0x1d>
+ 4000025:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 4000028:	e9 00 00 00 00       	jmp    400002d <soft_inequality>
+
+000000000400002d <soft_inequality>:
+ 400002d:	49 c7 c0 00 00 00 00 	mov    r8,0x0
+ 4000034:	48 8b 3a             	mov    rdi,QWORD PTR [rdx]
+ 4000037:	48 39 f7             	cmp    rdi,rsi
+ 400003a:	0f 87 00 00 00 00    	ja     4000040 <soft_inequality+0x13>
+ 4000040:	48 83 fe 10          	cmp    rsi,0x10
+ 4000044:	0f 87 00 00 00 00    	ja     400004a <soft_inequality+0x1d>
+ 400004a:	48 8b 07             	mov    rax,QWORD PTR [rdi]
+ 400004d:	e9 00 00 00 00       	jmp    4000052 <soft_inequality+0x25>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing SDB   @0x400003a: <Bool LOAD_64[<BV64 rdx>]_20 <= rsi> <> <BV64 rsi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing TRANS @0x400004a: <BV64 LOAD_64[<BV64 rdx>]_20>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x4000015: <Bool LOAD_64[<BV64 rdx>]_22 == rsi> <> <BV64 rsi>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing TRANS @0x4000025: <BV64 LOAD_64[<BV64 rdx>]_22>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[MAIN]  Found 2 potential transmissions.
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 2 potential secret dependent branches.
+[MAIN]  Outputted 2 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 2 secret dependent branches.
+
+== REASONER TRANSMISSION ==
+Total 2 Secret Dependent Branches (not reasoned)
+[-] Imported 2 gadgets
+[-] Performing exploitability analysis...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 0 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 2 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

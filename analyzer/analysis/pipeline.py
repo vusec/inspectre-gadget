@@ -223,7 +223,7 @@ class AnalysisPipeline:
             sdb.pc_symbol = pc_symbol.name if pc_symbol else ""
             sdb.address_symbol = self.gadget_symbol
             baseControlAnalysis.analyse_secret_dependent_branch(sdb)
-            pathAnalysis.analyse(sdb)
+            pathAnalysis.analyse_sdb(sdb)
             requirementsAnalysis.analyse_secret_dependent_branch(sdb)
 
             try:
