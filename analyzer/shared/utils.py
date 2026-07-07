@@ -147,7 +147,7 @@ def truncate_str(s, width=1000):
     if not global_config["OutputTruncatedASTs"]:
         return s
 
-    assert(width > len(placeholder) + 20)
+    assert (width > len(placeholder) + 20)
 
     if len(s) > width:
         return s[:width - 20 - len(placeholder)] + placeholder + s[-20:]

@@ -33,8 +33,10 @@ def analyse(t: Transmission):
 
     d: DepGraph = t.properties["deps"]
 
-    base_deps = [] if t.base == None else d.get_all_deps(get_vars(t.base.expr), include_constraints=True)
-    indep_base_deps = [] if t.independent_base == None else d.get_all_deps(get_vars(t.independent_base.expr), include_constraints=True)
+    base_deps = [] if t.base == None else d.get_all_deps(
+        get_vars(t.base.expr), include_constraints=True)
+    indep_base_deps = [] if t.independent_base == None else d.get_all_deps(
+        get_vars(t.independent_base.expr), include_constraints=True)
     secret_addr_deps = d.get_all_deps(get_vars(t.secret_address.expr), include_constraints=True)
     secret_deps = d.get_all_deps(get_vars(t.transmitted_secret.expr), include_constraints=True)
     transmission_deps = d.get_all_deps(get_vars(t.transmission.expr), include_constraints=True)
@@ -72,7 +74,8 @@ def analyse(t: Transmission):
             t.transmitted_secret.constraints.append((addr, cond, ctype))
 
     l.warning(f"Base constraints: {'None' if t.base == None else t.base.constraints}")
-    l.warning(f"Independent Base constraints: {'None' if t.independent_base == None else t.independent_base.constraints}")
+    l.warning(
+        f"Independent Base constraints: {'None' if t.independent_base == None else t.independent_base.constraints}")
     l.warning(f"Secret Addr constraints: {t.secret_address.constraints}")
     l.warning(f"Transmitted Secret constraints: {t.transmitted_secret.constraints}")
     l.warning(f"Transmission constraints: {t.transmission.constraints}")
@@ -92,7 +95,8 @@ def analyse(t: Transmission):
             t.transmitted_secret.aliases.append(a)
 
     l.warning(f"Base aliases: {'None' if t.base == None else t.base.aliases}")
-    l.warning(f"Independent Base aliases: {'None' if t.independent_base == None else t.independent_base.aliases}")
+    l.warning(
+        f"Independent Base aliases: {'None' if t.independent_base == None else t.independent_base.aliases}")
     l.warning(f"Secret Addr aliases: {t.secret_address.aliases}")
     l.warning(f"Transmitted Secret aliases: {t.transmitted_secret.aliases}")
     l.warning(f"Transmission aliases: {t.transmission.aliases}")
@@ -128,7 +132,8 @@ def analyse_sdb(sdb: SecretDependentBranch):
             sdb.controlled_cmp_value.branches.append((addr, condition, taken))
 
     l.warning(f"Cmp Value branches: {sdb.cmp_value.branches}")
-    l.warning(f"Controlled Cmp Value branches: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.branches}")
+    l.warning(
+        f"Controlled Cmp Value branches: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.branches}")
 
     for addr, cond, ctype in sdb.constraints:
         constr_deps = d.get_all_deps(get_vars(cond), include_constraints=True)
@@ -139,7 +144,8 @@ def analyse_sdb(sdb: SecretDependentBranch):
             sdb.controlled_cmp_value.constraints.append((addr, cond, ctype))
 
     l.warning(f"Cmp Value constraints: {sdb.cmp_value.constraints}")
-    l.warning(f"Controlled Cmp Value constraints: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.constraints}")
+    l.warning(
+        f"Controlled Cmp Value constraints: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.constraints}")
 
     for a in sdb.aliases:
         alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=True)
@@ -150,7 +156,8 @@ def analyse_sdb(sdb: SecretDependentBranch):
             sdb.controlled_cmp_value.aliases.append(a)
 
     l.warning(f"Cmp Value aliases: {sdb.cmp_value.aliases}")
-    l.warning(f"Controlled Cmp Value aliases: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.aliases}")
+    l.warning(
+        f"Controlled Cmp Value aliases: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.aliases}")
 
     l.warning(f"==========================")
 
@@ -170,7 +177,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
     reg_deps = {}
     for r in t.registers:
         reg_deps[t.registers[r].reg] = d.get_all_deps(get_vars(t.registers[r].expr),
-                                                            include_constraints=True)
+                                                      include_constraints=True)
 
     if t.reg not in reg_deps:
         reg_deps[t.reg] = d.get_all_deps(
@@ -223,9 +230,9 @@ def analyse_half_gadget(g: HalfGadget):
     d.resolve_dependencies()
 
     base_deps = [] if g.base == None else d.get_all_deps(
-                        get_vars(g.base.expr), include_constraints=True)
+        get_vars(g.base.expr), include_constraints=True)
     uncontrolled_base_deps = [] if g.uncontrolled_base == None else d.get_all_deps(
-                        get_vars(g.uncontrolled_base.expr), include_constraints=True)
+        get_vars(g.uncontrolled_base.expr), include_constraints=True)
     attacker_deps = d.get_all_deps(get_vars(g.attacker.expr), include_constraints=True)
     loaded_deps = d.get_all_deps(get_vars(g.loaded.expr), include_constraints=True)
 
@@ -281,7 +288,8 @@ def analyse_half_gadget(g: HalfGadget):
             g.loaded.aliases.append(a)
 
     l.warning(f"Base aliases: {'None' if g.base == None else g.base.aliases}")
-    l.warning(f"Uncontrolled Base aliases: {'None' if g.uncontrolled_base == None else g.uncontrolled_base.aliases}")
+    l.warning(
+        f"Uncontrolled Base aliases: {'None' if g.uncontrolled_base == None else g.uncontrolled_base.aliases}")
     l.warning(f"Attacker aliases: {g.attacker.aliases}")
     l.warning(f"Loaded aliases: {g.loaded.aliases}")
 

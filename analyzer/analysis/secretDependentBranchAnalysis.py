@@ -23,7 +23,7 @@ from ..scanner.annotations import *
 l = get_logger("SecretDependentBranchAnalysis")
 
 
-def get_secret_dependent_branches(potential_sdb : SecretDependentBranchExpr) -> list[SecretDependentBranch]:
+def get_secret_dependent_branches(potential_sdb: SecretDependentBranchExpr) -> list[SecretDependentBranch]:
     """
     Analyze an expression marked as a possible secret dependent branch (e.g.
     a branch guard consisting of a secret) to identify its components.
@@ -37,12 +37,12 @@ def get_secret_dependent_branches(potential_sdb : SecretDependentBranchExpr) -> 
 
     expr = potential_sdb.expr
 
-
     if not isinstance(expr, claripy.ast.bool.Bool):
         return []
 
     if len(expr.args) == 1:
-        report_error(Exception(), hex(0), hex(0), error_type="get_secret_dependent_branches: Unexpected AST with args == 1")
+        report_error(Exception(), hex(0), hex(
+            0), error_type="get_secret_dependent_branches: Unexpected AST with args == 1")
         return []
 
     expr_right = expr.args[0]
@@ -69,8 +69,6 @@ def get_secret_dependent_branches(potential_sdb : SecretDependentBranchExpr) -> 
     elif isinstance(expr_left, claripy.ast.bool.Bool):
         potential_sdb.expr = expr_right
         return get_secret_dependent_branches(potential_sdb)
-
-
 
     secret_dependent_branches = []
     # For both side combinations, do the analysis
