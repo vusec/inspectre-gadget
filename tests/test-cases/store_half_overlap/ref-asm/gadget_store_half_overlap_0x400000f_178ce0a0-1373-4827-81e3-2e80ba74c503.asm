@@ -20,12 +20,12 @@ Transmitted Secret:
   - Spread: 0 - 15
   - Number of Bits Inferable: 16
 Base:
-  - Expr: <BV64 0xffffffff81000000 + ((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. (0#32 .. LOAD_64[<BV64 r8 + 0x4>_22[47:32]) << 0x20) + (0#16 .. (0#16 .. rsi[63:32]))>
+  - Expr: <BV64 0xffffffff81000000 + ((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. (0#32 .. LOAD_64[<BV64 r8 + 0x4>_22][47:32]) << 0x20) + (0#16 .. (0#16 .. rsi[63:32]))>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
-  - Independent Expr: <BV64 0xffffffff81000000 + ((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. (0#32 .. LOAD_64[<BV64 r8 + 0x4>_22[47:32]) << 0x20) + (0#16 .. (0#16 .. rsi[63:32]))>
+  - Independent Expr: <BV64 0xffffffff81000000 + ((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. (0#32 .. LOAD_64[<BV64 r8 + 0x4>_22][47:32]) << 0x20) + (0#16 .. (0#16 .. rsi[63:32]))>
   - Independent Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
 Transmission:
-  - Expr: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22[47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
+  - Expr: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22][47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
 
 Register Requirements: ['<BV64 r8>', '<BV64 rdi>', '<BV64 rdx>', '<BV64 rsi>']

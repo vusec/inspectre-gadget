@@ -47,6 +47,7 @@ class TFPRegister():
 
     branches: list
     constraints: list
+    aliases: list
     requirements: Requirements
 
     range: ranges.AstRange
@@ -67,6 +68,7 @@ class TFPRegister():
         self.control_type = TFPRegisterControlType.UNKNOWN
         self.branches = []
         self.constraints = []
+        self.aliases = []
         self.requirements = Requirements()
         self.range = None
         self.range_with_branches = None
@@ -83,6 +85,7 @@ class TFPRegister():
         control_type: {self.control_type}
         branches: {ordered_branches(self.branches)}
         constraints: {ordered_constraints(self.constraints)}
+        aliases: {self.aliases}
         requirements: {self.requirements}
         range: {self.range}
         range_with_branches: {self.range_with_branches}
@@ -121,6 +124,7 @@ class TFPRegister():
             ("control_type", self.control_type),
             ("branches", ordered_branches(self.branches)),
             ("constraints", ordered_constraints(self.constraints)),
+            ("aliases", [str(a.to_BV()) for a in self.aliases]),
             ("requirements", self.requirements.to_dict()),
             ("range", ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range == None else self.range.to_dict()),
@@ -140,6 +144,7 @@ class TFPRegister():
         # Shallow copy mutable values
         new_t.branches = self.branches.copy()
         new_t.constraints = self.constraints.copy()
+        new_t.aliases = self.aliases.copy()
         return new_t
 
 

@@ -532,7 +532,6 @@ class Scanner:
 
     # ---------------- LOADS ----------------------------
 
-
     def load_hook_after(self, state: angr.SimState):
         """
         Create a new symbolic variable for every load, and annotate it with
@@ -581,7 +580,7 @@ class Scanner:
         else:
             # Create a new symbol to represent the loaded value.
             annotation = propagate_annotations(load_addr, state.scratch.ins_addr)
-            load_val = claripy.BVS(name=f'LOAD_{load_len*8}[{load_addr}]_{self.cur_id}',
+            load_val = claripy.BVS(name=f'LOAD_{load_len * 8}[{load_addr}]_{self.cur_id}',
                                    size=load_len * 8,
                                    annotations=(annotation,), explicit_name=True)
 

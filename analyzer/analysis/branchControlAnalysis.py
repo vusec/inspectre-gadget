@@ -71,7 +71,7 @@ def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
             for v in get_vars(c[1]):
                 constraint_expr = claripy.Concat(constraint_expr, v)
 
-    l.info(f"Analyzing {constraint_expr} vs { t.transmitted_secret.expr}")
+    l.info(f"Analyzing {constraint_expr} vs {t.transmitted_secret.expr}")
 
     if len(get_vars(constraint_expr)) == 0:
         l.info(f"No vars")

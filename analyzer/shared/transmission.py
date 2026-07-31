@@ -135,6 +135,7 @@ class TransmissionComponent():
     expr: claripy.ast.BV
     branches: list
     constraints: list[tuple[int, claripy.ast.BV]]
+    aliases: list
     requirements: Requirements
     range: ranges.AstRange
     range_with_branches: ranges.AstRange
@@ -146,6 +147,7 @@ class TransmissionComponent():
         self.expr = None
         self.branches = []
         self.constraints = []
+        self.aliases = []
         self.requirements = Requirements()
         self.range = None
         self.range_with_branches = None
@@ -159,6 +161,7 @@ class TransmissionComponent():
                 size: {self.size}
                 branches: {utils.ordered_branches(self.branches)}
                 constraints: {utils.ordered_constraints(self.constraints)}
+                aliases: {self.aliases}
                 requirements: {self.requirements}
                 range: {self.range}
                 range_with_branches: {self.range_with_branches}
@@ -172,6 +175,7 @@ class TransmissionComponent():
             ('size', str(self.size)),
             ('branches', utils.ordered_branches(self.branches)),
             ('constraints', utils.ordered_constraints(self.constraints)),
+            ('aliases', [str(x.to_BV()) for x in self.aliases]),
             ('requirements', self.requirements.to_dict()),
             ('range', ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range == None else self.range.to_dict()),

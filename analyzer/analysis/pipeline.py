@@ -86,7 +86,8 @@ class AnalysisPipeline:
             l.info(f"Analyzing TRANS @{hex(t.pc)}: {truncate_str(t.transmission.expr)}")
             t.name = self.name
             t.address = self.gadget_address
-            t.uuid = get_uuid(t, [t.secret_address.expr, t.secret_val.expr, self.n_found_transmissions])
+            t.uuid = get_uuid(t, [t.secret_address.expr, t.secret_val.expr,
+                              self.n_found_transmissions])
             pc_symbol = self.proj.loader.find_symbol(t.pc, fuzzy=True)
             t.pc_symbol = pc_symbol.name if pc_symbol else ""
             t.address_symbol = self.gadget_symbol
@@ -135,7 +136,8 @@ class AnalysisPipeline:
             l.info(f"Analyzing TFP @{hex(tfp.pc)}: {truncate_str(tfp.expr)}")
             tfp.name = self.name
             tfp.address = self.gadget_address
-            tfp.uuid = get_uuid(tfp, [[r.expr for r in t.registers.values()], self.n_found_tainted_function_pointers])
+            tfp.uuid = get_uuid(tfp, [[r.expr for r in t.registers.values()],
+                                self.n_found_tainted_function_pointers])
 
             pc_symbol = self.proj.loader.find_symbol(tfp.pc, fuzzy=True)
             tfp.pc_symbol = pc_symbol.name if pc_symbol else ""
@@ -217,13 +219,14 @@ class AnalysisPipeline:
                 f"Analyzing SDB   @{hex(sdb.pc)}: {truncate_str(sdb.sdb_expr)} <> {truncate_str(sdb.cmp_value.expr)}")
             sdb.name = self.name
             sdb.address = self.gadget_address
-            sdb.uuid = get_uuid(sdb, [sdb.sdb_expr, sdb.cmp_value.expr, self.n_found_secret_dependent_branches])
+            sdb.uuid = get_uuid(sdb, [sdb.sdb_expr, sdb.cmp_value.expr,
+                                self.n_found_secret_dependent_branches])
 
             pc_symbol = self.proj.loader.find_symbol(sdb.pc, fuzzy=True)
             sdb.pc_symbol = pc_symbol.name if pc_symbol else ""
             sdb.address_symbol = self.gadget_symbol
             baseControlAnalysis.analyse_secret_dependent_branch(sdb)
-            pathAnalysis.analyse(sdb)
+            pathAnalysis.analyse_sdb(sdb)
             requirementsAnalysis.analyse_secret_dependent_branch(sdb)
 
             try:
@@ -320,4 +323,3 @@ def get_uuid(t, hash_list):
         return str(uuid.UUID(int=(int(h, 16) % 2 ** 128), version=4))
     else:
         return str(uuid.uuid4())
-

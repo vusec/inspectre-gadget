@@ -98,6 +98,7 @@ class MemoryAlias:
     def to_BV(self):
         return self.val1.to_BV() == self.val2.to_BV()
 
+
 EDGE_BOUNDS_SIZE = 0x1000
 
 def get_edge_constraints(addr):
@@ -143,7 +144,7 @@ def is_simple_isolated_expression(state, expr):
     simple_ops = ['__add__', '__sub__']
 
     if expr.depth == 1 or (expr.depth == 2 and expr.op in simple_ops):
-        c =  get_constraints_for_expr(state, expr)
+        c = get_constraints_for_expr(state, expr)
         if not c:
             return True
 
@@ -153,14 +154,14 @@ def concrete_value_overlaps_with(val1, size1, val2, size2):
     return not (val1 + size1 <= val2 or val2 + size2 <= val1)
 
 
-def addr_overlaps_with(addr1: claripy.ast.BV, size1 : int, addr2: claripy.ast.BV, size2: int, state: angr.SimState) -> bool:
+def addr_overlaps_with(addr1: claripy.ast.BV, size1: int, addr2: claripy.ast.BV, size2: int, state: angr.SimState) -> bool:
     """
     Check if the two accesses (addresses + size) overlap.
     Note that, since we are dealing with symbolic loads, the result
     is true only if the two symbolic addresses _must_ overlap, i.e. there
     is no possible solution where they don't.
     """
-    assert(size1 < EDGE_BOUNDS_SIZE and size2 < EDGE_BOUNDS_SIZE)
+    assert (size1 < EDGE_BOUNDS_SIZE and size2 < EDGE_BOUNDS_SIZE)
 
     # fast-path: two concrete values
     if addr1.concrete and addr2.concrete:
@@ -185,7 +186,6 @@ def addr_overlaps_with(addr1: claripy.ast.BV, size1 : int, addr2: claripy.ast.BV
 
     if not state.solver.satisfiable(extra_constraints=constraints):
         return False
-
 
     # If this condition is satisfiable, there is at least one solution for
     # addr1 and addr2 in which they don't overlap.
@@ -336,7 +336,6 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
         if addr_overlaps_with(load_addr, load_size, prev_s.addr, prev_s.size, state):
             overlapping_stores.append(prev_s)
 
-
     if not overlapping_stores:
         # No aliasing stores
         return None, None
@@ -346,7 +345,7 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
     last_store = overlapping_stores[-1]
 
     if last_store.size == load_size \
-        and not state.solver.satisfiable(extra_constraints=[load_addr != last_store.addr]):
+            and not state.solver.satisfiable(extra_constraints=[load_addr != last_store.addr]):
         #  The last store is an exact match (both addr + length)! -> Easy case
         return last_store, last_store.val
 
@@ -364,9 +363,9 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
 
         # We first store a new expr on load_addr, to fill any possible blank spots
         annotation = propagate_annotations(load_addr, state.scratch.ins_addr)
-        gap_expr = claripy.BVS(name=f"LOAD_{load_size*8}[{load_addr}_{load_id}]",
-                                        size=load_size * 8,
-                                        annotations=(annotation,), explicit_name=True)
+        gap_expr = claripy.BVS(name=f"LOAD_{load_size * 8}[{load_addr}_{load_id}]",
+                               size=load_size * 8,
+                               annotations=(annotation,), explicit_name=True)
 
         blank_state.memory.store(load_addr, gap_expr, endness=archinfo.Endness.LE)
 

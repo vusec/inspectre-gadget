@@ -74,21 +74,20 @@ def calculate_range(component: TransmissionComponent, constraints, branches):
 def analyse(t: Transmission):
     l.warning(f"========= [RANGE] ==========")
 
-    # Pre-compute constraint sets.
-    constr = []
-    constr.extend([x[1] for x in t.constraints])
-
-    constr_with_branches = []
-    if len(t.branches) > 0:
-        constr_with_branches.extend([x[1] for x in t.constraints])
-        constr_with_branches.extend([x[1] for x in t.branches])
-
     # Calculate ranges for each component
     for c in [t.base, t.transmitted_secret, t.secret_address, t.transmission]:
         if c != None:
             constr = [x[1] for x in c.constraints]
             constr_with_branches = [x[1] for x in c.branches]
             constr_with_branches.extend(constr)
+
+            # Add aliases to capture constraints and branches correctly.
+            alias_constr = [a.to_BV() for a in c.aliases]
+            if len(constr) > 0:
+                constr.extend(alias_constr)
+            if len(constr_with_branches) > 0:
+                constr_with_branches.extend(alias_constr)
+
             calculate_range(c, constr, constr_with_branches)
 
     # Calculate ranges for base sub-components.
@@ -100,6 +99,14 @@ def analyse(t: Transmission):
             constr = [x[1] for x in t.independent_base.constraints]
             constr_with_branches = [x[1] for x in t.independent_base.branches]
             constr_with_branches.extend(constr)
+
+            # Add aliases to capture constraints and branches correctly.
+            alias_constr = [a.to_BV() for a in t.independent_base.aliases]
+            if len(constr) > 0:
+                constr.extend(alias_constr)
+            if len(constr_with_branches) > 0:
+                constr_with_branches.extend(alias_constr)
+
             calculate_range(t.independent_base, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if t.base == None else t.base.range}")
@@ -120,6 +127,14 @@ def analyse_tfp(t: TaintedFunctionPointer):
             constr = [x[1] for x in r.constraints]
             constr_with_branches = [x[1] for x in r.branches]
             constr_with_branches.extend(constr)
+
+            # Add aliases to capture constraints and branches correctly.
+            alias_constr = [a.to_BV() for a in r.aliases]
+            if len(constr) > 0:
+                constr.extend(alias_constr)
+            if len(constr_with_branches) > 0:
+                constr_with_branches.extend(alias_constr)
+
             calculate_range(r, constr, constr_with_branches)
 
             if r.controlled_expr != None:
@@ -142,18 +157,21 @@ def analyse_tfp(t: TaintedFunctionPointer):
 def analyse_half_gadget(g: HalfGadget):
     l.warning(f"========= [RANGE] ==========")
 
-    # Pre-compute constraint sets.
-    constr = []
-    constr.extend([x[1] for x in g.constraints])
-
-    constr_with_branches = []
-    if len(g.branches) > 0:
-        constr_with_branches.extend([x[1] for x in g.constraints])
-        constr_with_branches.extend([x[1] for x in g.branches])
-
     # Calculate ranges for each component
     for c in [g.loaded, g.base, g.uncontrolled_base, g.attacker]:
-        calculate_range(c, constr, constr_with_branches)
+        if c != None:
+            constr = [x[1] for x in c.constraints]
+            constr_with_branches = [x[1] for x in c.branches]
+            constr_with_branches.extend(constr)
+
+            # Add aliases to capture constraints and branches correctly.
+            alias_constr = [a.to_BV() for a in c.aliases]
+            if len(constr) > 0:
+                constr.extend(alias_constr)
+            if len(constr_with_branches) > 0:
+                constr_with_branches.extend(alias_constr)
+
+            calculate_range(c, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if g.base == None else g.base.range}")
     l.warning(
@@ -167,17 +185,20 @@ def analyze_secret_dependent_branch(sdb: SecretDependentBranch):
     # First analyze the transmission components
     analyse(sdb)
 
-    # Pre-compute constraint sets.
-    constr = []
-    constr.extend([x[1] for x in sdb.constraints])
+    for c in [sdb.cmp_value, sdb.controlled_cmp_value]:
+        if c != None:
+            constr = [x[1] for x in c.constraints]
+            constr_with_branches = [x[1] for x in c.branches]
+            constr_with_branches.extend(constr)
 
-    constr_with_branches = []
-    if len(sdb.branches) > 0:
-        constr_with_branches.extend([x[1] for x in sdb.constraints])
-        constr_with_branches.extend([x[1] for x in sdb.branches])
+            # Add aliases to capture constraints and branches correctly.
+            alias_constr = [a.to_BV() for a in c.aliases]
+            if len(constr) > 0:
+                constr.extend(alias_constr)
+            if len(constr_with_branches) > 0:
+                constr_with_branches.extend(alias_constr)
 
-    calculate_range(sdb.cmp_value, constr, constr_with_branches)
-    calculate_range(sdb.controlled_cmp_value, constr, constr_with_branches)
+            calculate_range(c, constr, constr_with_branches)
 
     l.warning(f"cmp_value range:  {sdb.cmp_value.range}")
     l.warning(
