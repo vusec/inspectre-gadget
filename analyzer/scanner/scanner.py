@@ -580,6 +580,16 @@ class Scanner:
             load_val = stored_val
             l.info(f"Forwarded ({load_val} {utils.get_annotations(load_val)})"
                    f" from store @({alias_store.addr})")
+        elif (global_config['LoadConcreteMemory'] and not load_addr.symbolic
+                and not state.inspect.mem_read_expr.symbolic):
+            annotation = annotations.propagate_annotations(load_addr, state.scratch.ins_addr)
+            load_val = claripy.BVV(state.inspect.mem_read_expr.args[0],
+                                   size=load_len * 8,
+                                   annotations=(annotation,))
+
+            # Save it, in case we later need to split this state manually.
+            recordSubstitution(self.cur_state, state.scratch.ins_addr, load_val,
+                               SubstType.VALUE_SUBST)
         else:
             # Create a new symbol to represent the loaded value.
             annotation = annotations.propagate_annotations(load_addr,
