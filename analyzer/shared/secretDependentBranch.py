@@ -5,7 +5,8 @@ Secret Dependent Branch object.
 import claripy
 
 from . import utils
-from .transmission import Transmission, TransmissionComponent, TransmissionExpr, component_to_dict
+from . import transmission
+from .transmission import Transmission, TransmissionComponent, TransmissionExpr
 
 
 class SecretDependentBranchExpr(TransmissionExpr):
@@ -89,8 +90,8 @@ class SecretDependentBranch(Transmission):
 
         d['sdb_expr'] = self.sdb_expr
         d['cmp_operation'] = self.cmp_operation
-        d['cmp_value'] = component_to_dict(self.cmp_value)
-        d['controlled_cmp_value'] = component_to_dict(
+        d['cmp_value'] = transmission.component_to_dict(self.cmp_value)
+        d['controlled_cmp_value'] = transmission.component_to_dict(
             self.controlled_cmp_value)
 
         return d

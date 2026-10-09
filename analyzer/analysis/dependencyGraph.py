@@ -10,18 +10,20 @@ import sys
 import random
 
 # autopep8: off
-from ..scanner.annotations import *
-from ..shared.logger import *
+from ..scanner import annotations
+from ..scanner.annotations import AttackerAnnotation, LoadAnnotation, UncontrolledAnnotation
+from ..shared import logger
+from ..shared import utils
 # autopep8: on
 
-l = get_logger("DepGraph")
+l = logger.get_logger("DepGraph")
 
 def is_controlled(var):
-    if not is_sym_var(var):
+    if not utils.is_sym_var(var):
         return False
 
-    load_anno = get_load_annotation(var)
-    uncontrolled_anno = get_uncontrolled_annotation(var)
+    load_anno = annotations.get_load_annotation(var)
+    uncontrolled_anno = annotations.get_uncontrolled_annotation(var)
 
     if uncontrolled_anno != None:
         return False
@@ -32,17 +34,17 @@ def is_controlled(var):
     return True
 
 def is_expr_controlled(expr):
-    if not is_sym_expr(expr):
+    if not utils.is_sym_expr(expr):
         return False
 
-    return any(is_controlled(x) for x in get_vars(expr))
+    return any(is_controlled(x) for x in utils.get_vars(expr))
 
 def is_uncontrolled(var):
-    if not is_sym_var(var):
+    if not utils.is_sym_var(var):
         return False
 
-    load_anno = get_load_annotation(var)
-    uncontrolled_anno = get_uncontrolled_annotation(var)
+    load_anno = annotations.get_load_annotation(var)
+    uncontrolled_anno = annotations.get_uncontrolled_annotation(var)
 
     if uncontrolled_anno != None:
         return True
@@ -53,13 +55,13 @@ def is_uncontrolled(var):
     return False
 
 def is_expr_uncontrolled(expr):
-    if not is_sym_expr(expr):
+    if not utils.is_sym_expr(expr):
         return False
 
-    if len(get_vars(expr)) == 0:
+    if len(utils.get_vars(expr)) == 0:
         return False
 
-    return any(is_uncontrolled(x) for x in get_vars(expr))
+    return any(is_uncontrolled(x) for x in utils.get_vars(expr))
 
 class DepNode:
     """
@@ -115,7 +117,7 @@ class ExprNode(DepNode):
     expr: claripy.ast.BV
 
     def __init__(self, expr):
-        super().__init__(get_vars(expr), is_expr_controlled(expr))
+        super().__init__(utils.get_vars(expr), is_expr_controlled(expr))
         self.expr = expr
 
 class SymNode(DepNode):
@@ -153,7 +155,7 @@ def is_addr_controllable(tree, sym: claripy.ast.BV, fixed_syms: list[claripy.ast
     if not node.controlled:
         return False
 
-    if isinstance(node, LoadNode) and is_sym_expr(node.addr):
+    if isinstance(node, LoadNode) and utils.is_sym_expr(node.addr):
         return tree.is_independently_controllable(node.addr, fixed_syms, check_constraints, True)
     else:
         return True
@@ -163,7 +165,7 @@ def is_addr_independent(tree, expr1: claripy.ast.BV, expr2: claripy.ast.BV, chec
     node = tree.get_node(expr1)
     assert (isinstance(node, SymNode))
 
-    if isinstance(node, LoadNode) and is_sym_expr(node.addr):
+    if isinstance(node, LoadNode) and utils.is_sym_expr(node.addr):
         return tree.is_independent(node.addr, expr2, check_constraints, True)
     else:
         return tree.is_independent(expr1, expr2, check_constraints, False)
@@ -200,7 +202,7 @@ class DepGraph:
         """
         Return the node associated to a given symbolic expression, if any.
         """
-        if not is_sym_expr(expr):
+        if not utils.is_sym_expr(expr):
             return None
 
         if expr.depth == 1:
@@ -214,7 +216,7 @@ class DepGraph:
         expression, we also add one node for each of its base symbols.
         """
         # Not a symbolic expression.
-        if not is_sym_expr(expr):
+        if not utils.is_sym_expr(expr):
             return
 
         # Already added.
@@ -223,11 +225,11 @@ class DepGraph:
 
         # Symbolic variable.
         if expr.depth == 1:
-            attacker_annos = [a for a in get_annotations(
+            attacker_annos = [a for a in utils.get_annotations(
                 expr) if isinstance(a, AttackerAnnotation)]
-            load_annos = [a for a in get_annotations(
+            load_annos = [a for a in utils.get_annotations(
                 expr) if isinstance(a, LoadAnnotation)]
-            uncontrolled_annos = [a for a in get_annotations(
+            uncontrolled_annos = [a for a in utils.get_annotations(
                 expr) if isinstance(a, UncontrolledAnnotation)]
 
             if len(attacker_annos) + len(load_annos) + len(uncontrolled_annos) == 0:
@@ -249,7 +251,7 @@ class DepGraph:
 
         # Symbolic expression.
         else:
-            for v in get_vars(expr):
+            for v in utils.get_vars(expr):
                 self.add_nodes(v)
             self.expr_nodes[expr] = ExprNode(expr)
 
@@ -260,9 +262,9 @@ class DepGraph:
         X are considered also dependencies for Y.
         """
         for a in aliases:
-            alias_set = get_vars(a)
+            alias_set = utils.get_vars(a)
             for sym in alias_set:
-                assert (is_sym_var(sym))
+                assert (utils.is_sym_var(sym))
                 self.add_nodes(sym)
                 self.sym_nodes[sym].aliases.update(alias_set)
 
@@ -271,7 +273,7 @@ class DepGraph:
         Add constraints like X > Y.
         """
         for c in constraints:
-            involved_vars = get_vars(c)
+            involved_vars = utils.get_vars(c)
             for sym in involved_vars:
                 self.add_nodes(sym)
                 self.sym_nodes[sym].constraints.update(involved_vars)
@@ -321,7 +323,7 @@ class DepGraph:
     def get_all_deps(self, exprs, include_constraints: bool):
         deps = set()
         for e in exprs:
-            if not is_sym_expr(e):
+            if not utils.is_sym_expr(e):
                 continue
             n = self.get_node(e)
             assert (n)
@@ -340,7 +342,7 @@ class DepGraph:
             return False
 
         # l.info(f"Checking if {expr} can be controlled independently from {fixed_syms}")
-        expr_syms = set(get_vars(expr))
+        expr_syms = set(utils.get_vars(expr))
         deps_to_check = set(self.get_all_deps(fixed_syms, check_constraints))
 
         # Get all symbols in the expr that are not among the symbols, aliases or
@@ -366,8 +368,8 @@ class DepGraph:
         Check if expr1 and expr2 have any symbol in common, accounting for aliases
         and (optionally) constraints.
         """
-        expr1_syms = set(get_vars(expr1))
-        expr2_syms = set(get_vars(expr2))
+        expr1_syms = set(utils.get_vars(expr1))
+        expr2_syms = set(utils.get_vars(expr2))
         dep1 = set(self.get_all_deps(expr1_syms, check_constraints))
         dep2 = set(self.get_all_deps(expr2_syms, check_constraints))
 

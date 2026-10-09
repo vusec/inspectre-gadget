@@ -9,7 +9,8 @@ from collections import OrderedDict
 
 from . import ranges
 from . import utils
-from .transmission import TransmissionComponent, Requirements, component_to_dict
+from . import transmission
+from .transmission import Requirements, TransmissionComponent
 
 
 class HalfGadget():
@@ -117,10 +118,10 @@ class HalfGadget():
         d['contains_spec_stop'] = self.contains_spec_stop
         d['bbls'] = str([hex(x) for x in self.bbls])
 
-        d['loaded'] = component_to_dict(self.loaded)
-        d['base'] = component_to_dict(self.base)
-        d['uncontrolled_base'] = component_to_dict(self.uncontrolled_base)
-        d['attacker'] = component_to_dict(self.attacker)
+        d['loaded'] = transmission.component_to_dict(self.loaded)
+        d['base'] = transmission.component_to_dict(self.base)
+        d['uncontrolled_base'] = transmission.component_to_dict(self.uncontrolled_base)
+        d['attacker'] = transmission.component_to_dict(self.attacker)
 
         d['branches'] = utils.ordered_branches(self.branches)
         d['branch_requirements'] = self.branch_requirements

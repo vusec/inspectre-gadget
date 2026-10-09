@@ -5,8 +5,8 @@ import claripy
 import sys
 
 # autopep8: off
-from ..shared.utils import *
-from ..shared.transmission import Requirements, ControlType
+from ..shared import utils
+from ..shared.transmission import ControlType, Requirements
 # autopep8: on
 
 
@@ -31,11 +31,11 @@ class LoadAnnotation(claripy.Annotation):
         self.requirements = Requirements()
         self.depth = 0
 
-        if is_sym_expr(read_address_ast):
+        if utils.is_sym_expr(read_address_ast):
             self.requirements.mem.add(read_address_ast)
             max_depth = 0
 
-            for v in get_vars(read_address_ast):
+            for v in utils.get_vars(read_address_ast):
                 load_anno = None
                 for a in v.annotations:
                     if isinstance(a, LoadAnnotation):
@@ -173,7 +173,7 @@ def propagate_annotations(ast: claripy.ast.BV, address):
 
     can_be_controlled = False
 
-    for anno in get_annotations(ast):
+    for anno in utils.get_annotations(ast):
         if isinstance(anno, AttackerAnnotation):
             is_attack = True
             can_be_controlled = True
@@ -197,10 +197,10 @@ def propagate_annotations(ast: claripy.ast.BV, address):
 
 
 def contains_secret(ast: claripy.ast.BV):
-    if not is_sym_expr(ast):
+    if not utils.is_sym_expr(ast):
         return False
 
-    for anno in get_annotations(ast):
+    for anno in utils.get_annotations(ast):
         if isinstance(anno, SecretAnnotation) or isinstance(anno, TransmissionAnnotation):
             return True
 
@@ -208,16 +208,16 @@ def contains_secret(ast: claripy.ast.BV):
 
 
 def get_load_annotation(x):
-    if is_sym_var(x):
-        for anno in get_annotations(x):
+    if utils.is_sym_var(x):
+        for anno in utils.get_annotations(x):
             if isinstance(anno, LoadAnnotation):
                 return anno
     return None
 
 def get_load_depth(x):
     max_depth = 0
-    if is_sym_expr(x):
-        for anno in get_annotations(x):
+    if utils.is_sym_expr(x):
+        for anno in utils.get_annotations(x):
             if isinstance(anno, LoadAnnotation):
                 max_depth = max(max_depth, anno.depth)
 
@@ -225,22 +225,22 @@ def get_load_depth(x):
 
 
 def get_attacker_annotation(x):
-    if is_sym_var(x):
-        for anno in get_annotations(x):
+    if utils.is_sym_var(x):
+        for anno in utils.get_annotations(x):
             if isinstance(anno, AttackerAnnotation):
                 return anno
     return None
 
 def get_uncontrolled_annotation(x):
-    if is_sym_var(x):
-        for anno in get_annotations(x):
+    if utils.is_sym_var(x):
+        for anno in utils.get_annotations(x):
             if isinstance(anno, UncontrolledAnnotation):
                 return anno
     return None
 
 def get_uncontrolled_load_annotation(x):
-    if is_sym_var(x):
-        for anno in get_annotations(x):
+    if utils.is_sym_var(x):
+        for anno in utils.get_annotations(x):
             if isinstance(anno, UncontrolledLoadAnnotation):
                 return anno
     return None
@@ -248,7 +248,7 @@ def get_uncontrolled_load_annotation(x):
 def get_dep_set(expr):
     depset = set()
 
-    for v in get_vars(expr):
+    for v in utils.get_vars(expr):
         depset.add(v)
         anno = get_load_annotation(v)
         if anno:
@@ -257,16 +257,16 @@ def get_dep_set(expr):
     return depset
 
 def is_attacker_controlled(ast):
-    for anno in get_annotations(ast):
+    for anno in utils.get_annotations(ast):
         if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
             return True
     return False
 
 def is_directly_controlled(ast: claripy.ast.BV):
-    if not is_sym_expr(ast):
+    if not utils.is_sym_expr(ast):
         return False
 
-    for anno in get_annotations(ast):
+    for anno in utils.get_annotations(ast):
         if isinstance(anno, AttackerAnnotation):
             return True
 

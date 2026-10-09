@@ -12,19 +12,29 @@ import csv
 import hashlib
 from collections.abc import MutableMapping
 
-from . import transmissionAnalysis, tfpAnalysis, halfGadgetAnalysis, secretDependentBranchAnalysis
-from . import baseControlAnalysis, branchControlAnalysis, pathAnalysis, requirementsAnalysis, rangeAnalysis, bitsAnalysis, tfpAnalysis
-from ..asmprinter.asmprinter import *
-from ..shared.logger import *
-from ..shared.transmission import *
+from . import baseControlAnalysis
+from . import bitsAnalysis
+from . import branchControlAnalysis
+from . import halfGadgetAnalysis
+from . import pathAnalysis
+from . import rangeAnalysis
+from . import requirementsAnalysis
+from . import secretDependentBranchAnalysis
+from . import tfpAnalysis
+from . import transmissionAnalysis
+from ..asmprinter import asmprinter
+from ..shared import logger
+from ..shared.transmission import Transmission, TransmissionExpr
 from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared.utils import report_error
+from ..shared import utils
 from ..shared.config import global_config
+from pathlib import Path
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
 
 
-l = get_logger("AnalysisMAIN")
-l_verbose = get_logger("Analysis")
+l = logger.get_logger("AnalysisMAIN")
+l_verbose = logger.get_logger("Analysis")
 
 
 class AnalysisPipeline:
@@ -83,7 +93,7 @@ class AnalysisPipeline:
         transmissions = transmissionAnalysis.get_transmissions(potential_t)
 
         for t in transmissions:
-            l.info(f"Analyzing TRANS @{hex(t.pc)}: {truncate_str(t.transmission.expr)}")
+            l.info(f"Analyzing TRANS @{hex(t.pc)}: {utils.truncate_str(t.transmission.expr)}")
             t.name = self.name
             t.address = self.gadget_address
             t.uuid = get_uuid(t, [t.secret_address.expr, t.secret_val.expr,
@@ -107,7 +117,7 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                report_error(e, where="range_analysis", start_addr=hex(
+                utils.report_error(e, where="range_analysis", start_addr=hex(
                     self.gadget_address), error_type="RANGE")
                 continue
 
@@ -121,7 +131,7 @@ class AnalysisPipeline:
             l_verbose.info(t)
 
             if self.asm_folder != "":
-                output_gadget_to_file(t, self.proj, self.asm_folder)
+                asmprinter.output_gadget_to_file(t, self.proj, self.asm_folder)
                 l.info(f"Dumped annotated ASM to {self.asm_folder}")
             if self.csv_filename != "":
                 append_to_csv(self.csv_filename, [t])
@@ -133,7 +143,7 @@ class AnalysisPipeline:
         tainted_function_pointers = tfpAnalysis.analyse(t)
 
         for tfp in tainted_function_pointers:
-            l.info(f"Analyzing TFP @{hex(tfp.pc)}: {truncate_str(tfp.expr)}")
+            l.info(f"Analyzing TFP @{hex(tfp.pc)}: {utils.truncate_str(tfp.expr)}")
             tfp.name = self.name
             tfp.address = self.gadget_address
             tfp.uuid = get_uuid(tfp, [[r.expr for r in t.registers.values()],
@@ -157,7 +167,7 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                report_error(e, where="range_analysis", start_addr=hex(
+                utils.report_error(e, where="range_analysis", start_addr=hex(
                     self.gadget_address), error_type="TFP RANGE")
                 continue
 
@@ -165,7 +175,7 @@ class AnalysisPipeline:
             l_verbose.info(tfp)
 
             if self.asm_folder != "":
-                output_tfp_to_file(tfp, self.proj, self.asm_folder)
+                asmprinter.output_tfp_to_file(tfp, self.proj, self.asm_folder)
                 l.info(f"Dumped annotated ASM to {self.asm_folder}")
             if self.tfp_csv_filename != "":
                 append_to_csv(self.tfp_csv_filename, [tfp])
@@ -176,7 +186,7 @@ class AnalysisPipeline:
         gadgets = halfGadgetAnalysis.analyse(gadget)
 
         for g in gadgets:
-            l.info(f"Analyzing half-spectre @{hex(g.pc)}: {truncate_str(g.loaded.expr)}")
+            l.info(f"Analyzing half-spectre @{hex(g.pc)}: {utils.truncate_str(g.loaded.expr)}")
             g.name = self.name
             g.address = self.gadget_address
             g.uuid = get_uuid(g, [g.loaded.expr, self.n_found_half_gadgets])
@@ -196,14 +206,14 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                report_error(e, where="range_analysis", start_addr=hex(
+                utils.report_error(e, where="range_analysis", start_addr=hex(
                     self.gadget_address), error_type="HALF GADGET RANGE")
 
             self.n_final_half_gadgets += 1
             l_verbose.info(g)
 
             if self.asm_folder != "":
-                output_half_gadget_to_file(g, self.proj, self.asm_folder)
+                asmprinter.output_half_gadget_to_file(g, self.proj, self.asm_folder)
                 l.info(f"Dumped annotated ASM to {self.asm_folder}")
             if self.half_gadget_filename != "":
                 append_to_csv(self.half_gadget_filename, [g])
@@ -216,7 +226,7 @@ class AnalysisPipeline:
 
         for sdb in secret_dependent_branches:
             l.info(
-                f"Analyzing SDB   @{hex(sdb.pc)}: {truncate_str(sdb.sdb_expr)} <> {truncate_str(sdb.cmp_value.expr)}")
+                f"Analyzing SDB   @{hex(sdb.pc)}: {utils.truncate_str(sdb.sdb_expr)} <> {utils.truncate_str(sdb.cmp_value.expr)}")
             sdb.name = self.name
             sdb.address = self.gadget_address
             sdb.uuid = get_uuid(sdb, [sdb.sdb_expr, sdb.cmp_value.expr,
@@ -239,7 +249,7 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                report_error(e, where="range_analysis", start_addr=hex(
+                utils.report_error(e, where="range_analysis", start_addr=hex(
                     self.gadget_address), error_type="RANGE")
                 continue
 
@@ -253,7 +263,7 @@ class AnalysisPipeline:
             l_verbose.info(sdb)
 
             if self.asm_folder != "":
-                output_secret_dependent_branch_to_file(
+                asmprinter.output_secret_dependent_branch_to_file(
                     sdb, self.proj, self.asm_folder)
                 l.info(f"Dumped annotated ASM to {self.asm_folder}")
             if self.csv_filename != "":

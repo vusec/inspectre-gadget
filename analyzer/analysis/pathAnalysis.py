@@ -11,15 +11,15 @@ import sys
 from .dependencyGraph import DepGraph
 
 # autopep8: off
-from ..shared.transmission import *
-from ..shared.taintedFunctionPointer import *
+from ..shared.transmission import Transmission
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
 from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared.utils import *
-from ..shared.logger import *
+from ..shared import utils
+from ..shared import logger
 # autopep8: on
 
-l = get_logger("PathAnalysis")
+l = logger.get_logger("PathAnalysis")
 
 
 def analyse(t: Transmission):
@@ -34,15 +34,15 @@ def analyse(t: Transmission):
     d: DepGraph = t.properties["deps"]
 
     base_deps = [] if t.base == None else d.get_all_deps(
-        get_vars(t.base.expr), include_constraints=True)
+        utils.get_vars(t.base.expr), include_constraints=True)
     indep_base_deps = [] if t.independent_base == None else d.get_all_deps(
-        get_vars(t.independent_base.expr), include_constraints=True)
-    secret_addr_deps = d.get_all_deps(get_vars(t.secret_address.expr), include_constraints=True)
-    secret_deps = d.get_all_deps(get_vars(t.transmitted_secret.expr), include_constraints=True)
-    transmission_deps = d.get_all_deps(get_vars(t.transmission.expr), include_constraints=True)
+        utils.get_vars(t.independent_base.expr), include_constraints=True)
+    secret_addr_deps = d.get_all_deps(utils.get_vars(t.secret_address.expr), include_constraints=True)
+    secret_deps = d.get_all_deps(utils.get_vars(t.transmitted_secret.expr), include_constraints=True)
+    transmission_deps = d.get_all_deps(utils.get_vars(t.transmission.expr), include_constraints=True)
 
     for addr, condition, taken in t.branches:
-        br_deps = d.get_all_deps(get_vars(condition), include_constraints=True)
+        br_deps = d.get_all_deps(utils.get_vars(condition), include_constraints=True)
 
         if len(br_deps.intersection(base_deps)):
             t.base.branches.append((addr, condition, taken))
@@ -61,7 +61,7 @@ def analyse(t: Transmission):
     l.warning(f"Transmission branches: {t.transmission.branches}")
 
     for addr, cond, ctype in t.constraints:
-        constr_deps = d.get_all_deps(get_vars(cond), include_constraints=True)
+        constr_deps = d.get_all_deps(utils.get_vars(cond), include_constraints=True)
         if len(constr_deps.intersection(base_deps)):
             t.base.constraints.append((addr, cond, ctype))
         if len(constr_deps.intersection(indep_base_deps)):
@@ -81,7 +81,7 @@ def analyse(t: Transmission):
     l.warning(f"Transmission constraints: {t.transmission.constraints}")
 
     for a in t.aliases:
-        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=True)
+        alias_deps = d.get_all_deps(utils.get_vars(a.to_BV()), include_constraints=True)
 
         if len(alias_deps.intersection(base_deps)):
             t.base.aliases.append(a)
@@ -119,12 +119,12 @@ def analyse_sdb(sdb: SecretDependentBranch):
     if sdb.controlled_cmp_value != None:
         d.add_nodes(sdb.controlled_cmp_value.expr)
 
-    cmp_value_deps = d.get_all_deps(get_vars(sdb.cmp_value.expr), include_constraints=True)
+    cmp_value_deps = d.get_all_deps(utils.get_vars(sdb.cmp_value.expr), include_constraints=True)
     controlled_cmp_value_deps = [] if sdb.controlled_cmp_value == None else d.get_all_deps(
-        get_vars(sdb.controlled_cmp_value.expr), include_constraints=True)
+        utils.get_vars(sdb.controlled_cmp_value.expr), include_constraints=True)
 
     for addr, condition, taken in sdb.branches:
-        br_deps = d.get_all_deps(get_vars(condition), include_constraints=True)
+        br_deps = d.get_all_deps(utils.get_vars(condition), include_constraints=True)
 
         if len(br_deps.intersection(cmp_value_deps)):
             sdb.cmp_value.branches.append((addr, condition, taken))
@@ -136,7 +136,7 @@ def analyse_sdb(sdb: SecretDependentBranch):
         f"Controlled Cmp Value branches: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.branches}")
 
     for addr, cond, ctype in sdb.constraints:
-        constr_deps = d.get_all_deps(get_vars(cond), include_constraints=True)
+        constr_deps = d.get_all_deps(utils.get_vars(cond), include_constraints=True)
 
         if len(constr_deps.intersection(cmp_value_deps)):
             sdb.cmp_value.constraints.append((addr, cond, ctype))
@@ -148,7 +148,7 @@ def analyse_sdb(sdb: SecretDependentBranch):
         f"Controlled Cmp Value constraints: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.constraints}")
 
     for a in sdb.aliases:
-        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=True)
+        alias_deps = d.get_all_deps(utils.get_vars(a.to_BV()), include_constraints=True)
 
         if len(alias_deps.intersection(cmp_value_deps)):
             sdb.cmp_value.aliases.append(a)
@@ -176,16 +176,16 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
     reg_deps = {}
     for r in t.registers:
-        reg_deps[t.registers[r].reg] = d.get_all_deps(get_vars(t.registers[r].expr),
+        reg_deps[t.registers[r].reg] = d.get_all_deps(utils.get_vars(t.registers[r].expr),
                                                       include_constraints=True)
 
     if t.reg not in reg_deps:
         reg_deps[t.reg] = d.get_all_deps(
-            get_vars(t.expr), include_constraints=True)
+            utils.get_vars(t.expr), include_constraints=True)
 
     for addr, condition, taken in t.all_branches:
         br_deps = d.get_all_deps(
-            get_vars(condition), include_constraints=True)
+            utils.get_vars(condition), include_constraints=True)
 
         # Check for all registers
         for r in t.registers:
@@ -197,7 +197,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
             t.branches.append((addr, condition, taken))
 
     for addr, c, ctype in t.all_constraints:
-        constr_deps = d.get_all_deps(get_vars(c), include_constraints=True)
+        constr_deps = d.get_all_deps(utils.get_vars(c), include_constraints=True)
 
         # Check for all registers
         for r in t.registers:
@@ -209,7 +209,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
             t.constraints.append((addr, c, ctype))
 
     for a in t.aliases:
-        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=True)
+        alias_deps = d.get_all_deps(utils.get_vars(a.to_BV()), include_constraints=True)
 
         # Check for all registers
         for r in t.registers:
@@ -230,15 +230,15 @@ def analyse_half_gadget(g: HalfGadget):
     d.resolve_dependencies()
 
     base_deps = [] if g.base == None else d.get_all_deps(
-        get_vars(g.base.expr), include_constraints=True)
+        utils.get_vars(g.base.expr), include_constraints=True)
     uncontrolled_base_deps = [] if g.uncontrolled_base == None else d.get_all_deps(
-        get_vars(g.uncontrolled_base.expr), include_constraints=True)
-    attacker_deps = d.get_all_deps(get_vars(g.attacker.expr), include_constraints=True)
-    loaded_deps = d.get_all_deps(get_vars(g.loaded.expr), include_constraints=True)
+        utils.get_vars(g.uncontrolled_base.expr), include_constraints=True)
+    attacker_deps = d.get_all_deps(utils.get_vars(g.attacker.expr), include_constraints=True)
+    loaded_deps = d.get_all_deps(utils.get_vars(g.loaded.expr), include_constraints=True)
 
     for addr, condition, taken in g.branches:
         br_deps = d.get_all_deps(
-            get_vars(condition), include_constraints=True)
+            utils.get_vars(condition), include_constraints=True)
 
         if len(br_deps.intersection(base_deps)):
             g.base.branches.append((addr, condition, taken))
@@ -257,7 +257,7 @@ def analyse_half_gadget(g: HalfGadget):
     l.warning(f"Loaded branches: {g.loaded.branches}")
 
     for addr, cond, ctype in g.constraints:
-        constr_deps = d.get_all_deps(get_vars(cond), include_constraints=True)
+        constr_deps = d.get_all_deps(utils.get_vars(cond), include_constraints=True)
 
         if len(constr_deps.intersection(base_deps)):
             g.base.constraints.append((addr, cond, ctype))
@@ -276,7 +276,7 @@ def analyse_half_gadget(g: HalfGadget):
     l.warning(f"Loaded constraints: {g.loaded.constraints}")
 
     for a in g.aliases:
-        alias_deps = d.get_all_deps(get_vars(a.to_BV()), include_constraints=True)
+        alias_deps = d.get_all_deps(utils.get_vars(a.to_BV()), include_constraints=True)
 
         if len(alias_deps.intersection(base_deps)):
             g.base.aliases.append(a)

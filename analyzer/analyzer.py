@@ -13,13 +13,13 @@ from cle import Symbol
 
 from .scanner.scanner import Scanner
 from .analysis.pipeline import AnalysisPipeline
-from .shared.logger import *
-from .shared.config import *
-from .asmprinter.asmprinter import *
+from .shared import logger
+from .shared import config as config_module
+from .shared.config import global_config
 
 
-l = get_logger("MAIN")
-l_verbose = get_logger("MAIN_VERBOSE")
+l = logger.get_logger("MAIN")
+l_verbose = logger.get_logger("MAIN_VERBOSE")
 
 
 def load_config(config_file):
@@ -37,7 +37,7 @@ def load_config(config_file):
                                            'rcx', 'r8', 'r9', 'r10', 'r11',
                                            'r12', 'r13', 'r14', 'r15']}
 
-    init_config(config)
+    config_module.init_config(config)
 
 
 def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Project:
@@ -127,9 +127,9 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
     load_config(config_file)
 
     if global_config["LogLevel"] == 0:
-        disable_logging()
+        logger.disable_logging()
     elif global_config["LogLevel"] == 1:
-        disable_logging(keep_main=True)
+        logger.disable_logging(keep_main=True)
 
     # Prepare angr project.
     l.info("Loading angr project...")

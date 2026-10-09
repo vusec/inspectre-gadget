@@ -5,20 +5,20 @@ from pathlib import Path
 from enum import Enum
 
 # autopep8: off
-from ..shared.logger import *
-from ..shared.transmission import *
-from ..shared.taintedFunctionPointer import *
+from ..shared.transmission import Transmission
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
 from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared.utils import *
-from ..scanner.annotations import *
+from ..shared import utils
+from ..scanner import annotations as annotations_module
+from ..scanner.annotations import LoadAnnotation, SecretAnnotation, TransmissionAnnotation
 # autopep8: on
 
 
 def get_branch_comments(branches):
     comments = {}
     for addr, condition, taken in branches:
-        comments[addr] = str(taken) + "   " + truncate_str(str(condition))
+        comments[addr] = str(taken) + "   " + utils.truncate_str(str(condition))
 
     return comments
 
@@ -37,24 +37,24 @@ def replace_secret_annotations_with_name(annotations, name):
 
 def get_load_comments(expr: claripy.ast.BV, secret_load_pc):
     annotations = {}
-    for v in get_vars(expr):
-        load_anno = get_load_annotation(v)
+    for v in utils.get_vars(expr):
+        load_anno = annotations_module.get_load_annotation(v)
 
         if load_anno != None:
             if load_anno.address == secret_load_pc:
                 # We load the secret value
-                annotations[load_anno.address] = sorted_set_str(replace_secret_annotations_with_name(
-                    get_annotations(load_anno.read_address_ast), "Attacker"))
+                annotations[load_anno.address] = utils.sorted_set_str(replace_secret_annotations_with_name(
+                    utils.get_annotations(load_anno.read_address_ast), "Attacker"))
                 annotations[load_anno.address] += " -> " + \
-                    sorted_set_str(replace_secret_annotations_with_name(
-                        get_annotations(v), "Secret"))
+                    utils.sorted_set_str(replace_secret_annotations_with_name(
+                        utils.get_annotations(v), "Secret"))
             else:
                 # We load an attacker indirect value
-                annotations[load_anno.address] = sorted_set_str(replace_secret_annotations_with_name(
-                    get_annotations(load_anno.read_address_ast), "Attacker"))
+                annotations[load_anno.address] = utils.sorted_set_str(replace_secret_annotations_with_name(
+                    utils.get_annotations(load_anno.read_address_ast), "Attacker"))
                 annotations[load_anno.address] += " -> " + \
-                    sorted_set_str(replace_secret_annotations_with_name(
-                        get_annotations(v), "Attacker"))
+                    utils.sorted_set_str(replace_secret_annotations_with_name(
+                        utils.get_annotations(v), "Attacker"))
 
             annotations.update(get_load_comments(
                 load_anno.read_address_ast, secret_load_pc))
@@ -110,32 +110,32 @@ def print_annotated_assembly(proj: angr.Project, bbls, branches, expr, pc, secre
     proj.kb.comments.update(get_load_comments(expr, secret_load_pc))
     # Transmission
     if type == GadgetType.TFP:
-        proj.kb.comments[pc] = sorted_set_str(
-            replace_secret_annotations_with_name(get_annotations(expr), "Attacker"))
+        proj.kb.comments[pc] = utils.sorted_set_str(
+            replace_secret_annotations_with_name(utils.get_annotations(expr), "Attacker"))
         proj.kb.comments[pc] += " -> " + "TAINTED FUNCTION POINTER"
     elif type == GadgetType.HALF:
-        proj.kb.comments[pc] = sorted_set_str(
-            replace_secret_annotations_with_name(get_annotations(expr), "Attacker"))
+        proj.kb.comments[pc] = utils.sorted_set_str(
+            replace_secret_annotations_with_name(utils.get_annotations(expr), "Attacker"))
         proj.kb.comments[pc] += " -> " + "HALF GADGET"
     elif type == GadgetType.TRANSMISSION:
-        all_annotations = set(get_annotations(expr))
+        all_annotations = set(utils.get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(
             a, LoadAnnotation) and a.address == secret_load_pc}
         annotations = replace_secret_annotations_with_name(
             secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(
             all_annotations - secret_annotations, "Attacker")
-        proj.kb.comments[pc] = sorted_set_str(annotations)
+        proj.kb.comments[pc] = utils.sorted_set_str(annotations)
         proj.kb.comments[pc] += " -> " + "TRANSMISSION"
     elif type == GadgetType.SDB:
-        all_annotations = set(get_annotations(expr))
+        all_annotations = set(utils.get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(
             a, LoadAnnotation) and a.address == secret_load_pc}
         annotations = replace_secret_annotations_with_name(
             secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(
             all_annotations - secret_annotations, "Attacker")
-        proj.kb.comments[pc] = sorted_set_str(annotations)
+        proj.kb.comments[pc] = utils.sorted_set_str(annotations)
         proj.kb.comments[pc] += " -> " + "SECRET DEPENDENT BRANCH"
 
     output = get_disassembled_trace_text(proj, bbls, color)
@@ -156,25 +156,25 @@ uuid: {t.uuid}
 transmitter: {t.transmitter}
 
 Secret Address:
-  - Expr: {truncate_str(t.secret_address.expr)}
+  - Expr: {utils.truncate_str(t.secret_address.expr)}
   - Range: {t.secret_address.range}
 Transmitted Secret:
-  - Expr: {truncate_str(t.transmitted_secret.expr)}
+  - Expr: {utils.truncate_str(t.transmitted_secret.expr)}
   - Range: {t.transmitted_secret.range}
   - Spread: {t.inferable_bits.spread_low} - {t.inferable_bits.spread_high}
   - Number of Bits Inferable: {t.inferable_bits.number_of_bits_inferable}
 Base:
-  - Expr: {'None' if t.base == None else truncate_str(t.base.expr)}
+  - Expr: {'None' if t.base == None else utils.truncate_str(t.base.expr)}
   - Range: {'None' if t.base == None else t.base.range}
-  - Independent Expr: {'None' if t.independent_base == None else truncate_str(t.independent_base.expr)}
-  - Independent Range: {'None' if t.independent_base == None else truncate_str(t.independent_base.range)}
+  - Independent Expr: {'None' if t.independent_base == None else utils.truncate_str(t.independent_base.expr)}
+  - Independent Range: {'None' if t.independent_base == None else utils.truncate_str(t.independent_base.range)}
 Transmission:
-  - Expr: {truncate_str(t.transmission.expr)}
+  - Expr: {utils.truncate_str(t.transmission.expr)}
   - Range: {t.transmission.range}
 
 Register Requirements: {t.all_requirements.to_dict()['regs']}
-Constraints: {ordered_constraints(t.constraints)}
-Branches: {ordered_branches(t.branches)}
+Constraints: {utils.ordered_constraints(t.constraints)}
+Branches: {utils.ordered_branches(t.branches)}
 {'-' * 48}
 """)
     o.close()
@@ -191,24 +191,24 @@ def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
 uuid: {t.uuid}
 
 Reg: {t.reg}
-Expr: {truncate_str(t.expr)}
+Expr: {utils.truncate_str(t.expr)}
 Tainted Function Pointer:
   - Reg: {t.reg}
-  - Expr: {truncate_str(t.expr)}
+  - Expr: {utils.truncate_str(t.expr)}
   - Control: {t.control}
   - Register Requirements: {t.requirements.to_dict()['regs']}
 
-Constraints: {ordered_constraints(t.constraints)}
-Branches: {ordered_branches(t.branches)}
+Constraints: {utils.ordered_constraints(t.constraints)}
+Branches: {utils.ordered_branches(t.branches)}
 
 """)
 
     o.write(f"Controlled Regs:\n")
     for r in t.controlled:
         o.write(f"  - Reg: {r}\n")
-        o.write(f"    Expr: {truncate_str(t.registers[r].expr)}\n")
+        o.write(f"    Expr: {utils.truncate_str(t.registers[r].expr)}\n")
         o.write(f"    ControlType: {t.registers[r].control_type}\n")
-        o.write(f"    Controlled Expr: {truncate_str(t.registers[r].controlled_expr)}\n")
+        o.write(f"    Controlled Expr: {utils.truncate_str(t.registers[r].controlled_expr)}\n")
         o.write(f"    Controlled Range: {t.registers[r].controlled_range}\n")
         o.write(f"    Controlled Range w Branches:"
                 f"{t.registers[r].controlled_range_with_branches}\n")
@@ -218,7 +218,7 @@ Branches: {ordered_branches(t.branches)}
     o.write(f"\nRegisters aliasing with tfp:\n")
     for r in t.aliasing:
         o.write(f"  - Reg: {r}\n")
-        o.write(f"    Expr: {truncate_str(t.registers[r].expr)}\n")
+        o.write(f"    Expr: {utils.truncate_str(t.registers[r].expr)}\n")
         o.write(f"    Range: {t.registers[r].range}\n")
         o.write(f"    ControlType: {t.registers[r].control_type}\n")
 
@@ -243,13 +243,13 @@ def output_half_gadget_to_file(g: HalfGadget, proj, path):
 {'-' * 48}
 uuid: {g.uuid}
 
-Expr: {truncate_str(g.loaded.expr)}
-Base: {'None' if g.base == None else truncate_str(g.base.expr)}
-Attacker: {truncate_str(g.attacker.expr)}
+Expr: {utils.truncate_str(g.loaded.expr)}
+Base: {'None' if g.base == None else utils.truncate_str(g.base.expr)}
+Attacker: {utils.truncate_str(g.attacker.expr)}
 ControlType: {g.loaded.control}
 
-Constraints: {ordered_constraints(g.constraints)}
-Branches: {ordered_branches(g.branches)}
+Constraints: {utils.ordered_constraints(g.constraints)}
+Branches: {utils.ordered_branches(g.branches)}
 
 """)
 
@@ -272,28 +272,28 @@ transmitter: {sdb.transmitter}
 CMP operation: {sdb.cmp_operation}
 
 Secret Dependent Branch:
-  - Expr: {truncate_str(sdb.sdb_expr)}
+  - Expr: {utils.truncate_str(sdb.sdb_expr)}
 Secret Address:
-  - Expr: {truncate_str(sdb.secret_address.expr)}
+  - Expr: {utils.truncate_str(sdb.secret_address.expr)}
   - Range: {sdb.secret_address.range}
 Transmitted Secret:
-  - Expr: {truncate_str(sdb.transmitted_secret.expr)}
+  - Expr: {utils.truncate_str(sdb.transmitted_secret.expr)}
   - Range: {sdb.transmitted_secret.range}
   - Spread: {sdb.inferable_bits.spread_low} - {sdb.inferable_bits.spread_high}
   - Number of Bits Inferable: {sdb.inferable_bits.number_of_bits_inferable}
 Base:
-  - Expr: {'None' if sdb.base == None else truncate_str(sdb.base.expr)}
+  - Expr: {'None' if sdb.base == None else utils.truncate_str(sdb.base.expr)}
   - Range: {'None' if sdb.base == None else sdb.base.range}
-  - Independent Expr: {'None' if sdb.independent_base == None else truncate_str(sdb.independent_base.expr)}
+  - Independent Expr: {'None' if sdb.independent_base == None else utils.truncate_str(sdb.independent_base.expr)}
   - Independent Range: {'None' if sdb.independent_base == None else sdb.independent_base.range}
 Transmission:
-  - Expr: {truncate_str(sdb.transmission.expr)}
+  - Expr: {utils.truncate_str(sdb.transmission.expr)}
   - Range: {sdb.transmission.range}
 
 CMP Value:
-  - Expr: {truncate_str(sdb.cmp_value.expr)}
+  - Expr: {utils.truncate_str(sdb.cmp_value.expr)}
   - Range: {sdb.cmp_value.range}
-  - Controlled Expr: {'None' if sdb.controlled_cmp_value == None else truncate_str(sdb.controlled_cmp_value.expr)}
+  - Controlled Expr: {'None' if sdb.controlled_cmp_value == None else utils.truncate_str(sdb.controlled_cmp_value.expr)}
   - Controlled Range: {'None' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range}
 
 Register Requirements:
@@ -301,8 +301,8 @@ Register Requirements:
   - Transmission: {sdb.transmission.requirements.regs}
   - CMP Value: {sdb.cmp_value.requirements.regs}
 
-Constraints: {ordered_constraints(sdb.constraints)}
-Branches: {ordered_branches(sdb.branches)}
+Constraints: {utils.ordered_constraints(sdb.constraints)}
+Branches: {utils.ordered_branches(sdb.branches)}
 {'-' * 48}
 """)
     o.close()

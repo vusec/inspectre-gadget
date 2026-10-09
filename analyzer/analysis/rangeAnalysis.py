@@ -1,18 +1,17 @@
 import claripy
 import sys
-from .range_strategies import *
+from .range_strategies import RangeStrategyFindConstraintsBounds, RangeStrategyFindMasking, RangeStrategyInferIsolated, RangeStrategySmallSet
 
 # autopep8: off
-from ..shared.transmission import *
-from ..shared.taintedFunctionPointer import *
-from ..shared.secretDependentBranch import *
+from ..shared.transmission import ControlType, Transmission, TransmissionComponent
+from ..shared.taintedFunctionPointer import TFPRegisterControlType, TaintedFunctionPointer
+from ..shared.secretDependentBranch import SecretDependentBranch
 from ..shared.halfGadget import HalfGadget
-from ..shared.utils import *
-from ..shared.logger import *
-from ..shared.config import *
+from ..shared import logger
+from ..shared.config import global_config
 # autopep8: on
 
-l = get_logger("RangeAnalys")
+l = logger.get_logger("RangeAnalys")
 
 __range_strategies = [
     RangeStrategySmallSet(),

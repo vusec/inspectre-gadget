@@ -5,8 +5,8 @@ from .rangeStrategy import RangeStrategy
 
 
 # autopep8: off
-from ...shared.ranges import *
-from ...shared.config import *
+from ...shared import ranges
+from ...shared.config import global_config
 # autopep8: on
 
 class RangeStrategyFindMasking(RangeStrategy):
@@ -24,7 +24,7 @@ class RangeStrategyFindMasking(RangeStrategy):
 
         entropy, and_mask, or_mask = _find_entropy(s, ast, ast_max)
 
-        return range_complex(ast_min, ast_max, ast.size(), False, entropy, and_mask, or_mask)
+        return ranges.range_complex(ast_min, ast_max, ast.size(), False, entropy, and_mask, or_mask)
 
 def _find_entropy(s: claripy.Solver, ast: claripy.ast.BV, ast_max: int):
 

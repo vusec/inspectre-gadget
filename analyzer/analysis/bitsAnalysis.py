@@ -7,17 +7,16 @@ expression.
 import claripy
 
 # autopep8: off
-from ..shared.transmission import *
-from ..shared.utils import *
-from ..shared.logger import *
-from ..scanner.annotations import *
-from ..shared.config import *
+from ..shared.transmission import Transmission
+from ..shared import logger
+from ..shared.config import global_config
+from collections import OrderedDict
 # autopep8: on
 
 BITMAP_SPREAD = 0
 BITMAP_DIRECT = 1
 
-l = get_logger("BitsAnalysis")
+l = logger.get_logger("BitsAnalysis")
 
 
 def get_list_of_bits_set(mask):

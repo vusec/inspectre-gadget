@@ -12,12 +12,12 @@ import claripy
 import sys
 
 # autopep8: off
-from ..shared.logger import *
-from ..shared.utils import *
-from .annotations import *
+from ..shared import logger
+from ..shared import utils
+from . import annotations
 # autopep8: on
 
-l = get_logger("MemHooks")
+l = logger.get_logger("MemHooks")
 
 
 class MemOpType(Enum):
@@ -93,7 +93,7 @@ class MemoryAlias:
         return f"{self.val1} == {self.val2}"
 
     def is_symbolic(self):
-        return is_sym_expr(self.val1.sym) or is_sym_expr(self.val2.sym)
+        return utils.is_sym_expr(self.val1.sym) or utils.is_sym_expr(self.val2.sym)
 
     def to_BV(self):
         return self.val1.to_BV() == self.val2.to_BV()
@@ -119,7 +119,7 @@ def get_constraints_for_expr(state, expr) -> list:
     splitted_constraints = state.solver._solver._split_constraints(all_constraints)
     all_groups = [group[0] for group in splitted_constraints]
     # Get all independent groups
-    independent_groups = merge_dependent_sets(all_groups)
+    independent_groups = utils.merge_dependent_sets(all_groups)
 
     # find our group
     common_group = set()
@@ -362,7 +362,7 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
                 blank_state.solver.add(*get_edge_constraints(s.addr))
 
         # We first store a new expr on load_addr, to fill any possible blank spots
-        annotation = propagate_annotations(load_addr, state.scratch.ins_addr)
+        annotation = annotations.propagate_annotations(load_addr, state.scratch.ins_addr)
         gap_expr = claripy.BVS(name=f"LOAD_{load_size * 8}[{load_addr}_{load_id}]",
                                size=load_size * 8,
                                annotations=(annotation,), explicit_name=True)

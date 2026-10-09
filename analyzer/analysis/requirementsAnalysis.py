@@ -8,28 +8,29 @@ import claripy
 import sys
 
 # autopep8: off
-from ..shared.transmission import *
-from ..shared.taintedFunctionPointer import *
+from ..shared.transmission import ControlType, Requirements, Transmission, TransmissionComponent
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
 from ..shared.halfGadget import HalfGadget
-from ..shared.secretDependentBranch import *
-from ..shared.utils import *
-from ..shared.astTransform import *
-from ..shared.logger import *
-from ..scanner.annotations import *
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared import utils
+from ..shared import astTransform
+from ..shared import logger
+from ..scanner import annotations
+from ..scanner.annotations import AttackerAnnotation, LoadAnnotation
 # autopep8: on
 
-l = get_logger("ReqAnalysis")
+l = logger.get_logger("ReqAnalysis")
 
 
 def get_requirements(expr: claripy.ast.BV) -> Requirements:
     req = Requirements()
-    syms = get_vars(expr)
+    syms = utils.get_vars(expr)
 
     l.info(f"Analyzing: {expr}")
 
     # Gather all the requirements.
     for s in syms:
-        load_anno = get_load_annotation(s)
+        load_anno = annotations.get_load_annotation(s)
 
         if load_anno == None:
             req.regs.add(s)
@@ -49,9 +50,9 @@ def get_requirements(expr: claripy.ast.BV) -> Requirements:
     for mem in req.mem:
         const_part = 0
         var_part = None
-        for v in extract_summed_vals(mem):
+        for v in astTransform.extract_summed_vals(mem):
             # If there's exactly one variable, save it.
-            if get_attacker_annotation(v) != None:
+            if annotations.get_attacker_annotation(v) != None:
                 if var_part == None:
                     var_part = v
                 else:
@@ -85,7 +86,7 @@ def get_control(c: TransmissionComponent, report_massaging=False) -> ControlType
     has_uncontrolled_components = False
 
     # Check the annotations of all the symbols in the expression
-    for v in get_vars(c.expr):
+    for v in utils.get_vars(c.expr):
         for anno in v.annotations:
             if isinstance(anno, AttackerAnnotation):
                 # Attacker symbols are directly controlled

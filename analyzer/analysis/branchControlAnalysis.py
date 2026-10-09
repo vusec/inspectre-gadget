@@ -8,18 +8,18 @@ from enum import Enum
 import claripy
 import sys
 
-from .dependencyGraph import DepGraph, is_expr_uncontrolled
+from . import dependencyGraph
+from .dependencyGraph import DepGraph
 from ..shared.astTransform import ConditionType
 
 # autopep8: off
-from ..scanner.annotations import *
-from ..scanner.memory import *
-from ..shared.transmission import *
-from ..shared.secretDependentBranch import *
-from ..shared.logger import *
+from ..shared.transmission import Transmission
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared import logger
+from ..shared import utils
 # autopep8: on
 
-l = get_logger("BranchControlAnalysis")
+l = logger.get_logger("BranchControlAnalysis")
 
 
 class BranchControlType(Enum):
@@ -33,17 +33,17 @@ class BranchControlType(Enum):
 def get_branch_control(t: Transmission, d: DepGraph, constraints: bool):
     constraint_expr = claripy.BVV(0, 1)
     for c in t.branches:
-        for v in get_vars(c[1]):
+        for v in utils.get_vars(c[1]):
             constraint_expr = claripy.Concat(constraint_expr, v)
 
     l.info(f"Analyzing {constraint_expr} vs {t.transmitted_secret.expr}")
 
-    if len(get_vars(constraint_expr)) == 0:
+    if len(utils.get_vars(constraint_expr)) == 0:
         l.info(f"No vars")
         return BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET
 
     # If any branch is uncontrolled.
-    if is_expr_uncontrolled(constraint_expr):
+    if dependencyGraph.is_expr_uncontrolled(constraint_expr):
         return BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED
     # Check if any branch depends on the transmitted secret.
     elif not d.is_independent(constraint_expr, t.transmitted_secret.expr, check_constraints=constraints, check_addr=False):
@@ -68,17 +68,17 @@ def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
     constraint_expr = claripy.BVV(0, 1)
     for c in t.constraints:
         if c[2] == ConditionType.CMOVE:
-            for v in get_vars(c[1]):
+            for v in utils.get_vars(c[1]):
                 constraint_expr = claripy.Concat(constraint_expr, v)
 
     l.info(f"Analyzing {constraint_expr} vs {t.transmitted_secret.expr}")
 
-    if len(get_vars(constraint_expr)) == 0:
+    if len(utils.get_vars(constraint_expr)) == 0:
         l.info(f"No vars")
         return BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET
 
     # If any branch is uncontrolled.
-    if is_expr_uncontrolled(constraint_expr):
+    if dependencyGraph.is_expr_uncontrolled(constraint_expr):
         return BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED
     # Check if any branch depends on the transmitted secret.
     elif not d.is_independent(constraint_expr, t.transmitted_secret.expr, check_constraints=constraints, check_addr=False):

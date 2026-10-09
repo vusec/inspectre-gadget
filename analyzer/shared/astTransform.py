@@ -8,10 +8,10 @@ import itertools
 from enum import Enum
 from itertools import chain
 
-from .utils import *
-from .logger import *
+from . import utils
+from . import logger
 
-l = get_logger("AstTransform")
+l = logger.get_logger("AstTransform")
 
 class SplitTooManyNestedIfException(Exception):
     "Too many if statements in expr, skipping"
@@ -167,7 +167,7 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
         new_expr = ast
         new_conds = []
         for i in range(0, len(ast.args)):
-            if not is_sym_expr(ast.args[i]):
+            if not utils.is_sym_expr(ast.args[i]):
                 continue
             new_expr = claripy.replace(
                 new_expr, ast.args[i], combination[i].expr)
@@ -232,7 +232,7 @@ def sign_ext_to_sum(ast: claripy.ast.BV, addr):
     """
 
     # If this AST is a constant, do nothing.
-    if not isinstance(ast, claripy.ast.BV) or ast.concrete or is_sym_var(ast):
+    if not isinstance(ast, claripy.ast.BV) or ast.concrete or utils.is_sym_var(ast):
         return ast
 
     # If this node is a signext, transform it.
@@ -253,7 +253,7 @@ def sign_ext_to_sum(ast: claripy.ast.BV, addr):
     # Visit arguments.
     new_expr = ast
     for arg in ast.args:
-        if not isinstance(arg, claripy.ast.BV) or arg.concrete or is_sym_var(arg):
+        if not isinstance(arg, claripy.ast.BV) or arg.concrete or utils.is_sym_var(arg):
             continue
         new_expr = claripy.replace(new_expr, arg, sign_ext_to_sum(arg, addr))
 
@@ -269,7 +269,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     """
 
     # If this AST is a constant, do nothing.
-    if not isinstance(ast, claripy.ast.BV) or ast.concrete or is_sym_var(ast):
+    if not isinstance(ast, claripy.ast.BV) or ast.concrete or utils.is_sym_var(ast):
         return ast
 
     # If this node is a concat, check if it's a sign extension.
@@ -284,7 +284,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
             arg = match_sign_ext(ast.args[i], addr)
 
             # Symbol equal to previous one: add 1 to length.
-            if is_sym_expr(arg) and arg.op == "Extract" and arg.size() == 1 and arg.structurally_match(sign_sym):
+            if utils.is_sym_expr(arg) and arg.op == "Extract" and arg.size() == 1 and arg.structurally_match(sign_sym):
                 sign_ext_size += 1
             # Symbol different to previous one: push new arg.
             else:
@@ -293,7 +293,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
                 elif sign_ext_size == 0:
                     new_args.append(sign_sym)
                     sign_sym = arg
-                elif is_sym_expr(arg) and arg.structurally_match(sign_sym.args[2]):
+                elif utils.is_sym_expr(arg) and arg.structurally_match(sign_sym.args[2]):
                     if_expr = claripy.If(sign_sym == 0,
                                          claripy.Concat(claripy.BVV(
                                              0, sign_ext_size + 1), arg),
@@ -321,7 +321,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     # Recursively check args.
     new_expr = ast
     for arg in ast.args:
-        if not isinstance(arg, claripy.ast.BV) or arg.concrete or is_sym_var(arg):
+        if not isinstance(arg, claripy.ast.BV) or arg.concrete or utils.is_sym_var(arg):
             continue
 
         new_expr = claripy.replace(new_expr, arg, match_sign_ext(arg, addr))

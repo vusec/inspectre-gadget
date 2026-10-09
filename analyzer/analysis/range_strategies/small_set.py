@@ -5,8 +5,9 @@ from .rangeStrategy import RangeStrategy
 
 
 # autopep8: off
-from ...shared.ranges import *
-from ...shared.config import *
+from ...shared import ranges
+from ...shared.ranges import AstRange, Interval
+from ...shared.config import global_config
 # autopep8: on
 
 def _list_to_stride_range(numbers: list):
@@ -38,7 +39,7 @@ class RangeStrategySmallSet(RangeStrategy):
                 ast_max = s.max(ast)
 
         if ast_min == ast_max:
-            return range_static(ast_min, False)
+            return ranges.range_static(ast_min, False)
 
         samples = s.eval(ast, 17)
         sample_len = len(samples)

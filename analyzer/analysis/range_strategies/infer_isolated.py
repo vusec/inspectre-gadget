@@ -5,14 +5,12 @@ import sys
 from .rangeStrategy import RangeStrategy
 
 # autopep8: off
-from ...shared.ranges import *
-from ...shared.transmission import *
-from ...shared.utils import *
-from ...shared.logger import *
-from ...shared.config import *
+from ...shared import ranges
+from ...shared import logger
+from ...shared.config import global_config
 # autopep8: on
 
-l = get_logger("InferIsolated")
+l = logger.get_logger("InferIsolated")
 
 debug = False
 
@@ -35,7 +33,7 @@ class RangeStrategyInferIsolated(RangeStrategy):
                 ast_max = s.max(ast)
 
         if ast.depth == 1:
-            return range_simple(ast_min, ast_max, ast.size(), 1, True)
+            return ranges.range_simple(ast_min, ast_max, ast.size(), 1, True)
 
         range_map = get_range_map_from_ast(ast)
 
@@ -66,7 +64,7 @@ class RangeStrategyInferIsolated(RangeStrategy):
                 sym_ast_min = s.min(sub_ast)
                 sym_ast_max = s.max(sub_ast)
 
-                return range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
+                return ranges.range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
                                                              sym_ast_min, sym_ast_max, range_map.stride,
                                                              concrete_value)
 
@@ -74,10 +72,10 @@ class RangeStrategyInferIsolated(RangeStrategy):
                 return None
 
         if range_map.stride_mode:
-            return range_simple(ast_min, ast_max, ast.size(), range_map.stride, isolated=True)
+            return ranges.range_simple(ast_min, ast_max, ast.size(), range_map.stride, isolated=True)
 
         else:
-            return range_complex(ast_min, ast_max, ast.size(), True, None, range_map.and_mask, range_map.or_mask, True)
+            return ranges.range_complex(ast_min, ast_max, ast.size(), True, None, range_map.and_mask, range_map.or_mask, True)
 
 
 def is_linear_mask(and_mask, or_mask):
@@ -122,7 +120,7 @@ class RangeMap:
         if not is_linear_mask(self.and_mask, self.or_mask):
             return unknown_range()
 
-        self.stride = get_stride_from_mask(self.and_mask, self.or_mask)
+        self.stride = ranges.get_stride_from_mask(self.and_mask, self.or_mask)
         self.and_mask = 0
         self.stride_mode = True
 
@@ -190,7 +188,7 @@ class RangeMap:
 
         if self.stride_mode:
             if self.stride == 0 and is_linear_mask(and_mask, 0):
-                new_stride = get_stride_from_mask(and_mask, 0)
+                new_stride = ranges.get_stride_from_mask(and_mask, 0)
                 self.stride = new_stride
 
                 return self
@@ -207,7 +205,7 @@ class RangeMap:
 
         if self.stride_mode:
             if self.stride == 0 and is_linear_mask(or_mask, 0):
-                self.stride = get_stride_from_mask(~or_mask, 0)
+                self.stride = ranges.get_stride_from_mask(~or_mask, 0)
                 return self
 
             else:

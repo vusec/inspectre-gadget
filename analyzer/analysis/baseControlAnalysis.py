@@ -8,18 +8,17 @@ from enum import Enum
 import claripy
 import sys
 
-from .dependencyGraph import DepGraph, is_expr_controlled
+from . import dependencyGraph
+from .dependencyGraph import DepGraph
 
 # autopep8: off
-from ..scanner.annotations import *
-from ..scanner.memory import *
-from ..shared.transmission import *
-from ..shared.secretDependentBranch import *
-from ..shared.logger import *
-from ..shared.astTransform import *
+from ..shared.transmission import Transmission
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared import logger
+from ..shared import utils
 # autopep8: on
 
-l = get_logger("BaseControlAnalysis")
+l = logger.get_logger("BaseControlAnalysis")
 
 
 class BaseControlType(Enum):
@@ -45,10 +44,10 @@ class BaseControlType(Enum):
 
 
 def get_expr_base_control(base_expr, transmitted_secret_expr, secret_address_expr, d: DepGraph, constraints: bool):
-    secrets = set(get_vars(transmitted_secret_expr))
+    secrets = set(utils.get_vars(transmitted_secret_expr))
 
     # If the base is not symbolic, we're done.
-    if not is_sym_expr(base_expr) or not is_expr_controlled(base_expr):
+    if not utils.is_sym_expr(base_expr) or not dependencyGraph.is_expr_controlled(base_expr):
         return BaseControlType.CONSTANT_BASE
     # Check if the base depends on the transmitted secret.
     elif not d.is_independently_controllable(base_expr, secrets, check_constraints=constraints, check_addr=False):
@@ -58,7 +57,7 @@ def get_expr_base_control(base_expr, transmitted_secret_expr, secret_address_exp
 
     else:
         # Check if the base depends on the secret address.
-        secrets.update(get_vars(secret_address_expr))
+        secrets.update(utils.get_vars(secret_address_expr))
         if not d.is_independently_controllable(base_expr, secrets, check_constraints=constraints, check_addr=False):
             return BaseControlType.BASE_DEPENDS_ON_SECRET_ADDR
         elif not d.is_independently_controllable(base_expr, secrets, check_constraints=constraints, check_addr=True):
@@ -76,7 +75,7 @@ def get_base_control(t: Transmission, d: DepGraph, constraints: bool):
     # If there's no base expression, there might still be some symbol in the
     # transmission expression that does not depend on the secret.
     else:
-        secrets = set(get_vars(t.secret_address.expr))
+        secrets = set(utils.get_vars(t.secret_address.expr))
         secrets.add(t.secret_val.expr)
         if d.is_independently_controllable(t.transmission.expr, secrets, check_constraints=constraints, check_addr=True):
             return BaseControlType.COMPLEX_TRANSMISSION

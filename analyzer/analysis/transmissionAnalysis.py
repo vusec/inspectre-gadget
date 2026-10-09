@@ -8,17 +8,20 @@ import sys
 import claripy.ast.base
 import itertools
 
-from .dependencyGraph import *
+from .dependencyGraph import DepGraph
 
 # autopep8: off
-from ..shared.logger import *
-from ..shared.astTransform import *
-from ..shared.config import *
-from ..shared.transmission import *
-from ..scanner.annotations import *
+from ..shared import logger
+from ..shared import astTransform
+from ..shared.astTransform import ConditionalAst, SplitTooManyNestedIfException
+from ..shared.config import global_config
+from ..shared.transmission import Transmission, TransmissionExpr
+from ..scanner import annotations
+from ..scanner.annotations import SecretAnnotation, TransmissionAnnotation
+from ..shared import utils
 # autopep8: on
 
-l = get_logger("TransmissionAnalysis")
+l = logger.get_logger("TransmissionAnalysis")
 
 
 def reduce_to_shifts(args, size):
@@ -82,7 +85,7 @@ def distribute_shifts(ast: claripy.ast.BV):
         val_to_shift = ast.args[0]
         shift_amount = ast.args[1]
 
-        addenda = extract_summed_vals(val_to_shift)
+        addenda = astTransform.extract_summed_vals(val_to_shift)
         # ... and the first operand is an addition ...
         if len(addenda) > 1:
             # Distribute any shifts inside the addenda before solving this expression.
@@ -95,7 +98,7 @@ def distribute_shifts(ast: claripy.ast.BV):
             args_shifted = [claripy.ZeroExt(expr_size, arg) << shift_amount
                             for arg in args_analyzed]
             # Add everything together again.
-            return generate_addition(args_shifted)
+            return astTransform.generate_addition(args_shifted)
 
     # Otherwise, apply to arguments recursively.
     new_expr = ast
@@ -116,7 +119,7 @@ def canonicalize(expr, addr):
     # 2. all sums
     # 3. distribution of * and / over +
     l.info(f"CANONICALIZING: {expr}")
-    splitted = split_conditions(expr, simplify=True, addr=addr)
+    splitted = astTransform.split_conditions(expr, simplify=True, addr=addr)
 
     for s in splitted:
         s.expr = concat_to_shift(s.expr)
@@ -157,7 +160,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
     for canonical_expr in canonical_exprs:
         l.warning(
             f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
-        members = extract_summed_vals(canonical_expr.expr)
+        members = astTransform.extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {potential_t.aliases}")
 
         d = get_dependency_graph(potential_t, canonical_expr)
@@ -173,8 +176,8 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
             # Check if this member contains potential secrets.
             secrets = []
-            for var in get_vars(member):
-                for anno in get_annotations(var):
+            for var in utils.get_vars(member):
+                for anno in utils.get_annotations(var):
                     if isinstance(anno, SecretAnnotation) or isinstance(anno, TransmissionAnnotation):
                         secrets.append((var, anno.read_address_ast))
 
@@ -184,7 +187,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 # Create new transmission.
                 t = Transmission(potential_t)
                 t.transmission.expr = canonical_expr.expr
-                t.max_load_depth = get_load_depth(t.transmission.expr)
+                t.max_load_depth = annotations.get_load_depth(t.transmission.expr)
                 # Append CMOV conditions.
                 t.constraints.extend(canonical_expr.conditions)
                 # Append the dependency graph.
@@ -193,7 +196,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 # Save which secret is is being transmitted.
                 t.transmitted_secret.expr = member
                 t.secret_val.expr = secret_sym
-                t.secret_load_pc = get_load_annotation(secret_sym).address
+                t.secret_load_pc = annotations.get_load_annotation(secret_sym).address
                 t.secret_address.expr = secret_addr
 
                 # Check the rest of the expression
@@ -224,25 +227,25 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
                 # Create the base.
                 if len(base_members) > 0:
-                    t.base.expr = generate_addition(base_members)
+                    t.base.expr = astTransform.generate_addition(base_members)
                 else:
                     t.base = None
 
                 # Create base sub-components.
                 if len(independent_base_members) > 0:
-                    t.independent_base.expr = generate_addition(
+                    t.independent_base.expr = astTransform.generate_addition(
                         independent_base_members)
                 else:
                     t.independent_base = None
 
                 if len(direct_dependent_base) > 0:
-                    t.properties['direct_dependent_base_expr'] = generate_addition(
+                    t.properties['direct_dependent_base_expr'] = astTransform.generate_addition(
                         direct_dependent_base)
                 else:
                     t.properties['direct_dependent_base_expr'] = None
 
                 if len(indirect_dependent_base) > 0:
-                    t.properties['indirect_dependent_base_expr'] = generate_addition(
+                    t.properties['indirect_dependent_base_expr'] = astTransform.generate_addition(
                         indirect_dependent_base)
                 else:
                     t.properties['indirect_dependent_base_expr'] = None
@@ -251,7 +254,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 for component in [t.base, t.secret_address, t.transmission, t.transmitted_secret, t.secret_val, t.independent_base]:
                     if component != None:
                         component.size = component.expr.size()
-                        component.max_load_depth = get_load_depth(
+                        component.max_load_depth = annotations.get_load_depth(
                             component.expr)
 
                 transmissions.append(t)

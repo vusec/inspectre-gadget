@@ -11,8 +11,8 @@ The Scanner is responsible of:
 import angr
 import claripy
 
+from . import annotations
 from . import memory
-from .annotations import *
 import sys
 from enum import Enum
 import traceback
@@ -21,19 +21,21 @@ from angr.concretization_strategies import SimConcretizationStrategy
 
 # autopep8: off
 from ..analysis.pipeline import AnalysisPipeline
-from ..shared.logger import *
-from ..shared.transmission import *
-from ..shared.taintedFunctionPointer import *
-from ..shared.halfGadget import *
+from ..shared import logger
+from ..shared.transmission import TransmissionExpr, TransmitterType
+from ..shared.taintedFunctionPointer import TFPRegister, TaintedFunctionPointer
+from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranchExpr
-from ..shared.config import *
-from ..shared.astTransform import *
-from ..shared.utils import get_x86_registers
-from ..asmprinter.asmprinter import get_disassembled_trace_text
+from ..shared.config import global_config
+from ..shared import astTransform
+from ..shared.astTransform import CmoveAnnotation, SplitTooManyNestedIfException
+from ..shared import utils
+from ..asmprinter import asmprinter
+from .annotations import AttackerAnnotation, UncontrolledAnnotation
 
 # autopep8: on
 
-l = get_logger("Scanner")
+l = logger.get_logger("Scanner")
 
 n_concrete_addr = 0
 
@@ -150,7 +152,7 @@ class Scanner:
             'gs', 64, annotations=(UncontrolledAnnotation('gs'),), explicit_name=True)
 
         # Initialize non-controlled registers.
-        for reg in get_x86_registers():
+        for reg in utils.get_x86_registers():
             if reg not in global_config['controlled_registers']:
                 try:
                     length = getattr(state.regs, reg).length
@@ -272,7 +274,7 @@ class Scanner:
             if subst != None:
                 cond = subst
 
-            outcome = get_outcome(cond, source, target)
+            outcome = utils.get_outcome(cond, source, target)
             branches.append((source, cond, outcome))
 
         return branches
@@ -296,7 +298,7 @@ class Scanner:
         if not global_config['TransmissionGadgets']:
             return
 
-        if contains_secret(expr):
+        if annotations.contains_secret(expr):
             # Create a new transmission object.
             t = TransmissionExpr(pc=state.scratch.ins_addr,
                                  expr=expr,
@@ -327,7 +329,7 @@ class Scanner:
             return
 
         l.warning(
-            f"Found new Dispatch Gadget! {func_ptr_ast} {get_annotations(func_ptr_ast)}")
+            f"Found new Dispatch Gadget! {func_ptr_ast} {utils.get_annotations(func_ptr_ast)}")
         # Create a new TFP object.
         tfp = TaintedFunctionPointer(pc=state.scratch.ins_addr,
                                      expr=func_ptr_ast,
@@ -342,17 +344,17 @@ class Scanner:
                                          state),
                                      contains_spec_stop=self.history_contains_speculation_stop(
                                          state),
-                                     n_dependent_loads=get_load_depth(
+                                     n_dependent_loads=annotations.get_load_depth(
                                          func_ptr_ast)
                                      )
 
-        for reg in get_x86_registers():
+        for reg in utils.get_x86_registers():
             reg_ast = getattr(state.regs, reg)
             tfp.registers[reg] = TFPRegister(reg, reg_ast)
 
         if global_config['TaintedFunctionPointersRegisterDereference']:
             # Check if there is a register at dereference
-            for reg in get_x86_registers():
+            for reg in utils.get_x86_registers():
                 reg_expr = tfp.registers[reg].expr
 
                 # If the instruction is a call, it will add 8 to rsp, so we also
@@ -369,7 +371,7 @@ class Scanner:
                     alias_store, stored_val = memory.get_aliasing_store(
                         reg_expr + offset + call_offset, 8, self.cur_id, state)
 
-                    if alias_store and is_attacker_controlled(stored_val) and 'gs' not in str(stored_val):
+                    if alias_store and annotations.is_attacker_controlled(stored_val) and 'gs' not in str(stored_val):
                         tfp.registers[reg_str] = TFPRegister(
                             reg_str, stored_val, is_dereferenced=True)
                         tfp.registers[reg].reg_dereferenced.append(
@@ -384,7 +386,7 @@ class Scanner:
         """
         Secret loads are, technically speaking, "half-Spectre" gadgets.
         """
-        if is_directly_controlled(expr):
+        if annotations.is_directly_controlled(expr):
             l.warning(f"Found new Half Gadget! {expr}")
             # Create a new transmission object.
             g = HalfGadget(expr=expr,
@@ -412,7 +414,7 @@ class Scanner:
         if not global_config['SecretDependentBranches']:
             return
 
-        if contains_secret(expr):
+        if annotations.contains_secret(expr):
 
             pc = state.scratch.ins_addr
             bbls = self.get_bbls(state)
@@ -508,25 +510,25 @@ class Scanner:
         if state.inspect.expr_result.op == "Concat":
             l.info(f"Expr Hook (Concat) @{hex(state.scratch.ins_addr)} :")
             l.info(
-                f"   Before:  {state.inspect.expr_result}  {get_annotations(state.inspect.expr_result)}")
-            state.inspect.expr_result = match_sign_ext(
+                f"   Before:  {state.inspect.expr_result}  {utils.get_annotations(state.inspect.expr_result)}")
+            state.inspect.expr_result = astTransform.match_sign_ext(
                 state.inspect.expr_result, state.scratch.ins_addr)
             l.info(
-                f"   After:  {state.inspect.expr_result}  {get_annotations(state.inspect.expr_result)}")
+                f"   After:  {state.inspect.expr_result}  {utils.get_annotations(state.inspect.expr_result)}")
 
         elif state.inspect.expr_result.op == "SignExt":
             l.info(f"Expr Hook (SignExt) @{hex(state.scratch.ins_addr)} :")
             l.info(
-                f"   Before:  {state.inspect.expr_result}  {get_annotations(state.inspect.expr_result)}")
-            state.inspect.expr_result = sign_ext_to_sum(
+                f"   Before:  {state.inspect.expr_result}  {utils.get_annotations(state.inspect.expr_result)}")
+            state.inspect.expr_result = astTransform.sign_ext_to_sum(
                 state.inspect.expr_result, state.scratch.ins_addr)
             l.info(
-                f"   After:  {state.inspect.expr_result}  {get_annotations(state.inspect.expr_result)}")
+                f"   After:  {state.inspect.expr_result}  {utils.get_annotations(state.inspect.expr_result)}")
 
         elif state.inspect.expr_result.op == "If":
             # We assume any expression that is directly translated as an if-then-else statement is
             # a CMOVE-like instruction.
-            if getCmoveAnnotation(state.inspect.expr_result) == None and getSignExtAnnotation(state.inspect.expr_result) == None:
+            if astTransform.getCmoveAnnotation(state.inspect.expr_result) == None and astTransform.getSignExtAnnotation(state.inspect.expr_result) == None:
                 state.inspect.expr_result = state.inspect.expr_result.annotate(
                     CmoveAnnotation(state.scratch.ins_addr))
 
@@ -540,7 +542,7 @@ class Scanner:
         load_addr = state.inspect.mem_read_address
         load_len = state.inspect.mem_read_length
         l.info(
-            f"Load@{hex(state.scratch.ins_addr)}: {load_addr}  {get_annotations(load_addr)}")
+            f"Load@{hex(state.scratch.ins_addr)}: {load_addr}  {utils.get_annotations(load_addr)}")
         l.info(state.solver.constraints)
 
         # If the state has been manually splitted after this load, we already
@@ -556,11 +558,11 @@ class Scanner:
         if subst != None:
             load_addr = subst
             l.info(
-                f" Applied substitution! {load_addr}  {get_annotations(load_addr)}")
+                f" Applied substitution! {load_addr}  {utils.get_annotations(load_addr)}")
         else:
             # If the state has _not_ been manually splitted, check if we
             # should split it.
-            asts = split_conditions(load_addr, simplify=False, addr=state.scratch.ins_addr)
+            asts = astTransform.split_conditions(load_addr, simplify=False, addr=state.scratch.ins_addr)
             assert (len(asts) >= 1)
 
             l.info(f"  After transformations: {load_addr}")
@@ -576,10 +578,10 @@ class Scanner:
             # Perform Store-to-Load forwarding.
             load_val = stored_val
             l.info(
-                f"Forwarded ({load_val} {get_annotations(load_val)}) from store @({alias_store.addr})")
+                f"Forwarded ({load_val} {utils.get_annotations(load_val)}) from store @({alias_store.addr})")
         else:
             # Create a new symbol to represent the loaded value.
-            annotation = propagate_annotations(load_addr, state.scratch.ins_addr)
+            annotation = annotations.propagate_annotations(load_addr, state.scratch.ins_addr)
             load_val = claripy.BVS(name=f'LOAD_{load_len * 8}[{load_addr}]_{self.cur_id}',
                                    size=load_len * 8,
                                    annotations=(annotation,), explicit_name=True)
@@ -608,7 +610,7 @@ class Scanner:
             state.solver.add(alias.to_BV())
             l.warning(f"Adding alias {alias.to_BV()}")
             if not state.solver.satisfiable():
-                report_error(Exception(), hex(self.cur_state.scratch.ins_addr),
+                utils.report_error(Exception(), hex(self.cur_state.scratch.ins_addr),
                              hex(0), error_type="ALIAS UNSAT")
 
         # Save this load in the angr state.
@@ -650,7 +652,7 @@ class Scanner:
             store_addr = subst
         else:
             # Check if the address contains an if-then-else node.
-            addr_asts = split_conditions(
+            addr_asts = astTransform.split_conditions(
                 store_addr, simplify=False, addr=state.scratch.ins_addr)
             # value_asts = split_conditions(stored_value, simplify=False, addr=state.scratch.ins_addr)
 
@@ -736,7 +738,7 @@ class Scanner:
                 func_ptr_ast = subst
             else:
                 # Check if the symbolic address contains an if-then-else node.
-                asts = split_conditions(
+                asts = astTransform.split_conditions(
                     func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
                 assert (len(asts) >= 1)
 
@@ -769,7 +771,7 @@ class Scanner:
                 exit_guard = subst
             else:
                 # Check if the address contains an if-then-else node.
-                asts = split_conditions(
+                asts = astTransform.split_conditions(
                     exit_guard, simplify=False, addr=state.scratch.ins_addr)
                 assert (len(asts) >= 1)
 
@@ -822,7 +824,7 @@ class Scanner:
                         action=self.expr_hook_after)
 
         self.initialize_regs_and_stack(state)
-        self.thunk_list = get_x86_indirect_thunks(proj)
+        self.thunk_list = utils.get_x86_indirect_thunks(proj)
 
         # Run the symbolic execution engine.
         state.globals['hist_0'] = state.addr
@@ -858,7 +860,7 @@ class Scanner:
             except (angr.errors.SimIRSBNoDecodeError, angr.errors.UnsupportedIROpError) as e:
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
+                utils.report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except angr.errors.UnsupportedDirtyError as e:
@@ -866,7 +868,7 @@ class Scanner:
                     continue
                 l.error("=============== UNSUPPORTED INSTRUCTION ===============")
                 l.error(str(e))
-                report_unsupported(e, proj, hex(self.cur_state.addr), hex(
+                utils.report_unsupported(e, proj, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
             except Exception as e:
@@ -882,7 +884,7 @@ class Scanner:
 
                 # Debug setting to print the trace and immediately exit
                 if global_config['CrashOnExceptions']:
-                    print(get_disassembled_trace_text(
+                    print(asmprinter.get_disassembled_trace_text(
                         proj, self.cur_state.history.bbl_addrs))
                     raise e
 
@@ -892,11 +894,11 @@ class Scanner:
                 l.error(str(e))
 
                 if not l.disabled:
-                    print(get_disassembled_trace_text(
+                    print(asmprinter.get_disassembled_trace_text(
                         proj, self.cur_state.history.bbl_addrs))
                     traceback.format_exc()
 
-                report_error(e, hex(self.cur_state.addr), hex(
+                utils.report_error(e, hex(self.cur_state.addr), hex(
                     start_address), error_type="SCANNER")
                 continue
 
@@ -918,10 +920,10 @@ class Scanner:
 
                 # Check if the last branch condition contains an if-then-else statement.
                 try:
-                    asts = split_conditions(
+                    asts = astTransform.split_conditions(
                         ns.history.jump_guards[-1], simplify=False, addr=ns.history.jump_sources[-1])
                 except SplitTooManyNestedIfException as e:
-                    report_error(e, hex(self.cur_state.addr), hex(
+                    utils.report_error(e, hex(self.cur_state.addr), hex(
                         start_address), error_type="SCANNER")
                     continue
 
@@ -937,9 +939,9 @@ class Scanner:
             if len(self.loads) < 50:
                 from tabulate import tabulate
                 l.info(tabulate([[hex(x.pc), str(x.addr),
-                                "0" if get_load_annotation(
-                                    x.val) == None else get_load_annotation(x.val).depth,
-                                  str(x.val), str(get_annotations(x.addr)), str(
-                                    get_annotations(x.val)),
-                                  "none" if get_load_annotation(x.val) == None else get_load_annotation(x.val).requirements] for x in self.loads],
+                                "0" if annotations.get_load_annotation(
+                                    x.val) == None else annotations.get_load_annotation(x.val).depth,
+                                  str(x.val), str(utils.get_annotations(x.addr)), str(
+                                    utils.get_annotations(x.val)),
+                                  "none" if annotations.get_load_annotation(x.val) == None else annotations.get_load_annotation(x.val).requirements] for x in self.loads],
                                 headers=["pc", "addr", "depth", "val", "addr annotations", "val annotations", "deps"]))

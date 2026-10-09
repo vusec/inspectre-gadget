@@ -10,15 +10,15 @@ import itertools
 import copy
 
 # autopep8: off
-from ..shared.logger import *
-from ..shared.astTransform import *
-from ..shared.config import *
-from ..shared.halfGadget import *
-from ..scanner.annotations import *
-from .transmissionAnalysis import canonicalize
+from ..shared import logger
+from ..shared import astTransform
+from ..shared.astTransform import SplitTooManyNestedIfException
+from ..shared.halfGadget import HalfGadget
+from ..scanner import annotations
+from . import transmissionAnalysis
 # autopep8: on
 
-l = get_logger("HalfSpectreAnalysis")
+l = logger.get_logger("HalfSpectreAnalysis")
 
 
 def analyse(gadget: HalfGadget):
@@ -27,7 +27,7 @@ def analyse(gadget: HalfGadget):
 
     # Extract members of the transmission.
     try:
-        canonical_exprs = canonicalize(gadget.loaded.expr, gadget.pc)
+        canonical_exprs = transmissionAnalysis.canonicalize(gadget.loaded.expr, gadget.pc)
     except SplitTooManyNestedIfException:
         l.error("half_gadget analyse: Failed canonicalizing expression")
         return []
@@ -40,7 +40,7 @@ def analyse(gadget: HalfGadget):
 
         l.warning(
             f"POTENTIAL HALF GADGET: {canonical_expr}")
-        members = extract_summed_vals(canonical_expr.expr)
+        members = astTransform.extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {gadget.aliases}")
 
         # Analyze each member.
@@ -55,24 +55,24 @@ def analyse(gadget: HalfGadget):
                 l.warning("     skipping")
                 continue
 
-            if is_attacker_controlled(member):
+            if annotations.is_attacker_controlled(member):
                 # Note that this includes both direct control (e.g. rdi)
                 # and indirect control (e.g. LOAD[LOAD[RDI]]).
                 attacker_members.append(member)
             else:
                 base_members.append(member)
-                if get_uncontrolled_load_annotation(member) is not None:
+                if annotations.get_uncontrolled_load_annotation(member) is not None:
                     # These are members that contain code loaded from
                     # uncontrolled locations (constants or GS).
                     uncontrolled_base_members.append(member)
 
         # Create the base.
         if len(base_members) > 0:
-            g.base.expr = generate_addition(base_members)
+            g.base.expr = astTransform.generate_addition(base_members)
         else:
             g.base = None
         if len(uncontrolled_base_members) > 0:
-            g.uncontrolled_base.expr = generate_addition(
+            g.uncontrolled_base.expr = astTransform.generate_addition(
                 uncontrolled_base_members)
         else:
             g.uncontrolled_base = None
@@ -82,13 +82,13 @@ def analyse(gadget: HalfGadget):
             l.warning(f"Uncontrolled half gadget, skipping...")
             continue
 
-        g.attacker.expr = generate_addition(attacker_members)
+        g.attacker.expr = astTransform.generate_addition(attacker_members)
 
         # Calculate size.
         for component in [g.loaded, g.base, g.attacker, g.uncontrolled_base]:
             if component != None:
                 component.size = component.expr.size()
-                component.max_load_depth = get_load_depth(
+                component.max_load_depth = annotations.get_load_depth(
                     component.expr)
 
         gadgets.append(g)

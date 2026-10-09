@@ -7,7 +7,7 @@ from collections import OrderedDict
 from collections.abc import MutableMapping
 from claripy import BVS
 
-from .utils import ordered_branches, ordered_constraints
+from . import utils
 from . import ranges
 from .transmission import ControlType, Requirements
 
@@ -83,8 +83,8 @@ class TFPRegister():
         controlled_expr: {self.controlled_expr}
         control: {self.control}
         control_type: {self.control_type}
-        branches: {ordered_branches(self.branches)}
-        constraints: {ordered_constraints(self.constraints)}
+        branches: {utils.ordered_branches(self.branches)}
+        constraints: {utils.ordered_constraints(self.constraints)}
         aliases: {self.aliases}
         requirements: {self.requirements}
         range: {self.range}
@@ -104,8 +104,8 @@ class TFPRegister():
                     'controlled_expr': str(r.controlled_expr),
                     'control': str(r.control),
                     'control_type': str(r.control_type),
-                    'branches': ordered_branches(r.branches),
-                    'constraints': ordered_constraints(r.constraints),
+                    'branches': utils.ordered_branches(r.branches),
+                    'constraints': utils.ordered_constraints(r.constraints),
                     'controlled_range': dict(ranges.AstRange(0, 0, 0, False).to_dict()
                                              if r.controlled_range == None else r.controlled_range.to_dict()),
                     'controlled_range_with_branches': dict(ranges.AstRange(0, 0, 0, False).to_dict()
@@ -122,8 +122,8 @@ class TFPRegister():
             ("controlled_expr", self.expr),
             ("control", self.control),
             ("control_type", self.control_type),
-            ("branches", ordered_branches(self.branches)),
-            ("constraints", ordered_constraints(self.constraints)),
+            ("branches", utils.ordered_branches(self.branches)),
+            ("constraints", utils.ordered_constraints(self.constraints)),
             ("aliases", [str(a.to_BV()) for a in self.aliases]),
             ("requirements", self.requirements.to_dict()),
             ("range", ranges.AstRange(0, 0, 0, False).to_dict()
@@ -235,8 +235,8 @@ class TaintedFunctionPointer():
         aliasing: {self.aliasing}
 
         bbls: {[hex(x) for x in self.bbls]}
-        all_branches: {ordered_branches(self.all_branches)}
-        all_constraints: {ordered_constraints(self.all_constraints)}
+        all_branches: {utils.ordered_branches(self.all_branches)}
+        all_constraints: {utils.ordered_constraints(self.all_constraints)}
         aliases: {self.aliases}
         requirements: {self.requirements}
         registers:
@@ -263,11 +263,11 @@ class TaintedFunctionPointer():
              if self.range == None else self.range.to_dict()),
             ("range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range_with_branches == None else self.range_with_branches.to_dict()),
-            ("branches", ordered_branches(self.constraints)),
-            ("constraints", ordered_constraints(self.branches)),
+            ("branches", utils.ordered_branches(self.constraints)),
+            ("constraints", utils.ordered_constraints(self.branches)),
             ("requirements", self.requirements.to_dict()),
-            ("all_branches", ordered_branches(self.all_constraints)),
-            ("all_constraints", ordered_constraints(self.all_branches)),
+            ("all_branches", utils.ordered_branches(self.all_constraints)),
+            ("all_constraints", utils.ordered_constraints(self.all_branches)),
             ("aliases", self.aliases),
             ("bbls", [hex(x) for x in self.bbls]),
             ("controlled", self.controlled),

@@ -6,13 +6,13 @@ from .rangeStrategy import RangeStrategy
 from .infer_isolated import RangeStrategyInferIsolated
 
 # autopep8: off
-from ...shared.config import *
-from ...shared.utils import *
-from ...shared.logger import *
-from ...shared.ranges import *
+from ...shared.config import global_config
+from ...shared import utils
+from ...shared import logger
+from ...shared import ranges
 # autopep8: on
 
-l = get_logger("FindConstraintsBounds")
+l = logger.get_logger("FindConstraintsBounds")
 
 
 class RangeStrategyFindConstraintsBounds(RangeStrategy):
@@ -29,10 +29,10 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
         if not constraints:
             return None
 
-        ast_vars = set(get_vars(ast))
+        ast_vars = set(utils.get_vars(ast))
         new_constr = set()
         for c in constraints:
-            c_vars = set(get_vars(c))
+            c_vars = set(utils.get_vars(c))
             if ast_vars.intersection(c_vars):
                 new_constr.add(c)
 
@@ -49,7 +49,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
         # Early exit: single value
         if ast_min == ast_max:
-            return range_static(ast_min, isolated=False)
+            return ranges.range_static(ast_min, isolated=False)
 
         try:
             sat_ranges = _find_sat_distribution(
@@ -97,7 +97,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             # We only support 'stride mode' ranges
             if r != None and r.and_mask == None and r.or_mask == None:
 
-                return range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
+                return ranges.range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
                                                              r.min, r.max, r.stride,
                                                              concrete_value)
 
