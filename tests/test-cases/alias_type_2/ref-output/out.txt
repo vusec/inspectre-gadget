@@ -6,7 +6,7 @@ Disassembly of section .text:
 
 0000000004000000 <alias_type_2>:
  4000000:	44 0f b7 87 00 01 00 	movzx  r8d,WORD PTR [rdi+0x100]
- 4000007:	00 
+ 4000007:	00
  4000008:	48 8b 37             	mov    rsi,QWORD PTR [rdi]
  400000b:	4e 8b 14 06          	mov    r10,QWORD PTR [rsi+r8*1]
  400000f:	44 0f b7 42 28       	movzx  r8d,WORD PTR [rdx+0x28]

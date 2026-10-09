@@ -24,7 +24,7 @@ Disassembly of section .text:
  4000028:	48 8b 57 40          	mov    rdx,QWORD PTR [rdi+0x40]
  400002c:	83 e0 07             	and    eax,0x7
  400002f:	4c 8b bc c2 38 01 00 	mov    r15,QWORD PTR [rdx+rax*8+0x138]
- 4000036:	00 
+ 4000036:	00
  4000037:	48 0f be 41 14       	movsx  rax,BYTE PTR [rcx+0x14]
  400003c:	48 8d 14 40          	lea    rdx,[rax+rax*2]
  4000040:	49 8b 47 08          	mov    rax,QWORD PTR [r15+0x8]

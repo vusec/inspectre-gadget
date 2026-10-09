@@ -8,9 +8,9 @@ Disassembly of section .text:
  4000000:	48 63 ff             	movsxd rdi,edi
  4000003:	48 c7 c0 00 77 02 00 	mov    rax,0x27700
  400000a:	48 03 04 c5 60 28 62 	add    rax,QWORD PTR [rax*8-0x7d9dd7a0]
- 4000011:	82 
+ 4000011:	82
  4000012:	48 03 04 fd 60 28 62 	add    rax,QWORD PTR [rdi*8-0x7d9dd7a0]
- 4000019:	82 
+ 4000019:	82
  400001a:	48 8d 90 80 00 00 00 	lea    rdx,[rax+0x80]
  4000021:	48 83 38 00          	cmp    QWORD PTR [rax],0x0
  4000025:	e9 00 00 00 00       	jmp    400002a <has_bh_in_lru+0x2a>

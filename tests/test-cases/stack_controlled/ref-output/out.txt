@@ -10,7 +10,7 @@ Disassembly of section .text:
  4000002:	5a                   	pop    rdx
  4000003:	59                   	pop    rcx
  4000004:	4c 0f b7 92 ff 00 00 	movzx  r10,WORD PTR [rdx+0xff]
- 400000b:	00 
+ 400000b:	00
  400000c:	4e 8b 1c 11          	mov    r11,QWORD PTR [rcx+r10*1]
  4000010:	e9 00 00 00 00       	jmp    4000015 <stack_controlled+0x15>
 

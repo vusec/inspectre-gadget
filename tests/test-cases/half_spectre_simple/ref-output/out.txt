@@ -7,9 +7,9 @@ Disassembly of section .text:
 0000000004000000 <half_spectre>:
  4000000:	48 8b 37             	mov    rsi,QWORD PTR [rdi]
  4000003:	67 4c 8b 90 00 00 00 	mov    r10,QWORD PTR [eax-0x7f000000]
- 400000a:	81 
+ 400000a:	81
  400000b:	4c 8b 1c 25 00 00 00 	mov    r11,QWORD PTR ds:0xffffffff81000000
- 4000012:	81 
+ 4000012:	81
  4000013:	49 01 c3             	add    r11,rax
  4000016:	4d 8b 23             	mov    r12,QWORD PTR [r11]
 

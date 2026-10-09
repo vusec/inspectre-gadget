@@ -1,3 +1,4 @@
+#!/bin/bash
 OUT_REF_FOLDER="ref-output"
 ASM_REF_FOLDER="ref-asm"
 OUT_FOLDER="output"
@@ -64,7 +65,9 @@ if [ -f tfp.csv ]; then
     echo "== REASONER DISPATCH ==" >> ${OUT_FOLDER}/out.txt
     python3 ../../../inspectre reason tfp.csv tfp-reasoned.csv &>> ${OUT_FOLDER}/out.txt
 fi
-
+# Drop environment-specific angr log lines (e.g., unicorn version mismatch),
+# format: "ERROR    | 2024-01-01 12:00:00,000 | angr.some.module | message"
+sed -i -E '/^(DEBUG|INFO|WARNING|ERROR|CRITICAL) +\| [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:,]+ \| /d' ${OUT_FOLDER}/out.txt
 
 # ------------------------------------------------------------------------------
 # Execute queries for disclosure gadgets
@@ -148,6 +151,8 @@ if [ -f half.csv ]; then
     done
 fi
 
+# Remove trailing whitespace, to avoid differences that only consist of whitespace
+find ${OUT_FOLDER} -type f -exec sed -i 's/[[:space:]]*$//' {} +
 
 # ------------------------------------------------------------------------------
 # Create ref folder if it does not exist

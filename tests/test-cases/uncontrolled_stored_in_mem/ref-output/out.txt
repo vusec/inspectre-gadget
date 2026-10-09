@@ -10,7 +10,7 @@ Disassembly of section .text:
  4000009:	4c 8b 8f ff 00 00 00 	mov    r9,QWORD PTR [rdi+0xff]
  4000010:	49 81 e1 ff ff 00 00 	and    r9,0xffff
  4000017:	4f 8b 94 08 00 00 00 	mov    r10,QWORD PTR [r8+r9*1-0x7f000000]
- 400001e:	81 
+ 400001e:	81
  400001f:	c7 06 00 00 00 00    	mov    DWORD PTR [rsi],0x0
  4000025:	44 8b 0e             	mov    r9d,DWORD PTR [rsi]
  4000028:	49 81 e1 ff ff 00 00 	and    r9,0xffff

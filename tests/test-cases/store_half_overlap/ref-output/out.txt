@@ -10,16 +10,16 @@ Disassembly of section .text:
  4000007:	49 8b 78 04          	mov    rdi,QWORD PTR [r8+0x4]
  400000b:	4c 0f b7 1a          	movzx  r11,WORD PTR [rdx]
  400000f:	49 8b bc 3b 00 00 00 	mov    rdi,QWORD PTR [r11+rdi*1-0x7f000000]
- 4000016:	81 
+ 4000016:	81
  4000017:	e9 00 00 00 00       	jmp    400001c <store_half_overlap+0x1c>
 
 == SCANNER ==
 [MAIN]  Loading angr project...
 [MAIN]  Analyzing gadget at address 0x4000000...
-[AnalysisMAIN]  Analyzing TRANS @0x400000f: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22[47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
+[AnalysisMAIN]  Analyzing TRANS @0x400000f: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22][47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
-[AnalysisMAIN]  Analyzing TRANS @0x400000f: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22[47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
+[AnalysisMAIN]  Analyzing TRANS @0x400000f: <BV64 0xffffffff81000000 + (0#48 .. LOAD_16[<BV64 rdx>]_23) + (((0#48 .. rdi[15:0]) << 0x30) + (0#16 .. ((0#32 .. LOAD_64[<BV64 r8 + 0x4>_22][47:32]) << 0x20) + (0#16 .. rsi[63:32])))>
 [AnalysisMAIN]  Dumped annotated ASM to asm
 [AnalysisMAIN]  Dumped properties to gadgets.csv
 [MAIN]  Found 1 potential transmissions.
@@ -30,7 +30,6 @@ Disassembly of section .text:
 [MAIN]  Outputted 0 secret dependent branches.
 
 == REASONER TRANSMISSION ==
-  import pkg_resources
 Total 0 Secret Dependent Branches (not reasoned)
 [-] Imported 2 gadgets
 [-] Performing exploitability analysis...

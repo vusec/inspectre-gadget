@@ -23,14 +23,14 @@ Disassembly of section .text:
 
 0000000004000028 <t3>:
  4000028:	48 8b 04 25 00 00 00 	mov    rax,QWORD PTR ds:0xffffffff81000000
- 400002f:	81 
+ 400002f:	81
  4000030:	4c 0f b7 4f 30       	movzx  r9,WORD PTR [rdi+0x30]
  4000035:	49 39 c1             	cmp    r9,rax
  4000038:	74 15                	je     400004f <end>
 
 000000000400003a <t4>:
  400003a:	48 8b 04 25 00 00 00 	mov    rax,QWORD PTR ds:0xffffffff81000000
- 4000041:	81 
+ 4000041:	81
  4000042:	4c 0f b7 4f 30       	movzx  r9,WORD PTR [rdi+0x30]
  4000047:	49 01 c1             	add    r9,rax
  400004a:	49 39 f1             	cmp    r9,rsi

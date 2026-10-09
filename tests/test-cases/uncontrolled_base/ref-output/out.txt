@@ -7,7 +7,7 @@ Disassembly of section .text:
 0000000004000000 <uncontrolled_base>:
  4000000:	4c 0f b6 07          	movzx  r8,BYTE PTR [rdi]
  4000004:	65 48 8b 34 25 80 ac 	mov    rsi,QWORD PTR gs:0x2ac80
- 400000b:	02 00 
+ 400000b:	02 00
  400000d:	48 8b 16             	mov    rdx,QWORD PTR [rsi]
  4000010:	48 8b 12             	mov    rdx,QWORD PTR [rdx]
  4000013:	4a 8b 14 02          	mov    rdx,QWORD PTR [rdx+r8*1]

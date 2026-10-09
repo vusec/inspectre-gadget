@@ -28,21 +28,21 @@ Disassembly of section .text:
  4000040:	4c 03 a6 80 03 00 00 	add    r12,QWORD PTR [rsi+0x380]
  4000047:	4c 89 64 24 08       	mov    QWORD PTR [rsp+0x8],r12
  400004c:	4c 8d a4 06 40 0a 00 	lea    r12,[rsi+rax*1+0xa40]
- 4000053:	00 
+ 4000053:	00
  4000054:	48 8b 86 58 1b 00 00 	mov    rax,QWORD PTR [rsi+0x1b58]
  400005b:	49 8d 94 24 c0 02 00 	lea    rdx,[r12+0x2c0]
- 4000062:	00 
+ 4000062:	00
  4000063:	48 c1 e8 3d          	shr    rax,0x3d
  4000067:	a8 01                	test   al,0x1
  4000069:	4c 0f 45 e2          	cmovne r12,rdx
  400006d:	41 8b b4 24 40 02 00 	mov    esi,DWORD PTR [r12+0x240]
- 4000074:	00 
+ 4000074:	00
  4000075:	41 8b 94 24 48 02 00 	mov    edx,DWORD PTR [r12+0x248]
- 400007c:	00 
+ 400007c:	00
  400007d:	48 8b bf c8 00 00 00 	mov    rdi,QWORD PTR [rdi+0xc8]
  4000084:	89 f0                	mov    eax,esi
  4000086:	41 2b 84 24 44 02 00 	sub    eax,DWORD PTR [r12+0x244]
- 400008d:	00 
+ 400008d:	00
  400008e:	25 ff 01 00 00       	and    eax,0x1ff
  4000093:	29 c2                	sub    edx,eax
  4000095:	41 8b 85 c0 00 00 00 	mov    eax,DWORD PTR [r13+0xc0]

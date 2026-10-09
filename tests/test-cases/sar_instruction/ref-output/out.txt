@@ -17,7 +17,7 @@ Disassembly of section .text:
 0000000004000015 <trans1>:
  4000015:	0f b7 06             	movzx  eax,WORD PTR [rsi]
  4000018:	48 0f a3 87 b8 00 00 	bt     QWORD PTR [rdi+0xb8],rax
- 400001f:	00 
+ 400001f:	00
 
 0000000004000020 <end>:
  4000020:	e9 00 00 00 00       	jmp    4000025 <end+0x5>
