@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `LoadConcreteMemory` option to load concrete values from the binary (e.g., globals) ([#38](https://github.com/vusec/inspectre-gadget/pull/38))
+
 ## [1.2.0] - 2026-10-09
 
 After the InSpectre Gadget paper release, many features were added and bugs fixed.

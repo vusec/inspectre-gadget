@@ -45,6 +45,10 @@ LogLevel: 1
 # Forward stored values to subsequent loads.
 STLForwarding: True
 
+# Load concrete values from the binary (e.g., globals) when both the load
+# address and the loaded value are concrete, instead of creating a new symbol.
+LoadConcreteMemory: False
+
 # Timeout of the Z3 solver when evaluating constraints.
 Z3Timeout: 10000 # ms = 10s
 
@@ -85,6 +89,9 @@ Some other parameters that can be tweaked are:
 - **MaxBB**: Maximum number of basic blocks to explore for each entrypoint
 - **STLForwarding**: When enabled, the scanner will forward stored values
   to subsequent loads to the same address
+- **LoadConcreteMemory**: When enabled, loads from a concrete address that
+  contains a concrete value in the binary (e.g., a global) return that value
+  instead of a new symbol, so it shows up in the resulting expressions
 - **DistributeShifts**: When enabled, left-shift expressions like
   `(rax + rbx) << 8` will be treated as `(rax << 8) + (rbx << 8)` during range and control analysis
 - **TaintedFunctionPointers**: When enabled, the scanner will scan also for

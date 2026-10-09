@@ -21,6 +21,8 @@ def init_config(config):
     global_config["SpeculationStopMnemonics"] = {'lfence', 'mfence', 'cpuid'}
     # Crash (exit) on exceptions
     global_config["CrashOnExceptions"] = False
+    # Load concrete memory values from the loaded binary (instead all symbolic).
+    global_config["LoadConcreteMemory"] = False
     # Enable search for transmission gadgets
     global_config["TransmissionGadgets"] = True
     # Enable search for tainted function pointers (i.e. dispatch gadgets).
