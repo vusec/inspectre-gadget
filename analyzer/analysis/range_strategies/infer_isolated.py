@@ -64,18 +64,20 @@ class RangeStrategyInferIsolated(RangeStrategy):
                 sym_ast_min = s.min(sub_ast)
                 sym_ast_max = s.max(sub_ast)
 
-                return ranges.range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
-                                                             sym_ast_min, sym_ast_max, range_map.stride,
-                                                             concrete_value)
+                return ranges.range_from_symbolic_concrete_addition(
+                    ast, ast_min, ast_max, sym_ast_min, sym_ast_max, range_map.stride,
+                    concrete_value)
 
             else:
                 return None
 
         if range_map.stride_mode:
-            return ranges.range_simple(ast_min, ast_max, ast.size(), range_map.stride, isolated=True)
+            return ranges.range_simple(ast_min, ast_max, ast.size(), range_map.stride,
+                                       isolated=True)
 
         else:
-            return ranges.range_complex(ast_min, ast_max, ast.size(), True, None, range_map.and_mask, range_map.or_mask, True)
+            return ranges.range_complex(ast_min, ast_max, ast.size(), True, None,
+                                        range_map.and_mask, range_map.or_mask, True)
 
 
 def is_linear_mask(and_mask, or_mask):

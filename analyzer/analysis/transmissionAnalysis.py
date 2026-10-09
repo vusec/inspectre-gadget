@@ -130,7 +130,8 @@ def canonicalize(expr, addr):
     l.info(f"canonicalized: {splitted}")
     return splitted
 
-def get_dependency_graph(potential_t: TransmissionExpr, transmission_expr: ConditionalAst):
+def get_dependency_graph(potential_t: TransmissionExpr,
+                         transmission_expr: ConditionalAst):
     d = DepGraph()
     d.add_nodes(transmission_expr.expr)
     d.add_aliases(map(lambda x: x.to_BV(), potential_t.aliases))
@@ -178,7 +179,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
             secrets = []
             for var in utils.get_vars(member):
                 for anno in utils.get_annotations(var):
-                    if isinstance(anno, SecretAnnotation) or isinstance(anno, TransmissionAnnotation):
+                    if isinstance(anno, (SecretAnnotation, TransmissionAnnotation)):
                         secrets.append((var, anno.read_address_ast))
 
             # If there is at least one secret in this member...
@@ -209,14 +210,19 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                         continue
 
                     # TODO: is check_addr=True too strict?
-                    if d.is_independent(other_m, secret_sym, check_constraints=False, check_addr=True):
+                    if d.is_independent(other_m, secret_sym,
+                                        check_constraints=False, check_addr=True):
                         # If the other member is completely independent
                         # from the secret, it's part of the base.
                         base_members.append(other_m)
 
-                        if d.is_independent(other_m, secret_addr, check_constraints=False, check_addr=True):
+                        if d.is_independent(other_m, secret_addr,
+                                            check_constraints=False,
+                                            check_addr=True):
                             independent_base_members.append(other_m)
-                        elif d.is_independent(other_m, secret_addr, check_constraints=False, check_addr=False):
+                        elif d.is_independent(other_m, secret_addr,
+                                              check_constraints=False,
+                                              check_addr=False):
                             indirect_dependent_base.append(other_m)
                         else:
                             direct_dependent_base.append(other_m)
@@ -238,20 +244,18 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 else:
                     t.independent_base = None
 
-                if len(direct_dependent_base) > 0:
-                    t.properties['direct_dependent_base_expr'] = astTransform.generate_addition(
-                        direct_dependent_base)
-                else:
-                    t.properties['direct_dependent_base_expr'] = None
+                t.properties['direct_dependent_base_expr'] = (
+                    astTransform.generate_addition(direct_dependent_base)
+                    if len(direct_dependent_base) > 0 else None)
 
-                if len(indirect_dependent_base) > 0:
-                    t.properties['indirect_dependent_base_expr'] = astTransform.generate_addition(
-                        indirect_dependent_base)
-                else:
-                    t.properties['indirect_dependent_base_expr'] = None
+                t.properties['indirect_dependent_base_expr'] = (
+                    astTransform.generate_addition(indirect_dependent_base)
+                    if len(indirect_dependent_base) > 0 else None)
 
                 # Calculate size.
-                for component in [t.base, t.secret_address, t.transmission, t.transmitted_secret, t.secret_val, t.independent_base]:
+                for component in [t.base, t.secret_address, t.transmission,
+                                  t.transmitted_secret, t.secret_val,
+                                  t.independent_base]:
                     if component != None:
                         component.size = component.expr.size()
                         component.max_load_depth = annotations.get_load_depth(

@@ -106,10 +106,14 @@ class TFPRegister():
                     'control_type': str(r.control_type),
                     'branches': utils.ordered_branches(r.branches),
                     'constraints': utils.ordered_constraints(r.constraints),
-                    'controlled_range': dict(ranges.AstRange(0, 0, 0, False).to_dict()
-                                             if r.controlled_range == None else r.controlled_range.to_dict()),
-                    'controlled_range_with_branches': dict(ranges.AstRange(0, 0, 0, False).to_dict()
-                                                           if r.controlled_range_with_branches == None else r.controlled_range_with_branches.to_dict()),
+                    'controlled_range': dict(
+                        ranges.AstRange(0, 0, 0, False).to_dict()
+                        if r.controlled_range == None
+                        else r.controlled_range.to_dict()),
+                    'controlled_range_with_branches': dict(
+                        ranges.AstRange(0, 0, 0, False).to_dict()
+                        if r.controlled_range_with_branches == None
+                        else r.controlled_range_with_branches.to_dict()),
                 }
             }
 
@@ -129,11 +133,13 @@ class TFPRegister():
             ("range", ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range == None else self.range.to_dict()),
             ("range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.range_with_branches == None else self.range_with_branches.to_dict()),
+             if self.range_with_branches == None
+             else self.range_with_branches.to_dict()),
             ("controlled_range", ranges.AstRange(0, 0, 0, False).to_dict()
              if self.controlled_range == None else self.controlled_range.to_dict()),
             ("controlled_range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.controlled_range_with_branches == None else self.controlled_range_with_branches.to_dict()),
+             if self.controlled_range_with_branches == None
+             else self.controlled_range_with_branches.to_dict()),
             ("reg_dereferenced", str(reg_dereferenced_dict))
         ])
 
@@ -171,7 +177,8 @@ class TaintedFunctionPointer():
     control: ControlType
     contains_spec_stop: bool
 
-    def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr, n_control_flow_changes, contains_spec_stop, n_dependent_loads) -> None:
+    def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr,
+                 n_control_flow_changes, contains_spec_stop, n_dependent_loads) -> None:
         self.uuid = ""
         self.name = ""
         self.address = 0
@@ -262,7 +269,8 @@ class TaintedFunctionPointer():
             ("range", ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range == None else self.range.to_dict()),
             ("range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.range_with_branches == None else self.range_with_branches.to_dict()),
+             if self.range_with_branches == None
+             else self.range_with_branches.to_dict()),
             ("branches", utils.ordered_branches(self.constraints)),
             ("constraints", utils.ordered_constraints(self.branches)),
             ("requirements", self.requirements.to_dict()),
@@ -286,17 +294,18 @@ class TaintedFunctionPointer():
         return d
 
     def copy(self):
-        new_tfp = TaintedFunctionPointer(pc=self.pc,
-                                         expr=self.expr,
-                                         reg=self.reg,
-                                         bbls=self.bbls,
-                                         branches=self.all_branches,
-                                         constraints=self.all_constraints,
-                                         aliases=self.aliases,
-                                         n_instr=self.n_instr,
-                                         n_control_flow_changes=self.n_control_flow_changes,
-                                         contains_spec_stop=self.contains_spec_stop,
-                                         n_dependent_loads=self.n_dependent_loads)
+        new_tfp = TaintedFunctionPointer(
+            pc=self.pc,
+            expr=self.expr,
+            reg=self.reg,
+            bbls=self.bbls,
+            branches=self.all_branches,
+            constraints=self.all_constraints,
+            aliases=self.aliases,
+            n_instr=self.n_instr,
+            n_control_flow_changes=self.n_control_flow_changes,
+            contains_spec_stop=self.contains_spec_stop,
+            n_dependent_loads=self.n_dependent_loads)
         new_tfp.control = new_tfp.control
         new_tfp.constraints.extend(self.constraints)
         new_tfp.branches.extend(self.branches)

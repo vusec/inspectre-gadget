@@ -69,10 +69,12 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
             if r != None and sat_ranges[0][0] > sat_ranges[0][1]:
                 # The range wraps around, we have to be sure that the AST range is
-                # a simple strided range, otherwise we get two separate disjoint ranges
-                # which we cannot describe in our range (e.g., [ast != 0xf, ast <= 0xffff])
-                if r.and_mask != None or r.or_mask != None or \
-                        ast_max != ((1 << ast.size()) - 1 - (r.stride - 1)) or ast_min != 0:
+                # a simple strided range, otherwise we get two separate disjoint
+                # ranges which we cannot describe in our range
+                # (e.g., [ast != 0xf, ast <= 0xffff])
+                max_strided_value = (1 << ast.size()) - 1 - (r.stride - 1)
+                if (r.and_mask != None or r.or_mask != None
+                        or ast_max != max_strided_value or ast_min != 0):
 
                     # We have a complex range thus fail (e.g., masking is performed)
                     return None
@@ -97,9 +99,8 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             # We only support 'stride mode' ranges
             if r != None and r.and_mask == None and r.or_mask == None:
 
-                return ranges.range_from_symbolic_concrete_addition(ast, ast_min, ast_max,
-                                                             r.min, r.max, r.stride,
-                                                             concrete_value)
+                return ranges.range_from_symbolic_concrete_addition(
+                    ast, ast_min, ast_max, r.min, r.max, r.stride, concrete_value)
 
         # --------- Can't solve this
         l.warning(f"Cant' solve range: {ast}  ({constraints})")

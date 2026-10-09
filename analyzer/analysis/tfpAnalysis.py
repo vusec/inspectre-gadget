@@ -3,7 +3,8 @@ import sys
 import itertools
 
 # autopep8: off
-from ..shared.taintedFunctionPointer import TFPRegisterControlType, TaintedFunctionPointer
+from ..shared.taintedFunctionPointer import (TFPRegisterControlType,
+                                             TaintedFunctionPointer)
 from ..shared import utils
 from ..shared import logger
 from ..shared.config import global_config
@@ -51,10 +52,25 @@ def is_potential_secret(d: DepGraph, expr: claripy.ast.BV, tfp_expr: claripy.ast
         anno = annotations.get_load_annotation(v)
         if anno != None:
             has_load_anno = True
-            if not (d.is_independent(tfp_expr, anno.read_address_ast, check_constraints=True, check_addr=True)):
+            if not d.is_independent(tfp_expr, anno.read_address_ast,
+                                    check_constraints=True, check_addr=True):
                 return False
 
     return has_load_anno
+
+
+def is_independent_from_tfp(d: DepGraph, reg_expr, tfp_expr, check_addr: bool):
+    """
+    Check if the register and the TFP expression can be controlled
+    independently from each other.
+    """
+    if not d.is_independently_controllable(reg_expr, [tfp_expr],
+                                           check_constraints=True,
+                                           check_addr=check_addr):
+        return False
+    return d.is_independently_controllable(tfp_expr, [reg_expr],
+                                           check_constraints=True,
+                                           check_addr=check_addr)
 
 
 def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
@@ -93,7 +109,8 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
                     new_t.expr = s[1].expr
 
             s = claripy.Solver(timeout=global_config["Z3Timeout"])
-            if not s.satisfiable(extra_constraints=[x[1] for x in new_t.all_constraints]):
+            all_constraints = [x[1] for x in new_t.all_constraints]
+            if not s.satisfiable(extra_constraints=all_constraints):
                 # Skipping.. this combination of constraints is not satisfiable
                 continue
 
@@ -105,7 +122,8 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
 
         if not global_config['NonTaintedFunctionPointers']:
             # If the TFP is not really controlled, skip.
-            if not utils.is_sym_expr(tfp.expr) or not dependencyGraph.is_expr_controlled(tfp.expr):
+            if (not utils.is_sym_expr(tfp.expr)
+                    or not dependencyGraph.is_expr_controlled(tfp.expr)):
                 continue
 
         d = get_dependency_graph(tfp)
@@ -113,29 +131,32 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
 
         # Analyse registers control.
         for r in tfp.registers:
-            if tfp.registers[r].reg == tfp.reg:
-                tfp.registers[r].control_type = TFPRegisterControlType.IS_TFP_REGISTER
-            elif not utils.is_sym_expr(tfp.registers[r].expr) or not dependencyGraph.is_expr_controlled(tfp.registers[r].expr):
-                tfp.registers[r].control_type = TFPRegisterControlType.UNCONTROLLED
+            reg = tfp.registers[r]
+
+            if reg.reg == tfp.reg:
+                reg.control_type = TFPRegisterControlType.IS_TFP_REGISTER
+            elif (not utils.is_sym_expr(reg.expr)
+                    or not dependencyGraph.is_expr_controlled(reg.expr)):
+                reg.control_type = TFPRegisterControlType.UNCONTROLLED
                 # Do not add dereferenced registers (not interesting)
-                if not tfp.registers[r].is_dereferenced:
+                if not reg.is_dereferenced:
                     tfp.uncontrolled.append(r)
-            elif tfp_controlled and not (d.is_independently_controllable(tfp.registers[r].expr, [tfp.expr], check_constraints=True, check_addr=False)
-                                         and d.is_independently_controllable(tfp.expr, [tfp.registers[r].expr], check_constraints=True, check_addr=False)):
-                tfp.registers[r].control_type = TFPRegisterControlType.DEPENDS_ON_TFP_EXPR
+            elif tfp_controlled and not is_independent_from_tfp(d, reg.expr, tfp.expr,
+                                                                check_addr=False):
+                reg.control_type = TFPRegisterControlType.DEPENDS_ON_TFP_EXPR
                 tfp.aliasing.append(r)
-            elif tfp_controlled and not (d.is_independently_controllable(tfp.registers[r].expr, [tfp.expr], check_constraints=True, check_addr=True)
-                                         and d.is_independently_controllable(tfp.expr, [tfp.registers[r].expr], check_constraints=True, check_addr=True)):
-                tfp.registers[r].control_type = TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
+            elif tfp_controlled and not is_independent_from_tfp(d, reg.expr, tfp.expr,
+                                                                check_addr=True):
+                reg.control_type = TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
                 tfp.aliasing.append(r)
-            elif utils.is_sym_var(tfp.registers[r].expr) and is_same_var(tfp.registers[r].expr, tfp.registers[r].reg):
-                tfp.registers[r].control_type = TFPRegisterControlType.UNMODIFIED
+            elif utils.is_sym_var(reg.expr) and is_same_var(reg.expr, reg.reg):
+                reg.control_type = TFPRegisterControlType.UNMODIFIED
                 tfp.unmodified.append(r)
-            elif is_potential_secret(d, tfp.registers[r].expr, tfp.expr):
-                tfp.registers[r].control_type = TFPRegisterControlType.POTENTIAL_SECRET
+            elif is_potential_secret(d, reg.expr, tfp.expr):
+                reg.control_type = TFPRegisterControlType.POTENTIAL_SECRET
                 tfp.secrets.append(r)
             else:
-                tfp.registers[r].control_type = TFPRegisterControlType.CONTROLLED
+                reg.control_type = TFPRegisterControlType.CONTROLLED
                 # We add controlled registers later
 
         # Initialize controlled expr for each register

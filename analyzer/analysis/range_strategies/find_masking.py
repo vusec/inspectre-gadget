@@ -24,7 +24,8 @@ class RangeStrategyFindMasking(RangeStrategy):
 
         entropy, and_mask, or_mask = _find_entropy(s, ast, ast_max)
 
-        return ranges.range_complex(ast_min, ast_max, ast.size(), False, entropy, and_mask, or_mask)
+        return ranges.range_complex(ast_min, ast_max, ast.size(), False, entropy,
+                                    and_mask, or_mask)
 
 def _find_entropy(s: claripy.Solver, ast: claripy.ast.BV, ast_max: int):
 

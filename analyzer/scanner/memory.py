@@ -36,7 +36,8 @@ class MemOp:
     id: int
     op_type: MemOpType
 
-    def __init__(self, pc: int, addr: claripy.ast.BV, val: claripy.ast.BV, size: int, id: int, op_type: MemOpType):
+    def __init__(self, pc: int, addr: claripy.ast.BV, val: claripy.ast.BV, size: int,
+                 id: int, op_type: MemOpType):
         self.pc = pc
         self.addr = addr
         self.val = val
@@ -154,7 +155,8 @@ def concrete_value_overlaps_with(val1, size1, val2, size2):
     return not (val1 + size1 <= val2 or val2 + size2 <= val1)
 
 
-def addr_overlaps_with(addr1: claripy.ast.BV, size1: int, addr2: claripy.ast.BV, size2: int, state: angr.SimState) -> bool:
+def addr_overlaps_with(addr1: claripy.ast.BV, size1: int, addr2: claripy.ast.BV,
+                       size2: int, state: angr.SimState) -> bool:
     """
     Check if the two accesses (addresses + size) overlap.
     Note that, since we are dealing with symbolic loads, the result
@@ -165,7 +167,8 @@ def addr_overlaps_with(addr1: claripy.ast.BV, size1: int, addr2: claripy.ast.BV,
 
     # fast-path: two concrete values
     if addr1.concrete and addr2.concrete:
-        return concrete_value_overlaps_with(addr1.concrete_value, size1, addr2.concrete_value, size2)
+        return concrete_value_overlaps_with(addr1.concrete_value, size1,
+                                            addr2.concrete_value, size2)
 
     # fast-path: two independent expressions
     if not (addr1.variables & addr2.variables):
@@ -228,12 +231,14 @@ def get_overlap(load1: MemOp, load2: MemOp, state: angr.SimState):
     # Consider only these offsets for possible overlaps.
     for i in [0, 1, 2, 4]:
 
-        if not state.solver.satisfiable(extra_constraints=[load1.addr != load2.addr + i] + edge_const):
+        if not state.solver.satisfiable(
+                extra_constraints=[load1.addr != load2.addr + i] + edge_const):
             l.error("Overlap found: {} ~~ {} (offset {})".format(
                 load1.addr, load2.addr, i))
             return load2, load1, i
 
-        if not state.solver.satisfiable(extra_constraints=[load1.addr + i != load2.addr] + edge_const):
+        if not state.solver.satisfiable(
+                extra_constraints=[load1.addr + i != load2.addr] + edge_const):
             l.error("Overlap found: {} (offset {}) ~~ {}".format(
                 load1.addr, i, load2.addr))
             return load1, load2, i
@@ -246,14 +251,16 @@ def is_load_obj(item):
 
 
 def get_previous_loads(state: angr.SimState):
-    return filter(lambda x: isinstance(x, MemOp) and x.op_type == MemOpType.LOAD, state.globals.values())
+    return filter(lambda x: isinstance(x, MemOp) and x.op_type == MemOpType.LOAD,
+                  state.globals.values())
 
 
 def get_aliases(state: angr.SimState) -> MemoryAlias:
     return filter(lambda x: isinstance(x, MemoryAlias), state.globals.values())
 
 
-def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[MemoryAlias]:
+def get_aliasing_loads(this: MemOp, state: angr.SimState,
+                       alias_store) -> list[MemoryAlias]:
     """
     Check if a load aliases with any other previous load.
     """
@@ -274,8 +281,8 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
 
             if memop1 == None:
                 # TODO: Handle this properly.
-                l.error(
-                    f"Bailing out: Unhandled aliasing condition between {this.addr} and {prev.addr}")
+                l.error("Bailing out: Unhandled aliasing condition between "
+                        f"{this.addr} and {prev.addr}")
             else:
                 val1 = memop1.val
                 val2 = memop2.val
@@ -318,9 +325,11 @@ def get_aliasing_loads(this: MemOp, state: angr.SimState, alias_store) -> list[M
     return aliasing_loads
 
 def get_previous_stores(state: angr.SimState):
-    return filter(lambda x: (isinstance(x, MemOp) and x.op_type == MemOpType.STORE), state.globals.values())
+    return filter(lambda x: isinstance(x, MemOp) and x.op_type == MemOpType.STORE,
+                  state.globals.values())
 
-def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, state: angr.SimState):
+def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int,
+                       state: angr.SimState):
     """
     Return the latest store that aliases with the given load and its value.
     """
@@ -344,8 +353,9 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
     overlapping_stores.sort(key=lambda x: x.id)
     last_store = overlapping_stores[-1]
 
-    if last_store.size == load_size \
-            and not state.solver.satisfiable(extra_constraints=[load_addr != last_store.addr]):
+    if (last_store.size == load_size
+            and not state.solver.satisfiable(
+                extra_constraints=[load_addr != last_store.addr])):
         #  The last store is an exact match (both addr + length)! -> Easy case
         return last_store, last_store.val
 
@@ -362,7 +372,8 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
                 blank_state.solver.add(*get_edge_constraints(s.addr))
 
         # We first store a new expr on load_addr, to fill any possible blank spots
-        annotation = annotations.propagate_annotations(load_addr, state.scratch.ins_addr)
+        annotation = annotations.propagate_annotations(load_addr,
+                                                       state.scratch.ins_addr)
         gap_expr = claripy.BVS(name=f"LOAD_{load_size * 8}[{load_addr}_{load_id}]",
                                size=load_size * 8,
                                annotations=(annotation,), explicit_name=True)
@@ -374,7 +385,8 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int, 
             blank_state.memory.store(s.addr, s.val, endness=archinfo.Endness.LE)
 
         # Now we load our addr, we let Angr handle all the crazy overlaps :D
-        load_val = blank_state.memory.load(load_addr, load_size, endness=archinfo.Endness.LE)
+        load_val = blank_state.memory.load(load_addr, load_size,
+                                           endness=archinfo.Endness.LE)
 
         # TODO: Handle multiple stores in get_aliasing_loads()
         # for now we simply returns the newest store, however, this may

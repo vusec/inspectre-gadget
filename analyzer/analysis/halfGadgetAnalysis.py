@@ -27,7 +27,8 @@ def analyse(gadget: HalfGadget):
 
     # Extract members of the transmission.
     try:
-        canonical_exprs = transmissionAnalysis.canonicalize(gadget.loaded.expr, gadget.pc)
+        canonical_exprs = transmissionAnalysis.canonicalize(gadget.loaded.expr,
+                                                            gadget.pc)
     except SplitTooManyNestedIfException:
         l.error("half_gadget analyse: Failed canonicalizing expression")
         return []

@@ -13,7 +13,8 @@ from . import transmissionAnalysis
 # autopep8: off
 from ..shared import logger
 from ..shared import astTransform
-from ..shared.secretDependentBranch import SecretDependentBranch, SecretDependentBranchExpr
+from ..shared.secretDependentBranch import (SecretDependentBranch,
+                                            SecretDependentBranchExpr)
 from ..scanner import annotations
 from ..shared import utils
 # autopep8: on
@@ -21,7 +22,8 @@ from ..shared import utils
 l = logger.get_logger("SecretDependentBranchAnalysis")
 
 
-def get_secret_dependent_branches(potential_sdb: SecretDependentBranchExpr) -> list[SecretDependentBranch]:
+def get_secret_dependent_branches(
+        potential_sdb: SecretDependentBranchExpr) -> list[SecretDependentBranch]:
     """
     Analyze an expression marked as a possible secret dependent branch (e.g.
     a branch guard consisting of a secret) to identify its components.
@@ -39,15 +41,16 @@ def get_secret_dependent_branches(potential_sdb: SecretDependentBranchExpr) -> l
         return []
 
     if len(expr.args) == 1:
-        utils.report_error(Exception(), hex(0), hex(
-            0), error_type="get_secret_dependent_branches: Unexpected AST with args == 1")
+        error_type = "get_secret_dependent_branches: Unexpected AST with args == 1"
+        utils.report_error(Exception(), hex(0), hex(0), error_type=error_type)
         return []
 
     expr_right = expr.args[0]
     expr_left = expr.args[1]
 
     # Do some sanity checks on right left expressions
-    if isinstance(expr_right, claripy.ast.bool.Bool) and isinstance(expr_left, claripy.ast.bool.Bool):
+    if (isinstance(expr_right, claripy.ast.bool.Bool)
+            and isinstance(expr_left, claripy.ast.bool.Bool)):
         # If expr has depth == 1, its simple 'True' or 'False'
         # Do we need to fix operation of child expr?
         if expr_right.depth == 1:
@@ -70,7 +73,8 @@ def get_secret_dependent_branches(potential_sdb: SecretDependentBranchExpr) -> l
 
     secret_dependent_branches = []
     # For both side combinations, do the analysis
-    for secret_expr, compared_expr in [[expr_right, expr_left], [expr_left, expr_right]]:
+    for secret_expr, compared_expr in ((expr_right, expr_left),
+                                       (expr_left, expr_right)):
 
         # Get all transmission for the secret_expr
         potential_sdb.expr = secret_expr
@@ -86,7 +90,8 @@ def get_secret_dependent_branches(potential_sdb: SecretDependentBranchExpr) -> l
             sdb.cmp_value.expr = compared_expr
 
             # Collect controlled part of cmp_value
-            canonical_exprs = transmissionAnalysis.canonicalize(compared_expr, potential_sdb.pc)
+            canonical_exprs = transmissionAnalysis.canonicalize(compared_expr,
+                                                                potential_sdb.pc)
             controlled_members = []
             for canonical_expr in canonical_exprs:
                 members = astTransform.extract_summed_vals(canonical_expr.expr)
@@ -96,7 +101,8 @@ def get_secret_dependent_branches(potential_sdb: SecretDependentBranchExpr) -> l
                         controlled_members.append(ast)
 
             if len(controlled_members) > 0:
-                sdb.controlled_cmp_value.expr = astTransform.generate_addition(controlled_members)
+                sdb.controlled_cmp_value.expr = astTransform.generate_addition(
+                    controlled_members)
             else:
                 sdb.controlled_cmp_value = None
 

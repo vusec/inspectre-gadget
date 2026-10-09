@@ -47,7 +47,8 @@ class AstRange:
             # TODO: Handle multiple intervals
             None
 
-    def __init__(self, min, max, ast_size, exact, entropy=None, isolated=False, and_mask=None, or_mask=None, values=[], intervals=[]):
+    def __init__(self, min, max, ast_size, exact, entropy=None, isolated=False,
+                 and_mask=None, or_mask=None, values=[], intervals=[]):
         self.min = min
         self.max = max
         self.__ast_size = ast_size
@@ -125,14 +126,17 @@ class AstRange:
 def range_static(value, isolated):
     interval = Interval(min=value, max=value, stride=1)
 
-    return AstRange(min=value, max=value, ast_size=0, exact=True, entropy=0, isolated=isolated, intervals=[interval])
+    return AstRange(min=value, max=value, ast_size=0, exact=True, entropy=0,
+                    isolated=isolated, intervals=[interval])
 
 
 def range_simple(min, max, ast_size, stride, isolated):
-    return AstRange(min=min, max=max, ast_size=ast_size, exact=True, isolated=isolated, intervals=[Interval(min, max, stride)])
+    return AstRange(min=min, max=max, ast_size=ast_size, exact=True, isolated=isolated,
+                    intervals=[Interval(min, max, stride)])
 
 
-def range_from_symbolic_concrete_addition(ast, ast_min, ast_max, sym_ast_min, sym_ast_max, sym_ast_stride, concrete_value):
+def range_from_symbolic_concrete_addition(ast, ast_min, ast_max, sym_ast_min,
+                                          sym_ast_max, sym_ast_stride, concrete_value):
     isolated_ast_min = sym_ast_min + concrete_value
     isolated_ast_max = sym_ast_max + concrete_value
 
@@ -168,7 +172,8 @@ def get_stride_from_mask(and_mask, or_mask):
     return 2 ** lowest_bit
 
 
-def range_complex(min, max, ast_size, exact, entropy, and_mask, or_mask, isolated=False):
+def range_complex(min, max, ast_size, exact, entropy, and_mask, or_mask,
+                  isolated=False):
     stride = get_stride_from_mask(and_mask, or_mask)
 
     highest_bit = max.bit_length()

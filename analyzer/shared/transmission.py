@@ -27,7 +27,9 @@ class ControlType(Enum):
 
 
 def component_to_dict(component):
-    return TransmissionComponent().to_dict() if component == None else component.to_dict()
+    if component == None:
+        return TransmissionComponent().to_dict()
+    return component.to_dict()
 
 
 class Requirements():
@@ -46,7 +48,8 @@ class Requirements():
 
     def __repr__(self) -> str:
         d = {'regs': sorted([str(x) for x in self.regs]),
-             'indirect_regs': sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs]),
+             'indirect_regs': sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}"
+                                      for x in self.indirect_regs]),
              'direct_regs': sorted([str(x) for x in self.direct_regs]),
              'mem': sorted([str(x) for x in self.mem]),
              'const_mem': sorted([str(x) for x in self.const_mem]),
@@ -56,8 +59,8 @@ class Requirements():
     def to_dict(self):
         return OrderedDict([
             ('regs', sorted([str(x) for x in self.regs])),
-            ('indirect_regs', sorted(
-                [f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs])),
+            ('indirect_regs', sorted([f"{str(x)}: {sorted(self.indirect_regs[x])}"
+                                      for x in self.indirect_regs])),
             ('direct_regs', sorted([str(x) for x in self.direct_regs])),
             ('mem', sorted([str(x) for x in self.mem])),
             ('const_mem', sorted([str(x) for x in self.const_mem])),
@@ -101,7 +104,9 @@ class TransmissionExpr:
     n_control_flow_changes: int
     contains_spec_stop: bool
 
-    def __init__(self, pc: int, expr: claripy.ast.BV, transmitter: TransmitterType, bbls, branches, aliases, constraints, n_instr, n_control_flow_changes, contains_spec_stop):
+    def __init__(self, pc: int, expr: claripy.ast.BV, transmitter: TransmitterType,
+                 bbls, branches, aliases, constraints, n_instr,
+                 n_control_flow_changes, contains_spec_stop):
         self.pc = pc
         self.expr = expr
         self.transmitter = transmitter
@@ -130,7 +135,8 @@ class TransmissionExpr:
 
 class TransmissionComponent():
     """
-    A _component_ of a transmission (e.g. the base, the secret address or the secret value.)
+    A _component_ of a transmission (e.g. the base, the secret address or the
+    secret value.)
     """
     expr: claripy.ast.BV
     branches: list
@@ -179,8 +185,9 @@ class TransmissionComponent():
             ('requirements', self.requirements.to_dict()),
             ('range', ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range == None else self.range.to_dict()),
-            ('range_w_branches', ranges.AstRange(0, 0, 0, False).to_dict(
-            ) if self.range_with_branches == None else self.range_with_branches.to_dict()),
+            ('range_w_branches', ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.range_with_branches == None
+             else self.range_with_branches.to_dict()),
             ('control', str(self.control)),
             ('n_dependent_loads', str(self.max_load_depth))
         ]
@@ -354,7 +361,7 @@ class Transmission():
         for p in self.properties:
             d[p] = str(self.properties[p])
 
-       # Properties only used for child class Secret Dependent branch
+        # Properties only used for child class Secret Dependent branch
         # We initialize them to None to have consisted data columns
         d['sdb_expr'] = None
         d['cmp_operation'] = None

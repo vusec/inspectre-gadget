@@ -93,7 +93,8 @@ class TransmissionAnnotation(LoadAnnotation):
         super().__init__(read_address_ast, "Transmission", address, controlled)
 
     def copy(self):
-        return TransmissionAnnotation(self.read_address_ast, self.address, self.controlled)
+        return TransmissionAnnotation(self.read_address_ast, self.address,
+                                      self.controlled)
 
 
 class UncontrolledLoadAnnotation(LoadAnnotation):
@@ -102,7 +103,8 @@ class UncontrolledLoadAnnotation(LoadAnnotation):
     """
 
     def __init__(self, read_address_ast, address):
-        super().__init__(read_address_ast, "UncontrolledLoad", address, controlled=False)
+        super().__init__(read_address_ast, "UncontrolledLoad", address,
+                         controlled=False)
 
     def copy(self):
         return UncontrolledLoadAnnotation(self.read_address_ast, self.address)
@@ -201,7 +203,7 @@ def contains_secret(ast: claripy.ast.BV):
         return False
 
     for anno in utils.get_annotations(ast):
-        if isinstance(anno, SecretAnnotation) or isinstance(anno, TransmissionAnnotation):
+        if isinstance(anno, (SecretAnnotation, TransmissionAnnotation)):
             return True
 
     return False
@@ -258,7 +260,8 @@ def get_dep_set(expr):
 
 def is_attacker_controlled(ast):
     for anno in utils.get_annotations(ast):
-        if isinstance(anno, AttackerAnnotation) | isinstance(anno, SecretAnnotation) | isinstance(anno, TransmissionAnnotation):
+        if isinstance(anno, (AttackerAnnotation, SecretAnnotation,
+                             TransmissionAnnotation)):
             return True
     return False
 

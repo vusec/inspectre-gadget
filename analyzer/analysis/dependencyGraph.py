@@ -11,7 +11,8 @@ import random
 
 # autopep8: off
 from ..scanner import annotations
-from ..scanner.annotations import AttackerAnnotation, LoadAnnotation, UncontrolledAnnotation
+from ..scanner.annotations import (AttackerAnnotation, LoadAnnotation,
+                                   UncontrolledAnnotation)
 from ..shared import logger
 from ..shared import utils
 # autopep8: on
@@ -147,7 +148,8 @@ class RegNode(SymNode):
     def __init__(self, sym):
         super().__init__(sym)
 
-def is_addr_controllable(tree, sym: claripy.ast.BV, fixed_syms: list[claripy.ast.BV], check_constraints: bool):
+def is_addr_controllable(tree, sym: claripy.ast.BV, fixed_syms: list[claripy.ast.BV],
+                         check_constraints: bool):
     # l.info(f"Checking address: {sym}")
     node = tree.get_node(sym)
     assert (isinstance(node, SymNode))
@@ -156,11 +158,13 @@ def is_addr_controllable(tree, sym: claripy.ast.BV, fixed_syms: list[claripy.ast
         return False
 
     if isinstance(node, LoadNode) and utils.is_sym_expr(node.addr):
-        return tree.is_independently_controllable(node.addr, fixed_syms, check_constraints, True)
+        return tree.is_independently_controllable(node.addr, fixed_syms,
+                                                  check_constraints, True)
     else:
         return True
 
-def is_addr_independent(tree, expr1: claripy.ast.BV, expr2: claripy.ast.BV, check_constraints: bool):
+def is_addr_independent(tree, expr1: claripy.ast.BV, expr2: claripy.ast.BV,
+                        check_constraints: bool):
     # l.info(f"Checking address: {sym}")
     node = tree.get_node(expr1)
     assert (isinstance(node, SymNode))
@@ -331,7 +335,9 @@ class DepGraph:
 
         return deps
 
-    def is_independently_controllable(self, expr: claripy.ast.BV, fixed_syms: list[claripy.ast.BV], check_constraints: bool, check_addr: bool):
+    def is_independently_controllable(self, expr: claripy.ast.BV,
+                                      fixed_syms: list[claripy.ast.BV],
+                                      check_constraints: bool, check_addr: bool):
         """
         Check if expr contains at least one symbol that is not influenced by any
         of the symbols in fixed_syms.
@@ -341,7 +347,8 @@ class DepGraph:
         if not is_expr_controlled(expr):
             return False
 
-        # l.info(f"Checking if {expr} can be controlled independently from {fixed_syms}")
+        # l.info(f"Checking if {expr} can be controlled independently "
+        #        f"from {fixed_syms}")
         expr_syms = set(utils.get_vars(expr))
         deps_to_check = set(self.get_all_deps(fixed_syms, check_constraints))
 
@@ -361,9 +368,11 @@ class DepGraph:
 
         # Else, check each of the remaining symbols recursively and exclude those
         # that were loaded from an address that completely depends on fixed_syms.
-        return any([is_addr_controllable(self, x, fixed_syms, check_constraints) for x in diff])
+        return any([is_addr_controllable(self, x, fixed_syms, check_constraints)
+                    for x in diff])
 
-    def is_independent(self, expr1: claripy.ast.BV, expr2: claripy.ast.BV, check_constraints: bool, check_addr: bool):
+    def is_independent(self, expr1: claripy.ast.BV, expr2: claripy.ast.BV,
+                       check_constraints: bool, check_addr: bool):
         """
         Check if expr1 and expr2 have any symbol in common, accounting for aliases
         and (optionally) constraints.
@@ -383,4 +392,5 @@ class DepGraph:
             return True
 
         # Else, recursively check the address expression, following loads.
-        return all([is_addr_independent(self, x, expr2, check_constraints) for x in expr1_syms])
+        return all([is_addr_independent(self, x, expr2, check_constraints)
+                    for x in expr1_syms])

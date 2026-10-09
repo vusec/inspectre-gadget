@@ -1,3 +1,4 @@
 """
-Component that analyzes the binary to extract Spectre transmissions and their properties.
+Component that analyzes the binary to extract Spectre transmissions and their
+properties.
 """

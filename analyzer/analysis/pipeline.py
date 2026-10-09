@@ -65,7 +65,8 @@ class AnalysisPipeline:
     n_found_secret_dependent_branches: int
     n_final_secret_dependent_branches: int
 
-    def __init__(self, name, gadget_address, proj, asm_folder, csv_filename, tfp_csv_filename, half_gadget_filename):
+    def __init__(self, name, gadget_address, proj, asm_folder, csv_filename,
+                 tfp_csv_filename, half_gadget_filename):
         self.name = name
         self.gadget_address = gadget_address
         self.proj = proj
@@ -93,7 +94,8 @@ class AnalysisPipeline:
         transmissions = transmissionAnalysis.get_transmissions(potential_t)
 
         for t in transmissions:
-            l.info(f"Analyzing TRANS @{hex(t.pc)}: {utils.truncate_str(t.transmission.expr)}")
+            l.info(f"Analyzing TRANS @{hex(t.pc)}: "
+                   f"{utils.truncate_str(t.transmission.expr)}")
             t.name = self.name
             t.address = self.gadget_address
             t.uuid = get_uuid(t, [t.secret_address.expr, t.secret_val.expr,
@@ -186,7 +188,8 @@ class AnalysisPipeline:
         gadgets = halfGadgetAnalysis.analyse(gadget)
 
         for g in gadgets:
-            l.info(f"Analyzing half-spectre @{hex(g.pc)}: {utils.truncate_str(g.loaded.expr)}")
+            l.info(f"Analyzing half-spectre @{hex(g.pc)}: "
+                   f"{utils.truncate_str(g.loaded.expr)}")
             g.name = self.name
             g.address = self.gadget_address
             g.uuid = get_uuid(g, [g.loaded.expr, self.n_found_half_gadgets])
@@ -222,11 +225,12 @@ class AnalysisPipeline:
     def analyze_secret_dependent_branch(self, s: SecretDependentBranch):
 
         self.n_found_secret_dependent_branches += 1
-        secret_dependent_branches = secretDependentBranchAnalysis.get_secret_dependent_branches(s)
+        secret_dependent_branches = (
+            secretDependentBranchAnalysis.get_secret_dependent_branches(s))
 
         for sdb in secret_dependent_branches:
-            l.info(
-                f"Analyzing SDB   @{hex(sdb.pc)}: {utils.truncate_str(sdb.sdb_expr)} <> {utils.truncate_str(sdb.cmp_value.expr)}")
+            l.info(f"Analyzing SDB   @{hex(sdb.pc)}: {utils.truncate_str(sdb.sdb_expr)}"
+                   f" <> {utils.truncate_str(sdb.cmp_value.expr)}")
             sdb.name = self.name
             sdb.address = self.gadget_address
             sdb.uuid = get_uuid(sdb, [sdb.sdb_expr, sdb.cmp_value.expr,

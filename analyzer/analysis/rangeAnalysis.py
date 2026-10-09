@@ -1,10 +1,13 @@
 import claripy
 import sys
-from .range_strategies import RangeStrategyFindConstraintsBounds, RangeStrategyFindMasking, RangeStrategyInferIsolated, RangeStrategySmallSet
+from .range_strategies import (RangeStrategyFindConstraintsBounds,
+                               RangeStrategyFindMasking, RangeStrategyInferIsolated,
+                               RangeStrategySmallSet)
 
 # autopep8: off
 from ..shared.transmission import ControlType, Transmission, TransmissionComponent
-from ..shared.taintedFunctionPointer import TFPRegisterControlType, TaintedFunctionPointer
+from ..shared.taintedFunctionPointer import (TFPRegisterControlType,
+                                             TaintedFunctionPointer)
 from ..shared.secretDependentBranch import SecretDependentBranch
 from ..shared.halfGadget import HalfGadget
 from ..shared import logger
@@ -91,7 +94,8 @@ def analyse(t: Transmission):
 
     # Calculate ranges for base sub-components.
     if t.base != None and t.independent_base != None:
-        if t.properties['direct_dependent_base_expr'] == None and t.properties['indirect_dependent_base_expr'] == None:
+        if (t.properties['direct_dependent_base_expr'] == None
+                and t.properties['indirect_dependent_base_expr'] == None):
             t.independent_base.range = t.base.range
             t.independent_base.range_with_branches = t.base.range_with_branches
         else:
@@ -109,8 +113,8 @@ def analyse(t: Transmission):
             calculate_range(t.independent_base, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if t.base == None else t.base.range}")
-    l.warning(
-        f"independent base range:  {'NONE' if t.independent_base == None else t.independent_base.range}")
+    l.warning("independent base range:  "
+              f"{'NONE' if t.independent_base == None else t.independent_base.range}")
     l.warning(f"secret_address range:  {t.secret_address.range}")
     l.warning(f"transmitted_secret range:  {t.transmitted_secret.range}")
     l.warning(f"transmission range:  {t.transmission.range}")
@@ -121,8 +125,10 @@ def analyse_tfp(t: TaintedFunctionPointer):
     l.warning(f"========= [RANGE] ==========")
 
     for r in t.registers.values():
-        if r.control in (ControlType.REQUIRES_MEM_LEAK, ControlType.REQUIRES_MEM_MASSAGING, ControlType.CONTROLLED) \
-                or r.control_type == TFPRegisterControlType.IS_TFP_REGISTER:
+        if (r.control in (ControlType.REQUIRES_MEM_LEAK,
+                          ControlType.REQUIRES_MEM_MASSAGING,
+                          ControlType.CONTROLLED)
+                or r.control_type == TFPRegisterControlType.IS_TFP_REGISTER):
             constr = [x[1] for x in r.constraints]
             constr_with_branches = [x[1] for x in r.branches]
             constr_with_branches.extend(constr)
@@ -173,8 +179,8 @@ def analyse_half_gadget(g: HalfGadget):
             calculate_range(c, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if g.base == None else g.base.range}")
-    l.warning(
-        f"uncontrolled_base range:  {'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.range}")
+    l.warning("uncontrolled_base range:  "
+              f"{'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.range}")
     l.warning(f"attacker range:  {g.attacker.range}")
     l.warning("==========================")
 
@@ -200,6 +206,7 @@ def analyze_secret_dependent_branch(sdb: SecretDependentBranch):
             calculate_range(c, constr, constr_with_branches)
 
     l.warning(f"cmp_value range:  {sdb.cmp_value.range}")
-    l.warning(
-        f"controlled_cmp_value range:  {'NONE' if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range}")
+    controlled_range = ('NONE' if sdb.controlled_cmp_value == None
+                        else sdb.controlled_cmp_value.range)
+    l.warning(f"controlled_cmp_value range:  {controlled_range}")
     l.warning("==========================")

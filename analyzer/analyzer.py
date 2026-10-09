@@ -51,8 +51,8 @@ def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Projec
             f = open(pickle_file, "rb")
             proj = pickle.load(f)
         except:
-            proj = angr.Project(
-                binary_file, auto_load_libs=False, main_opts={"base_addr": base_address})
+            proj = angr.Project(binary_file, auto_load_libs=False,
+                                main_opts={"base_addr": base_address})
             f = open(pickle_file, "wb")
             pickle.dump(proj, f)
             f.close()
@@ -63,17 +63,18 @@ def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Projec
     return proj
 
 
-def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, asm_folder, half_gadget_filename):
+def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename,
+                   asm_folder, half_gadget_filename):
     """
     Run the scanner from a single entrypoint and analyze the potential transmissions
     found at symbolic-execution time.
     """
 
     # Step 1. Initialize the analyzer
-    analysis_pipeline = AnalysisPipeline(name=name, gadget_address=gadget_address, proj=proj,
-                                         asm_folder=asm_folder, csv_filename=csv_filename,
-                                         tfp_csv_filename=tfp_csv_filename,
-                                         half_gadget_filename=half_gadget_filename)
+    analysis_pipeline = AnalysisPipeline(
+        name=name, gadget_address=gadget_address, proj=proj, asm_folder=asm_folder,
+        csv_filename=csv_filename, tfp_csv_filename=tfp_csv_filename,
+        half_gadget_filename=half_gadget_filename)
 
     # Step 2. Analyze the code snippet with angr.
     l.info(f"Analyzing gadget at address {hex(gadget_address)}...")
@@ -87,8 +88,8 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
     if global_config['HalfSpectre']:
         l.info(f"Found {len(s.half_gadgets)} potential half-spectre gadgets.")
     if global_config['SecretDependentBranches']:
-        l.info(
-            f"Found {len(s.secretDependentBranches)} potential secret dependent branches.")
+        l.info(f"Found {len(s.secretDependentBranches)}"
+               " potential secret dependent branches.")
 
     # Step 3. Analyze found gadgets (if not analyzed during scanning)
     if not global_config['AnalyzeDuringScanning']:
@@ -103,20 +104,20 @@ def analyse_gadget(proj, gadget_address, name, csv_filename, tfp_csv_filename, a
             analysis_pipeline.analyze_half_gadget(half)
 
     if global_config['TransmissionGadgets']:
-        l.info(
-            f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
+        l.info(f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
     if global_config['TaintedFunctionPointers']:
-        l.info(
-            f"Outputted {analysis_pipeline.n_final_tainted_function_pointers} tainted function pointers.")
+        l.info(f"Outputted {analysis_pipeline.n_final_tainted_function_pointers}"
+               " tainted function pointers.")
     if global_config['HalfSpectre']:
-        l.info(
-            f"Outputted {analysis_pipeline.n_final_half_gadgets} half-spectre gadgets.")
+        l.info(f"Outputted {analysis_pipeline.n_final_half_gadgets}"
+               " half-spectre gadgets.")
     if global_config['SecretDependentBranches']:
-        l.info(
-            f"Outputted {analysis_pipeline.n_final_secret_dependent_branches} secret dependent branches.")
+        l.info(f"Outputted {analysis_pipeline.n_final_secret_dependent_branches}"
+               " secret dependent branches.")
 
 
-def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="", tfp_csv_filename="", asm_folder="", symbol_binary="", half_gadget_filename=""):
+def run(binary, config_file, base_address, gadgets, cache_project, csv_filename="",
+        tfp_csv_filename="", asm_folder="", symbol_binary="", half_gadget_filename=""):
     """
     Run the analyzer on a binary.
     """
@@ -140,8 +141,10 @@ def run(binary, config_file, base_address, gadgets, cache_project, csv_filename=
         symbol_proj = load_angr_project(
             symbol_binary, base_address, cache_project)
 
-        proj.loader.all_objects[0].symbols = symbol_proj.loader.all_objects[0].symbols
-        proj.loader.all_objects[0]._symbols_by_name = symbol_proj.loader.all_objects[0]._symbols_by_name
+        main_obj = proj.loader.all_objects[0]
+        symbol_obj = symbol_proj.loader.all_objects[0]
+        main_obj.symbols = symbol_obj.symbols
+        main_obj._symbols_by_name = symbol_obj._symbols_by_name
 
         # Adding the symbols to the text object ensures that fuzzy search
         # using proj.loader.find_symbol() works

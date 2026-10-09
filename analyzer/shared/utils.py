@@ -61,22 +61,24 @@ def get_x86_registers():
             "r10", "r11", "r12", "r13", "r14", "r15"]
 
 
-def report_error(error: Exception, where="dunno", start_addr="dunno", error_type="GENERIC"):
+def report_error(error: Exception, where="dunno", start_addr="dunno",
+                 error_type="GENERIC"):
     ins_addr = None
     if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
         ins_addr = hex(error.ins_addr)
 
     o = open("fail.txt", "a+")
     o.write(f"---------------- [ {error_type} ERROR ] ----------------\n")
-    o.write(
-        f"where: {where}     started at: {start_addr} {f'instruction addr: {ins_addr}' if ins_addr else ''}\n")
+    ins_addr_str = f'instruction addr: {ins_addr}' if ins_addr else ''
+    o.write(f"where: {where}     started at: {start_addr} {ins_addr_str}\n")
     o.write(str(error) + "\n")
     o.write(traceback.format_exc())
     o.write("\n")
     o.close()
 
 
-def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno", error_type="GENERIC"):
+def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno",
+                       error_type="GENERIC"):
     if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
         where = hex(error.ins_addr)
 
@@ -91,8 +93,8 @@ def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno"
     o = open("unsupported.txt", "a+")
     o.write(
         f"---------------- [ {error_type} UNSUPPORTED INSTRUCTION ] ----------------\n")
-    o.write(
-        f"instruction addr: {where}     started at: {start_addr}     mnemonic: '{mnemonic}'\n")
+    o.write(f"instruction addr: {where}     started at: {start_addr}     "
+            f"mnemonic: '{mnemonic}'\n")
     o.write(str(error) + "\n")
     o.write("\n")
     o.close()
@@ -123,7 +125,8 @@ def ordered_branches(branches):
 
 def ordered_constraints(constraints):
     constraints = sorted(constraints, key=lambda x: x[0])
-    return [(hex(addr), truncate_str(cond), str(ctype)) for addr, cond, ctype in constraints]
+    return [(hex(addr), truncate_str(cond), str(ctype))
+            for addr, cond, ctype in constraints]
 
 
 def get_mnemonic_at_address(proj, address):
