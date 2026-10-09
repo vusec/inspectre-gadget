@@ -110,6 +110,20 @@ class UncontrolledLoadAnnotation(LoadAnnotation):
         return UncontrolledLoadAnnotation(self.read_address_ast, self.address)
 
 
+class AttackerMemoryAnnotation(LoadAnnotation):
+    """
+    This symbol comes from loading an uncontrolled address that is known to
+    contain attacker-controlled data (e.g., memory that the attacker can massage).
+    InSpectre Gadget does not generate this annotation itself, but programs that
+    use InSpectre Gadget can attach it, e.g., via a custom propagate_annotations().
+    """
+
+    def __init__(self, read_address_ast, address):
+        super().__init__(read_address_ast, "AttackerMemory", address, controlled=True)
+
+    def copy(self):
+        return AttackerMemoryAnnotation(self.read_address_ast, self.address)
+
 class AttackerAnnotation(claripy.Annotation):
     register: str
 
@@ -176,7 +190,7 @@ def propagate_annotations(ast: claripy.ast.BV, address):
     can_be_controlled = False
 
     for anno in utils.get_annotations(ast):
-        if isinstance(anno, AttackerAnnotation):
+        if isinstance(anno, (AttackerAnnotation, AttackerMemoryAnnotation)):
             is_attack = True
             can_be_controlled = True
         if isinstance(anno, SecretAnnotation):
@@ -260,8 +274,8 @@ def get_dep_set(expr):
 
 def is_attacker_controlled(ast):
     for anno in utils.get_annotations(ast):
-        if isinstance(anno, (AttackerAnnotation, SecretAnnotation,
-                             TransmissionAnnotation)):
+        if isinstance(anno, (AttackerAnnotation, AttackerMemoryAnnotation,
+                             SecretAnnotation, TransmissionAnnotation)):
             return True
     return False
 
@@ -270,7 +284,7 @@ def is_directly_controlled(ast: claripy.ast.BV):
         return False
 
     for anno in utils.get_annotations(ast):
-        if isinstance(anno, AttackerAnnotation):
+        if isinstance(anno, (AttackerAnnotation, AttackerMemoryAnnotation)):
             return True
 
     return False
