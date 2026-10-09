@@ -1,4 +1,4 @@
-angr>=9.2.172
+angr>=9.2.,<10
 PyYAML
 pandas
 tabulate
