@@ -31,7 +31,7 @@ def reduce_to_shifts(args, size):
 
     # Only one arg: return it.
     if len(args) == 1:
-        arg = concat_to_shift(arg)
+        arg = concat_to_shift(args[0])
         return claripy.ZeroExt(arg.size(), arg)
     else:
         # Leftmost arg -> shift it.
