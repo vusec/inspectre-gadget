@@ -94,13 +94,12 @@ def is_register_sufficiently_controlled(t: pd.Series, reg):
 
     for r in MAPPED_REGIONS:
         if reg_min <= reg_max:
-            if not is_overlapping(reg_min, reg_max, r[0], r[1]):
-                return False
-        elif not (is_overlapping(0, reg_max, r[0], r[1]) or
+            if is_overlapping(reg_min, reg_max, r[0], r[1]):
+                return True
+        elif (is_overlapping(0, reg_max, r[0], r[1]) or
                   is_overlapping(reg_min, (2 ** t[f'{reg}_size']) - 1, r[0], r[1])):
-            return False
-
-    return True
+            return True
+    return False
 
 
 def is_register_fully_controlled(t: pd.Series, reg):
