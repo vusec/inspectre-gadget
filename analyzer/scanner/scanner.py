@@ -331,6 +331,11 @@ class Scanner:
         if not global_config['TaintedFunctionPointers']:
             return
 
+        if (not global_config['NonTaintedFunctionPointers']
+                and not annotations.is_attacker_controlled(func_ptr_ast)):
+            # Lets save computation time, tfp is not attacker controlled
+            return
+
         l.warning(f"Found new Dispatch Gadget! {func_ptr_ast} "
                   f"{utils.get_annotations(func_ptr_ast)}")
         # Create a new TFP object.
@@ -582,7 +587,8 @@ class Scanner:
                    f" from store @({alias_store.addr})")
         elif (global_config['LoadConcreteMemory'] and not load_addr.symbolic
                 and not state.inspect.mem_read_expr.symbolic):
-            annotation = annotations.propagate_annotations(load_addr, state.scratch.ins_addr)
+            annotation = annotations.propagate_annotations(
+                load_addr, state.scratch.ins_addr)
             load_val = claripy.BVV(state.inspect.mem_read_expr.args[0],
                                    size=load_len * 8,
                                    annotations=(annotation,))
