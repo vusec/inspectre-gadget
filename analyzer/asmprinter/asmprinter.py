@@ -225,8 +225,6 @@ Branches: {utils.ordered_branches(t.branches)}
                 f"{reg.controlled_range_with_branches}\n")
 
     o.write(f"\nRegisters aliasing with tfp:\n")
-
-    o.write(f"\nRegisters aliasing with tfp:\n")
     for r in t.aliasing:
         o.write(f"  - Reg: {r}\n")
         o.write(f"    Expr: {utils.truncate_str(t.registers[r].expr)}\n")
