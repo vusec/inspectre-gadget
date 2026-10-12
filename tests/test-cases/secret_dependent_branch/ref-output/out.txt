@@ -84,31 +84,7 @@ Found 0 exploitable gadgets!
 [-] Performing exploitability analysis assuming the SLAM covert channel...
 Found 1 exploitable gadgets!
 [-] Performing exploitability analysis for secret dependent branches...
-['<BV64 rdi>'] != ["<BV64 rdi>: ['0x10']"]
-Hitted case!
-[] != ["<BV64 rdi>: ['0x0']"]
-cmp_value_requirements_regs ['<BV64 rdi>']
-["<BV64 rdi>: ['0x0']"] != ["<BV64 rdi>: ['0x10']"]
-['<BV64 rdi>'] != ["<BV64 rdi>: ['0x100']"]
-Hitted case!
-['<BV64 rdi>'] != ["<BV64 rdi>: ['0x20']"]
-Hitted case!
-['<BV64 rdi>'] != []
-cmp_value_requirements_regs ['<BV64 rsi>']
-[] != ["<BV64 rdi>: ['0x30']"]
 Found 2 exploitable secret dependent branches!
-['<BV64 rdi>'] != ["<BV64 rdi>: ['0x10']"]
-Hitted case!
-[] != ["<BV64 rdi>: ['0x0']"]
-cmp_value_requirements_regs ['<BV64 rdi>']
-["<BV64 rdi>: ['0x0']"] != ["<BV64 rdi>: ['0x10']"]
-['<BV64 rdi>'] != ["<BV64 rdi>: ['0x100']"]
-Hitted case!
-['<BV64 rdi>'] != ["<BV64 rdi>: ['0x20']"]
-Hitted case!
-['<BV64 rdi>'] != []
-cmp_value_requirements_regs ['<BV64 rsi>']
-[] != ["<BV64 rdi>: ['0x30']"]
 Found 2 exploitable secret dependent branches with branches!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!

@@ -230,8 +230,6 @@ Controlled Regs:
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
 
 Registers aliasing with tfp:
-
-Registers aliasing with tfp:
   - Reg: rdi
     Expr: <BV64 rdi>
     Range: (0x0,0xffffffffffffffff, 0x1) Exact: True

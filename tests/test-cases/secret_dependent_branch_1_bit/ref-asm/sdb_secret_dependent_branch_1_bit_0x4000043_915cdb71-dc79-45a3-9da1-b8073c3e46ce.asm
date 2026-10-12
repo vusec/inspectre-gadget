@@ -16,17 +16,18 @@
 400002e  je      end ; Not Taken   <Bool LShR((0#56 .. LOAD_8[<BV64 rdi + 0x30>]_23), 0x7) != LOAD_64[<BV64 0xffffffff81000000>]_22>
          t4:
 4000030  movzx   r9, byte ptr [rdi+0x40] ; {Attacker@rdi} -> {Attacker@0x4000030}
-4000035  mov     r8, qword ptr [rdi+0x100] ; {Attacker@rdi} -> {Secret@0x4000035}
-400003c  cmp     r9, r8
-400003f  je      end ; {Attacker@0x4000030, Secret@0x4000035} -> SECRET DEPENDENT BRANCH
+4000035  shr     r9, 0x7
+4000039  mov     r8, qword ptr [rdi+0x100] ; {Attacker@rdi} -> {Secret@0x4000039}
+4000040  cmp     r9, r8
+4000043  je      end ; {Attacker@0x4000030, Secret@0x4000039} -> SECRET DEPENDENT BRANCH
 
 ------------------------------------------------
-uuid: 6966a94f-0bd1-442d-add3-d65d0636182e
+uuid: 915cdb71-dc79-45a3-9da1-b8073c3e46ce
 transmitter: TransmitterType.SECRET_DEP_BRANCH
 CMP operation: __eq__
 
 Secret Dependent Branch:
-  - Expr: <Bool (0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24) == LOAD_64[<BV64 rdi + 0x100>]_25>
+  - Expr: <Bool LShR((0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24), 0x7) == LOAD_64[<BV64 rdi + 0x100>]_25>
 Secret Address:
   - Expr: <BV64 rdi + 0x100>
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
@@ -45,10 +46,10 @@ Transmission:
   - Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
 
 CMP Value:
-  - Expr: <BV64 0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24>
-  - Range: (0x0,0xff, 0x1) Exact: True
-  - Controlled Expr: <BV64 0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24>
-  - Controlled Range: (0x0,0xff, 0x1) Exact: True
+  - Expr: <BV64 LShR((0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24), 0x7)>
+  - Range: (0x0,0x1, 0x1) Exact: True
+  - Controlled Expr: <BV64 0#63 .. LOAD_8[<BV64 rdi + 0x40>]_24[7:7]>
+  - Controlled Range: (0x0,0x1, 0x1) Exact: True
 
 Register Requirements:
   - All: ['<BV64 rdi>']
