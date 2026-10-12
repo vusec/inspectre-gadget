@@ -57,7 +57,7 @@ def run_analyzer(args):
 
 
 def run_reasoner(args):
-    reasoner.run(args.csv_in, args.csv_out)
+    reasoner.run(args.csv_in, args.csv_out, args.config)
 
 def run_viewer(args):
     asm_files = os.listdir(args.folder)
@@ -115,6 +115,9 @@ if __name__ == '__main__':
         'reason', help='Reason about gadget exploitability')
     reasoner_args.add_argument('csv_in')
     reasoner_args.add_argument('csv_out')
+    reasoner_args.add_argument(
+        '--config', type=str, default=None,
+        help='configuration file, only the \'reasoner\' section is used')
     reasoner_args.set_defaults(func=run_reasoner)
 
     # ----------- Viewer

@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 from io import StringIO
 
+from . import addressSpace
+
 from warnings import simplefilter
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
@@ -13,19 +15,6 @@ MIN_INFERABLE_BITS = 1
 
 MIN_BASE_WINDOW = 0
 MIN_SECRET_ADDRESS_WINDOW = 0xffff
-
-VALID_ADDRESS_MAX = 0xffffffff9fffffff
-VALID_ADDRESS_MIN = 0xffff800000000000
-
-MAPPED_REGIONS = [
-    (0xffffffff81000000, 0xffffffff84000000),
-    (0xffff888000000000, 0xffffc87fffffffff)
-]
-
-CANONICAL_REGIONS = [
-    (0x0000000000000000, 0x00007fffffffffff),
-    (0xffff800000000000, 0xffffffff9fffffff)
-]
 
 MAX_SECRET_WO_ADJUSTING_BASE = ((1 << 30) * 256)  # 256 GB
 
@@ -43,10 +32,6 @@ def is_in_range(n, min, max):
         return n >= min and n <= max
     else:
         return n >= min or n <= max
-
-
-def is_overlapping(x_min, x_max, y_min, y_max):
-    return x_max >= y_min and y_max >= x_min
 
 
 def calc_base_size(t: pd.Series):
@@ -85,15 +70,8 @@ def has_valid_base(t: pd.Series):
     base_min = t[f'base_range{"" if not with_branches else "_w_branches"}_min']
     base_max = t[f'base_range{"" if not with_branches else "_w_branches"}_max']
 
-    for r in MAPPED_REGIONS:
-        if base_min <= base_max:
-            if is_overlapping(base_min, base_max, r[0], r[1]):
-                return True
-        elif is_overlapping(0, base_max, r[0], r[1]) or (
-                is_overlapping(base_min, (2 ** t['base_size']) - 1, r[0], r[1])):
-            return True
-
-    return False
+    return addressSpace.range_overlaps_regions(base_min, base_max, t['base_size'],
+                                               addressSpace.MAPPED_REGIONS)
 
 
 def has_valid_secret_address(t: pd.Series):
@@ -110,14 +88,8 @@ def has_valid_secret_address(t: pd.Series):
     addr_min = t[f'secret_address_range{"" if not with_branches else "_w_branches"}_min']
     addr_max = t[f'secret_address_range{"" if not with_branches else "_w_branches"}_max']
 
-    if addr_min <= addr_max:
-        if addr_min > VALID_ADDRESS_MAX or addr_max < VALID_ADDRESS_MIN:
-            return False
-    else:
-        if addr_min > VALID_ADDRESS_MAX and addr_max < VALID_ADDRESS_MIN:
-            return False
-
-    return True
+    return addressSpace.range_overlaps_regions(addr_min, addr_max, ADDRESS_BIT_LEN,
+                                               addressSpace.VALID_REGIONS)
 
 
 def is_cmove_independent_from_secret(t: pd.Series):
@@ -190,17 +162,17 @@ def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
     if valid_secret_max > MAX_SECRET_WO_ADJUSTING_BASE:
         return True
 
-    for r in MAPPED_REGIONS:
+    for r in addressSpace.MAPPED_REGIONS:
 
         if base_min <= base_max:
             valid_min = max(base_min, r[0])
         else:
             # If we are here, we have a range that wraps around.
             if r[0] < base_max or r[0] > base_min:
-                # Case 1: VALID_ADDRESS_MIN is inside the range: use that.
+                # Case 1: the region start is inside the range: use that.
                 valid_min = r[0]
             else:
-                # Case 2: VALID_ADDRESS_MIN is outside the range - between
+                # Case 2: the region start is outside the range - between
                 # base_max and base_min -. so first valid value is base_min
                 valid_min = base_min
 
@@ -243,15 +215,9 @@ def _has_valid_independent_base(t: pd.Series):
     base_min = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_min']
     base_max = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_max']
 
-    for r in MAPPED_REGIONS:
-        if base_min <= base_max:
-            if is_overlapping(base_min, base_max, r[0], r[1]):
-                return True
-        elif is_overlapping(0, base_max, r[0], r[1]) or (
-                is_overlapping(base_min, (2 ** t['independent_base_size']) - 1, r[0], r[1])):
-            return True
-
-    return False
+    return addressSpace.range_overlaps_regions(base_min, base_max,
+                                               t['independent_base_size'],
+                                               addressSpace.MAPPED_REGIONS)
 
 
 def transform_partial_control_into_aliasing(t: pd.Series):
@@ -331,7 +297,7 @@ def can_adjust_base(t: pd.Series):
     if secret_window >= 2**48 and base_controllable_window <= 2**32:
         return False
 
-    for r in MAPPED_REGIONS:
+    for r in addressSpace.MAPPED_REGIONS:
         # We assume the attacker can subtract the window from a valid address.
         # it is an approximation, but good enough
         valid_min = r[0] - \

@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `LoadConcreteMemory` option to load concrete values from the binary (e.g., globals) ([#38](https://github.com/vusec/inspectre-gadget/pull/38))
+- Reasoner support for user-space programs: `reasoner` config section with `AllowKernelAddresses` and `AllowUserAddresses` (`inspectre reason --config`) ([#39](https://github.com/vusec/inspectre-gadget/pull/39))
 
 ## [1.2.0] - 2026-10-09
 

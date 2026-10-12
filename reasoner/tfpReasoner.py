@@ -4,24 +4,12 @@ import numpy as np
 from io import StringIO
 import csv
 
+from . import addressSpace
 
 from warnings import simplefilter
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
 MIN_REG_CONTROL_WINDOW = 0xffff
-
-VALID_ADDRESS_MAX = 0xffffffff9fffffff
-VALID_ADDRESS_MIN = 0xffff800000000000
-
-MAPPED_REGIONS = [
-    (0xffffffff81000000, 0xffffffff84000000),
-    (0xffff888000000000, 0xffffc87fffffffff)
-]
-
-CANONICAL_REGIONS = [
-    (0x0000000000000000, 0x00007fffffffffff),
-    (0xffff800000000000, 0xffffffff9fffffff)
-]
 
 CACHE_SHIFT = 6
 PAGE_SHIFT = 12
@@ -35,10 +23,6 @@ def is_in_range(n, min, max):
         return n >= min and n <= max
     else:
         return n >= min or n <= max
-
-
-def is_overlapping(x_min, x_max, y_min, y_max):
-    return x_max >= y_min and y_max >= x_min
 
 
 def get_pc_as_number(t: pd.Series):
@@ -92,14 +76,14 @@ def is_register_sufficiently_controlled(t: pd.Series, reg):
     if reg_window < MIN_REG_CONTROL_WINDOW:
         return False
 
-    for r in MAPPED_REGIONS:
-        if reg_min <= reg_max:
-            if is_overlapping(reg_min, reg_max, r[0], r[1]):
-                return True
-        elif (is_overlapping(0, reg_max, r[0], r[1]) or
-              is_overlapping(reg_min, (2 ** t[f'{reg}_size']) - 1, r[0], r[1])):
-            return True
-    return False
+    # Dereferenced registers (see get_indirect_offsets_*) have no size column
+    if f'{reg}_size' in t:
+        reg_size = t[f'{reg}_size']
+    else:
+        reg_size = calc_reg_size(t, reg)
+
+    return addressSpace.range_overlaps_regions(reg_min, reg_max, reg_size,
+                                               addressSpace.MAPPED_REGIONS)
 
 
 def is_register_fully_controlled(t: pd.Series, reg):
