@@ -1,21 +1,18 @@
 ------------ SECRET DEPENDENT BRANCH ------------
          secret_dependent_branch:
 4000000  movzx   r9, word ptr [rdi]
-4000004  mov     r8, qword ptr [rsi]
-4000007  add     r8, 0x50
-400000b  cmp     r9, r8
-400000e  je      end ; Not Taken   <Bool (0#48 .. LOAD_16[<BV64 rdi>]_20) != LOAD_64[<BV64 rsi>]_21 + 0x50>
+4000004  mov     r8, qword ptr [rdi+0x10]
+4000008  movzx   r8, word ptr [r8]
+400000c  add     r8, 0x50
+4000010  cmp     r9, r8
+4000013  je      end ; Not Taken   <Bool (0#48 .. LOAD_16[<BV64 rdi>]_20) != (0#48 .. LOAD_16[<BV64 LOAD_64[<BV64 rdi + 0x10>]_21>]_22) + 0x50>
          t1:
-4000010  movzx   r9, word ptr [rdi+0x10]
-4000015  cmp     r9, 0xdead
-400001c  je      end ; Not Taken   <Bool LOAD_16[<BV64 rdi + 0x10>]_22 != 0xdead>
-         t2:
-400001e  movzx   r9, word ptr [rdi+0x20] ; {Attacker@rdi} -> {Secret@0x400001e}
-4000023  cmp     r9, rdi
-4000026  je      end ; {Attacker@rdi, Secret@0x400001e} -> SECRET DEPENDENT BRANCH
+4000015  movzx   r9, word ptr [rdi+0x20] ; {Attacker@rdi} -> {Secret@0x4000015}
+400001a  cmp     r9, rdi
+400001d  je      end ; {Attacker@rdi, Secret@0x4000015} -> SECRET DEPENDENT BRANCH
 
 ------------------------------------------------
-uuid: c9333b05-605c-4c94-a25c-1ac54431478e
+uuid: 68d2a9bf-d62d-4322-b2d8-915ed3bac3b7
 transmitter: TransmitterType.SECRET_DEP_BRANCH
 CMP operation: __eq__
 
@@ -50,5 +47,5 @@ Register Requirements:
   - CMP Value: {<BV64 rdi>}
 
 Constraints: []
-Branches: [('0x400000e', '<Bool (0#48 .. LOAD_16[<BV64 rdi>]_20) != LOAD_64[<BV64 rsi>]_21 + 0x50>', 'Not Taken'), ('0x400001c', '<Bool LOAD_16[<BV64 rdi + 0x10>]_22 != 0xdead>', 'Not Taken')]
+Branches: [('0x4000013', '<Bool (0#48 .. LOAD_16[<BV64 rdi>]_20) != (0#48 .. LOAD_16[<BV64 LOAD_64[<BV64 rdi + 0x10>]_21>]_22) + 0x50>', 'Not Taken')]
 ------------------------------------------------

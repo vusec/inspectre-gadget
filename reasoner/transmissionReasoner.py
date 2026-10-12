@@ -1,4 +1,5 @@
 import argparse
+import ast
 import pandas as pd
 import numpy as np
 from io import StringIO
@@ -426,6 +427,111 @@ def perform_out_of_place_training(t: pd.Series):
 def leak_secret_near_valid_base(t: pd.Series):
     return True
 
+# -- Secret dependent branch
+# A covert channel on the directional branch predictor, leaking the results
+# of a comparison on a secret value
+# e.g.,: if (secret_value == cmp_value)
+#
+# We consider two cases:
+# 1) cmp_value (or base) is attacker controlled: since the attacker can choose arbitrary
+#    values for cmp_value, it can leak the secret by observing when the branch is taken.
+# 2) Comparison of _one_ secret bit with a (non-secret dependent) value.
+#    Leaks 1-bit secret, needs multiple of these gadgets (comparing different bits) to
+#    leak 1 full byte.
+#    If the comparison is with an uncontrolled non-constant value, we assume the
+#    attacker can first leak the value of this uncontrolled value (e.g., by pointing the
+#    secret address to attacker known values)
+
+def get_registers(regs) -> set:
+    """
+    Return the registers of a requirements column, e.g., both
+    "['<BV64 rdi>']" (direct regs) and "[\"<BV64 rdi>: ['0x0']\"]" (indirect regs)
+    give {'<BV64 rdi>'}.
+    """
+    if not isinstance(regs, str):
+        return set()
+
+    return {r.split(':')[0] for r in ast.literal_eval(regs)}
+
+
+def _is_cmp_value_independent(t: pd.Series):
+
+    secret_addr_direct_regs = t['secret_address_requirements_direct_regs']
+    secret_addr_indirect_regs = t['secret_address_requirements_indirect_regs']
+    cmp_value_direct_regs = t['cmp_value_requirements_direct_regs']
+    cmp_value_indirect_regs = t['cmp_value_requirements_indirect_regs']
+
+    # direct dependency
+    # cmp_value should not depend on the same registers as the secret address
+    if (secret_addr_indirect_regs != '[]'
+            and secret_addr_indirect_regs == cmp_value_indirect_regs):
+        return False
+
+    if (secret_addr_direct_regs != '[]'
+            and secret_addr_direct_regs == cmp_value_direct_regs):
+        return False
+
+    secret_addr_direct_reg_set = get_registers(secret_addr_direct_regs)
+    cmp_value_indirect_reg_set = get_registers(cmp_value_indirect_regs)
+
+    # indirect dependency
+    # cmp_value should not be loaded near the secret value
+    if (len(secret_addr_direct_reg_set) > 0
+            and secret_addr_direct_reg_set == cmp_value_indirect_reg_set):
+        return False
+
+    return True
+
+def _is_cmp_value_independently_controlled(t: pd.Series):
+    """
+    The attacker controls cmp_value, independently from the secret.
+    """
+    if t['cmp_value_control'] != 'ControlType.CONTROLLED':
+        return False
+
+    return _is_cmp_value_independent(t)
+
+
+def _is_sdb_base_controlled(t: pd.Series):
+    """
+    The attacker controls the base, independently from the secret.
+    """
+    if t['base_control'] != 'ControlType.CONTROLLED':
+        return False
+
+    if t['base_control_type'] not in ['BaseControlType.BASE_INDEPENDENT_FROM_SECRET',
+                                      'BaseControlType.COMPLEX_TRANSMISSION']:
+        return False
+
+    return True
+
+
+def cmp_value_not_independently_controlled(t: pd.Series):
+    """
+    The attacker can not choose the value the secret is compared with, neither
+    via cmp_value nor via the base.
+    """
+    return not (_is_cmp_value_independently_controlled(t) or _is_sdb_base_controlled(t))
+
+
+def cmp_value_not_controlled(t : pd.Series):
+
+    if t['base_control'] == 'ControlType.CONTROLLED' or \
+        t['cmp_value_control'] == 'ControlType.CONTROLLED':
+        return False
+
+    return True
+
+
+def do_one_bit_compare(t: pd.Series):
+    """
+    One secret bit is compared with a static value.
+    """
+    # cmp_value_window = t[
+        # f'cmp_value_range{"" if not with_branches else "_w_branches"}_window']
+
+    return int(t['inferable_bits_n_inferable_bits']) == 1 and _is_cmp_value_independent(t)
+
 # ----------------- Evaluation
 
 
@@ -481,121 +587,58 @@ slam_advanced_checks = [
      'solution': perform_out_of_place_training},
 ]
 
+sdb_basic_checks = [is_secret_inferable,
+                has_valid_secret_address,
+                is_cmove_independent_from_secret,
+                has_no_speculation_stop
+                ]
 
-def is_exploitable(t: pd.Series):
+sdb_extra_checks = [
+    {'problem' : cmp_value_not_controlled, 'solution': do_one_bit_compare},
+    {'problem': cmp_value_not_independently_controlled,
+     'solution': do_one_bit_compare},
+]
+
+
+
+def evaluate_checks(t: pd.Series, checks: list, extra_checks: list):
     exploitable = True
 
     fail_reasons = []
     required_solutions = []
 
-    for b in basic_checks:
+    for b in checks:
         if not b(t):
             exploitable = False
             fail_reasons.append(b.__name__)
 
-    for c in advanced_checks:
+    for c in extra_checks:
         if t[f'{c["problem"].__name__}{"" if not with_branches else "_w_branches"}']:
             if t[f'{c["solution"].__name__}{"" if not with_branches else "_w_branches"}']:
-                required_solutions.append(c['solution'].__name__)
+                # Multiple problems can have the same solution, only add it once
+                if c['solution'].__name__ not in required_solutions:
+                    required_solutions.append(c['solution'].__name__)
             else:
                 exploitable = False
                 fail_reasons.append(c['problem'].__name__.replace('is_', ''))
 
     return exploitable, required_solutions if exploitable else [], fail_reasons
+
+
+def is_exploitable(t: pd.Series):
+    return evaluate_checks(t, basic_checks, advanced_checks)
 
 
 def slam_is_exploitable(t: pd.Series):
-    exploitable = True
-
-    fail_reasons = []
-    required_solutions = []
-
-    for b in slam_basic_checks:
-        if not b(t):
-            exploitable = False
-            fail_reasons.append(b.__name__)
-
-    for c in slam_advanced_checks:
-        if t[f'{c["problem"].__name__}{"" if not with_branches else "_w_branches"}']:
-            if t[f'{c["solution"].__name__}{"" if not with_branches else "_w_branches"}']:
-                required_solutions.append(c['solution'].__name__)
-            else:
-                exploitable = False
-                fail_reasons.append(c['problem'].__name__.replace('is_', ''))
-
-    return exploitable, required_solutions if exploitable else [], fail_reasons
+    return evaluate_checks(t, slam_basic_checks, slam_advanced_checks)
 
 
-def run(in_csv, out_csv):
+def sdb_is_exploitable(t: pd.Series):
+    return evaluate_checks(t, sdb_basic_checks, sdb_extra_checks)
+
+
+def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
     global with_branches
-
-    integer_cols = ['base_range_max',
-                    'base_range_min',
-                    'base_range_stride',
-                    'base_range_window',
-                    'independent_base_range_max',
-                    'independent_base_range_min',
-                    'independent_base_range_stride',
-                    'independent_base_range_window',
-                    # 'base_size',
-                    'inferable_bits_n_inferable_bits',
-                    'inferable_bits_spread_high',
-                    'inferable_bits_spread_low',
-                    'inferable_bits_spread_total',
-                    'secret_address_range_stride',
-                    'secret_address_range_max',
-                    'secret_address_range_min',
-                    'secret_address_range_window',
-                    'transmitted_secret_range_max',
-                    'transmitted_secret_range_min',
-                    # 'transmitted_secret_size',
-                    'base_range_w_branches_max',
-                    'base_range_w_branches_min',
-                    'base_range_w_branches_stride',
-                    'base_range_w_branches_window',
-                    'independent_base_range_w_branches_max',
-                    'independent_base_range_w_branches_min',
-                    'independent_base_range_w_branches_stride',
-                    'independent_base_range_w_branches_window',
-                    'secret_address_range_w_branches_stride',
-                    'secret_address_range_w_branches_max',
-                    'secret_address_range_w_branches_min',
-                    'secret_address_range_w_branches_window',
-                    'transmitted_secret_range_w_branches_max',
-                    'transmitted_secret_range_w_branches_min'
-                    ]
-
-    file = open(in_csv, 'r')
-    data = file.read()
-    file.close()
-
-    df_header = pd.read_csv(StringIO(data), delimiter=';')
-    types_dict = {
-        col: 'UInt64' if col in integer_cols else df_header[col].dtype.name for col in df_header}
-
-    # Via this method we avoid pandas mixing types
-    df = pd.read_csv(StringIO(data), delimiter=';', dtype=types_dict)
-
-    # TODO: Add support for Secret Dependent Branch
-    # for now we filter them out and add them in the end
-    df_sdb = df[df['transmitter'] == 'TransmitterType.SECRET_DEP_BRANCH']
-    print(f"Total {len(df_sdb)} Secret Dependent Branches (not reasoned)")
-
-    df = df[df['transmitter'] != 'TransmitterType.SECRET_DEP_BRANCH']
-
-    if df.empty:
-        print(f"[-] Imported {len(df)} gadgets")
-        return
-
-    # Transform columns.
-    for i in integer_cols:
-        df[i] = df[i].fillna(0)
-
-    df['base_size'] = df.apply(calc_base_size, axis=1)
-    df['transmitted_secret_size'] = df.apply(
-        calc_transmitted_secret_size, axis=1)
-    df['pc_as_int'] = df.apply(get_pc_as_number, axis=1)
-    print(f"[-] Imported {len(df)} gadgets")
 
     # --------------------------------------------------------------------------
     # Add results of exploitability analysis.
@@ -661,8 +704,142 @@ def run(in_csv, out_csv):
     print(
         f"Found {len(df[df['exploitable_w_slam'] == True])} exploitable gadgets!")
 
-    # add the DSP gadgets
-    df = pd.concat([df, df_sdb])
+    return df
+
+
+def reason_secret_dependent_branches(df: pd.DataFrame) -> pd.DataFrame:
+    global with_branches
+
+    print("[-] Performing exploitability analysis for secret dependent branches...")
+    for with_branches in [False, True]:
+        suffix = "" if not with_branches else "_w_branches"
+
+        for b in sdb_basic_checks:
+            df[b.__name__ + suffix] = df.apply(b, axis=1)
+
+        for c in sdb_extra_checks:
+            df[c['problem'].__name__ + suffix] = df.apply(c['problem'], axis=1)
+            df[c['solution'].__name__ + suffix] = df.apply(c['solution'], axis=1)
+
+        result_columns = ['exploitable_w_sdb' + suffix,
+                          'required_solutions_w_sdb' + suffix,
+                          'fail_reasons_w_sdb' + suffix]
+        df[result_columns] = df.apply(sdb_is_exploitable, axis=1, result_type="expand")
+
+        n_exploitable = len(df[df['exploitable_w_sdb' + suffix] == True])
+        print(f"Found {n_exploitable} exploitable secret dependent branches"
+              f"{' with branches' if with_branches else ''}!")
+
+    return df
+
+
+def add_missing_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Make sure all check and result columns exist (empty for rows they do not
+    apply to), also if there are no transmissions or no secret dependent
+    branches, so that the output always has the same columns.
+    """
+    def names(checks, extra_checks):
+        return ([c.__name__ for c in checks]
+                + [c['problem'].__name__ for c in extra_checks]
+                + [c['solution'].__name__ for c in extra_checks])
+
+    results = ['exploitable', 'required_solutions', 'fail_reasons']
+
+    # Transmissions and SDBs are checked with and without branches, SLAM without
+    columns = []
+    for suffix in ['', '_w_branches']:
+        columns += [x + suffix for x in names(basic_checks, advanced_checks)]
+        columns += [x + suffix for x in names(sdb_basic_checks, sdb_extra_checks)]
+        columns += [x + suffix for x in results]
+        columns += [x + '_w_sdb' + suffix for x in results]
+    columns += names(slam_basic_checks, slam_advanced_checks)
+    columns += [x + '_w_slam' for x in results]
+
+    for col in columns:
+        if col not in df.columns:
+            df[col] = pd.NA
+
+    return df
+
+
+def run(in_csv, out_csv):
+    global with_branches
+
+    integer_cols = ['base_range_max',
+                    'base_range_min',
+                    'base_range_stride',
+                    'base_range_window',
+                    'independent_base_range_max',
+                    'independent_base_range_min',
+                    'independent_base_range_stride',
+                    'independent_base_range_window',
+                    # 'base_size',
+                    'inferable_bits_n_inferable_bits',
+                    'inferable_bits_spread_high',
+                    'inferable_bits_spread_low',
+                    'inferable_bits_spread_total',
+                    'secret_address_range_stride',
+                    'secret_address_range_max',
+                    'secret_address_range_min',
+                    'secret_address_range_window',
+                    'transmitted_secret_range_max',
+                    'transmitted_secret_range_min',
+                    # 'transmitted_secret_size',
+                    'base_range_w_branches_max',
+                    'base_range_w_branches_min',
+                    'base_range_w_branches_stride',
+                    'base_range_w_branches_window',
+                    'independent_base_range_w_branches_max',
+                    'independent_base_range_w_branches_min',
+                    'independent_base_range_w_branches_stride',
+                    'independent_base_range_w_branches_window',
+                    'secret_address_range_w_branches_stride',
+                    'secret_address_range_w_branches_max',
+                    'secret_address_range_w_branches_min',
+                    'secret_address_range_w_branches_window',
+                    'transmitted_secret_range_w_branches_max',
+                    'transmitted_secret_range_w_branches_min'
+                    ]
+
+    file = open(in_csv, 'r')
+    data = file.read()
+    file.close()
+
+    df_header = pd.read_csv(StringIO(data), delimiter=';')
+    types_dict = {
+        col: 'UInt64' if col in integer_cols else df_header[col].dtype.name for col in df_header}
+
+    # Via this method we avoid pandas mixing types
+    df = pd.read_csv(StringIO(data), delimiter=';', dtype=types_dict)
+
+    if df.empty:
+        print(f"[-] Imported {len(df)} gadgets")
+        return
+
+    # Transform columns.
+    for i in integer_cols:
+        df[i] = df[i].fillna(0)
+
+    df['base_size'] = df.apply(calc_base_size, axis=1)
+    df['transmitted_secret_size'] = df.apply(
+        calc_transmitted_secret_size, axis=1)
+    df['pc_as_int'] = df.apply(get_pc_as_number, axis=1)
+    print(f"[-] Imported {len(df)} gadgets")
+
+    # Secret dependent branches are reasoned separately
+    is_sdb = df['transmitter'] == 'TransmitterType.SECRET_DEP_BRANCH'
+    df_sdb = df[is_sdb].copy()
+    df = df[~is_sdb].copy()
+
+    if not df.empty:
+        df = reason_transmissions(df)
+
+    if not df_sdb.empty:
+        df_sdb = reason_secret_dependent_branches(df_sdb)
+        df = df_sdb if df.empty else pd.concat([df, df_sdb])
+
+    df = add_missing_columns(df)
 
     # Save to new file.
     print(f"[-] Saving to {out_csv}")
