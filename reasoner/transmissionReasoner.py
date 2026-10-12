@@ -28,6 +28,13 @@ MAX_ENTROPY = 16
 with_branches = False
 
 
+def branch_suffix():
+    """
+    Suffix of the columns for the current analysis (with or without branches).
+    """
+    return "" if not with_branches else "_w_branches"
+
+
 def is_in_range(n, min, max):
     if min <= max:
         return n >= min and n <= max
@@ -68,8 +75,8 @@ def has_valid_base(t: pd.Series):
     """
     Check if the base can point to a valid address
     """
-    base_min = t[f'base_range{"" if not with_branches else "_w_branches"}_min']
-    base_max = t[f'base_range{"" if not with_branches else "_w_branches"}_max']
+    base_min = t[f'base_range{branch_suffix()}_min']
+    base_max = t[f'base_range{branch_suffix()}_max']
 
     return addressSpace.range_overlaps_regions(base_min, base_max, t['base_size'],
                                                addressSpace.MAPPED_REGIONS)
@@ -83,11 +90,11 @@ def has_valid_secret_address(t: pd.Series):
     if t[f'secret_address_control'] != 'ControlType.CONTROLLED':
         return False
 
-    if t[f'secret_address_range{"" if not with_branches else "_w_branches"}_window'] < MIN_SECRET_ADDRESS_WINDOW:
+    if t[f'secret_address_range{branch_suffix()}_window'] < MIN_SECRET_ADDRESS_WINDOW:
         return False
 
-    addr_min = t[f'secret_address_range{"" if not with_branches else "_w_branches"}_min']
-    addr_max = t[f'secret_address_range{"" if not with_branches else "_w_branches"}_max']
+    addr_min = t[f'secret_address_range{branch_suffix()}_min']
+    addr_max = t[f'secret_address_range{branch_suffix()}_max']
 
     return addressSpace.range_overlaps_regions(addr_min, addr_max, ADDRESS_BIT_LEN,
                                                addressSpace.VALID_REGIONS)
@@ -109,7 +116,8 @@ def is_secret_below_cache_granularity(t: pd.Series):
     above cache line granularity.
     If not, we need to apply the sliding technique.
     """
-    return t['inferable_bits_spread_low'] < CACHE_SHIFT and t['inferable_bits_spread_high'] < (CACHE_SHIFT + 8)
+    return (t['inferable_bits_spread_low'] < CACHE_SHIFT
+            and t['inferable_bits_spread_high'] < (CACHE_SHIFT + 8))
 
 
 def is_secret_entropy_high(t: pd.Series):
@@ -135,11 +143,11 @@ def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
         return False
 
     if only_independent:
-        base_min = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_min']
-        base_max = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_max']
+        base_min = t[f'independent_base_range{branch_suffix()}_min']
+        base_max = t[f'independent_base_range{branch_suffix()}_max']
     else:
-        base_min = t[f'base_range{"" if not with_branches else "_w_branches"}_min']
-        base_max = t[f'base_range{"" if not with_branches else "_w_branches"}_max']
+        base_min = t[f'base_range{branch_suffix()}_min']
+        base_max = t[f'base_range{branch_suffix()}_max']
 
     #
     # We don't use with_branches here because it does no make sense. Example
@@ -188,19 +196,24 @@ def base_has_direct_secret_dependency(t: pd.Series):
 
 
 def base_has_indirect_secret_dependency(t: pd.Series):
-    return t['base_control_type'] == 'BaseControlType.BASE_INDIRECTLY_DEPENDS_ON_SECRET_ADDR'
+    return (t['base_control_type']
+            == 'BaseControlType.BASE_INDIRECTLY_DEPENDS_ON_SECRET_ADDR')
 
 
 def is_base_controlled(t: pd.Series):
-    return t['base_control'] in ['ControlType.CONTROLLED', 'ControlType.REQUIRES_MEM_LEAK']
+    return t['base_control'] in ['ControlType.CONTROLLED',
+                                 'ControlType.REQUIRES_MEM_LEAK']
 
 
 def is_branch_dependent_from_secret(t: pd.Series):
-    return t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS' or t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE'
+    return t['branch_control_type'] in [
+        'BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS',
+        'BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE']
 
 
 def is_branch_dependent_from_uncontrolled(t: pd.Series):
-    return t['branch_control_type'] == 'BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED'
+    return (t['branch_control_type']
+            == 'BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED')
 
 # ----------------- Transformations
 
@@ -213,8 +226,8 @@ def _has_valid_independent_base(t: pd.Series):
     if t['base_expr'] == '' or pd.isna(t['base_expr']):
         return True
 
-    base_min = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_min']
-    base_max = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_max']
+    base_min = t[f'independent_base_range{branch_suffix()}_min']
+    base_max = t[f'independent_base_range{branch_suffix()}_max']
 
     return addressSpace.range_overlaps_regions(base_min, base_max,
                                                t['independent_base_size'],
@@ -263,7 +276,9 @@ def can_perform_sliding(t: pd.Series):
     if not is_base_controlled(t):
         return False
 
-    return t[f'independent_base_range{"" if not with_branches else "_w_branches"}_stride'] <= 2**t['inferable_bits_spread_low'] and t[f'independent_base_range{"" if not with_branches else "_w_branches"}_window'] >= 4096
+    stride = t[f'independent_base_range{branch_suffix()}_stride']
+    window = t[f'independent_base_range{branch_suffix()}_window']
+    return stride <= 2**t['inferable_bits_spread_low'] and window >= 4096
 
 
 def can_perform_known_prefix(t: pd.Series):
@@ -277,7 +292,7 @@ def can_perform_known_prefix(t: pd.Series):
         return False
 
     # TODO: should we check the secret address window also?
-    return t[f'secret_address_range{"" if not with_branches else "_w_branches"}_stride'] <= MAX_ENTROPY
+    return t[f'secret_address_range{branch_suffix()}_stride'] <= MAX_ENTROPY
 
 
 def can_adjust_base(t: pd.Series):
@@ -289,9 +304,9 @@ def can_adjust_base(t: pd.Series):
     if not is_base_controlled(t):
         return False
 
-    base_controllable_window = t[f'independent_base_range{"" if not with_branches else "_w_branches"}_window']
-    secret_max = t[f'transmitted_secret_range{"" if not with_branches else "_w_branches"}_max']
-    secret_window = t[f'transmitted_secret_range{"" if not with_branches else "_w_branches"}_window']
+    base_controllable_window = t[f'independent_base_range{branch_suffix()}_window']
+    secret_max = t[f'transmitted_secret_range{branch_suffix()}_max']
+    secret_window = t[f'transmitted_secret_range{branch_suffix()}_window']
 
     # TODO: quick fix for stupid cases, we need a more sophisticated way of sampling
     # the range.
@@ -344,7 +359,8 @@ def can_ignore_direct_dependency(t: pd.Series, slam=False):
             return True
 
         else:
-            return not (is_secret_below_cache_granularity(t) or is_max_secret_too_high(t, only_independent=True))
+            return not (is_secret_below_cache_granularity(t)
+                        or is_max_secret_too_high(t, only_independent=True))
 
 
 # -- SLAM Covert channel
@@ -403,7 +419,8 @@ def slam_is_an_user_address_translation(t: pd.Series):
     n_inferable_bits = int(t['inferable_bits_n_inferable_bits'])
     secret_stride = int(t[f'transmitted_secret_range_stride'])
 
-    if (n_inferable_bits + (secret_stride - 1) <= 32) and base_controllable_window < 2 ** 63:
+    if ((n_inferable_bits + (secret_stride - 1) <= 32)
+            and base_controllable_window < 2 ** 63):
         # We do the same check as above, but now with the inferable bits
         # information to catch the 'complex' range cases (base expr
         # is included in transmitted secret expr)
@@ -514,10 +531,10 @@ def cmp_value_not_independently_controlled(t: pd.Series):
     return not (_is_cmp_value_independently_controlled(t) or _is_sdb_base_controlled(t))
 
 
-def cmp_value_not_controlled(t : pd.Series):
+def cmp_value_not_controlled(t: pd.Series):
 
-    if t['base_control'] == 'ControlType.CONTROLLED' or \
-        t['cmp_value_control'] == 'ControlType.CONTROLLED':
+    if (t['base_control'] == 'ControlType.CONTROLLED'
+            or t['cmp_value_control'] == 'ControlType.CONTROLLED'):
         return False
 
     return True
@@ -527,10 +544,10 @@ def do_one_bit_compare(t: pd.Series):
     """
     One secret bit is compared with a static value.
     """
-    # cmp_value_window = t[
-        # f'cmp_value_range{"" if not with_branches else "_w_branches"}_window']
+    # cmp_value_window = t[f'cmp_value_range{branch_suffix()}_window']
 
-    return int(t['inferable_bits_n_inferable_bits']) == 1 and _is_cmp_value_independent(t)
+    return (int(t['inferable_bits_n_inferable_bits']) == 1
+            and _is_cmp_value_independent(t))
 
 # ----------------- Evaluation
 
@@ -588,17 +605,16 @@ slam_advanced_checks = [
 ]
 
 sdb_basic_checks = [is_secret_inferable,
-                has_valid_secret_address,
-                is_cmove_independent_from_secret,
-                has_no_speculation_stop
-                ]
+                    has_valid_secret_address,
+                    is_cmove_independent_from_secret,
+                    has_no_speculation_stop
+                    ]
 
 sdb_extra_checks = [
-    {'problem' : cmp_value_not_controlled, 'solution': do_one_bit_compare},
+    {'problem': cmp_value_not_controlled, 'solution': do_one_bit_compare},
     {'problem': cmp_value_not_independently_controlled,
      'solution': do_one_bit_compare},
 ]
-
 
 
 def evaluate_checks(t: pd.Series, checks: list, extra_checks: list):
@@ -613,8 +629,8 @@ def evaluate_checks(t: pd.Series, checks: list, extra_checks: list):
             fail_reasons.append(b.__name__)
 
     for c in extra_checks:
-        if t[f'{c["problem"].__name__}{"" if not with_branches else "_w_branches"}']:
-            if t[f'{c["solution"].__name__}{"" if not with_branches else "_w_branches"}']:
+        if t[f'{c["problem"].__name__}{branch_suffix()}']:
+            if t[f'{c["solution"].__name__}{branch_suffix()}']:
                 # Multiple problems can have the same solution, only add it once
                 if c['solution'].__name__ not in required_solutions:
                     required_solutions.append(c['solution'].__name__)
@@ -676,7 +692,8 @@ def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
             '_w_branches'] = df.apply(c['solution'], axis=1)
 
     df[['exploitable_w_branches', 'required_solutions_w_branches',
-        'fail_reasons_w_branches']] = df.apply(is_exploitable, axis=1, result_type="expand")
+        'fail_reasons_w_branches']] = df.apply(is_exploitable, axis=1,
+                                               result_type="expand")
 
     print(
         f"Found {len(df[df['exploitable_w_branches'] == True])} exploitable gadgets!")
@@ -699,7 +716,8 @@ def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
             df[c['solution'].__name__] = df.apply(c['solution'], axis=1)
 
     df[['exploitable_w_slam', 'required_solutions_w_slam',
-        'fail_reasons_w_slam']] = df.apply(slam_is_exploitable, axis=1, result_type="expand")
+        'fail_reasons_w_slam']] = df.apply(slam_is_exploitable, axis=1,
+                                           result_type="expand")
 
     print(
         f"Found {len(df[df['exploitable_w_slam'] == True])} exploitable gadgets!")
@@ -808,7 +826,8 @@ def run(in_csv, out_csv):
 
     df_header = pd.read_csv(StringIO(data), delimiter=';')
     types_dict = {
-        col: 'UInt64' if col in integer_cols else df_header[col].dtype.name for col in df_header}
+        col: 'UInt64' if col in integer_cols else df_header[col].dtype.name
+        for col in df_header}
 
     # Via this method we avoid pandas mixing types
     df = pd.read_csv(StringIO(data), delimiter=';', dtype=types_dict)
