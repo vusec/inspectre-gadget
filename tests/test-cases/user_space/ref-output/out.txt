@@ -1,0 +1,72 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <user_space>:
+ 4000000:	49 83 f8 00          	cmp    r8,0x0
+ 4000004:	74 05                	je     400000b <trans>
+
+0000000004000006 <tfp>:
+ 4000006:	48 63 07             	movsxd rax,DWORD PTR [rdi]
+ 4000009:	ff e0                	jmp    rax
+
+000000000400000b <trans>:
+ 400000b:	4c 8b 0e             	mov    r9,QWORD PTR [rsi]
+ 400000e:	49 81 e1 ff 00 00 00 	and    r9,0xff
+ 4000015:	89 c9                	mov    ecx,ecx
+ 4000017:	4e 8b 14 09          	mov    r10,QWORD PTR [rcx+r9*1]
+ 400001b:	e9 00 00 00 00       	jmp    4000020 <trans+0x15>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing TFP @0x4000009: <BV64 0xffffffff .. LOAD_32[<BV64 rdi>]_20>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to tfp.csv
+[AnalysisMAIN]  Analyzing TRANS @0x4000009: <BV64 0xffffffff00000000 + (0#32 .. LOAD_32[<BV64 rdi>]_20)>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing TFP @0x4000009: <BV64 0x0 .. LOAD_32[<BV64 rdi>]_20>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped CSV to tfp.csv
+[AnalysisMAIN]  Analyzing TRANS @0x4000009: <BV64 0#32 .. LOAD_32[<BV64 rdi>]_20>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing TRANS @0x4000017: <BV64 (0#32 .. rcx[31:0]) + (0#56 .. LOAD_64[<BV64 rsi>]_21[7:0])>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[MAIN]  Found 3 potential transmissions.
+[MAIN]  Found 2 potential tainted function pointers.
+[MAIN]  Found 0 potential secret dependent branches.
+[MAIN]  Outputted 3 transmissions.
+[MAIN]  Outputted 2 tainted function pointers.
+[MAIN]  Outputted 0 secret dependent branches.
+
+== REASONER TRANSMISSION ==
+Total 0 Secret Dependent Branches (not reasoned)
+[-] Imported 3 gadgets
+[-] Performing exploitability analysis...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis including branch constraints...
+Found 1 exploitable gadgets!
+[-] Performing exploitability analysis assuming the SLAM covert channel...
+Found 0 exploitable gadgets!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!
+
+== REASONER DISPATCH ==
+[-] Imported 2 gadgets
+[-] Enriching with extra info...
+[-] Performing exploitability analysis...
+   [+] Found 2 exploitable TFPs!
+   [+] Found 1 (unique PCs) TFPs with at least one sufficiently controlled register!
+   [+] Found 1 (unique entry point) TFPs with at least one sufficiently controlled register!
+[-] Enriching with extra info including branch constraints...
+[-] Performing exploitability analysis with branches...
+   [+] Found 2 exploitable TFPs with branches!
+   [+] Found 1 (unique PCs) TFPs with at least one sufficiently controlled register!
+   [+] Found 1 (unique entry point) TFPs with at least one sufficiently controlled register!
+[-] Saving to tfp-reasoned.csv
+[-] Done!

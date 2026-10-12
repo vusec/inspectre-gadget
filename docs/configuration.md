@@ -77,6 +77,15 @@ CrashOnExceptions: False
 # This has consequences on interrupting, e.g., if you analyse only _after_ scanning
 # you won't have any outputted transmission in case of  e.g.timeouts.
 AnalyzeDuringScanning: True
+
+# Settings that are only used by the reasoner (`inspectre reason --config`).
+reasoner:
+  # Which address spaces the gadgets can access, i.e., which addresses are
+  # considered valid (e.g., for the base and secret address). Enable kernel
+  # addresses when analyzing the (Linux) kernel, and user addresses when
+  # analyzing a user-space program. At least one of them should be enabled.
+  AllowKernelAddresses: True
+  AllowUserAddresses: False
 ```
 
 Note that, since InSpectre Gadget lists which registers and memory locations are
@@ -99,3 +108,21 @@ Some other parameters that can be tweaked are:
 - **HalfSpectre**: When enabled, the scanner will scan also for
   Half-Spectre gadgets (a.k.a prefetch gadgets, a.k.a dispatch gadgets,
   see for example[https://download.vusec.net/papers/halfspectre_sp25.pdf](https://download.vusec.net/papers/halfspectre_sp25.pdf)).
+
+## Reasoner
+
+The `reasoner` section of the config is only used by the reasoner, which reads
+it when you pass the config file with `--config`:
+
+```sh
+inspectre reason --config config_all.yaml gadgets.csv gadgets-reasoned.csv
+```
+
+- **AllowKernelAddresses**: Gadgets can access kernel-space addresses (Linux
+  x86-64: kernel text and the direct physical memory map). Enable this when
+  analyzing the kernel.
+- **AllowUserAddresses**: Gadgets can access user-space addresses. Enable this
+  when analyzing a user-space program. Since user-space layouts differ per
+  process, we assume the attacker can map (or knows) any user-space address.
+
+Without `--config`, the reasoner only allows kernel addresses.
