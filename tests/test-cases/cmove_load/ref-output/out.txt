@@ -28,7 +28,6 @@ Disassembly of section .text:
 [MAIN]  Outputted 0 secret dependent branches.
 
 == REASONER TRANSMISSION ==
-Total 0 Secret Dependent Branches (not reasoned)
 [-] Imported 2 gadgets
 [-] Performing exploitability analysis...
 Found 0 exploitable gadgets!

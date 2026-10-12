@@ -229,8 +229,6 @@ Controlled Regs:
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
 
 Registers aliasing with tfp:
-
-Registers aliasing with tfp:
   - Reg: rax
     Expr: <BV64 0x0 .. LOAD_16[<BV64 rdi>]_22>
     Range: (0x0,0xffff, 0x1) Exact: True

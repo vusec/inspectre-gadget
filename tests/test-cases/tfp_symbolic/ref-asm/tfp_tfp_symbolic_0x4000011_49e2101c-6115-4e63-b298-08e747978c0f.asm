@@ -8,7 +8,7 @@
 4000011  jmp     qword ptr [rax-0x7db6bd40] ; {Attacker@0x4000011} -> TAINTED FUNCTION POINTER
 
 ------------------------------------------------
-uuid: fee8a981-20c0-4b8e-aca0-aa1170029c88
+uuid: 49e2101c-6115-4e63-b298-08e747978c0f
 
 Reg: mem
 Expr: <BV64 LOAD_64[<BV64 (0#32 .. rcx[31:0]) + 0xffffffff824942c0>]_27>
@@ -107,9 +107,9 @@ Controlled Regs:
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:0x0
   - Reg: rdi_0
-    Expr: <BV64 LOAD_64[<BV64 rdi>_28[63:8] .. LOAD_8[<BV64 rdi>]_22 + rbx[15:8]>
+    Expr: <BV64 LOAD_64[<BV64 rdi>_28][63:8] .. LOAD_8[<BV64 rdi>]_22 + rbx[15:8]>
     ControlType: TFPRegisterControlType.POTENTIAL_SECRET
-    Controlled Expr: <BV64 ((0#8 .. LOAD_64[<BV64 rdi>_28[63:8]) << 0x8) + (0#56 .. LOAD_8[<BV64 rdi>]_22) + (0#56 .. rbx[15:8])>
+    Controlled Expr: <BV64 ((0#8 .. LOAD_64[<BV64 rdi>_28][63:8]) << 0x8) + (0#56 .. LOAD_8[<BV64 rdi>]_22) + (0#56 .. rbx[15:8])>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: False
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: False
   - Reg: rsp_0
@@ -232,8 +232,6 @@ Controlled Regs:
     Controlled Expr: <BV64 rsp_152>
     Controlled Range: (0x0,0xffffffffffffffff, 0x1) Exact: True
     Controlled Range w Branches:(0x0,0xffffffffffffffff, 0x1) Exact: True
-
-Registers aliasing with tfp:
 
 Registers aliasing with tfp:
   - Reg: rax

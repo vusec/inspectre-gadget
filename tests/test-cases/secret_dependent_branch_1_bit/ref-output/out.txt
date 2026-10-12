@@ -1,0 +1,67 @@
+
+gadget:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000004000000 <secret_dependent_branch_1_bit>:
+ 4000000:	4c 0f b6 4f 10       	movzx  r9,BYTE PTR [rdi+0x10]
+ 4000005:	49 83 f9 41          	cmp    r9,0x41
+ 4000009:	74 3a                	je     4000045 <end>
+
+000000000400000b <t2>:
+ 400000b:	4c 0f b6 4f 20       	movzx  r9,BYTE PTR [rdi+0x20]
+ 4000010:	49 83 e1 01          	and    r9,0x1
+ 4000014:	49 83 f9 01          	cmp    r9,0x1
+ 4000018:	74 2b                	je     4000045 <end>
+
+000000000400001a <t3>:
+ 400001a:	48 8b 04 25 00 00 00 	mov    rax,QWORD PTR ds:0xffffffff81000000
+ 4000021:	81
+ 4000022:	4c 0f b6 4f 30       	movzx  r9,BYTE PTR [rdi+0x30]
+ 4000027:	49 c1 e9 07          	shr    r9,0x7
+ 400002b:	49 39 c1             	cmp    r9,rax
+ 400002e:	74 15                	je     4000045 <end>
+
+0000000004000030 <t4>:
+ 4000030:	4c 0f b6 4f 40       	movzx  r9,BYTE PTR [rdi+0x40]
+ 4000035:	49 c1 e9 07          	shr    r9,0x7
+ 4000039:	4c 8b 87 00 01 00 00 	mov    r8,QWORD PTR [rdi+0x100]
+ 4000040:	4d 39 c1             	cmp    r9,r8
+ 4000043:	74 00                	je     4000045 <end>
+
+0000000004000045 <end>:
+ 4000045:	e9 00 00 00 00       	jmp    400004a <end+0x5>
+
+== SCANNER ==
+[MAIN]  Loading angr project...
+[MAIN]  Analyzing gadget at address 0x4000000...
+[AnalysisMAIN]  Analyzing SDB   @0x4000009: <Bool LOAD_8[<BV64 rdi + 0x10>]_20 == 65> <> <BV8 65>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x4000018: <Bool (LOAD_8[<BV64 rdi + 0x20>]_21 & 1) == 1> <> <BV8 1>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x400002e: <Bool LShR((0#56 .. LOAD_8[<BV64 rdi + 0x30>]_23), 0x7) == LOAD_64[<BV64 0xffffffff81000000>]_22> <> <BV64 LOAD_64[<BV64 0xffffffff81000000>]_22>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x4000043: <Bool LShR((0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24), 0x7) == LOAD_64[<BV64 rdi + 0x100>]_25> <> <BV64 LOAD_64[<BV64 rdi + 0x100>]_25>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[AnalysisMAIN]  Analyzing SDB   @0x4000043: <Bool LShR((0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24), 0x7) == LOAD_64[<BV64 rdi + 0x100>]_25> <> <BV64 LShR((0#56 .. LOAD_8[<BV64 rdi + 0x40>]_24), 0x7)>
+[AnalysisMAIN]  Dumped annotated ASM to asm
+[AnalysisMAIN]  Dumped properties to gadgets.csv
+[MAIN]  Found 0 potential transmissions.
+[MAIN]  Found 0 potential tainted function pointers.
+[MAIN]  Found 4 potential secret dependent branches.
+[MAIN]  Outputted 0 transmissions.
+[MAIN]  Outputted 0 tainted function pointers.
+[MAIN]  Outputted 5 secret dependent branches.
+
+== REASONER TRANSMISSION ==
+[-] Imported 5 gadgets
+[-] Performing exploitability analysis for secret dependent branches...
+Found 2 exploitable secret dependent branches!
+Found 2 exploitable secret dependent branches with branches!
+[-] Saving to gadgets-reasoned.csv
+[-] Done!

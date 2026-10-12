@@ -224,8 +224,6 @@ Controlled Regs:
 
 Registers aliasing with tfp:
 
-Registers aliasing with tfp:
-
 Uncontrolled Regs: ['rbp', 'rsp', 'r8']
 Unmodified Regs: ['rbx', 'rdx', 'rdi', 'r9', 'r10', 'r11', 'r13', 'r14', 'r15', 'rsp_0', 'rsp_8', 'rsp_16', 'rsp_24', 'rsp_32', 'rsp_40', 'rsp_48', 'rsp_56', 'rsp_64', 'rsp_72', 'rsp_80', 'rsp_88', 'rsp_96', 'rsp_104', 'rsp_112', 'rsp_120', 'rsp_128', 'rsp_136', 'rsp_144', 'rsp_152']
 Potential Secrets: ['r12']

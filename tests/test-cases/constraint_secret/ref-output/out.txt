@@ -52,13 +52,15 @@ Disassembly of section .text:
 [MAIN]  Outputted 3 secret dependent branches.
 
 == REASONER TRANSMISSION ==
-Total 3 Secret Dependent Branches (not reasoned)
-[-] Imported 3 gadgets
+[-] Imported 6 gadgets
 [-] Performing exploitability analysis...
 Found 0 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
 Found 0 exploitable gadgets!
 [-] Performing exploitability analysis assuming the SLAM covert channel...
 Found 0 exploitable gadgets!
+[-] Performing exploitability analysis for secret dependent branches...
+Found 0 exploitable secret dependent branches!
+Found 0 exploitable secret dependent branches with branches!
 [-] Saving to gadgets-reasoned.csv
 [-] Done!
