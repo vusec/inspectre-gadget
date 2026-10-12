@@ -544,7 +544,6 @@ def do_one_bit_compare(t: pd.Series):
     """
     One secret bit is compared with a static value.
     """
-    # cmp_value_window = t[f'cmp_value_range{branch_suffix()}_window']
 
     return (int(t['inferable_bits_n_inferable_bits']) == 1
             and _is_cmp_value_independent(t))
