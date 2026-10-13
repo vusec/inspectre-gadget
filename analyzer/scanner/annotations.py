@@ -6,6 +6,7 @@ import sys
 
 # autopep8: off
 from ..shared import utils
+from ..shared import astTransform
 from ..shared.transmission import ControlType, Requirements
 # autopep8: on
 
@@ -288,3 +289,24 @@ def is_directly_controlled(ast: claripy.ast.BV):
             return True
 
     return False
+
+
+def get_controlled_members(expr):
+    """
+    Return the summands of expr that contain at least one attacker-controlled
+    symbol. Constants and summands with only uncontrolled symbols are left out.
+    """
+    return [m for m in astTransform.extract_summed_vals(expr)
+            if is_attacker_controlled(m)]
+
+
+def get_controlled_expr(expr):
+    """
+    Return the part of expr the attacker controls (see get_controlled_members),
+    or None if the attacker controls no part of expr.
+    """
+    members = get_controlled_members(expr)
+    if len(members) == 0:
+        return None
+
+    return astTransform.generate_addition(members)

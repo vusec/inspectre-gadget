@@ -16,8 +16,7 @@ uncontrolled_base:
    mov    r9, QWORD PTR [r9 + r8]   # transmisson 2
 
 
-   # Known false postive: uncontrollable base with small
-   # controllable part. We can fix this by adding an 'controllable' base range
+   # Not exploitable, controlled base but controllable part too small
    mov    r10, QWORD PTR [rsi] # base load 2
    and    r11, 0xff
    add    r10, r11
