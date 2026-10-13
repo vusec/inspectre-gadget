@@ -172,13 +172,9 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
                 continue
 
             controlled_members = []
-            controlled_members = []
             for canonical_expr in canonical_exprs:
-                members = astTransform.extract_summed_vals(canonical_expr.expr)
-
-                for ast in members:
-                    if annotations.is_attacker_controlled(ast):
-                        controlled_members.append(ast)
+                controlled_members += annotations.get_controlled_members(
+                    canonical_expr.expr)
 
             if len(controlled_members) > 0:
                 tfp.registers[r].controlled_expr = astTransform.generate_addition(

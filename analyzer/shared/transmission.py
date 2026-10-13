@@ -139,24 +139,32 @@ class TransmissionComponent():
     secret value.)
     """
     expr: claripy.ast.BV
+    # Part of expr the attacker controls.
+    controlled_expr: claripy.ast.BV
     branches: list
     constraints: list[tuple[int, claripy.ast.BV]]
     aliases: list
     requirements: Requirements
     range: ranges.AstRange
     range_with_branches: ranges.AstRange
+    # range for controlled_expr
+    controlled_range: ranges.AstRange
+    controlled_range_with_branches: ranges.AstRange
     control: ControlType
     size: int
     max_load_depth: int
 
     def __init__(self) -> None:
         self.expr = None
+        self.controlled_expr = None
         self.branches = []
         self.constraints = []
         self.aliases = []
         self.requirements = Requirements()
         self.range = None
         self.range_with_branches = None
+        self.controlled_range = None
+        self.controlled_range_with_branches = None
         self.control = ControlType.UNKNOWN
         self.size = 0
         self.max_load_depth = 0
@@ -164,6 +172,7 @@ class TransmissionComponent():
     def __repr__(self):
         return f"""
                 expr: {self.expr}
+                controlled_expr: {self.controlled_expr}
                 size: {self.size}
                 branches: {utils.ordered_branches(self.branches)}
                 constraints: {utils.ordered_constraints(self.constraints)}
@@ -171,6 +180,8 @@ class TransmissionComponent():
                 requirements: {self.requirements}
                 range: {self.range}
                 range_with_branches: {self.range_with_branches}
+                controlled_range: {self.controlled_range}
+                controlled_range_with_branches: {self.controlled_range_with_branches}
                 control: {self.control}
                 n_dependent_loads: {self.max_load_depth}
                 """
@@ -178,6 +189,7 @@ class TransmissionComponent():
     def to_dict(self):
         return OrderedDict([
             ('expr', str(self.expr)),
+            ('controlled_expr', str(self.controlled_expr)),
             ('size', str(self.size)),
             ('branches', utils.ordered_branches(self.branches)),
             ('constraints', utils.ordered_constraints(self.constraints)),
@@ -188,6 +200,12 @@ class TransmissionComponent():
             ('range_w_branches', ranges.AstRange(0, 0, 0, False).to_dict()
              if self.range_with_branches == None
              else self.range_with_branches.to_dict()),
+            ('controlled_range', ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.controlled_range == None
+             else self.controlled_range.to_dict()),
+            ('controlled_range_w_branches', ranges.AstRange(0, 0, 0, False).to_dict()
+             if self.controlled_range_with_branches == None
+             else self.controlled_range_with_branches.to_dict()),
             ('control', str(self.control)),
             ('n_dependent_loads', str(self.max_load_depth))
         ]

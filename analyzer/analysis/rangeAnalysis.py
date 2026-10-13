@@ -12,6 +12,7 @@ from ..shared.secretDependentBranch import SecretDependentBranch
 from ..shared.halfGadget import HalfGadget
 from ..shared import logger
 from ..shared.config import global_config
+from ..scanner import annotations
 # autopep8: on
 
 l = logger.get_logger("RangeAnalys")
@@ -72,6 +73,38 @@ def calculate_range(component: TransmissionComponent, constraints, branches):
         else:
             component.range_with_branches = component.range
 
+        # TFP registers have their own controlled expr (see tfpAnalysis)
+        if isinstance(component, TransmissionComponent):
+            calculate_controlled_range(component, constraints, branches)
+
+
+def calculate_controlled_range(component: TransmissionComponent, constraints,
+                               branches):
+    """
+    Calculate the range of the part of the expression the attacker controls.
+    """
+    if component.control not in [ControlType.CONTROLLED,
+                                 ControlType.REQUIRES_MEM_LEAK]:
+        return
+
+    component.controlled_expr = annotations.get_controlled_expr(component.expr)
+    if component.controlled_expr is None:
+        return
+
+    # Nothing left out (no constants, no uncontrolled parts): same range
+    if component.controlled_expr is component.expr:
+        component.controlled_range = component.range
+        component.controlled_range_with_branches = component.range_with_branches
+        return
+
+    component.controlled_range = get_ast_ranges(constraints,
+                                                component.controlled_expr)
+    if len(branches) > 0:
+        component.controlled_range_with_branches = get_ast_ranges(
+            branches, component.controlled_expr)
+    else:
+        component.controlled_range_with_branches = component.controlled_range
+
 
 def analyse(t: Transmission):
     l.warning(f"========= [RANGE] ==========")
@@ -98,6 +131,10 @@ def analyse(t: Transmission):
                 and t.properties['indirect_dependent_base_expr'] == None):
             t.independent_base.range = t.base.range
             t.independent_base.range_with_branches = t.base.range_with_branches
+            t.independent_base.controlled_expr = t.base.controlled_expr
+            t.independent_base.controlled_range = t.base.controlled_range
+            t.independent_base.controlled_range_with_branches = (
+                t.base.controlled_range_with_branches)
         else:
             constr = [x[1] for x in t.independent_base.constraints]
             constr_with_branches = [x[1] for x in t.independent_base.branches]

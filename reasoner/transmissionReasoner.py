@@ -87,10 +87,15 @@ def has_valid_secret_address(t: pd.Series):
     Check if the secret address can be adjusted to a valid address and the
     attacker has enough control over it.
     """
-    if t[f'secret_address_control'] != 'ControlType.CONTROLLED':
+    # With REQUIRES_MEM_LEAK, the attacker needs to know the uncontrolled part
+    if t[f'secret_address_control'] not in ['ControlType.CONTROLLED',
+                                            'ControlType.REQUIRES_MEM_LEAK']:
         return False
 
-    if t[f'secret_address_range{branch_suffix()}_window'] < MIN_SECRET_ADDRESS_WINDOW:
+    # The amount of control is only determined by the controlled part
+    controlled_window = t[
+        f'secret_address_controlled_range{branch_suffix()}_window']
+    if controlled_window < MIN_SECRET_ADDRESS_WINDOW:
         return False
 
     addr_min = t[f'secret_address_range{branch_suffix()}_min']
@@ -818,6 +823,14 @@ def run(in_csv, out_csv):
                     'secret_address_range_w_branches_max',
                     'secret_address_range_w_branches_min',
                     'secret_address_range_w_branches_window',
+                    'secret_address_controlled_range_stride',
+                    'secret_address_controlled_range_max',
+                    'secret_address_controlled_range_min',
+                    'secret_address_controlled_range_window',
+                    'secret_address_controlled_range_w_branches_stride',
+                    'secret_address_controlled_range_w_branches_max',
+                    'secret_address_controlled_range_w_branches_min',
+                    'secret_address_controlled_range_w_branches_window',
                     'transmitted_secret_range_w_branches_max',
                     'transmitted_secret_range_w_branches_min'
                     ]
