@@ -16,16 +16,16 @@
 +-----------+-------------------------------------+-----------------------------+-----------------------------------+------------------------------+---------------------------------+------------------+---------------------------------------+-------------------------------+
 |    pc     | base_has_indirect_secret_dependency | leak_secret_near_valid_base | base_has_direct_secret_dependency | can_ignore_direct_dependency | is_branch_dependent_from_secret | perform_training | is_branch_dependent_from_uncontrolled | perform_out_of_place_training |
 +-----------+-------------------------------------+-----------------------------+-----------------------------------+------------------------------+---------------------------------+------------------+---------------------------------------+-------------------------------+
-| 0x400006d | False                               | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x400006d | False                               | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x4000075 | False                               | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x4000075 | False                               | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x4000086 | False                               | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x4000086 | False                               | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x40000a3 | True                                | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x40000a3 | True                                | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x40000a3 | True                                | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
-| 0x40000a3 | True                                | True                        | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x400006d | False                               | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x400006d | False                               | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x4000075 | False                               | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x4000075 | False                               | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x4000086 | False                               | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x4000086 | False                               | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x40000a3 | True                                | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x40000a3 | True                                | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x40000a3 | True                                | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
+| 0x40000a3 | True                                | False                       | False                             | True                         | False                           | True             | False                                 | True                          |
 +-----------+-------------------------------------+-----------------------------+-----------------------------------+------------------------------+---------------------------------+------------------+---------------------------------------+-------------------------------+
 
 ../../test-queries/reasoner-gadgets/checks_with_branches.sql
@@ -46,16 +46,16 @@
 +-----------+------------------------------------------------+----------------------------------------+----------------------------------------------+-----------------------------------------+--------------------------------------------+-----------------------------+--------------------------------------------------+------------------------------------------+
 |    pc     | base_has_indirect_secret_dependency_w_branches | leak_secret_near_valid_base_w_branches | base_has_direct_secret_dependency_w_branches | can_ignore_direct_dependency_w_branches | is_branch_dependent_from_secret_w_branches | perform_training_w_branches | is_branch_dependent_from_uncontrolled_w_branches | perform_out_of_place_training_w_branches |
 +-----------+------------------------------------------------+----------------------------------------+----------------------------------------------+-----------------------------------------+--------------------------------------------+-----------------------------+--------------------------------------------------+------------------------------------------+
-| 0x400006d | False                                          | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x400006d | False                                          | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x4000075 | False                                          | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x4000075 | False                                          | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x4000086 | False                                          | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x4000086 | False                                          | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x40000a3 | True                                           | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x40000a3 | True                                           | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x40000a3 | True                                           | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
-| 0x40000a3 | True                                           | True                                   | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x400006d | False                                          | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x400006d | False                                          | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x4000075 | False                                          | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x4000075 | False                                          | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x4000086 | False                                          | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x4000086 | False                                          | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x40000a3 | True                                           | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x40000a3 | True                                           | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x40000a3 | True                                           | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
+| 0x40000a3 | True                                           | False                                  | False                                        | True                                    | False                                      | True                        | False                                            | True                                     |
 +-----------+------------------------------------------------+----------------------------------------+----------------------------------------------+-----------------------------------------+--------------------------------------------+-----------------------------+--------------------------------------------------+------------------------------------------+
 
 ../../test-queries/reasoner-gadgets/checks_with_slam.sql
@@ -75,36 +75,36 @@
 +-----------+-----------------------------+-------------------------------+-------------------------------------+-----------------------------------+
 
 ../../test-queries/reasoner-gadgets/exploitable.sql
-+-----------+-------------+-------------------------------------------------------------+--------------------+
-|    pc     | exploitable |                     required_solutions                      |    fail_reasons    |
-+-----------+-------------+-------------------------------------------------------------+--------------------+
-| 0x400006d | True        | []                                                          | []                 |
-| 0x400006d | True        | []                                                          | []                 |
-| 0x4000075 | True        | []                                                          | []                 |
-| 0x4000075 | True        | []                                                          | []                 |
-| 0x4000086 | True        | []                                                          | []                 |
-| 0x4000086 | True        | []                                                          | []                 |
-| 0x40000a3 | False       | []                                                          | ['has_valid_base'] |
-| 0x40000a3 | False       | []                                                          | ['has_valid_base'] |
-| 0x40000a3 | True        | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                 |
-| 0x40000a3 | True        | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                 |
-+-----------+-------------+-------------------------------------------------------------+--------------------+
++-----------+-------------+--------------------+-----------------------------------------------------------+
+|    pc     | exploitable | required_solutions |                       fail_reasons                        |
++-----------+-------------+--------------------+-----------------------------------------------------------+
+| 0x400006d | True        | []                 | []                                                        |
+| 0x400006d | True        | []                 | []                                                        |
+| 0x4000075 | True        | []                 | []                                                        |
+| 0x4000075 | True        | []                 | []                                                        |
+| 0x4000086 | True        | []                 | []                                                        |
+| 0x4000086 | True        | []                 | []                                                        |
+| 0x40000a3 | False       | []                 | ['has_valid_base', 'base_has_indirect_secret_dependency'] |
+| 0x40000a3 | False       | []                 | ['has_valid_base', 'base_has_indirect_secret_dependency'] |
+| 0x40000a3 | False       | []                 | ['base_has_indirect_secret_dependency']                   |
+| 0x40000a3 | False       | []                 | ['base_has_indirect_secret_dependency']                   |
++-----------+-------------+--------------------+-----------------------------------------------------------+
 
 ../../test-queries/reasoner-gadgets/exploitable_with_branches.sql
-+-----------+------------------------+-------------------------------------------------------------+-------------------------+
-|    pc     | exploitable_w_branches |                required_solutions_w_branches                | fail_reasons_w_branches |
-+-----------+------------------------+-------------------------------------------------------------+-------------------------+
-| 0x400006d | True                   | []                                                          | []                      |
-| 0x400006d | True                   | []                                                          | []                      |
-| 0x4000075 | True                   | []                                                          | []                      |
-| 0x4000075 | True                   | []                                                          | []                      |
-| 0x4000086 | True                   | []                                                          | []                      |
-| 0x4000086 | True                   | []                                                          | []                      |
-| 0x40000a3 | False                  | []                                                          | ['has_valid_base']      |
-| 0x40000a3 | False                  | []                                                          | ['has_valid_base']      |
-| 0x40000a3 | True                   | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                      |
-| 0x40000a3 | True                   | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                      |
-+-----------+------------------------+-------------------------------------------------------------+-------------------------+
++-----------+------------------------+-------------------------------+-----------------------------------------------------------+
+|    pc     | exploitable_w_branches | required_solutions_w_branches |                  fail_reasons_w_branches                  |
++-----------+------------------------+-------------------------------+-----------------------------------------------------------+
+| 0x400006d | True                   | []                            | []                                                        |
+| 0x400006d | True                   | []                            | []                                                        |
+| 0x4000075 | True                   | []                            | []                                                        |
+| 0x4000075 | True                   | []                            | []                                                        |
+| 0x4000086 | True                   | []                            | []                                                        |
+| 0x4000086 | True                   | []                            | []                                                        |
+| 0x40000a3 | False                  | []                            | ['has_valid_base', 'base_has_indirect_secret_dependency'] |
+| 0x40000a3 | False                  | []                            | ['has_valid_base', 'base_has_indirect_secret_dependency'] |
+| 0x40000a3 | False                  | []                            | ['base_has_indirect_secret_dependency']                   |
+| 0x40000a3 | False                  | []                            | ['base_has_indirect_secret_dependency']                   |
++-----------+------------------------+-------------------------------+-----------------------------------------------------------+
 
 ../../test-queries/reasoner-gadgets/exploitable_with_sdb.sql
 +-----------+-------------------+--------------------------+--------------------+------------------------------+-------------------------------------+-------------------------------+
@@ -123,20 +123,20 @@
 +-----------+-------------------+--------------------------+--------------------+------------------------------+-------------------------------------+-------------------------------+
 
 ../../test-queries/reasoner-gadgets/exploitable_with_slam.sql
-+-----------+--------------------+-------------------------------------------------------------+------------------------------------------------------------------+
-|    pc     | exploitable_w_slam |                  required_solutions_w_slam                  |                       fail_reasons_w_slam                        |
-+-----------+--------------------+-------------------------------------------------------------+------------------------------------------------------------------+
-| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
-| 0x400006d | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
-| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
-| 0x4000075 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
-| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
-| 0x4000086 | False              | []                                                          | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes'] |
-| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
-| 0x40000a3 | True               | ['can_perform_known_prefix', 'leak_secret_near_valid_base'] | []                                                               |
-| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
-| 0x40000a3 | False              | []                                                          | ['slam_is_an_user_address_translation']                          |
-+-----------+--------------------+-------------------------------------------------------------+------------------------------------------------------------------+
++-----------+--------------------+---------------------------+--------------------------------------------------------------------------------+
+|    pc     | exploitable_w_slam | required_solutions_w_slam |                              fail_reasons_w_slam                               |
++-----------+--------------------+---------------------------+--------------------------------------------------------------------------------+
+| 0x400006d | False              | []                        | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes']               |
+| 0x400006d | False              | []                        | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes']               |
+| 0x4000075 | False              | []                        | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes']               |
+| 0x4000075 | False              | []                        | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes']               |
+| 0x4000086 | False              | []                        | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes']               |
+| 0x4000086 | False              | []                        | ['slam_has_exact_secret_range', 'slam_has_aligned_secret_bytes']               |
+| 0x40000a3 | False              | []                        | ['base_has_indirect_secret_dependency']                                        |
+| 0x40000a3 | False              | []                        | ['base_has_indirect_secret_dependency']                                        |
+| 0x40000a3 | False              | []                        | ['slam_is_an_user_address_translation', 'base_has_indirect_secret_dependency'] |
+| 0x40000a3 | False              | []                        | ['slam_is_an_user_address_translation', 'base_has_indirect_secret_dependency'] |
++-----------+--------------------+---------------------------+--------------------------------------------------------------------------------+
 
 ../../test-queries/scanner-gadgets/aliases.sql
 +-----------+---------+

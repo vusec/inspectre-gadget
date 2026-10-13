@@ -55,9 +55,9 @@ Disassembly of section .text:
 == REASONER TRANSMISSION ==
 [-] Imported 6 gadgets
 [-] Performing exploitability analysis...
-Found 1 exploitable gadgets!
+Found 0 exploitable gadgets!
 [-] Performing exploitability analysis including branch constraints...
-Found 1 exploitable gadgets!
+Found 0 exploitable gadgets!
 [-] Performing exploitability analysis assuming the SLAM covert channel...
 Found 4 exploitable gadgets!
 [-] Saving to gadgets-reasoned.csv
