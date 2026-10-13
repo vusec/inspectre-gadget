@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Gadgets whose base has an indirect secret dependency (`base_has_indirect_secret_dependency`) are now not exploitable by default
+- Dispatch gadgets (TFPs) no longer require an extra controlled register to be exploitable (`has_extra_controlled_registers`)
 
 ## [1.2.0] - 2026-10-09
 

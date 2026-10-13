@@ -222,19 +222,6 @@ def is_exploitable(t: pd.Series):
             f'is_tfp_controlled_sufficiently{branch_suffix()}')
         exploitable = False
 
-    controlled = eval(t['controlled'])
-
-    if t['reg'] in controlled:
-        if len(controlled) == 1:
-            fail_reasons.append(
-                f'has_extra_controlled_registers{branch_suffix()}')
-            exploitable = False
-    else:
-        if len(controlled) == 0:
-            fail_reasons.append(
-                f'has_extra_controlled_registers{branch_suffix()}')
-            exploitable = False
-
     return exploitable, fail_reasons
 
 
