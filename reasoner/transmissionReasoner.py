@@ -149,6 +149,8 @@ def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
         # This check is redundant without a valid base
         return False
 
+    # With an uncontrolled part in the base (REQUIRES_MEM_LEAK), we assume
+    # it can be a valid pointer if the range allows it.
     if only_independent:
         base_min = t[f'independent_base_range{branch_suffix()}_min']
         base_max = t[f'independent_base_range{branch_suffix()}_max']
