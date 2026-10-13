@@ -83,6 +83,11 @@ def get_disassembled_trace_text(proj, bbls, color=True):
     for bbl_addr in bbls:
         # Symbol
         symbol = proj.loader.find_symbol(bbl_addr, fuzzy=True)
+        # Dont print basic blocks that are hooked & passed
+        if (proj.is_hooked(bbl_addr)
+                and proj.hooked_by(bbl_addr).display_name == 'pass_function'):
+            output += "; hooked -- skipped printing\n"
+            continue
         # We want a symbol add every non-fallthrough
         # As Disassembly adds a symbol at the start of the function, we do not
         if symbol != None and symbol.rebased_addr != bbl_addr and \
