@@ -442,7 +442,10 @@ def perform_out_of_place_training(t: pd.Series):
 
 
 def leak_secret_near_valid_base(t: pd.Series):
-    return True
+    # We consider indirect secret dependency always as not-exploitable by default
+    # There are cases why one mind would include these gadgets, if so, one
+    # can include gadgets having the fail_reasons equal to 'base_has_indirect_secret_dependency'
+    return False
 
 # -- Secret dependent branch
 # A covert channel on the directional branch predictor, leaking the results

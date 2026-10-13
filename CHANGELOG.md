@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 - Reasoner support for user-space programs: `reasoner` config section with `AllowKernelAddresses` and `AllowUserAddresses` (`inspectre reason --config`) ([#39](https://github.com/vusec/inspectre-gadget/pull/39))
 - Reasoner support for secret dependent branches (SDB), results in the `exploitable_w_sdb` columns ([#40](https://github.com/vusec/inspectre-gadget/pull/40))
 
+### Changed
+
+- Gadgets whose base has an indirect secret dependency (`base_has_indirect_secret_dependency`) are now not exploitable by default
+
 ## [1.2.0] - 2026-10-09
 
 After the InSpectre Gadget paper release, many features were added and bugs fixed.
