@@ -5,6 +5,7 @@ from io import StringIO
 import csv
 
 from . import addressSpace
+from . import common
 
 from warnings import simplefilter
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
@@ -72,7 +73,7 @@ def eval_column_to_dict(t: pd.Series, column):
 
 def is_register_sufficiently_controlled(t: pd.Series, reg):
 
-    if t[f"{reg}_control"] != "ControlType.CONTROLLED":
+    if t[f"{reg}_control"] not in common.ATTACKER_CONTROL_TYPES:
         return False
 
     if t[f"{reg}_control_type"] in [

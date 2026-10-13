@@ -5,6 +5,7 @@ import numpy as np
 from io import StringIO
 
 from . import addressSpace
+from . import common
 
 from warnings import simplefilter
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
@@ -24,6 +25,9 @@ PAGE_SHIFT = 12
 ADDRESS_BIT_LEN = 64
 
 MAX_ENTROPY = 16
+
+# Equality compares: no binary search possible
+EQUALITY_OPERATIONS = ['__eq__', '__ne__']
 
 with_branches = False
 
@@ -87,9 +91,7 @@ def has_valid_secret_address(t: pd.Series):
     Check if the secret address can be adjusted to a valid address and the
     attacker has enough control over it.
     """
-    # With REQUIRES_MEM_LEAK, the attacker needs to know the uncontrolled part
-    if t[f'secret_address_control'] not in ['ControlType.CONTROLLED',
-                                            'ControlType.REQUIRES_MEM_LEAK']:
+    if t[f'secret_address_control'] not in common.ATTACKER_CONTROL_TYPES:
         return False
 
     # The amount of control is only determined by the controlled part
@@ -206,8 +208,7 @@ def base_has_indirect_secret_dependency(t: pd.Series):
 
 
 def is_base_controlled(t: pd.Series):
-    return t['base_control'] in ['ControlType.CONTROLLED',
-                                 'ControlType.REQUIRES_MEM_LEAK']
+    return t['base_control'] in common.ATTACKER_CONTROL_TYPES
 
 
 def is_branch_dependent_from_secret(t: pd.Series):
@@ -281,8 +282,9 @@ def can_perform_sliding(t: pd.Series):
     if not is_base_controlled(t):
         return False
 
-    stride = t[f'independent_base_range{branch_suffix()}_stride']
-    window = t[f'independent_base_range{branch_suffix()}_window']
+    # The amount of control is only determined by the controlled part
+    stride = t[f'independent_base_controlled_range{branch_suffix()}_stride']
+    window = t[f'independent_base_controlled_range{branch_suffix()}_window']
     return stride <= 2**t['inferable_bits_spread_low'] and window >= 4096
 
 
@@ -293,11 +295,11 @@ def can_perform_known_prefix(t: pd.Series):
     bytes before the secret, and then increasing the secret address until
     we reach the secret.
     """
-    if t[f'secret_address_control'] != 'ControlType.CONTROLLED':
+    if t[f'secret_address_control'] not in common.ATTACKER_CONTROL_TYPES:
         return False
 
     # TODO: should we check the secret address window also?
-    return t[f'secret_address_range{branch_suffix()}_stride'] <= MAX_ENTROPY
+    return t[f'secret_address_controlled_range{branch_suffix()}_stride'] <= MAX_ENTROPY
 
 
 def can_adjust_base(t: pd.Series):
@@ -309,7 +311,8 @@ def can_adjust_base(t: pd.Series):
     if not is_base_controlled(t):
         return False
 
-    base_controllable_window = t[f'independent_base_range{branch_suffix()}_window']
+    base_controllable_window = t[
+        f'independent_base_controlled_range{branch_suffix()}_window']
     secret_max = t[f'transmitted_secret_range{branch_suffix()}_max']
     secret_window = t[f'transmitted_secret_range{branch_suffix()}_window']
 
@@ -412,7 +415,7 @@ def slam_is_an_user_address_translation(t: pd.Series):
 
     secret_window = t[f'transmitted_secret_range_window']
 
-    base_controllable_window = t[f'independent_base_range_window']
+    base_controllable_window = t[f'independent_base_controlled_range_window']
 
     if (secret_window <= 2 ** 32) and base_controllable_window < 2 ** 63:
         # If the secret is smaller than 32 bits then bits 47 and 63 are
@@ -507,28 +510,48 @@ def _is_cmp_value_independent(t: pd.Series):
 
     return True
 
+def _covers_secret(t: pd.Series, component: str):
+    """
+    Check if the attacker can choose enough different values with the controlled
+    part of the component, to compare with all possible secret values.
+    """
+    window = t[f'{component}_controlled_range{branch_suffix()}_window']
+    stride = max(t[f'{component}_controlled_range{branch_suffix()}_stride'], 1)
+    secret_window = t[f'transmitted_secret_range{branch_suffix()}_window']
+    secret_stride = max(t[f'transmitted_secret_range{branch_suffix()}_stride'], 1)
+
+    # The attacker should be able to hit each possible secret value
+    if stride > secret_stride:
+        return False
+
+    return window // stride >= secret_window // secret_stride
+
+
 def _is_cmp_value_independently_controlled(t: pd.Series):
     """
     The attacker controls cmp_value, independently from the secret.
     """
-    if t['cmp_value_control'] != 'ControlType.CONTROLLED':
+    if t['cmp_value_control'] not in common.ATTACKER_CONTROL_TYPES:
         return False
 
-    return _is_cmp_value_independent(t)
+    if not _is_cmp_value_independent(t):
+        return False
+
+    return _covers_secret(t, 'cmp_value')
 
 
 def _is_sdb_base_controlled(t: pd.Series):
     """
     The attacker controls the base, independently from the secret.
     """
-    if t['base_control'] != 'ControlType.CONTROLLED':
+    if not is_base_controlled(t):
         return False
 
     if t['base_control_type'] not in ['BaseControlType.BASE_INDEPENDENT_FROM_SECRET',
                                       'BaseControlType.COMPLEX_TRANSMISSION']:
         return False
 
-    return True
+    return _covers_secret(t, 'independent_base')
 
 
 def cmp_value_not_independently_controlled(t: pd.Series):
@@ -541,11 +564,22 @@ def cmp_value_not_independently_controlled(t: pd.Series):
 
 def cmp_value_not_controlled(t: pd.Series):
 
-    if (t['base_control'] == 'ControlType.CONTROLLED'
-            or t['cmp_value_control'] == 'ControlType.CONTROLLED'):
+    if (t['base_control'] in common.ATTACKER_CONTROL_TYPES
+            or t['cmp_value_control'] in common.ATTACKER_CONTROL_TYPES):
         return False
 
     return True
+
+
+def is_secret_too_large_for_equality_compare(t: pd.Series):
+    """
+    With an equality compare, the attacker has to guess the secret, which takes
+    up to 2 ** n_inferable_bits tries. Ordering compares allow a binary search.
+    """
+    if t['cmp_operation'] not in EQUALITY_OPERATIONS:
+        return False
+
+    return int(t['inferable_bits_n_inferable_bits']) > MAX_ENTROPY
 
 
 def do_one_bit_compare(t: pd.Series):
@@ -621,6 +655,8 @@ sdb_extra_checks = [
     {'problem': cmp_value_not_controlled, 'solution': do_one_bit_compare},
     {'problem': cmp_value_not_independently_controlled,
      'solution': do_one_bit_compare},
+    {'problem': is_secret_too_large_for_equality_compare,
+     'solution': can_perform_known_prefix},
 ]
 
 
@@ -823,6 +859,22 @@ def run(in_csv, out_csv):
                     'secret_address_range_w_branches_max',
                     'secret_address_range_w_branches_min',
                     'secret_address_range_w_branches_window',
+                    'independent_base_controlled_range_stride',
+                    'independent_base_controlled_range_max',
+                    'independent_base_controlled_range_min',
+                    'independent_base_controlled_range_window',
+                    'independent_base_controlled_range_w_branches_stride',
+                    'independent_base_controlled_range_w_branches_max',
+                    'independent_base_controlled_range_w_branches_min',
+                    'independent_base_controlled_range_w_branches_window',
+                    'cmp_value_controlled_range_stride',
+                    'cmp_value_controlled_range_max',
+                    'cmp_value_controlled_range_min',
+                    'cmp_value_controlled_range_window',
+                    'cmp_value_controlled_range_w_branches_stride',
+                    'cmp_value_controlled_range_w_branches_max',
+                    'cmp_value_controlled_range_w_branches_min',
+                    'cmp_value_controlled_range_w_branches_window',
                     'secret_address_controlled_range_stride',
                     'secret_address_controlled_range_max',
                     'secret_address_controlled_range_min',

@@ -123,7 +123,7 @@ class TFPRegister():
             ("reg", self.reg),
             ("expr", self.expr),
             ("is_dereferenced", self.is_dereferenced),
-            ("controlled_expr", self.expr),
+            ("controlled_expr", self.controlled_expr),
             ("control", self.control),
             ("control_type", self.control_type),
             ("branches", utils.ordered_branches(self.branches)),
