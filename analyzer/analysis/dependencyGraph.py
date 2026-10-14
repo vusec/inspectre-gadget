@@ -7,12 +7,11 @@ by either aliases or constraints that involve each other.
 
 import claripy
 import sys
-import random
 
 # autopep8: off
 from ..scanner import annotations
-from ..scanner.annotations import (AttackerAnnotation, LoadAnnotation,
-                                   UncontrolledAnnotation)
+from ..scanner.annotations import (AttackerAnnotation, AttackerMemoryAnnotation,
+                                   LoadAnnotation, UncontrolledAnnotation)
 from ..shared import logger
 from ..shared import utils
 # autopep8: on
@@ -20,19 +19,20 @@ from ..shared import utils
 l = logger.get_logger("DepGraph")
 
 def is_controlled(var):
+    """
+    A symbol is controlled only if it is an attacker symbol or comes from a
+    controlled load. Symbols without any of our annotations are created by
+    angr itself (e.g., registers that the scanner did not initialize, such as
+    flags) and are considered uncontrolled.
+    """
     if not utils.is_sym_var(var):
         return False
 
+    if annotations.get_attacker_annotation(var) != None:
+        return True
+
     load_anno = annotations.get_load_annotation(var)
-    uncontrolled_anno = annotations.get_uncontrolled_annotation(var)
-
-    if uncontrolled_anno != None:
-        return False
-
-    if load_anno != None and load_anno.controlled == False:
-        return False
-
-    return True
+    return load_anno != None and load_anno.controlled
 
 def is_expr_controlled(expr):
     if not utils.is_sym_expr(expr):
@@ -44,16 +44,7 @@ def is_uncontrolled(var):
     if not utils.is_sym_var(var):
         return False
 
-    load_anno = annotations.get_load_annotation(var)
-    uncontrolled_anno = annotations.get_uncontrolled_annotation(var)
-
-    if uncontrolled_anno != None:
-        return True
-
-    if load_anno != None and load_anno.controlled == False:
-        return True
-
-    return False
+    return not is_controlled(var)
 
 def is_expr_uncontrolled(expr):
     if not utils.is_sym_expr(expr):
@@ -157,6 +148,11 @@ def is_addr_controllable(tree, sym: claripy.ast.BV, fixed_syms: list[claripy.ast
     if not node.controlled:
         return False
 
+    # Attacker memory is controlled through its content, not its address,
+    # which is typically uncontrolled.
+    if isinstance(annotations.get_load_annotation(sym), AttackerMemoryAnnotation):
+        return True
+
     if isinstance(node, LoadNode) and utils.is_sym_expr(node.addr):
         return tree.is_independently_controllable(node.addr, fixed_syms,
                                                   check_constraints, True)
@@ -236,22 +232,18 @@ class DepGraph:
             uncontrolled_annos = [a for a in utils.get_annotations(
                 expr) if isinstance(a, UncontrolledAnnotation)]
 
-            if len(attacker_annos) + len(load_annos) + len(uncontrolled_annos) == 0:
-                print("TODO: something wrong is happening")
-                anno = UncontrolledAnnotation(
-                    f"unknown_{random.randint(0, 256)}")
-                uncontrolled_annos = [anno]
-                expr.annotate(anno)
-            else:
-                assert (len(attacker_annos) + len(load_annos) +
-                        len(uncontrolled_annos) == 1)
+            # A symbol has at most one taint annotation. Symbols created by
+            # angr itself (e.g., registers the scanner did not initialize) have
+            # none: they become uncontrolled RegNodes.
+            n_annos = len(attacker_annos) + len(load_annos) + len(uncontrolled_annos)
+            assert (n_annos <= 1)
 
-            if len(attacker_annos) > 0 or len(uncontrolled_annos) > 0:
-                self.sym_nodes[expr] = RegNode(expr)
-            elif len(load_annos) > 0:
+            if len(load_annos) > 0:
                 self.add_nodes(load_annos[0].read_address_ast)
                 self.sym_nodes[expr] = LoadNode(
                     expr, load_annos[0].read_address_ast)
+            else:
+                self.sym_nodes[expr] = RegNode(expr)
 
         # Symbolic expression.
         else:

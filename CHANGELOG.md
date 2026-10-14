@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 - TFP `controlled_expr` column contained the full expression instead of the controlled part ([#41](https://github.com/vusec/inspectre-gadget/pull/41))
+- Dependency graph treated symbols without annotations (created by angr, e.g., flags or uninitialized registers) as attacker-controlled; they are now uncontrolled.
 
 ## [1.2.0] - 2026-10-09
 
