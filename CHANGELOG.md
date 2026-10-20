@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-20
+
 ### Added
 
 - `LoadConcreteMemory` option to load concrete values from the binary (e.g., globals) ([#38](https://github.com/vusec/inspectre-gadget/pull/38))
@@ -35,5 +37,6 @@ The most important features added:
 - Reasoner support for dispatch gadgets ([#32](https://github.com/vusec/inspectre-gadget/pull/32))
 - Secret dependent branch (SDB) covert-channel support ([#33](https://github.com/vusec/inspectre-gadget/pull/33))
 
-[Unreleased]: https://github.com/vusec/inspectre-gadget/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/vusec/inspectre-gadget/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/vusec/inspectre-gadget/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/vusec/inspectre-gadget/compare/v1.1...v1.2.0
