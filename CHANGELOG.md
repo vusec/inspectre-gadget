@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `n_aggr_misprd` column: number of UNSAT branches taken on the path (`AggressiveSpeculation`)
+- `time_found` column: seconds from the scanner start until the gadget was found
 
 ### Fixed
 

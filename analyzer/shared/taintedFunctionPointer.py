@@ -173,6 +173,7 @@ class TaintedFunctionPointer():
     n_instr: int
     n_control_flow_changes: int
     n_aggr_misprd: int
+    time_found: float
 
     registers: dict[str, TFPRegister]
     control: ControlType
@@ -180,7 +181,7 @@ class TaintedFunctionPointer():
 
     def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr,
                  n_control_flow_changes, contains_spec_stop, n_dependent_loads,
-                 n_aggr_misprd=0) -> None:
+                 n_aggr_misprd=0, time_found=0.0) -> None:
         self.uuid = ""
         self.name = ""
         self.address = 0
@@ -191,6 +192,7 @@ class TaintedFunctionPointer():
         self.n_instr = n_instr
         self.n_control_flow_changes = n_control_flow_changes
         self.n_aggr_misprd = n_aggr_misprd
+        self.time_found = time_found
         self.contains_spec_stop = contains_spec_stop
         self.n_dependent_loads = n_dependent_loads
         self.n_branches = len(branches)
@@ -264,6 +266,7 @@ class TaintedFunctionPointer():
             ("n_instr", self.n_instr),
             ("n_control_flow_changes", self.n_control_flow_changes),
             ("n_aggr_misprd", self.n_aggr_misprd),
+            ("time_found", self.time_found),
             ("n_dependent_loads", self.n_dependent_loads),
             ("n_branches", self.n_branches),
             ("contains_spec_stop", self.contains_spec_stop),
@@ -310,7 +313,8 @@ class TaintedFunctionPointer():
             n_control_flow_changes=self.n_control_flow_changes,
             contains_spec_stop=self.contains_spec_stop,
             n_dependent_loads=self.n_dependent_loads,
-            n_aggr_misprd=self.n_aggr_misprd)
+            n_aggr_misprd=self.n_aggr_misprd,
+            time_found=self.time_found)
         new_tfp.control = new_tfp.control
         new_tfp.constraints.extend(self.constraints)
         new_tfp.branches.extend(self.branches)

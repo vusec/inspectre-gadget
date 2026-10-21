@@ -14,6 +14,7 @@ import claripy
 from . import annotations
 from . import memory
 import sys
+import time
 from enum import Enum
 import traceback
 
@@ -128,6 +129,7 @@ class Scanner:
 
     def __init__(self, analysis_pipeline):
         self.analysis_pipeline = analysis_pipeline
+        self.start_time = time.time()
 
         self.transmissions = []
         self.calls = []
@@ -263,6 +265,10 @@ class Scanner:
         # UNSAT branches taken on this path (AggressiveSpeculation).
         return state.globals.get('n_aggr_misprd', 0)
 
+    def get_time_found(self):
+        # Seconds since the scanner was created.
+        return round(time.time() - self.start_time, 2)
+
     def get_aliases(self, state):
         aliases = []
         for v in state.globals.keys():
@@ -336,6 +342,7 @@ class Scanner:
                 n_instr=self.count_instructions(state, state.scratch.ins_addr),
                 n_control_flow_changes=self.count_control_flow_changes(state),
                 n_aggr_misprd=self.count_aggressive_mispredictions(state),
+                time_found=self.get_time_found(),
                 contains_spec_stop=self.history_contains_speculation_stop(state))
             self.transmissions.append(t)
 
@@ -370,6 +377,7 @@ class Scanner:
             n_instr=self.count_instructions(state, state.scratch.ins_addr),
             n_control_flow_changes=self.count_control_flow_changes(state),
             n_aggr_misprd=self.count_aggressive_mispredictions(state),
+            time_found=self.get_time_found(),
             contains_spec_stop=self.history_contains_speculation_stop(state),
             n_dependent_loads=annotations.get_load_depth(func_ptr_ast))
 
@@ -426,6 +434,7 @@ class Scanner:
                            branches=self.get_history(state),
                            bbls=self.get_bbls(state),
                            n_aggr_misprd=self.count_aggressive_mispredictions(state),
+                           time_found=self.get_time_found(),
                            )
             self.half_gadgets.append(g)
 
@@ -473,6 +482,7 @@ class Scanner:
                 n_instr=self.count_instructions(state, state.scratch.ins_addr),
                 n_control_flow_changes=self.count_control_flow_changes(state),
                 n_aggr_misprd=self.count_aggressive_mispredictions(state),
+                time_found=self.get_time_found(),
                 contains_spec_stop=self.history_contains_speculation_stop(state))
 
             self.secretDependentBranches.append(sdb)
