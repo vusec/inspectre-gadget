@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- Branch history misaligned on paths through hooked functions (SimProcedures)
+- Annotated assembly: loop and repeated-call annotations no longer overwrite each other (`(visit k/n)`). TFP now also prints branch annotations.
+- Substitutions of a split state were reused on later visits of the same pc (loops, repeated calls)
+
 ## [1.3.0] - 2026-10-20
 
 ### Added

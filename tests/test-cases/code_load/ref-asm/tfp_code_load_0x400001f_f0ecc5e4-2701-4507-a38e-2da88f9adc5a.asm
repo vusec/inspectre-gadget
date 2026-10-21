@@ -1,7 +1,7 @@
 --------------------- TFP ----------------------
          code_load:
 4000000  cmp     r8, 0x0
-4000004  je      trans1
+4000004  je      trans1 ; Taken   <Bool r8 == 0x0>
          trans1:
 400001c  mov     rax, qword ptr [rdi] ; {Attacker@rdi} -> {Attacker@0x400001c}
 400001f  jmp     rax ; {Attacker@0x400001c} -> TAINTED FUNCTION POINTER

@@ -3,7 +3,7 @@
 4000000  mov     r8, qword ptr [rdi]
 4000003  cmp     rax, 0x0
 4000007  je      tfp0 ; Not Taken   <Bool rax != 0x0>
-4000009  jmp     tfp1
+4000009  jmp     tfp1 ; Taken   <Bool True>
          tfp1:
 4000014  mov     r10, qword ptr [rdi-0x10]
 4000018  mov     r11, qword ptr [r10]

@@ -373,7 +373,8 @@ def get_aliasing_store(load_addr: claripy.ast.BV, load_size: int, load_id: int,
 
         # We first store a new expr on load_addr, to fill any possible blank spots
         annotation = annotations.propagate_annotations(load_addr,
-                                                       state.scratch.ins_addr)
+                                                       state.scratch.ins_addr,
+                                                       utils.get_bbl_index(state))
         gap_expr = claripy.BVS(name=f"LOAD_{load_size * 8}[{load_addr}_{load_id}]",
                                size=load_size * 8,
                                annotations=(annotation,), explicit_name=True)

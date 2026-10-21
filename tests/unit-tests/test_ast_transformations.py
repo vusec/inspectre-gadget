@@ -85,7 +85,7 @@ class MatchSignExtTestCase(unittest.TestCase):
     def test_annotations_simplification(self):
         x = claripy.BVS("x", 8).annotate(AttackerAnnotation("rsi"))
         y = claripy.BVS("y", 8).annotate(AttackerAnnotation("rdi"))
-        z = claripy.BVS("z", 8).annotate(SecretAnnotation(x + y, 0, True))
+        z = claripy.BVS("z", 8).annotate(SecretAnnotation(x + y, 0, True, 0))
 
         self.assertTrue(len(get_annotations(x)) == 1)
         self.assertTrue(len(get_annotations(x + y)) == 2)

@@ -81,12 +81,17 @@ def getPrefix(stype: SubstType):
     return ""
 
 
+def getSubstKey(state, addr, type: SubstType):
+    # Per visit of the bbl: only the re-execution of the split bbl uses it.
+    return getPrefix(type) + f"{state.globals['bbl_index']}_{addr}"
+
+
 def recordSubstitution(state, addr, value, type):
-    state.globals[getPrefix(type) + str(addr)] = value
+    state.globals[getSubstKey(state, addr, type)] = value
 
 
 def getSubstitution(state, addr, type: SubstType):
-    key = getPrefix(type) + str(addr)
+    key = getSubstKey(state, addr, type)
 
     if key in state.globals.keys():
         return state.globals[key]
@@ -271,9 +276,13 @@ class Scanner:
     def get_history(self, state):
         branches = []
 
-        for cond, source, target in zip(state.history.jump_guards,
-                                        state.history.jump_sources,
-                                        state.history.jump_targets):
+        for h in state.history.lineage:
+            # A SimProcedure adds a history node without a jump source, and
+            # the current block has no exit yet. Skip both.
+            if h.jump_guard is None or h.jump_source is None or h.jump_target is None:
+                continue
+            cond, source, target = h.jump_guard, h.jump_source, h.jump_target
+
             # Check if the condition contains an if-then-else statement,
             # and substitute it with the appropriate choice for this state.
             subst = getSubstitution(state, source, SubstType.COND_SUBST)
@@ -284,6 +293,12 @@ class Scanner:
             branches.append((source, cond, outcome))
 
         return branches
+
+    def add_bbl(self, state):
+        # Append state.addr to the path, bbl_index is its position.
+        state.globals[f'hist_{self.n_hist}'] = state.addr
+        state.globals['bbl_index'] = state.globals.get('bbl_index', -1) + 1
+        self.n_hist += 1
 
     def get_bbls(self, state):
         hist = []
@@ -588,7 +603,7 @@ class Scanner:
         elif (global_config['LoadConcreteMemory'] and not load_addr.symbolic
                 and not state.inspect.mem_read_expr.symbolic):
             annotation = annotations.propagate_annotations(
-                load_addr, state.scratch.ins_addr)
+                load_addr, state.scratch.ins_addr, utils.get_bbl_index(state))
             load_val = claripy.BVV(state.inspect.mem_read_expr.args[0],
                                    size=load_len * 8,
                                    annotations=(annotation,))
@@ -599,7 +614,8 @@ class Scanner:
         else:
             # Create a new symbol to represent the loaded value.
             annotation = annotations.propagate_annotations(load_addr,
-                                                           state.scratch.ins_addr)
+                                                           state.scratch.ins_addr,
+                                                           utils.get_bbl_index(state))
             load_name = f'LOAD_{load_len * 8}[{load_addr}]_{self.cur_id}'
             load_val = claripy.BVS(name=load_name,
                                    size=load_len * 8,
@@ -854,7 +870,7 @@ class Scanner:
         self.thunk_list = utils.get_x86_indirect_thunks(proj)
 
         # Run the symbolic execution engine.
-        state.globals['hist_0'] = state.addr
+        self.add_bbl(state)
         self.states = [state]
         while len(self.states) > 0:
             # Pick the next state.
@@ -945,8 +961,7 @@ class Scanner:
                     marker = claripy.BoolV("UNSAT")
                     ns.history.jump_guard = (marker)
 
-                self.n_hist += 1
-                ns.globals[f'hist_{self.n_hist}'] = ns.addr
+                self.add_bbl(ns)
 
                 # Check if the last branch condition contains an if-then-else statement.
                 try:

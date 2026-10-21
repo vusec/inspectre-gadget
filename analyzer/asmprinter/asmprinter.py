@@ -3,6 +3,7 @@ import claripy
 import sys
 from pathlib import Path
 from enum import Enum
+from collections import Counter
 
 # autopep8: off
 from ..shared.transmission import Transmission
@@ -16,10 +17,12 @@ from ..scanner.annotations import (LoadAnnotation, SecretAnnotation,
 # autopep8: on
 
 
-def get_branch_comments(branches):
-    comments = {}
-    for addr, condition, taken in branches:
-        comments[addr] = str(taken) + "   " + utils.truncate_str(str(condition))
+def get_branch_comments(proj, bbls, branches):
+    # One dict per bbl; hooked bbls and the last bbl have no branch.
+    comments = [{} for _ in bbls]
+    branch_bbls = [i for i, bbl_addr in enumerate(bbls[:-1]) if not proj.is_hooked(bbl_addr)]
+    for i, (addr, condition, taken) in zip(branch_bbls, branches):
+        comments[i][addr] = str(taken) + "   " + utils.truncate_str(str(condition))
 
     return comments
 
@@ -29,7 +32,7 @@ def replace_secret_annotations_with_name(annotations, name):
     for anno in annotations:
         if isinstance(anno, (SecretAnnotation, TransmissionAnnotation)):
             new_annotations.append(LoadAnnotation(
-                None, name, anno.address, None))
+                None, name, anno.address, None, anno.bbl_index))
         else:
             new_annotations.append(anno)
 
@@ -53,8 +56,8 @@ def get_load_comments(expr: claripy.ast.BV, secret_load_pc):
                 utils.get_annotations(load_anno.read_address_ast), "Attacker")
             val_annos = replace_secret_annotations_with_name(
                 utils.get_annotations(v), loaded_name)
-            annotations[load_anno.address] = (utils.sorted_set_str(addr_annos) + " -> "
-                                              + utils.sorted_set_str(val_annos))
+            annotations[(load_anno.bbl_index, load_anno.address)] = (
+                utils.sorted_set_str(addr_annos) + " -> " + utils.sorted_set_str(val_annos))
 
             annotations.update(get_load_comments(
                 load_anno.read_address_ast, secret_load_pc))
@@ -76,11 +79,15 @@ class GadgetType(Enum):
     UNKNOWN = 3
 
 
-def get_disassembled_trace_text(proj, bbls, color=True):
+def get_disassembled_trace_text(proj, bbls, color=True, comments=None):
+    # comments: one {addr: comment} dict per bbl.
 
+    n_visits = Counter(bbls)
+    visit = Counter()
     prev_block = None
     output = ""
-    for bbl_addr in bbls:
+    for i, bbl_addr in enumerate(bbls):
+        visit[bbl_addr] += 1
         # Symbol
         symbol = proj.loader.find_symbol(bbl_addr, fuzzy=True)
         # Dont print basic blocks that are hooked & passed
@@ -97,7 +104,14 @@ def get_disassembled_trace_text(proj, bbls, color=True):
             output += " " * bytes_width + \
                 f";{symbol.name}+{bbl_addr - symbol.rebased_addr}:\n"
 
+        if n_visits[bbl_addr] > 1:
+            bytes_width = (bbl_addr.bit_length() + 3) // 4 + 2
+            output += " " * bytes_width + \
+                f";(visit {visit[bbl_addr]}/{n_visits[bbl_addr]})\n"
+
         # Add the assembly code
+        if comments is not None:
+            proj.kb.comments = comments[i]
         block = proj.factory.block(bbl_addr)
         prev_block = block
         output += proj.analyses.Disassembly(
@@ -111,20 +125,22 @@ def get_disassembled_trace_text(proj, bbls, color=True):
 def print_annotated_assembly(proj: angr.Project, bbls, branches, expr, pc,
                              secret_load_pc, type: GadgetType, color=True):
     # Branches.
-    proj.kb.comments = get_branch_comments(branches)
+    comments = get_branch_comments(proj, bbls, branches)
     # Loads.
-    proj.kb.comments.update(get_load_comments(expr, secret_load_pc))
-    # Transmission
+    for (bbl_index, addr), comment in get_load_comments(expr, secret_load_pc).items():
+        comments[bbl_index][addr] = comment
+    # Transmission, in the last bbl.
+    last = comments[-1]
     if type == GadgetType.TFP:
         attacker_annos = replace_secret_annotations_with_name(
             utils.get_annotations(expr), "Attacker")
-        proj.kb.comments[pc] = utils.sorted_set_str(attacker_annos)
-        proj.kb.comments[pc] += " -> " + "TAINTED FUNCTION POINTER"
+        last[pc] = utils.sorted_set_str(attacker_annos)
+        last[pc] += " -> " + "TAINTED FUNCTION POINTER"
     elif type == GadgetType.HALF:
         attacker_annos = replace_secret_annotations_with_name(
             utils.get_annotations(expr), "Attacker")
-        proj.kb.comments[pc] = utils.sorted_set_str(attacker_annos)
-        proj.kb.comments[pc] += " -> " + "HALF GADGET"
+        last[pc] = utils.sorted_set_str(attacker_annos)
+        last[pc] += " -> " + "HALF GADGET"
     elif type == GadgetType.TRANSMISSION:
         all_annotations = set(utils.get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(
@@ -133,8 +149,8 @@ def print_annotated_assembly(proj: angr.Project, bbls, branches, expr, pc,
             secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(
             all_annotations - secret_annotations, "Attacker")
-        proj.kb.comments[pc] = utils.sorted_set_str(annotations)
-        proj.kb.comments[pc] += " -> " + "TRANSMISSION"
+        last[pc] = utils.sorted_set_str(annotations)
+        last[pc] += " -> " + "TRANSMISSION"
     elif type == GadgetType.SDB:
         all_annotations = set(utils.get_annotations(expr))
         secret_annotations = {a for a in all_annotations if isinstance(
@@ -143,10 +159,10 @@ def print_annotated_assembly(proj: angr.Project, bbls, branches, expr, pc,
             secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(
             all_annotations - secret_annotations, "Attacker")
-        proj.kb.comments[pc] = utils.sorted_set_str(annotations)
-        proj.kb.comments[pc] += " -> " + "SECRET DEPENDENT BRANCH"
+        last[pc] = utils.sorted_set_str(annotations)
+        last[pc] += " -> " + "SECRET DEPENDENT BRANCH"
 
-    output = get_disassembled_trace_text(proj, bbls, color)
+    output = get_disassembled_trace_text(proj, bbls, color, comments)
 
     proj.kb.comments = {}
     return output
@@ -199,7 +215,7 @@ def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/tfp_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"--------------------- TFP ----------------------\n")
-    o.write(print_annotated_assembly(proj, t.bbls, t.branches,
+    o.write(print_annotated_assembly(proj, t.bbls, t.all_branches,
             t.expr, t.pc, None, type=GadgetType.TFP, color=False))
     o.write(f"""
 {'-' * 48}

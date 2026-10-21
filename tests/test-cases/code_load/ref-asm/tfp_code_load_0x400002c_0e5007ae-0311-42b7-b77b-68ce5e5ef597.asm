@@ -1,11 +1,11 @@
 --------------------- TFP ----------------------
          code_load:
 4000000  cmp     r8, 0x0
-4000004  je      trans1
+4000004  je      trans1 ; Not Taken   <Bool r8 != 0x0>
 4000006  cmp     r8, 0x1
-400000a  je      trans2
+400000a  je      trans2 ; Not Taken   <Bool r8 != 0x1>
 400000c  cmp     r8, 0x2
-4000010  je      trans3
+4000010  je      trans3 ; Taken   <Bool r8 == 0x2>
          trans3:
 400002c  jmp     qword ptr [rdi] ; {Attacker@0x400002c} -> TAINTED FUNCTION POINTER
 

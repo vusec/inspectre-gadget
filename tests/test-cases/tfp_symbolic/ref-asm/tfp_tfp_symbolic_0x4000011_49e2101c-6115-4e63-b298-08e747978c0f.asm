@@ -1,7 +1,7 @@
 --------------------- TFP ----------------------
          tfp_symbolic:
 4000000  cmp     r15, 0x0
-4000004  je      tfp1
+4000004  je      tfp1 ; Taken   <Bool r15 == 0x0>
          tfp1:
 400000c  add     byte ptr [rdi], bh
 400000e  cmovae  eax, ecx

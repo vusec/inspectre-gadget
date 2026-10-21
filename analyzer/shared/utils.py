@@ -100,6 +100,11 @@ def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno"
     o.close()
 
 
+def get_bbl_index(state):
+    # Index of the current bbl in the path, see Scanner.add_bbl.
+    return state.globals['bbl_index']
+
+
 def get_outcome(cond, source, target):
     if cond.concrete:
         if cond.is_true():

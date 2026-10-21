@@ -22,12 +22,15 @@ class LoadAnnotation(claripy.Annotation):
     requirements: Requirements
     controlled: bool
     depth: int
+    # Index in bbls, tells apart loads of the same pc.
+    bbl_index: int
 
-    def __init__(self, read_address_ast, name, address, controlled):
+    def __init__(self, read_address_ast, name, address, controlled, bbl_index):
         self.read_address_ast = read_address_ast
         self.name = name
         self.address = address
         self.controlled = controlled
+        self.bbl_index = bbl_index
 
         self.requirements = Requirements()
         self.depth = 0
@@ -78,11 +81,12 @@ class SecretAnnotation(LoadAnnotation):
     This symbol comes from loading an attacker-controlled address.
     """
 
-    def __init__(self, read_address_ast, address, controlled):
-        super().__init__(read_address_ast, "Secret", address, controlled)
+    def __init__(self, read_address_ast, address, controlled, bbl_index):
+        super().__init__(read_address_ast, "Secret", address, controlled, bbl_index)
 
     def copy(self):
-        return SecretAnnotation(self.read_address_ast, self.address, self.controlled)
+        return SecretAnnotation(self.read_address_ast, self.address, self.controlled,
+                                self.bbl_index)
 
 
 class TransmissionAnnotation(LoadAnnotation):
@@ -90,12 +94,12 @@ class TransmissionAnnotation(LoadAnnotation):
     This symbol comes from loading/storing/calling a secret-dependent address.
     """
 
-    def __init__(self, read_address_ast, address, controlled):
-        super().__init__(read_address_ast, "Transmission", address, controlled)
+    def __init__(self, read_address_ast, address, controlled, bbl_index):
+        super().__init__(read_address_ast, "Transmission", address, controlled, bbl_index)
 
     def copy(self):
         return TransmissionAnnotation(self.read_address_ast, self.address,
-                                      self.controlled)
+                                      self.controlled, self.bbl_index)
 
 
 class UncontrolledLoadAnnotation(LoadAnnotation):
@@ -103,12 +107,13 @@ class UncontrolledLoadAnnotation(LoadAnnotation):
     This symbol comes from loading a uncontrolled address.
     """
 
-    def __init__(self, read_address_ast, address):
+    def __init__(self, read_address_ast, address, bbl_index):
         super().__init__(read_address_ast, "UncontrolledLoad", address,
-                         controlled=False)
+                         controlled=False, bbl_index=bbl_index)
 
     def copy(self):
-        return UncontrolledLoadAnnotation(self.read_address_ast, self.address)
+        return UncontrolledLoadAnnotation(self.read_address_ast, self.address,
+                                          self.bbl_index)
 
 
 class AttackerMemoryAnnotation(LoadAnnotation):
@@ -119,11 +124,13 @@ class AttackerMemoryAnnotation(LoadAnnotation):
     use InSpectre Gadget can attach it, e.g., via a custom propagate_annotations().
     """
 
-    def __init__(self, read_address_ast, address):
-        super().__init__(read_address_ast, "AttackerMemory", address, controlled=True)
+    def __init__(self, read_address_ast, address, bbl_index):
+        super().__init__(read_address_ast, "AttackerMemory", address, controlled=True,
+                         bbl_index=bbl_index)
 
     def copy(self):
-        return AttackerMemoryAnnotation(self.read_address_ast, self.address)
+        return AttackerMemoryAnnotation(self.read_address_ast, self.address,
+                                        self.bbl_index)
 
 class AttackerAnnotation(claripy.Annotation):
     register: str
@@ -175,14 +182,14 @@ class UncontrolledAnnotation(claripy.Annotation):
         return UncontrolledAnnotation(self.register)
 
 
-def propagate_annotations(ast: claripy.ast.BV, address):
+def propagate_annotations(ast: claripy.ast.BV, address, bbl_index):
     """
     Given the AST of a symbolic address, return the annotation of the loaded value.
     This basically implements how taint evolves through memory operations.
     """
     # For constant addresses, we might be able to massage the content.
     if not ast.symbolic:
-        return UncontrolledLoadAnnotation(ast, address)
+        return UncontrolledLoadAnnotation(ast, address, bbl_index)
 
     is_attack = False
     is_secret = False
@@ -204,13 +211,14 @@ def propagate_annotations(ast: claripy.ast.BV, address):
                 can_be_controlled = True
 
     if is_secret or is_transmission:
-        return TransmissionAnnotation(ast, address, controlled=can_be_controlled)
+        return TransmissionAnnotation(ast, address, controlled=can_be_controlled,
+                                      bbl_index=bbl_index)
     elif is_attack:
-        return SecretAnnotation(ast, address, controlled=True)
+        return SecretAnnotation(ast, address, controlled=True, bbl_index=bbl_index)
     else:
         """ In some cases a load from an uncontrolled value could still be
         seen as a secret, but for now this is out of scope """
-        return UncontrolledLoadAnnotation(ast, address)
+        return UncontrolledLoadAnnotation(ast, address, bbl_index)
 
 
 def contains_secret(ast: claripy.ast.BV):

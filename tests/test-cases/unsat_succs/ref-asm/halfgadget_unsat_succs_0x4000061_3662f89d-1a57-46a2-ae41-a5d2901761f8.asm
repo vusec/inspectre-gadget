@@ -11,30 +11,35 @@
          loopy:
 4000052  mov     rbx, qword ptr [rax]
 4000055  cmp     rbx, r12
-4000058  je      end ; Not Taken   <Bool UNSAT>
+4000058  je      end ; Taken   <Bool True>
+         ;(visit 1/3)
 400005a  add     rbx, 0x8
 400005e  mov     rcx, qword ptr [rbx]
-4000061  mov     rdx, qword ptr [rcx] ; {Attacker@rdi} -> HALF GADGET
+4000061  mov     rdx, qword ptr [rcx]
 4000064  add     rax, 0x10
 4000068  jmp     loopy ; Taken   <Bool True>
+         ;(visit 1/2)
+         loopy:
+4000052  mov     rbx, qword ptr [rax]
+4000055  cmp     rbx, r12
+4000058  je      end ; Taken   <Bool True>
+         ;(visit 2/3)
+400005a  add     rbx, 0x8
+400005e  mov     rcx, qword ptr [rbx]
+4000061  mov     rdx, qword ptr [rcx]
+4000064  add     rax, 0x10
+4000068  jmp     loopy ; Taken   <Bool True>
+         ;(visit 2/2)
          loopy:
 4000052  mov     rbx, qword ptr [rax]
 4000055  cmp     rbx, r12
 4000058  je      end ; Not Taken   <Bool UNSAT>
+         ;(visit 3/3)
 400005a  add     rbx, 0x8
 400005e  mov     rcx, qword ptr [rbx]
 4000061  mov     rdx, qword ptr [rcx] ; {Attacker@rdi} -> HALF GADGET
 4000064  add     rax, 0x10
-4000068  jmp     loopy ; Taken   <Bool True>
-         loopy:
-4000052  mov     rbx, qword ptr [rax]
-4000055  cmp     rbx, r12
-4000058  je      end ; Not Taken   <Bool UNSAT>
-400005a  add     rbx, 0x8
-400005e  mov     rcx, qword ptr [rbx]
-4000061  mov     rdx, qword ptr [rcx] ; {Attacker@rdi} -> HALF GADGET
-4000064  add     rax, 0x10
-4000068  jmp     loopy ; Taken   <Bool True>
+4000068  jmp     loopy
 
 ------------------------------------------------
 uuid: 3662f89d-1a57-46a2-ae41-a5d2901761f8

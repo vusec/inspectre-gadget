@@ -1,7 +1,7 @@
 --------------------- TFP ----------------------
          user_space:
 4000000  cmp     r8, 0x0
-4000004  je      trans
+4000004  je      trans ; Not Taken   <Bool r8 != 0x0>
          tfp:
 4000006  movsxd  rax, dword ptr [rdi] ; {Attacker@rdi} -> {Attacker@0x4000006}
 4000009  jmp     rax ; {Attacker@0x4000006} -> TAINTED FUNCTION POINTER

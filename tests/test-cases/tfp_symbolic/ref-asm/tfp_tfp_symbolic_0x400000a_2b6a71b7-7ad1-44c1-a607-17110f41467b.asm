@@ -1,7 +1,7 @@
 --------------------- TFP ----------------------
          tfp_symbolic:
 4000000  cmp     r15, 0x0
-4000004  je      tfp1
+4000004  je      tfp1 ; Not Taken   <Bool r15 != 0x0>
          tfp0:
 4000006  mov     rax, qword ptr [rcx+rsi] ; {Attacker@rcx, Attacker@rsi} -> {Attacker@0x4000006}
 400000a  call    rax ; {Attacker@0x4000006} -> TAINTED FUNCTION POINTER
