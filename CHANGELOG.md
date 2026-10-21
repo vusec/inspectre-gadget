@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- `n_aggr_misprd` column: number of UNSAT branches taken on the path (`AggressiveSpeculation`)
+
 ### Fixed
 
 - Branch history misaligned on paths through hooked functions (SimProcedures)

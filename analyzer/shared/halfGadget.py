@@ -25,6 +25,7 @@ class HalfGadget():
     name: str
     pc: int
     n_instr: int
+    n_aggr_misprd: int
     contains_spec_stop: bool
     max_load_depth: int
 
@@ -46,11 +47,13 @@ class HalfGadget():
     all_requirements: Requirements
 
     def __init__(self, expr: claripy.ast.BV, pc: int, n_instr: int,
-                 contains_spec_stop: bool, aliases, constraints, branches, bbls):
+                 contains_spec_stop: bool, aliases, constraints, branches, bbls,
+                 n_aggr_misprd: int = 0):
         self.uuid = ""
         self.name = ""
         self.pc = pc
         self.n_instr = n_instr
+        self.n_aggr_misprd = n_aggr_misprd
         self.contains_spec_stop = contains_spec_stop
         self.max_load_depth = 0
 
@@ -103,6 +106,7 @@ class HalfGadget():
 
         aliases: {self.aliases}
         n_instr: {self.n_instr}
+        n_aggr_misprd: {self.n_aggr_misprd}
         n_dependent_loads: {self.max_load_depth}
         """
 
@@ -114,6 +118,7 @@ class HalfGadget():
         d['pc'] = hex(self.pc)
         d['expr'] = self.loaded.expr
         d['n_instr'] = self.n_instr
+        d['n_aggr_misprd'] = self.n_aggr_misprd
         d['n_dependent_loads'] = self.max_load_depth
         d['contains_spec_stop'] = self.contains_spec_stop
         d['bbls'] = str([hex(x) for x in self.bbls])

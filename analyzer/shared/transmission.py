@@ -102,11 +102,12 @@ class TransmissionExpr:
     constraints: list[tuple[int, claripy.ast.BV]]
     n_instr: int
     n_control_flow_changes: int
+    n_aggr_misprd: int
     contains_spec_stop: bool
 
     def __init__(self, pc: int, expr: claripy.ast.BV, transmitter: TransmitterType,
                  bbls, branches, aliases, constraints, n_instr,
-                 n_control_flow_changes, contains_spec_stop):
+                 n_control_flow_changes, contains_spec_stop, n_aggr_misprd=0):
         self.pc = pc
         self.expr = expr
         self.transmitter = transmitter
@@ -117,6 +118,7 @@ class TransmissionExpr:
         self.bbls = bbls
         self.n_instr = n_instr
         self.n_control_flow_changes = n_control_flow_changes
+        self.n_aggr_misprd = n_aggr_misprd
         self.contains_spec_stop = contains_spec_stop
 
     def __repr__(self):
@@ -129,6 +131,7 @@ class TransmissionExpr:
                 aliases: {self.aliases}
                 constraints: {utils.ordered_constraints(self.constraints)}
                 n_instr: {self.n_instr}
+                n_aggr_misprd: {self.n_aggr_misprd}
                 contains_spec_stop: {self.contains_spec_stop}
                 """
 
@@ -227,6 +230,7 @@ class Transmission():
     transmitter: TransmitterType
     n_instr: int
     n_control_flow_changes: int
+    n_aggr_misprd: int
     contains_spec_stop: bool
     max_load_depth: int
 
@@ -264,6 +268,7 @@ class Transmission():
         self.transmitter = t.transmitter
         self.n_instr = t.n_instr
         self.n_control_flow_changes = t.n_control_flow_changes
+        self.n_aggr_misprd = t.n_aggr_misprd
         self.contains_spec_stop = t.contains_spec_stop
         self.max_load_depth = 0
 
@@ -353,6 +358,7 @@ class Transmission():
         d['transmitter'] = str(self.transmitter)
         d['n_instr'] = self.n_instr
         d['n_control_flow_changes'] = self.n_control_flow_changes
+        d['n_aggr_misprd'] = self.n_aggr_misprd
         d['n_dependent_loads'] = self.max_load_depth
         d['contains_spec_stop'] = self.contains_spec_stop
         d['bbls'] = str([hex(x) for x in self.bbls])

@@ -172,13 +172,15 @@ class TaintedFunctionPointer():
 
     n_instr: int
     n_control_flow_changes: int
+    n_aggr_misprd: int
 
     registers: dict[str, TFPRegister]
     control: ControlType
     contains_spec_stop: bool
 
     def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr,
-                 n_control_flow_changes, contains_spec_stop, n_dependent_loads) -> None:
+                 n_control_flow_changes, contains_spec_stop, n_dependent_loads,
+                 n_aggr_misprd=0) -> None:
         self.uuid = ""
         self.name = ""
         self.address = 0
@@ -188,6 +190,7 @@ class TaintedFunctionPointer():
 
         self.n_instr = n_instr
         self.n_control_flow_changes = n_control_flow_changes
+        self.n_aggr_misprd = n_aggr_misprd
         self.contains_spec_stop = contains_spec_stop
         self.n_dependent_loads = n_dependent_loads
         self.n_branches = len(branches)
@@ -260,6 +263,7 @@ class TaintedFunctionPointer():
             ("pc_symbol", self.pc_symbol),
             ("n_instr", self.n_instr),
             ("n_control_flow_changes", self.n_control_flow_changes),
+            ("n_aggr_misprd", self.n_aggr_misprd),
             ("n_dependent_loads", self.n_dependent_loads),
             ("n_branches", self.n_branches),
             ("contains_spec_stop", self.contains_spec_stop),
@@ -305,7 +309,8 @@ class TaintedFunctionPointer():
             n_instr=self.n_instr,
             n_control_flow_changes=self.n_control_flow_changes,
             contains_spec_stop=self.contains_spec_stop,
-            n_dependent_loads=self.n_dependent_loads)
+            n_dependent_loads=self.n_dependent_loads,
+            n_aggr_misprd=self.n_aggr_misprd)
         new_tfp.control = new_tfp.control
         new_tfp.constraints.extend(self.constraints)
         new_tfp.branches.extend(self.branches)

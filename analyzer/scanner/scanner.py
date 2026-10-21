@@ -259,6 +259,10 @@ class Scanner:
 
         return n_control_flow_changes
 
+    def count_aggressive_mispredictions(self, state):
+        # UNSAT branches taken on this path (AggressiveSpeculation).
+        return state.globals.get('n_aggr_misprd', 0)
+
     def get_aliases(self, state):
         aliases = []
         for v in state.globals.keys():
@@ -331,6 +335,7 @@ class Scanner:
                 constraints=self.get_constraints(state),
                 n_instr=self.count_instructions(state, state.scratch.ins_addr),
                 n_control_flow_changes=self.count_control_flow_changes(state),
+                n_aggr_misprd=self.count_aggressive_mispredictions(state),
                 contains_spec_stop=self.history_contains_speculation_stop(state))
             self.transmissions.append(t)
 
@@ -364,6 +369,7 @@ class Scanner:
             constraints=self.get_constraints(state),
             n_instr=self.count_instructions(state, state.scratch.ins_addr),
             n_control_flow_changes=self.count_control_flow_changes(state),
+            n_aggr_misprd=self.count_aggressive_mispredictions(state),
             contains_spec_stop=self.history_contains_speculation_stop(state),
             n_dependent_loads=annotations.get_load_depth(func_ptr_ast))
 
@@ -419,6 +425,7 @@ class Scanner:
                            constraints=self.get_constraints(state),
                            branches=self.get_history(state),
                            bbls=self.get_bbls(state),
+                           n_aggr_misprd=self.count_aggressive_mispredictions(state),
                            )
             self.half_gadgets.append(g)
 
@@ -465,6 +472,7 @@ class Scanner:
                 constraints=constraints,
                 n_instr=self.count_instructions(state, state.scratch.ins_addr),
                 n_control_flow_changes=self.count_control_flow_changes(state),
+                n_aggr_misprd=self.count_aggressive_mispredictions(state),
                 contains_spec_stop=self.history_contains_speculation_stop(state))
 
             self.secretDependentBranches.append(sdb)
@@ -960,6 +968,7 @@ class Scanner:
                     ns.solver.reload_solver(self.cur_state.solver.constraints)
                     marker = claripy.BoolV("UNSAT")
                     ns.history.jump_guard = (marker)
+                    ns.globals['n_aggr_misprd'] = self.count_aggressive_mispredictions(ns) + 1
 
                 self.add_bbl(ns)
 

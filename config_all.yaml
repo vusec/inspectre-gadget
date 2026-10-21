@@ -76,6 +76,7 @@ AnalyzeDuringScanning: True
 # This is helpful to simulate cases where an attacker might have _indirect_
 # control of a branch speculation, e.g. with out_of_place training or massaging,
 # or when following a trace.
+# Counted per gadget in n_aggr_misprd column.
 AggressiveSpeculation: False
 
 # Settings that are only used by the reasoner (`inspectre reason --config`).
