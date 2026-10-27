@@ -2,3 +2,5 @@ angr>=9.2.,<10
 PyYAML
 pandas
 tabulate
+bitstring>=4,<5
+pycparser<3
