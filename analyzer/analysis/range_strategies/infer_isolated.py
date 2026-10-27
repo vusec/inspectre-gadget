@@ -222,6 +222,24 @@ class RangeMap:
     def op_extract(self, start, end):
 
         if self.stride_mode:
+            if start != 0 and self.stride != 0:
+                # Dropping the low bits divides the stride, which is only exact
+                # for power-of-two strides of at least 2**start.
+
+                # Not a power of two, e.g. stride 3 >> 1: 0, 3, 6, 9 -> 0, 1, 3, 4
+                if self.stride & (self.stride - 1):
+                    return unknown_range()
+
+                # Below 2**start, e.g. stride 2 >> 2: 0, 2, 4, 6 -> 0, 0, 1, 1
+                if self.stride < 2 ** start:
+                    return unknown_range()
+
+                self.stride = self.stride >> start
+
+            # The stride must fit in the extracted bits
+            if self.stride > 2 ** (end - start + 1) - 1:
+                return unknown_range()
+
             return self
 
         else:

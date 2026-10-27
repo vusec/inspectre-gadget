@@ -312,3 +312,38 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
 
         ast_range = self.range_strategy.find_range([], ast)
         self.assertIsNone(ast_range)
+
+    def test_extract_non_power_of_two_stride(self):
+        # Division by a constant: the compiler emits a mul by a magic number
+        # (rdx:rax, lifted to a 128-bit multiply) and takes the high bits
+        # from rdx (lifted to an extract). Dropping the low bits of a
+        # non-power-of-two stride is not exact, so we should bail out
+        # (instead of producing a stride larger than the int size).
+
+        # x / 3
+        a = claripy.BVS("a", 64)
+        ast = (claripy.BVV(0xaaaaaaaaaaaaaaab, 128) * a.zero_extend(64))[127:65]
+        ast = ast.zero_extend(1)
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertIsNone(ast_range)
+
+        # ((x << 7) + 0x7c) / 125
+        a = claripy.BVS("a", 16)
+        x = (a.zero_extend(7) << 7) + 0x7c
+        ast = (claripy.BVV(0x20c49ba5e353f7cf, 128) * x.zero_extend(105))[127:68]
+        ast = ast.zero_extend(4)
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertIsNone(ast_range)
+
+        # A power-of-two stride is still divided exactly
+        a = claripy.BVS("a", 64)
+        ast = (a << 4)[63:2]
+        ast_range = self.range_strategy.find_range([], ast)
+
+        self.assertEqual(ast_range.min, 0)
+        self.assertEqual(ast_range.max, 0x3ffffffffffffffc)
+        self.assertEqual(ast_range.stride, 4)
+        self.assertEqual(ast_range.and_mask, None)
+        self.assertEqual(ast_range.or_mask, None)
