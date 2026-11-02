@@ -3,3 +3,5 @@ __pycache__
 code/range/distribution/smt_samples
 results
 .venv/
+dist/
+*.egg-info/
