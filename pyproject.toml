@@ -1,0 +1,20 @@
+[project]
+name = "inspectre-gadget"
+version = "0.0.0"
+dependencies = [
+  "angr>=9.2,<10",
+  "PyYAML",
+  "pandas",
+  "tabulate",
+  "bitstring>=4,<5",
+  "pycparser<3"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-dir]
+# Add sub-packages to an `inspectre_gadget` super package.
+# This lets you do `from inspectre_gadget import analyzer`, for example.
+"inspectre_gadget" = "."
