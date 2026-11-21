@@ -20,6 +20,30 @@ and performing exploitability analysis.
 
 Documentation can be found at [https://vusec.github.io/inspectre-gadget](https://vusec.github.io/inspectre-gadget).
 
+Here's a small demo.
+
+![](docs/img/inspectre.gif)
+
+## Install
+
+Install the tool locally in a virtual environment.
+
+```sh
+# Install the tool locally.
+python3 -m venv .venv
+source .venv/bin/activate
+pip3 install -e .
+```
+
+If you plan to work on it as a developer, you might want to install dev dependencies (and optionally docs dependencies) as well.
+
+```sh
+# Install dev dependencies (pytest, ...)
+pip install -e ".[dev]"
+# Install dependencies for building docs (sphinx, ...)
+pip install -e ".[docs]"
+```
+
 ## Usage
 
 A typical workflow might look something like this:
@@ -27,19 +51,28 @@ A typical workflow might look something like this:
 ```sh
 # Run the analyzer on a binary to find transmissions.
 mkdir out
-inspectre analyze <BINARY> --address-list <CSV> --config config_all.yaml --output out/gadgets.csv --tfp-output output/tfp.csv --asm out/asm
+inspectre analyze <BINARY> --address-list <CSV> --config examples/configs/config_all.yaml --output out/gadgets.csv --tfp-output output/tfp.csv --asm out/asm
 
 # Evaluate exploitability.
 inspectre reason gadgets.csv gadgets-reasoned.csv
 
 # Import the CSV in a database and query the results.
 # You can use any DB, this is just an example with sqlite3.
-sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd '.import gadgets-reasoned.csv gadgets' -cmd '.mode table' < queries/exploitable_list.sql
+sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd '.import gadgets-reasoned.csv gadgets' -cmd '.mode table' < examples/queries/exploitable_list.sql
 
 # Manually inspect interesting candidates.
 inspectre show <UUID>
 ```
 
-## Demo
+## Run Tests
 
-![](docs/img/inspectre.gif)
+You can run all tests with `pytest [-n num_of_cores]`.
+
+We have two types of tests:
+* **unit tests**: test that specific internal functions do what they're supposed to
+    * run with `pytest -m "not e2e"`
+* **end-to-end tests (slow)**: run the full InSpectre Gadget pipeline on small assembly snippets and check that the output matches what we expect
+    * run with `pytest -m e2e [-n num_of_cores]`
+    * the short report should contain instructions on how to check the output of failing tests
+
+
