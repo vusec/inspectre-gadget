@@ -48,7 +48,7 @@ objdump --adjust-vma=0x4000000 -d -Mintel gadget > ${OUT_FOLDER}/out.txt
 
 echo ""  >> ${OUT_FOLDER}/out.txt
 echo "== SCANNER ==" >> ${OUT_FOLDER}/out.txt
-python3 ../../../inspectre analyze --config $cfg --base-address 0x4000000 --address 0x4000000 --name $name --output gadgets.csv --tfp-output tfp.csv --asm asm --half-gadget-output half.csv gadget 2> /dev/null >> ${OUT_FOLDER}/out.txt || true
+python3 -m inspectre_gadget analyze --config $cfg --base-address 0x4000000 --address 0x4000000 --name $name --output gadgets.csv --tfp-output tfp.csv --asm asm --half-gadget-output half.csv gadget 2> /dev/null >> ${OUT_FOLDER}/out.txt || true
 [ -f fail.txt ] && mv fail.txt ${OUT_FOLDER}/fail.txt
 
 # ------------------------------------------------------------------------------
@@ -57,13 +57,13 @@ python3 ../../../inspectre analyze --config $cfg --base-address 0x4000000 --addr
 if [ -f gadgets.csv ]; then
     echo ""  >> ${OUT_FOLDER}/out.txt
     echo "== REASONER TRANSMISSION ==" >> ${OUT_FOLDER}/out.txt
-    python3 ../../../inspectre reason --config $cfg gadgets.csv gadgets-reasoned.csv &>> ${OUT_FOLDER}/out.txt
+    python3 -m inspectre_gadget reason --config $cfg gadgets.csv gadgets-reasoned.csv &>> ${OUT_FOLDER}/out.txt
 fi
 
 if [ -f tfp.csv ]; then
     echo ""  >> ${OUT_FOLDER}/out.txt
     echo "== REASONER DISPATCH ==" >> ${OUT_FOLDER}/out.txt
-    python3 ../../../inspectre reason --config $cfg tfp.csv tfp-reasoned.csv &>> ${OUT_FOLDER}/out.txt
+    python3 -m inspectre_gadget reason --config $cfg tfp.csv tfp-reasoned.csv &>> ${OUT_FOLDER}/out.txt
 fi
 # Drop environment-specific angr log lines (e.g., unicorn version mismatch),
 # format: "ERROR    | 2024-01-01 12:00:00,000 | angr.some.module | message"

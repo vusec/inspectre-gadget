@@ -2,9 +2,9 @@ import unittest
 
 import claripy
 
-from analyzer.analysis.rangeAnalysis import get_ast_ranges
-from analyzer.shared.config import *
-from analyzer.shared.logger import disable_logging
+from inspectre_gadget.analyzer.analysis.rangeAnalysis import get_ast_ranges
+from inspectre_gadget.analyzer.shared.config import *
+from inspectre_gadget.analyzer.shared.logger import disable_logging
 
 
 class RangeStrategyInferIsolatedTestCase(unittest.TestCase):

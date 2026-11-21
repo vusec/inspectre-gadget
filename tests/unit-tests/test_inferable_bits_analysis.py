@@ -2,7 +2,7 @@ import unittest
 
 import claripy
 
-from analyzer.analysis.bitsAnalysis import *
+from inspectre_gadget.analyzer.analysis.bitsAnalysis import *
 
 
 class InferableBitsAnalysisTestCase(unittest.TestCase):

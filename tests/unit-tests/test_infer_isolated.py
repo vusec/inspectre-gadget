@@ -2,8 +2,8 @@ import unittest
 
 import claripy
 
-from analyzer.analysis.range_strategies import *
-from analyzer.shared.config import *
+from inspectre_gadget.analyzer.analysis.range_strategies import *
+from inspectre_gadget.analyzer.shared.config import *
 
 
 class RangeStrategyInferIsolatedTestCase(unittest.TestCase):

@@ -2,11 +2,11 @@ import unittest
 
 import claripy
 
-from analyzer.shared.config import *
-from analyzer.shared.astTransform import *
-from analyzer.shared.utils import *
-from analyzer.scanner.annotations import *
-from analyzer.shared.logger import disable_logging
+from inspectre_gadget.analyzer.shared.config import *
+from inspectre_gadget.analyzer.shared.astTransform import *
+from inspectre_gadget.analyzer.shared.utils import *
+from inspectre_gadget.analyzer.scanner.annotations import *
+from inspectre_gadget.analyzer.shared.logger import disable_logging
 
 
 class MatchSignExtTestCase(unittest.TestCase):
