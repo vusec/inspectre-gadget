@@ -2,11 +2,11 @@ import unittest
 
 import claripy
 
-from inspectre_gadget.analyzer.shared.config import *
-from inspectre_gadget.analyzer.shared.astTransform import *
-from inspectre_gadget.analyzer.shared.utils import *
 from inspectre_gadget.analyzer.scanner.annotations import *
+from inspectre_gadget.analyzer.shared.astTransform import *
+from inspectre_gadget.analyzer.shared.config import *
 from inspectre_gadget.analyzer.shared.logger import disable_logging
+from inspectre_gadget.analyzer.shared.utils import *
 
 
 class MatchSignExtTestCase(unittest.TestCase):
@@ -23,9 +23,7 @@ class MatchSignExtTestCase(unittest.TestCase):
         self.assertTrue(res.structurally_match(x))
         self.assertTrue(getSignExtAnnotation(res) == None)
 
-        res = match_sign_ext(
-            claripy.Concat(y, x[7:7], x[7:7], x[7:7], x[7:7], x, z), 0
-        )
+        res = match_sign_ext(claripy.Concat(y, x[7:7], x[7:7], x[7:7], x[7:7], x, z), 0)
 
         const_0 = claripy.BVV(0, 4)
         const_1 = claripy.BVV(0xF, 4)
@@ -45,9 +43,7 @@ class MatchSignExtTestCase(unittest.TestCase):
         self.assertTrue(res.structurally_match(claripy.Concat(const_0, x)))
         self.assertTrue(getSignExtAnnotation(res) == None)
 
-        res = match_sign_ext(
-            claripy.Concat(y, x[7:7], x[7:7], x[7:7], x[7:7], x), 0
-        )
+        res = match_sign_ext(claripy.Concat(y, x[7:7], x[7:7], x[7:7], x[7:7], x), 0)
 
         const_0 = claripy.BVV(0, 4)
         const_1 = claripy.BVV(0xF, 4)
@@ -62,9 +58,7 @@ class MatchSignExtTestCase(unittest.TestCase):
         self.assertTrue(res.structurally_match(expected))
         self.assertTrue(getSignExtAnnotation(res.args[1]) != None)
 
-        res = match_sign_ext(
-            claripy.Concat(y, x[7:7], x[7:7], x[7:7], x[7:7], z), 0
-        )
+        res = match_sign_ext(claripy.Concat(y, x[7:7], x[7:7], x[7:7], x[7:7], z), 0)
         expected = claripy.Concat(y, x[7:7], x[7:7], x[7:7], x[7:7], z)
 
         self.assertTrue(res.structurally_match(expected))

@@ -2,13 +2,12 @@
 Transmission object.
 """
 
-import claripy
-from enum import Enum
-import json
 from collections import OrderedDict
+from enum import Enum
 
-from . import ranges
-from . import utils
+import claripy
+
+from . import ranges, utils
 
 
 class TransmitterType(Enum):
@@ -87,11 +86,11 @@ class Requirements:
         ind_regs = {}
         # Check if any of the indirect regs has become a direct reg.
         for r in self.indirect_regs:
-            if not r in self.direct_regs:
+            if r not in self.direct_regs:
                 ind_regs[r] = self.indirect_regs[r]
         # Merge the indirect regs from the incoming requirements.
         for r in other.indirect_regs:
-            if not r in self.direct_regs:
+            if r not in self.direct_regs:
                 if r not in ind_regs.keys():
                     ind_regs[r] = []
                 ind_regs[r].extend(other.indirect_regs[r])

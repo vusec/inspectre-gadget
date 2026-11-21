@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
 import claripy
-import sys
-from .rangeStrategy import RangeStrategy
 
 # autopep8: off
-from ...shared import ranges
-from ...shared import logger
+from ...shared import logger, ranges
 from ...shared.config import global_config
+from .rangeStrategy import RangeStrategy
+
 # autopep8: on
 
 l = logger.get_logger("InferIsolated")

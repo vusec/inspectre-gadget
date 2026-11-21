@@ -5,8 +5,8 @@ should be considered dependent from each other, i.e. they are tied together
 by either aliases or constraints that involve each other.
 """
 
+
 import claripy
-import sys
 
 # autopep8: off
 from ..scanner import annotations
@@ -16,8 +16,8 @@ from ..scanner.annotations import (
     LoadAnnotation,
     UncontrolledAnnotation,
 )
-from ..shared import logger
-from ..shared import utils
+from ..shared import logger, utils
+
 # autopep8: on
 
 l = logger.get_logger("DepGraph")

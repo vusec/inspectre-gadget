@@ -5,17 +5,15 @@ can be controlled independently from the secret and the secret address.
 """
 
 from enum import Enum
-import claripy
-import sys
 
-from . import dependencyGraph
-from .dependencyGraph import DepGraph
+from ..shared import logger, utils
+from ..shared.secretDependentBranch import SecretDependentBranch
 
 # autopep8: off
 from ..shared.transmission import Transmission
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared import logger
-from ..shared import utils
+from . import dependencyGraph
+from .dependencyGraph import DepGraph
+
 # autopep8: on
 
 l = logger.get_logger("BaseControlAnalysis")
@@ -114,7 +112,7 @@ def analyse(t: Transmission):
     """
     Check if the base depends on the secret or secret address.
     """
-    l.warning(f"========= [BASE] ==========")
+    l.warning("========= [BASE] ==========")
 
     # 1. Get dependency graph of all symbols involved in this transmission.
     d = t.properties["deps"]
@@ -144,7 +142,7 @@ def analyse(t: Transmission):
 
     t.properties["deps"] = d
 
-    l.warning(f"===========================")
+    l.warning("===========================")
 
 
 def analyse_secret_dependent_branch(sdb: SecretDependentBranch):

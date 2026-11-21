@@ -4,21 +4,18 @@ This analysis is responsible of identifying the basic components (transmission
 base, transmitted secret and secret address) of a transmission.
 """
 
-import sys
 import claripy.ast.base
-import itertools
 
-from .dependencyGraph import DepGraph
+from ..scanner import annotations
+from ..scanner.annotations import SecretAnnotation, TransmissionAnnotation
 
 # autopep8: off
-from ..shared import logger
-from ..shared import astTransform
+from ..shared import astTransform, logger, utils
 from ..shared.astTransform import ConditionalAst, SplitTooManyNestedIfException
 from ..shared.config import global_config
 from ..shared.transmission import Transmission, TransmissionExpr
-from ..scanner import annotations
-from ..scanner.annotations import SecretAnnotation, TransmissionAnnotation
-from ..shared import utils
+from .dependencyGraph import DepGraph
+
 # autopep8: on
 
 l = logger.get_logger("TransmissionAnalysis")
@@ -154,7 +151,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
     of a double load) to identify its components. Note that the same expression
     might contain multiple transmissions.
     """
-    l.warning(f"========= [AST] ==========")
+    l.warning("========= [AST] ==========")
     l.warning(f"Analyzing @{hex(potential_t.pc)}: {potential_t.expr}")
 
     # Extract members of the transmission.
@@ -194,7 +191,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
             # If there is at least one secret in this member...
             for secret_sym, secret_addr in secrets:
-                l.warning(f"    Found secret")
+                l.warning("    Found secret")
                 # Create new transmission.
                 t = Transmission(potential_t)
                 t.transmission.expr = canonical_expr.expr

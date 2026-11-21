@@ -9,12 +9,11 @@ from enum import Enum
 import angr
 import archinfo
 import claripy
-import sys
 
 # autopep8: off
-from ..shared import logger
-from ..shared import utils
+from ..shared import logger, utils
 from . import annotations
+
 # autopep8: on
 
 l = logger.get_logger("MemHooks")

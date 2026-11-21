@@ -4,21 +4,18 @@ This analysis is responsible of identifying the branch sides that consist
 of the secret and value compared against
 """
 
-import sys
 import claripy.ast.base
-import itertools
 
-from . import transmissionAnalysis
+from ..scanner import annotations
 
 # autopep8: off
-from ..shared import logger
-from ..shared import astTransform
+from ..shared import astTransform, logger, utils
 from ..shared.secretDependentBranch import (
     SecretDependentBranch,
     SecretDependentBranchExpr,
 )
-from ..scanner import annotations
-from ..shared import utils
+from . import transmissionAnalysis
+
 # autopep8: on
 
 l = logger.get_logger("SecretDependentBranchAnalysis")
@@ -35,7 +32,7 @@ def get_secret_dependent_branches(
     a secret.
     """
 
-    l.warning(f"========= [AST] ==========")
+    l.warning("========= [AST] ==========")
     l.warning(f"Analyzing SDP @{hex(potential_sdb.pc)}: {potential_sdb.expr}")
 
     expr = potential_sdb.expr

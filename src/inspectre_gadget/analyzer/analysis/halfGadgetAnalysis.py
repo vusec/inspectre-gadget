@@ -4,25 +4,23 @@ This analysis is responsible of identifying the basic components of a half-spect
 gadget.
 """
 
-import sys
-import claripy.ast.base
-import itertools
 import copy
 
+from ..scanner import annotations
+
 # autopep8: off
-from ..shared import logger
-from ..shared import astTransform
+from ..shared import astTransform, logger
 from ..shared.astTransform import SplitTooManyNestedIfException
 from ..shared.halfGadget import HalfGadget
-from ..scanner import annotations
 from . import transmissionAnalysis
+
 # autopep8: on
 
 l = logger.get_logger("HalfSpectreAnalysis")
 
 
 def analyse(gadget: HalfGadget):
-    l.warning(f"========= [HalfGadget] ==========")
+    l.warning("========= [HalfGadget] ==========")
     l.warning(f"Analyzing @{hex(gadget.pc)}: {gadget.loaded.expr}")
 
     # Extract members of the transmission.
@@ -84,7 +82,7 @@ def analyse(gadget: HalfGadget):
         # Create the attacker-controlled component.
         if len(attacker_members) == 0:
             # This may happen if the attacker controlled expr is simplified to 0
-            l.warning(f"Uncontrolled half gadget, skipping...")
+            l.warning("Uncontrolled half gadget, skipping...")
             continue
 
         g.attacker.expr = astTransform.generate_addition(attacker_members)

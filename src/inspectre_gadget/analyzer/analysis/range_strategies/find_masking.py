@@ -1,12 +1,11 @@
+
 import claripy
-import sys
-
-from .rangeStrategy import RangeStrategy
-
 
 # autopep8: off
 from ...shared import ranges
 from ...shared.config import global_config
+from .rangeStrategy import RangeStrategy
+
 # autopep8: on
 
 

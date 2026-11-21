@@ -1,13 +1,13 @@
 # Annotations are effectively taint labels that we attach to symbolic values
 # to track which expressions contain an attacker-controlled register or a secret.
 
+
 import claripy
-import sys
 
 # autopep8: off
-from ..shared import utils
-from ..shared import astTransform
-from ..shared.transmission import ControlType, Requirements
+from ..shared import astTransform, utils
+from ..shared.transmission import Requirements
+
 # autopep8: on
 
 

@@ -4,8 +4,15 @@ This analysis calculates which registers and memory locations have to be
 controlled or leaked by the attacker in order to trigger a transmission.
 """
 
+
 import claripy
-import sys
+
+from ..scanner import annotations
+from ..scanner.annotations import AttackerAnnotation, LoadAnnotation
+from ..shared import astTransform, logger, utils
+from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
 
 # autopep8: off
 from ..shared.transmission import (
@@ -14,14 +21,7 @@ from ..shared.transmission import (
     Transmission,
     TransmissionComponent,
 )
-from ..shared.taintedFunctionPointer import TaintedFunctionPointer
-from ..shared.halfGadget import HalfGadget
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared import utils
-from ..shared import astTransform
-from ..shared import logger
-from ..scanner import annotations
-from ..scanner.annotations import AttackerAnnotation, LoadAnnotation
+
 # autopep8: on
 
 l = logger.get_logger("ReqAnalysis")
@@ -153,7 +153,7 @@ def get_transmission_control(t: Transmission):
 
 
 def analyse(t: Transmission):
-    l.warning(f"========= [REQS] ==========")
+    l.warning("========= [REQS] ==========")
 
     for c in [
         t.base,
@@ -205,7 +205,7 @@ def analyse(t: Transmission):
 
 
 def analyse_tfp(t: TaintedFunctionPointer):
-    l.warning(f"========= [REQS] ==========")
+    l.warning("========= [REQS] ==========")
     for r in t.registers:
         t.registers[r].requirements = get_requirements(t.registers[r].expr)
         t.registers[r].control = get_control(t.registers[r])
@@ -224,7 +224,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
 
 def analyse_half_gadget(g: HalfGadget):
-    l.warning(f"========= [REQS] ==========")
+    l.warning("========= [REQS] ==========")
 
     # Calculate for main expression.
     g.loaded.requirements = get_requirements(g.loaded.expr)

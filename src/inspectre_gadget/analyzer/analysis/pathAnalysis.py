@@ -5,18 +5,16 @@ not taken for the transmission to happen, and how their condition influence
 the final transmission.
 """
 
-import claripy
-import sys
 
-from .dependencyGraph import DepGraph
+from ..shared import logger, utils
+from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
 
 # autopep8: off
 from ..shared.transmission import Transmission
-from ..shared.taintedFunctionPointer import TaintedFunctionPointer
-from ..shared.halfGadget import HalfGadget
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared import utils
-from ..shared import logger
+from .dependencyGraph import DepGraph
+
 # autopep8: on
 
 l = logger.get_logger("PathAnalysis")
@@ -37,7 +35,7 @@ def get_component_deps(d: DepGraph, component):
 
 
 def analyse(t: Transmission):
-    l.warning(f"========= [PATH] ==========")
+    l.warning("========= [PATH] ==========")
 
     t.properties["n_branches"] = len(t.branches)
     # TODO: unsat branches?
@@ -121,7 +119,7 @@ def analyse(t: Transmission):
     l.warning(f"Transmitted Secret aliases: {t.transmitted_secret.aliases}")
     l.warning(f"Transmission aliases: {t.transmission.aliases}")
 
-    l.warning(f"==========================")
+    l.warning("==========================")
 
 
 def analyse_sdb(sdb: SecretDependentBranch):
@@ -190,11 +188,11 @@ def analyse_sdb(sdb: SecretDependentBranch):
     )
     l.warning(f"Controlled Cmp Value aliases: {controlled_aliases}")
 
-    l.warning(f"==========================")
+    l.warning("==========================")
 
 
 def analyse_tfp(t: TaintedFunctionPointer):
-    l.warning(f"========= [PATH] ==========")
+    l.warning("========= [PATH] ==========")
 
     d = DepGraph()
     d.add_nodes(t.expr)
@@ -248,7 +246,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
 
 def analyse_half_gadget(g: HalfGadget):
-    l.warning(f"========= [PATH] ==========")
+    l.warning("========= [PATH] ==========")
 
     d = DepGraph()
     d.add_nodes(g.loaded.expr)

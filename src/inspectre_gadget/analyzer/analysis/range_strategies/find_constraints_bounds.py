@@ -1,15 +1,13 @@
-import claripy
-import time
-import sys
 
-from .rangeStrategy import RangeStrategy
-from .infer_isolated import RangeStrategyInferIsolated
+import claripy
+
+from ...shared import logger, ranges, utils
 
 # autopep8: off
 from ...shared.config import global_config
-from ...shared import utils
-from ...shared import logger
-from ...shared import ranges
+from .infer_isolated import RangeStrategyInferIsolated
+from .rangeStrategy import RangeStrategy
+
 # autopep8: on
 
 l = logger.get_logger("FindConstraintsBounds")
@@ -60,7 +58,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             sat_ranges = _find_sat_distribution(
                 constraints, ast, ast_min, ast_max
             )
-        except claripy.ClaripyZ3Error as e:
+        except claripy.ClaripyZ3Error:
             # timeout
             return None
 

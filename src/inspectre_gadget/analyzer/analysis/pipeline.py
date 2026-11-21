@@ -5,33 +5,34 @@ The Analysis Pipeline is responsible of:
 3. Output the gadgets
 """
 
-import angr
-import uuid
-import os
 import csv
 import hashlib
+import os
+import uuid
 from collections.abc import MutableMapping
+from pathlib import Path
 
-from . import baseControlAnalysis
-from . import bitsAnalysis
-from . import branchControlAnalysis
-from . import halfGadgetAnalysis
-from . import pathAnalysis
-from . import rangeAnalysis
-from . import requirementsAnalysis
-from . import secretDependentBranchAnalysis
-from . import tfpAnalysis
-from . import transmissionAnalysis
+import angr
+
 from ..asmprinter import asmprinter
-from ..shared import logger
-from ..shared.transmission import Transmission, TransmissionExpr
+from ..shared import logger, utils
+from ..shared.config import global_config
 from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared import utils
-from ..shared.config import global_config
-from pathlib import Path
 from ..shared.taintedFunctionPointer import TaintedFunctionPointer
-
+from ..shared.transmission import Transmission, TransmissionExpr
+from . import (
+    baseControlAnalysis,
+    bitsAnalysis,
+    branchControlAnalysis,
+    halfGadgetAnalysis,
+    pathAnalysis,
+    rangeAnalysis,
+    requirementsAnalysis,
+    secretDependentBranchAnalysis,
+    tfpAnalysis,
+    transmissionAnalysis,
+)
 
 l = logger.get_logger("AnalysisMAIN")
 l_verbose = logger.get_logger("Analysis")

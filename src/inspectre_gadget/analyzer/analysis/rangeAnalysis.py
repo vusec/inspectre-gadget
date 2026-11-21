@@ -1,10 +1,14 @@
+
 import claripy
-import sys
-from .range_strategies import (
-    RangeStrategyFindConstraintsBounds,
-    RangeStrategyFindMasking,
-    RangeStrategyInferIsolated,
-    RangeStrategySmallSet,
+
+from ..scanner import annotations
+from ..shared import logger
+from ..shared.config import global_config
+from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared.taintedFunctionPointer import (
+    TaintedFunctionPointer,
+    TFPRegisterControlType,
 )
 
 # autopep8: off
@@ -13,15 +17,13 @@ from ..shared.transmission import (
     Transmission,
     TransmissionComponent,
 )
-from ..shared.taintedFunctionPointer import (
-    TFPRegisterControlType,
-    TaintedFunctionPointer,
+from .range_strategies import (
+    RangeStrategyFindConstraintsBounds,
+    RangeStrategyFindMasking,
+    RangeStrategyInferIsolated,
+    RangeStrategySmallSet,
 )
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared.halfGadget import HalfGadget
-from ..shared import logger
-from ..shared.config import global_config
-from ..scanner import annotations
+
 # autopep8: on
 
 l = logger.get_logger("RangeAnalys")
@@ -122,7 +124,7 @@ def calculate_controlled_range(
 
 
 def analyse(t: Transmission):
-    l.warning(f"========= [RANGE] ==========")
+    l.warning("========= [RANGE] ==========")
 
     # Calculate ranges for each component
     for c in [t.base, t.transmitted_secret, t.secret_address, t.transmission]:
@@ -179,7 +181,7 @@ def analyse(t: Transmission):
 
 
 def analyse_tfp(t: TaintedFunctionPointer):
-    l.warning(f"========= [RANGE] ==========")
+    l.warning("========= [RANGE] ==========")
 
     for r in t.registers.values():
         if (
@@ -223,7 +225,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
 
 def analyse_half_gadget(g: HalfGadget):
-    l.warning(f"========= [RANGE] ==========")
+    l.warning("========= [RANGE] ==========")
 
     # Calculate ranges for each component
     for c in [g.loaded, g.base, g.uncontrolled_base, g.attacker]:

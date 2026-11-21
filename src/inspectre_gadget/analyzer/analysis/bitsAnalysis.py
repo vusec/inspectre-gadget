@@ -4,13 +4,16 @@ This analysis infers how bits of the secret are spread in the transmission
 expression.
 """
 
+from collections import OrderedDict
+
 import claripy
+
+from ..shared import logger
+from ..shared.config import global_config
 
 # autopep8: off
 from ..shared.transmission import Transmission
-from ..shared import logger
-from ..shared.config import global_config
-from collections import OrderedDict
+
 # autopep8: on
 
 BITMAP_SPREAD = 0
@@ -857,7 +860,7 @@ def get_inferable_bits(ast: claripy.ast.bv.BVS, source: claripy.ast.bv.BVS):
 
 
 def analyse(t: Transmission):
-    l.warning(f"========= [BITS] ==========")
+    l.warning("========= [BITS] ==========")
 
     t.inferable_bits = get_inferable_bits(
         t.transmitted_secret.expr, t.secret_val.expr
@@ -865,4 +868,4 @@ def analyse(t: Transmission):
     if t.inferable_bits == None:
         t.inferable_bits = FlowMap({}, [], [])
 
-    l.warning(f"==========================")
+    l.warning("==========================")

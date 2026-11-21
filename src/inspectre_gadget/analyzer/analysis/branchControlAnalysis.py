@@ -5,18 +5,18 @@ constraint depends on the secret.
 """
 
 from enum import Enum
-import claripy
-import sys
 
-from . import dependencyGraph
-from .dependencyGraph import DepGraph
+import claripy
+
+from ..shared import logger, utils
 from ..shared.astTransform import ConditionType
+from ..shared.secretDependentBranch import SecretDependentBranch
 
 # autopep8: off
 from ..shared.transmission import Transmission
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared import logger
-from ..shared import utils
+from . import dependencyGraph
+from .dependencyGraph import DepGraph
+
 # autopep8: on
 
 l = logger.get_logger("BranchControlAnalysis")
@@ -39,7 +39,7 @@ def get_branch_control(t: Transmission, d: DepGraph, constraints: bool):
     l.info(f"Analyzing {constraint_expr} vs {t.transmitted_secret.expr}")
 
     if len(utils.get_vars(constraint_expr)) == 0:
-        l.info(f"No vars")
+        l.info("No vars")
         return BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET
 
     # If any branch is uncontrolled.
@@ -94,7 +94,7 @@ def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
     l.info(f"Analyzing {constraint_expr} vs {t.transmitted_secret.expr}")
 
     if len(utils.get_vars(constraint_expr)) == 0:
-        l.info(f"No vars")
+        l.info("No vars")
         return BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET
 
     # If any branch is uncontrolled.
@@ -144,7 +144,7 @@ def analyse(t: Transmission):
     Check if any branch depends on the secret or secret address.
     """
 
-    l.warning(f"========= [BASE] ==========")
+    l.warning("========= [BASE] ==========")
 
     # 1. Get dependency graph of all symbols involved in this transmission.
     d = t.properties["deps"]
@@ -158,7 +158,7 @@ def analyse(t: Transmission):
         f"Cmove control with constraints: {t.properties['cmove_control_type']}"
     )
 
-    l.warning(f"===========================")
+    l.warning("===========================")
 
 
 def analyse_secret_dependent_branch(sdb: SecretDependentBranch):

@@ -1,13 +1,10 @@
-import argparse
 import ast
-import pandas as pd
-import numpy as np
 from io import StringIO
-
-from . import addressSpace
-from . import common
-
 from warnings import simplefilter
+
+import pandas as pd
+
+from . import addressSpace, common
 
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
@@ -94,7 +91,7 @@ def has_valid_secret_address(t: pd.Series):
     Check if the secret address can be adjusted to a valid address and the
     attacker has enough control over it.
     """
-    if t[f"secret_address_control"] not in common.ATTACKER_CONTROL_TYPES:
+    if t["secret_address_control"] not in common.ATTACKER_CONTROL_TYPES:
         return False
 
     # The amount of control is only determined by the controlled part
@@ -156,7 +153,7 @@ def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
     attacker wants to retrieve).
     """
 
-    if t[f"has_valid_base"] == False:
+    if t["has_valid_base"] == False:
         # This check is redundant without a valid base
         return False
 
@@ -177,8 +174,8 @@ def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
     # In this case either we follow the constraint, so we cannot leak secrets
     # above 10, or we mispredict, and then we have the original secret max.
     #
-    secret_min = t[f"transmitted_secret_range_min"]
-    secret_max = t[f"transmitted_secret_range_max"]
+    secret_min = t["transmitted_secret_range_min"]
+    secret_max = t["transmitted_secret_range_max"]
 
     # Get the transmitted secret maximum.
     if secret_min <= secret_max:
@@ -319,7 +316,7 @@ def can_perform_known_prefix(t: pd.Series):
     bytes before the secret, and then increasing the secret address until
     we reach the secret.
     """
-    if t[f"secret_address_control"] not in common.ATTACKER_CONTROL_TYPES:
+    if t["secret_address_control"] not in common.ATTACKER_CONTROL_TYPES:
         return False
 
     # TODO: should we check the secret address window also?
@@ -388,8 +385,8 @@ def can_ignore_direct_dependency(t: pd.Series, slam=False):
             if is_secret_below_cache_granularity(t):
                 return False
 
-            secret_range_exact = t[f"transmitted_secret_range_exact"]
-            secret_window = t[f"transmitted_secret_range_window"]
+            secret_range_exact = t["transmitted_secret_range_exact"]
+            secret_window = t["transmitted_secret_range_window"]
 
             # We need a full secret range in order to overflow the kernel
             # base address to get an user address
@@ -416,7 +413,7 @@ def slam_has_exact_secret_range(t: pd.Series):
     The bit positions are really strict, so we need a exact range
     """
 
-    secret_range_exact = t[f"transmitted_secret_range_exact"]
+    secret_range_exact = t["transmitted_secret_range_exact"]
 
     assert type(secret_range_exact) == bool
 
@@ -432,7 +429,7 @@ def slam_has_aligned_secret_bytes(t: pd.Series):
     of the fact that all ASCII characters have the 8th bit set to 0
     """
 
-    secret_stride = t[f"transmitted_secret_range_stride"]
+    secret_stride = t["transmitted_secret_range_stride"]
 
     # Shifts are fine, as long as we shift one or more complete bytes
     if secret_stride not in [2**x for x in range(0, 64 + 1, 8)]:
@@ -447,9 +444,9 @@ def slam_is_an_user_address_translation(t: pd.Series):
     can be tricky if you have a secret <= 32 bits.
     """
 
-    secret_window = t[f"transmitted_secret_range_window"]
+    secret_window = t["transmitted_secret_range_window"]
 
-    base_controllable_window = t[f"independent_base_controlled_range_window"]
+    base_controllable_window = t["independent_base_controlled_range_window"]
 
     if (secret_window <= 2**32) and base_controllable_window < 2**63:
         # If the secret is smaller than 32 bits then bits 47 and 63 are
@@ -459,7 +456,7 @@ def slam_is_an_user_address_translation(t: pd.Series):
         return False
 
     n_inferable_bits = int(t["inferable_bits_n_inferable_bits"])
-    secret_stride = int(t[f"transmitted_secret_range_stride"])
+    secret_stride = int(t["transmitted_secret_range_stride"])
 
     if (
         n_inferable_bits + (secret_stride - 1) <= 32

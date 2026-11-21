@@ -3,13 +3,13 @@ Transformations that are performed on the AST of ANGR's symbolic expressions to
 normalize their form and ease analysis.
 """
 
-import claripy
 import itertools
 from enum import Enum
 from itertools import chain
 
-from . import utils
-from . import logger
+import claripy
+
+from . import logger, utils
 
 l = logger.get_logger("AstTransform")
 

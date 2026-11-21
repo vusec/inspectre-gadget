@@ -1,22 +1,24 @@
+from collections import Counter
+from enum import Enum
+from pathlib import Path
+
 import angr
 import claripy
-import sys
-from pathlib import Path
-from enum import Enum
-from collections import Counter
 
-# autopep8: off
-from ..shared.transmission import Transmission
-from ..shared.taintedFunctionPointer import TaintedFunctionPointer
-from ..shared.halfGadget import HalfGadget
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared import utils
 from ..scanner import annotations as annotations_module
 from ..scanner.annotations import (
     LoadAnnotation,
     SecretAnnotation,
     TransmissionAnnotation,
 )
+from ..shared import utils
+from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
+
+# autopep8: off
+from ..shared.transmission import Transmission
+
 # autopep8: on
 
 
@@ -222,7 +224,7 @@ def print_annotated_assembly(
 def output_gadget_to_file(t: Transmission, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/gadget_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
-    o.write(f"----------------- TRANSMISSION -----------------\n")
+    o.write("----------------- TRANSMISSION -----------------\n")
     o.write(
         print_annotated_assembly(
             proj,
@@ -275,7 +277,7 @@ Branches: {utils.ordered_branches(t.branches)}
 def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/tfp_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
-    o.write(f"--------------------- TFP ----------------------\n")
+    o.write("--------------------- TFP ----------------------\n")
     o.write(
         print_annotated_assembly(
             proj,
@@ -305,7 +307,7 @@ Branches: {utils.ordered_branches(t.branches)}
 
 """)
 
-    o.write(f"Controlled Regs:\n")
+    o.write("Controlled Regs:\n")
     for r in t.controlled:
         reg = t.registers[r]
         o.write(f"  - Reg: {r}\n")
@@ -320,14 +322,14 @@ Branches: {utils.ordered_branches(t.branches)}
             f"{reg.controlled_range_with_branches}\n"
         )
 
-    o.write(f"\nRegisters aliasing with tfp:\n")
+    o.write("\nRegisters aliasing with tfp:\n")
     for r in t.aliasing:
         o.write(f"  - Reg: {r}\n")
         o.write(f"    Expr: {utils.truncate_str(t.registers[r].expr)}\n")
         o.write(f"    Range: {t.registers[r].range}\n")
         o.write(f"    ControlType: {t.registers[r].control_type}\n")
 
-    o.write(f"\n")
+    o.write("\n")
     o.write(f"Uncontrolled Regs: {t.uncontrolled}\n")
     o.write(f"Unmodified Regs: {t.unmodified}\n")
     o.write(f"Potential Secrets: {t.secrets}\n")
@@ -341,7 +343,7 @@ Branches: {utils.ordered_branches(t.branches)}
 def output_half_gadget_to_file(g: HalfGadget, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/halfgadget_{g.name}_{hex(g.pc)}_{g.uuid}.asm", "a+")
-    o.write(f"--------------------- HALF GADGET ----------------------\n")
+    o.write("--------------------- HALF GADGET ----------------------\n")
     o.write(
         print_annotated_assembly(
             proj,
@@ -379,7 +381,7 @@ def output_secret_dependent_branch_to_file(
 ):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/sdb_{sdb.name}_{hex(sdb.pc)}_{sdb.uuid}.asm", "a+")
-    o.write(f"------------ SECRET DEPENDENT BRANCH ------------\n")
+    o.write("------------ SECRET DEPENDENT BRANCH ------------\n")
     o.write(
         print_annotated_assembly(
             proj,

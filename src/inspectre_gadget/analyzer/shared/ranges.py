@@ -2,8 +2,8 @@
 Range object.
 """
 
-from dataclasses import dataclass
 from collections import OrderedDict
+from dataclasses import dataclass
 
 import claripy
 

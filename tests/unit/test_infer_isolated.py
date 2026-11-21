@@ -330,9 +330,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         # ((x << 7) + 0x7c) / 125
         a = claripy.BVS("a", 16)
         x = (a.zero_extend(7) << 7) + 0x7C
-        ast = (claripy.BVV(0x20C49BA5E353F7CF, 128) * x.zero_extend(105))[
-            127:68
-        ]
+        ast = (claripy.BVV(0x20C49BA5E353F7CF, 128) * x.zero_extend(105))[127:68]
         ast = ast.zero_extend(4)
         ast_range = self.range_strategy.find_range([], ast)
 

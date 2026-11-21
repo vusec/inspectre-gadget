@@ -1,8 +1,8 @@
 import logging
-import zlib
 import sys
+import zlib
 
-from angr.misc.ansi import Color, BackgroundColor, color, clear
+from angr.misc.ansi import Color, color
 
 ENDC = "\033[0m"
 

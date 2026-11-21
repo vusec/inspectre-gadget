@@ -1,7 +1,8 @@
-import claripy
-import capstone
-import itertools
 import traceback
+
+import capstone
+import claripy
+
 from .config import global_config
 
 

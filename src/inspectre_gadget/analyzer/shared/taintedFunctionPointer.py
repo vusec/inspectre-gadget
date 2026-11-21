@@ -2,13 +2,13 @@
 TaintedFunctionPointer object (a.k.a. dispatch gadget).
 """
 
-from enum import Enum
 from collections import OrderedDict
 from collections.abc import MutableMapping
+from enum import Enum
+
 from claripy import BVS
 
-from . import utils
-from . import ranges
+from . import ranges, utils
 from .transmission import ControlType, Requirements
 
 

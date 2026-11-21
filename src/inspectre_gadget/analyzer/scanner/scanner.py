@@ -8,30 +8,25 @@ The Scanner is responsible of:
 - enforcing the memory model (all symbolic loads return a pure symbol)
 """
 
+import time
+import traceback
+from enum import Enum
+
 import angr
 import claripy
-
-from . import annotations
-from . import memory
-import sys
-import time
-from enum import Enum
-import traceback
-
 from angr.concretization_strategies import SimConcretizationStrategy
 
 # autopep8: off
 from ..analysis.pipeline import AnalysisPipeline
-from ..shared import logger
-from ..shared.transmission import TransmissionExpr, TransmitterType
-from ..shared.taintedFunctionPointer import TFPRegister, TaintedFunctionPointer
+from ..asmprinter import asmprinter
+from ..shared import astTransform, logger, utils
+from ..shared.astTransform import CmoveAnnotation, SplitTooManyNestedIfException
+from ..shared.config import global_config
 from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranchExpr
-from ..shared.config import global_config
-from ..shared import astTransform
-from ..shared.astTransform import CmoveAnnotation, SplitTooManyNestedIfException
-from ..shared import utils
-from ..asmprinter import asmprinter
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer, TFPRegister
+from ..shared.transmission import TransmissionExpr, TransmitterType
+from . import annotations, memory
 from .annotations import AttackerAnnotation, UncontrolledAnnotation
 
 # autopep8: on
@@ -1071,7 +1066,7 @@ class Scanner:
                 if global_config["AggressiveSpeculation"]:
                     succs.extend(ns.unsat_successors)
 
-            except (SplitException, GeneralException) as e:
+            except (SplitException, GeneralException):
                 # The state has been manually splitted: don't explore it further.
                 continue
             except (

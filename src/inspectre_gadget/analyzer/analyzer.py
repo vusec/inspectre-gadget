@@ -5,18 +5,18 @@ Entrypoint for the analysis component. The analyzer is responsible of:
 3. Run analyzer on each gadget (if not done during scanning)
 """
 
-import yaml
 import pickle
+
 import angr
 import claripy.ast.base
+import yaml
 from cle import Symbol
 
-from .scanner.scanner import Scanner
 from .analysis.pipeline import AnalysisPipeline
-from .shared import logger
+from .scanner.scanner import Scanner
 from .shared import config as config_module
+from .shared import logger
 from .shared.config import global_config
-
 
 l = logger.get_logger("MAIN")
 l_verbose = logger.get_logger("MAIN_VERBOSE")

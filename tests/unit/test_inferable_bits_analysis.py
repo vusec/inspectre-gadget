@@ -119,9 +119,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         self.assertEqual(flow_map.number_of_bits_inferable, 30)
         self.assertEqual(flow_map.spread_low, 0)
         self.assertEqual(flow_map.spread_high, 36)
-        self.assertEqual(
-            flow_map.all_inferable_bits, [0, 1] + list(range(4, 32))
-        )
+        self.assertEqual(flow_map.all_inferable_bits, [0, 1] + list(range(4, 32)))
 
     def test_and_operation(self):
 

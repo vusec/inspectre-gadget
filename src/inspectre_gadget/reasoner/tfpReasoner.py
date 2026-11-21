@@ -1,13 +1,9 @@
-import argparse
-import pandas as pd
-import numpy as np
 from io import StringIO
-import csv
-
-from . import addressSpace
-from . import common
-
 from warnings import simplefilter
+
+import pandas as pd
+
+from . import addressSpace, common
 
 simplefilter(action="ignore", category=pd.errors.PerformanceWarning)
 
@@ -225,7 +221,7 @@ def get_tfp_control(t: pd.Series):
     else:
         # We might want to add controlled_range for tfp expr to do more
         # fine-grained
-        if t[f"control"] != "ControlType.CONTROLLED" or "gs" in t[f"expr"]:
+        if t["control"] != "ControlType.CONTROLLED" or "gs" in t["expr"]:
             controlled_sufficiently = False
             controlled_fully = False
 

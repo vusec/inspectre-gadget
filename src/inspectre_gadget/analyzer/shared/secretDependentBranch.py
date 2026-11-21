@@ -4,8 +4,7 @@ Secret Dependent Branch object.
 
 import claripy
 
-from . import utils
-from . import transmission
+from . import transmission, utils
 from .transmission import Transmission, TransmissionComponent, TransmissionExpr
 
 

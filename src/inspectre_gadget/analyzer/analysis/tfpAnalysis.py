@@ -1,21 +1,20 @@
-import claripy
-import sys
 import itertools
+
+import claripy
+
+from ..scanner import annotations
+from ..shared import astTransform, logger, utils
+from ..shared.astTransform import SplitTooManyNestedIfException
+from ..shared.config import global_config
 
 # autopep8: off
 from ..shared.taintedFunctionPointer import (
-    TFPRegisterControlType,
     TaintedFunctionPointer,
+    TFPRegisterControlType,
 )
-from ..shared import utils
-from ..shared import logger
-from ..shared.config import global_config
-from ..shared import astTransform
-from ..shared.astTransform import SplitTooManyNestedIfException
-from ..scanner import annotations
-from . import dependencyGraph
+from . import dependencyGraph, transmissionAnalysis
 from .dependencyGraph import DepGraph
-from . import transmissionAnalysis
+
 # autopep8: on
 
 l = logger.get_logger("TFPAnalysis")
@@ -86,7 +85,7 @@ def is_independent_from_tfp(d: DepGraph, reg_expr, tfp_expr, check_addr: bool):
 
 
 def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
-    l.warning(f"========= [TFP] ==========")
+    l.warning("========= [TFP] ==========")
 
     substitutions = []
     needs_substitutions = False
