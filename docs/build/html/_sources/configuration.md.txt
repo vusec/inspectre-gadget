@@ -45,6 +45,10 @@ LogLevel: 1
 # Forward stored values to subsequent loads.
 STLForwarding: True
 
+# Load concrete values from the binary (e.g., globals) when both the load
+# address and the loaded value are concrete, instead of creating a new symbol.
+LoadConcreteMemory: False
+
 # Timeout of the Z3 solver when evaluating constraints.
 Z3Timeout: 10000 # ms = 10s
 
@@ -73,6 +77,15 @@ CrashOnExceptions: False
 # This has consequences on interrupting, e.g., if you analyse only _after_ scanning
 # you won't have any outputted transmission in case of  e.g.timeouts.
 AnalyzeDuringScanning: True
+
+# Settings that are only used by the reasoner (`inspectre reason --config`).
+reasoner:
+  # Which address spaces the gadgets can access, i.e., which addresses are
+  # considered valid (e.g., for the base and secret address). Enable kernel
+  # addresses when analyzing the (Linux) kernel, and user addresses when
+  # analyzing a user-space program. At least one of them should be enabled.
+  AllowKernelAddresses: True
+  AllowUserAddresses: False
 ```
 
 Note that, since InSpectre Gadget lists which registers and memory locations are
@@ -85,6 +98,9 @@ Some other parameters that can be tweaked are:
 - **MaxBB**: Maximum number of basic blocks to explore for each entrypoint
 - **STLForwarding**: When enabled, the scanner will forward stored values
   to subsequent loads to the same address
+- **LoadConcreteMemory**: When enabled, loads from a concrete address that
+  contains a concrete value in the binary (e.g., a global) return that value
+  instead of a new symbol, so it shows up in the resulting expressions
 - **DistributeShifts**: When enabled, left-shift expressions like
   `(rax + rbx) << 8` will be treated as `(rax << 8) + (rbx << 8)` during range and control analysis
 - **TaintedFunctionPointers**: When enabled, the scanner will scan also for
@@ -92,3 +108,21 @@ Some other parameters that can be tweaked are:
 - **HalfSpectre**: When enabled, the scanner will scan also for
   Half-Spectre gadgets (a.k.a prefetch gadgets, a.k.a dispatch gadgets,
   see for example[https://download.vusec.net/papers/halfspectre_sp25.pdf](https://download.vusec.net/papers/halfspectre_sp25.pdf)).
+
+## Reasoner
+
+The `reasoner` section of the config is only used by the reasoner, which reads
+it when you pass the config file with `--config`:
+
+```sh
+inspectre reason --config config_all.yaml gadgets.csv gadgets-reasoned.csv
+```
+
+- **AllowKernelAddresses**: Gadgets can access kernel-space addresses (Linux
+  x86-64: kernel text and the direct physical memory map). Enable this when
+  analyzing the kernel.
+- **AllowUserAddresses**: Gadgets can access user-space addresses. Enable this
+  when analyzing a user-space program. Since user-space layouts differ per
+  process, we assume the attacker can map (or knows) any user-space address.
+
+Without `--config`, the reasoner only allows kernel addresses.

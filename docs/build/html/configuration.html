@@ -8,15 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Configuration &mdash; InSpectre Gadget  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/css/sphinx_rtd_size.css?v=a8ffd9ad" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -47,7 +47,10 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="quickstart.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Configuration</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#reasoner">Reasoner</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="output.html">Output</a></li>
 <li class="toctree-l1"><a class="reference internal" href="experiments.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="internals/index.html">Internals</a></li>
@@ -87,7 +90,7 @@ user, as well as some analysis parameters.</p>
 <a class="reference external" href="https://github.com/vusec/inspectre-gadget/blob/main/config_all.yaml">in the top folder</a>.</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Which registers are attacker-controlled.</span>
 <span class="c1"># Note that we generally consider everything controlled,</span>
-<span class="c1"># and later filter the gadgets based on the &quot;Requirements&quot; column.</span>
+<span class="c1"># and later filter the gadgets based on the "Requirements" column.</span>
 <span class="nt">controlled_registers</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rax</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rbx</span>
@@ -122,6 +125,10 @@ user, as well as some analysis parameters.</p>
 <span class="c1"># Forward stored values to subsequent loads.</span>
 <span class="nt">STLForwarding</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 
+<span class="c1"># Load concrete values from the binary (e.g., globals) when both the load</span>
+<span class="c1"># address and the loaded value are concrete, instead of creating a new symbol.</span>
+<span class="nt">LoadConcreteMemory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
+
 <span class="c1"># Timeout of the Z3 solver when evaluating constraints.</span>
 <span class="nt">Z3Timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span><span class="w"> </span><span class="c1"># ms = 10s</span>
 
@@ -134,7 +141,7 @@ user, as well as some analysis parameters.</p>
 <span class="c1"># Also look for tainted function pointers (i.e. dispatch gadgets).</span>
 <span class="nt">TaintedFunctionPointers</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
 
-<span class="c1"># Also output &quot;Half-Spectre&quot; gadgets, a.k.a MDS gadgets.</span>
+<span class="c1"># Also output "Half-Spectre" gadgets, a.k.a MDS gadgets.</span>
 <span class="c1"># https://download.vusec.net/papers/halfspectre_sp25.pdf</span>
 <span class="nt">HalfSpectre</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 
@@ -148,8 +155,17 @@ user, as well as some analysis parameters.</p>
 <span class="c1"># Should we analyse the transmissions only after scanning the whole gadget,</span>
 <span class="c1"># or should we try to output transmissions as soon as they are found?</span>
 <span class="c1"># This has consequences on interrupting, e.g., if you analyse only _after_ scanning</span>
-<span class="c1"># you won&#39;t have any outputted transmission in case of  e.g.timeouts.</span>
+<span class="c1"># you won't have any outputted transmission in case of  e.g.timeouts.</span>
 <span class="nt">AnalyzeDuringScanning</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+
+<span class="c1"># Settings that are only used by the reasoner (`inspectre reason --config`).</span>
+<span class="nt">reasoner</span><span class="p">:</span>
+<span class="w">  </span><span class="c1"># Which address spaces the gadgets can access, i.e., which addresses are</span>
+<span class="w">  </span><span class="c1"># considered valid (e.g., for the base and secret address). Enable kernel</span>
+<span class="w">  </span><span class="c1"># addresses when analyzing the (Linux) kernel, and user addresses when</span>
+<span class="w">  </span><span class="c1"># analyzing a user-space program. At least one of them should be enabled.</span>
+<span class="w">  </span><span class="nt">AllowKernelAddresses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span>
+<span class="w">  </span><span class="nt">AllowUserAddresses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False</span>
 </pre></div>
 </div>
 <p>Note that, since InSpectre Gadget lists which registers and memory locations are
@@ -161,6 +177,9 @@ restrict the set of controlled registers beforehand.</p>
 <li><p><strong>MaxBB</strong>: Maximum number of basic blocks to explore for each entrypoint</p></li>
 <li><p><strong>STLForwarding</strong>: When enabled, the scanner will forward stored values
 to subsequent loads to the same address</p></li>
+<li><p><strong>LoadConcreteMemory</strong>: When enabled, loads from a concrete address that
+contains a concrete value in the binary (e.g., a global) return that value
+instead of a new symbol, so it shows up in the resulting expressions</p></li>
 <li><p><strong>DistributeShifts</strong>: When enabled, left-shift expressions like
 <code class="docutils literal notranslate"><span class="pre">(rax</span> <span class="pre">+</span> <span class="pre">rbx)</span> <span class="pre">&lt;&lt;</span> <span class="pre">8</span></code> will be treated as <code class="docutils literal notranslate"><span class="pre">(rax</span> <span class="pre">&lt;&lt;</span> <span class="pre">8)</span> <span class="pre">+</span> <span class="pre">(rbx</span> <span class="pre">&lt;&lt;</span> <span class="pre">8)</span></code> during range and control analysis</p></li>
 <li><p><strong>TaintedFunctionPointers</strong>: When enabled, the scanner will scan also for
@@ -169,6 +188,23 @@ TaintedFunctionPointers (a.k.a dispatch gadgets, see the paper for more details)
 Half-Spectre gadgets (a.k.a prefetch gadgets, a.k.a dispatch gadgets,
 see for example<a class="reference external" href="https://download.vusec.net/papers/halfspectre_sp25.pdf">https://download.vusec.net/papers/halfspectre_sp25.pdf</a>).</p></li>
 </ul>
+<section id="reasoner">
+<h2>Reasoner<a class="headerlink" href="#reasoner" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">reasoner</span></code> section of the config is only used by the reasoner, which reads
+it when you pass the config file with <code class="docutils literal notranslate"><span class="pre">--config</span></code>:</p>
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>inspectre<span class="w"> </span>reason<span class="w"> </span>--config<span class="w"> </span>config_all.yaml<span class="w"> </span>gadgets.csv<span class="w"> </span>gadgets-reasoned.csv
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>AllowKernelAddresses</strong>: Gadgets can access kernel-space addresses (Linux
+x86-64: kernel text and the direct physical memory map). Enable this when
+analyzing the kernel.</p></li>
+<li><p><strong>AllowUserAddresses</strong>: Gadgets can access user-space addresses. Enable this
+when analyzing a user-space program. Since user-space layouts differ per
+process, we assume the attacker can map (or knows) any user-space address.</p></li>
+</ul>
+<p>Without <code class="docutils literal notranslate"><span class="pre">--config</span></code>, the reasoner only allows kernel addresses.</p>
+</section>
 </section>
 
 

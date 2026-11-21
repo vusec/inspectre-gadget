@@ -38,4 +38,4 @@ queries on the CSV.
 
 ## License
 
-TBD
+InSpectre Gadget is released under the [Apache License 2.0](https://github.com/vusec/inspectre-gadget/blob/main/LICENSE).
