@@ -10,11 +10,12 @@ dependencies = [
   "pycparser<3"
 ]
 
+[project.scripts]
+inspectre = "inspectre_gadget.cli:main"
+
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.package-dir]
-# Add sub-packages to an `inspectre_gadget` super package.
-# This lets you do `from inspectre_gadget import analyzer`, for example.
-"inspectre_gadget" = "."
+[tool.setuptools.packages.find]
+where = ["src"]

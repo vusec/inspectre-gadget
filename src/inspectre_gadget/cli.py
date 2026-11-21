@@ -1,31 +1,27 @@
-#!/usr/bin/env python3
+"""Command-line interface for InSpectre Gadget."""
 
 import argparse
 import csv
-import subprocess
 import os
+import subprocess
+import sys
 
-from analyzer import analyzer
-from reasoner import reasoner
+from inspectre_gadget.analyzer import analyzer
+from inspectre_gadget.reasoner import reasoner
+
 
 def parse_gadget_list(filename):
-    file = open(filename, "r")
-    data = list(csv.reader(file, delimiter=","))
-    file.close()
+    with open(filename, "r") as file:
+        data = list(csv.reader(file, delimiter=","))
 
     if len(data[0]) != 2:
-        print("Invalid CSV: gadgets should be in the form of <hex_address>,<name")
-        exit(-1)
+        print("Invalid CSV: gadgets should be in the form of <hex_address>,<name>")
+        sys.exit(-1)
 
     return data
 
 
 def run_analyzer(args):
-    # No support for mutually exclusivity between a group of 1 and 2 arguments
-    # so we check manually for this
-    if args.address_list and args.name:
-        arg_parser.error("--name: not allowed with argument --address-list")
-
     # Parse entrypoint list.
     entrypoints = []
     if args.address != "":
@@ -59,18 +55,20 @@ def run_analyzer(args):
 def run_reasoner(args):
     reasoner.run(args.csv_in, args.csv_out, args.config)
 
+
 def run_viewer(args):
     asm_files = os.listdir(args.folder)
     asm = [f"{args.folder}/{x}" for x in asm_files if args.id in x]
     if len(asm) == 0:
         print("Not found")
-        exit()
+        sys.exit()
 
     subprocess.run(["batcat"] + asm)
 
 
-if __name__ == '__main__':
+def build_parser():
     arg_parser = argparse.ArgumentParser(
+        prog='inspectre',
         description='An inspector for Spectre gadgets')
     subparsers = arg_parser.add_subparsers(
         dest='command', help='command to run', required=True)
@@ -107,7 +105,6 @@ if __name__ == '__main__':
                                default='', help='output all found half-spectre gadgets to a CSV')
     analyzer_args.add_argument('--asm', required=False, default='',
                                help='output an annotated ASM file for each gadget to the specified folder')
-    # Run.
     analyzer_args.set_defaults(func=run_analyzer)
 
     # ----------- Reasoner
@@ -129,6 +126,20 @@ if __name__ == '__main__':
         'id', help='uuid or pc reported by the analyzer (in hex)')
     viewer_args.set_defaults(func=run_viewer)
 
-    args = arg_parser.parse_args()
+    return arg_parser
+
+
+def main(argv=None):
+    arg_parser = build_parser()
+    args = arg_parser.parse_args(argv)
+
+    # argparse has no support for mutual exclusivity between a group of 1 and
+    # 2 arguments, so we check manually for this.
+    if args.command == 'analyze' and args.address_list and args.name:
+        arg_parser.error("--name: not allowed with argument --address-list")
 
     args.func(args)
+
+
+if __name__ == '__main__':
+    main()
