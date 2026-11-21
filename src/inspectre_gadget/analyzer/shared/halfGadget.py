@@ -2,18 +2,15 @@
 HalfGadget object (a.k.a. MDS gadgets).
 """
 
-import claripy
-from enum import Enum
-import json
 from collections import OrderedDict
 
-from . import ranges
-from . import utils
-from . import transmission
+import claripy
+
+from . import transmission, utils
 from .transmission import Requirements, TransmissionComponent
 
 
-class HalfGadget():
+class HalfGadget:
     """
     Object that represents a "half" Spectre gadget.
     A half-spectre gadget consist only of an attacker-controlled load,
@@ -21,6 +18,7 @@ class HalfGadget():
     attacks), into the LFB (for MDS attacks), or even for Rowhammer attacks
     (ProbeHammer).
     """
+
     uuid: str
     name: str
     pc: int
@@ -47,9 +45,19 @@ class HalfGadget():
 
     all_requirements: Requirements
 
-    def __init__(self, expr: claripy.ast.BV, pc: int, n_instr: int,
-                 contains_spec_stop: bool, aliases, constraints, branches, bbls,
-                 n_aggr_misprd: int = 0, time_found: float = 0.0):
+    def __init__(
+        self,
+        expr: claripy.ast.BV,
+        pc: int,
+        n_instr: int,
+        contains_spec_stop: bool,
+        aliases,
+        constraints,
+        branches,
+        bbls,
+        n_aggr_misprd: int = 0,
+        time_found: float = 0.0,
+    ):
         self.uuid = ""
         self.name = ""
         self.pc = pc
@@ -67,7 +75,7 @@ class HalfGadget():
 
         self.aliases = aliases
         for x in aliases:
-            assert (' if ' not in str(x))
+            assert " if " not in str(x)
         self.branches = branches
         self.bbls = bbls
         # TODO check if branches contain if-then-else
@@ -116,29 +124,29 @@ class HalfGadget():
     def to_dict(self):
         d = OrderedDict()
 
-        d['uuid'] = self.uuid
-        d['name'] = self.name
-        d['pc'] = hex(self.pc)
-        d['expr'] = self.loaded.expr
-        d['n_instr'] = self.n_instr
-        d['n_aggr_misprd'] = self.n_aggr_misprd
-        d['time_found'] = self.time_found
-        d['n_dependent_loads'] = self.max_load_depth
-        d['contains_spec_stop'] = self.contains_spec_stop
-        d['bbls'] = str([hex(x) for x in self.bbls])
+        d["uuid"] = self.uuid
+        d["name"] = self.name
+        d["pc"] = hex(self.pc)
+        d["expr"] = self.loaded.expr
+        d["n_instr"] = self.n_instr
+        d["n_aggr_misprd"] = self.n_aggr_misprd
+        d["time_found"] = self.time_found
+        d["n_dependent_loads"] = self.max_load_depth
+        d["contains_spec_stop"] = self.contains_spec_stop
+        d["bbls"] = str([hex(x) for x in self.bbls])
 
-        d['loaded'] = transmission.component_to_dict(self.loaded)
-        d['base'] = transmission.component_to_dict(self.base)
-        d['uncontrolled_base'] = transmission.component_to_dict(self.uncontrolled_base)
-        d['attacker'] = transmission.component_to_dict(self.attacker)
+        d["loaded"] = transmission.component_to_dict(self.loaded)
+        d["base"] = transmission.component_to_dict(self.base)
+        d["uncontrolled_base"] = transmission.component_to_dict(self.uncontrolled_base)
+        d["attacker"] = transmission.component_to_dict(self.attacker)
 
-        d['branches'] = utils.ordered_branches(self.branches)
-        d['branch_requirements'] = self.branch_requirements
-        d['constraints'] = utils.ordered_constraints(self.constraints)
-        d['constraint_requirements'] = self.constraint_requirements
-        d['all_requirements'] = self.all_requirements
-        d['all_requirements_w_branches'] = self.all_requirements_w_branches
+        d["branches"] = utils.ordered_branches(self.branches)
+        d["branch_requirements"] = self.branch_requirements
+        d["constraints"] = utils.ordered_constraints(self.constraints)
+        d["constraint_requirements"] = self.constraint_requirements
+        d["all_requirements"] = self.all_requirements
+        d["all_requirements_w_branches"] = self.all_requirements_w_branches
 
-        d['aliases'] = [str(x.to_BV()) for x in self.aliases]
+        d["aliases"] = [str(x.to_BV()) for x in self.aliases]
 
         return d

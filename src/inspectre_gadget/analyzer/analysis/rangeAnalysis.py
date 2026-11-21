@@ -1,18 +1,28 @@
 import claripy
-import sys
-from .range_strategies import (RangeStrategyFindConstraintsBounds,
-                               RangeStrategyFindMasking, RangeStrategyInferIsolated,
-                               RangeStrategySmallSet)
 
-# autopep8: off
-from ..shared.transmission import ControlType, Transmission, TransmissionComponent
-from ..shared.taintedFunctionPointer import (TFPRegisterControlType,
-                                             TaintedFunctionPointer)
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared.halfGadget import HalfGadget
+from ..scanner import annotations
 from ..shared import logger
 from ..shared.config import global_config
-from ..scanner import annotations
+from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared.taintedFunctionPointer import (
+    TaintedFunctionPointer,
+    TFPRegisterControlType,
+)
+
+# autopep8: off
+from ..shared.transmission import (
+    ControlType,
+    Transmission,
+    TransmissionComponent,
+)
+from .range_strategies import (
+    RangeStrategyFindConstraintsBounds,
+    RangeStrategyFindMasking,
+    RangeStrategyInferIsolated,
+    RangeStrategySmallSet,
+)
+
 # autopep8: on
 
 l = logger.get_logger("RangeAnalys")
@@ -21,7 +31,7 @@ __range_strategies = [
     RangeStrategySmallSet(),
     RangeStrategyInferIsolated(),
     RangeStrategyFindConstraintsBounds(RangeStrategyInferIsolated()),
-    RangeStrategyFindMasking()
+    RangeStrategyFindMasking(),
 ]
 
 
@@ -68,8 +78,7 @@ def calculate_range(component: TransmissionComponent, constraints, branches):
 
         # Calculate ranges considering also branch constraints.
         if len(branches) > 0:
-            component.range_with_branches = get_ast_ranges(
-                branches, component.expr)
+            component.range_with_branches = get_ast_ranges(branches, component.expr)
         else:
             component.range_with_branches = component.range
 
@@ -78,13 +87,14 @@ def calculate_range(component: TransmissionComponent, constraints, branches):
             calculate_controlled_range(component, constraints, branches)
 
 
-def calculate_controlled_range(component: TransmissionComponent, constraints,
-                               branches):
+def calculate_controlled_range(component: TransmissionComponent, constraints, branches):
     """
     Calculate the range of the part of the expression the attacker controls.
     """
-    if component.control not in [ControlType.CONTROLLED,
-                                 ControlType.REQUIRES_MEM_LEAK]:
+    if component.control not in [
+        ControlType.CONTROLLED,
+        ControlType.REQUIRES_MEM_LEAK,
+    ]:
         return
 
     component.controlled_expr = annotations.get_controlled_expr(component.expr)
@@ -97,17 +107,17 @@ def calculate_controlled_range(component: TransmissionComponent, constraints,
         component.controlled_range_with_branches = component.range_with_branches
         return
 
-    component.controlled_range = get_ast_ranges(constraints,
-                                                component.controlled_expr)
+    component.controlled_range = get_ast_ranges(constraints, component.controlled_expr)
     if len(branches) > 0:
         component.controlled_range_with_branches = get_ast_ranges(
-            branches, component.controlled_expr)
+            branches, component.controlled_expr
+        )
     else:
         component.controlled_range_with_branches = component.controlled_range
 
 
 def analyse(t: Transmission):
-    l.warning(f"========= [RANGE] ==========")
+    l.warning("========= [RANGE] ==========")
 
     # Calculate ranges for each component
     for c in [t.base, t.transmitted_secret, t.secret_address, t.transmission]:
@@ -127,14 +137,17 @@ def analyse(t: Transmission):
 
     # Calculate ranges for base sub-components.
     if t.base != None and t.independent_base != None:
-        if (t.properties['direct_dependent_base_expr'] == None
-                and t.properties['indirect_dependent_base_expr'] == None):
+        if (
+            t.properties["direct_dependent_base_expr"] == None
+            and t.properties["indirect_dependent_base_expr"] == None
+        ):
             t.independent_base.range = t.base.range
             t.independent_base.range_with_branches = t.base.range_with_branches
             t.independent_base.controlled_expr = t.base.controlled_expr
             t.independent_base.controlled_range = t.base.controlled_range
             t.independent_base.controlled_range_with_branches = (
-                t.base.controlled_range_with_branches)
+                t.base.controlled_range_with_branches
+            )
         else:
             constr = [x[1] for x in t.independent_base.constraints]
             constr_with_branches = [x[1] for x in t.independent_base.branches]
@@ -150,8 +163,10 @@ def analyse(t: Transmission):
             calculate_range(t.independent_base, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if t.base == None else t.base.range}")
-    l.warning("independent base range:  "
-              f"{'NONE' if t.independent_base == None else t.independent_base.range}")
+    l.warning(
+        "independent base range:  "
+        f"{'NONE' if t.independent_base == None else t.independent_base.range}"
+    )
     l.warning(f"secret_address range:  {t.secret_address.range}")
     l.warning(f"transmitted_secret range:  {t.transmitted_secret.range}")
     l.warning(f"transmission range:  {t.transmission.range}")
@@ -159,13 +174,18 @@ def analyse(t: Transmission):
 
 
 def analyse_tfp(t: TaintedFunctionPointer):
-    l.warning(f"========= [RANGE] ==========")
+    l.warning("========= [RANGE] ==========")
 
     for r in t.registers.values():
-        if (r.control in (ControlType.REQUIRES_MEM_LEAK,
-                          ControlType.REQUIRES_MEM_MASSAGING,
-                          ControlType.CONTROLLED)
-                or r.control_type == TFPRegisterControlType.IS_TFP_REGISTER):
+        if (
+            r.control
+            in (
+                ControlType.REQUIRES_MEM_LEAK,
+                ControlType.REQUIRES_MEM_MASSAGING,
+                ControlType.CONTROLLED,
+            )
+            or r.control_type == TFPRegisterControlType.IS_TFP_REGISTER
+        ):
             constr = [x[1] for x in r.constraints]
             constr_with_branches = [x[1] for x in r.branches]
             constr_with_branches.extend(constr)
@@ -183,7 +203,8 @@ def analyse_tfp(t: TaintedFunctionPointer):
                 r.controlled_range = get_ast_ranges(constr, r.controlled_expr)
                 if len(r.branches) > 0:
                     r.controlled_range_with_branches = get_ast_ranges(
-                        constr_with_branches, r.controlled_expr)
+                        constr_with_branches, r.controlled_expr
+                    )
                 else:
                     r.controlled_range_with_branches = r.controlled_range
 
@@ -197,7 +218,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
 
 def analyse_half_gadget(g: HalfGadget):
-    l.warning(f"========= [RANGE] ==========")
+    l.warning("========= [RANGE] ==========")
 
     # Calculate ranges for each component
     for c in [g.loaded, g.base, g.uncontrolled_base, g.attacker]:
@@ -216,8 +237,10 @@ def analyse_half_gadget(g: HalfGadget):
             calculate_range(c, constr, constr_with_branches)
 
     l.warning(f"base range:  {'NONE' if g.base == None else g.base.range}")
-    l.warning("uncontrolled_base range:  "
-              f"{'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.range}")
+    l.warning(
+        "uncontrolled_base range:  "
+        f"{'NONE' if g.uncontrolled_base == None else g.uncontrolled_base.range}"
+    )
     l.warning(f"attacker range:  {g.attacker.range}")
     l.warning("==========================")
 
@@ -243,7 +266,8 @@ def analyze_secret_dependent_branch(sdb: SecretDependentBranch):
             calculate_range(c, constr, constr_with_branches)
 
     l.warning(f"cmp_value range:  {sdb.cmp_value.range}")
-    controlled_range = ('NONE' if sdb.controlled_cmp_value == None
-                        else sdb.controlled_cmp_value.range)
+    controlled_range = (
+        "NONE" if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range
+    )
     l.warning(f"controlled_cmp_value range:  {controlled_range}")
     l.warning("==========================")

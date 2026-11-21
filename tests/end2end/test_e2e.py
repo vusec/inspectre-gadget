@@ -39,9 +39,7 @@ def script_env():
 @pytest.mark.parametrize("case", CASES)
 def test_e2e(case, request, tools_available, script_env):
     # Nice section that lists how to reproduce specific failing cases
-    request.node.user_properties.append(
-        ("rerun", f"tests/end2end/test-single.sh {case}")
-    )
+    request.node.user_properties.append(("rerun", f"tests/end2end/test-single.sh {case}"))
 
     build = subprocess.run(
         ["make", "-s", "-C", str(CASES_DIR / case)],

@@ -1,8 +1,10 @@
-import claripy
-import capstone
-import itertools
 import traceback
+
+import capstone
+import claripy
+
 from .config import global_config
+
 
 def is_sym_expr(x) -> bool:
     return isinstance(x, claripy.ast.base.Base) and x.symbolic
@@ -28,23 +30,24 @@ def get_annotations(expr):
 
 
 def get_x86_indirect_thunks(proj):
-    symbol_names = {"__x86_indirect_thunk_array": "rax",
-                    "__x86_indirect_thunk_r10": "r10",
-                    "__x86_indirect_thunk_r11": "r11",
-                    "__x86_indirect_thunk_r12": "r12",
-                    "__x86_indirect_thunk_r13": "r13",
-                    "__x86_indirect_thunk_r14": "r14",
-                    "__x86_indirect_thunk_r15": "r15",
-                    "__x86_indirect_thunk_r8": "r8",
-                    "__x86_indirect_thunk_r9": "r9",
-                    "__x86_indirect_thunk_rax": "rax",
-                    "__x86_indirect_thunk_rbp": "rbp",
-                    "__x86_indirect_thunk_rbx": "rbx",
-                    "__x86_indirect_thunk_rcx": "rcx",
-                    "__x86_indirect_thunk_rdi": "rdi",
-                    "__x86_indirect_thunk_rdx": "rdx",
-                    "__x86_indirect_thunk_rsi": "rsi",
-                    }
+    symbol_names = {
+        "__x86_indirect_thunk_array": "rax",
+        "__x86_indirect_thunk_r10": "r10",
+        "__x86_indirect_thunk_r11": "r11",
+        "__x86_indirect_thunk_r12": "r12",
+        "__x86_indirect_thunk_r13": "r13",
+        "__x86_indirect_thunk_r14": "r14",
+        "__x86_indirect_thunk_r15": "r15",
+        "__x86_indirect_thunk_r8": "r8",
+        "__x86_indirect_thunk_r9": "r9",
+        "__x86_indirect_thunk_rax": "rax",
+        "__x86_indirect_thunk_rbp": "rbp",
+        "__x86_indirect_thunk_rbx": "rbx",
+        "__x86_indirect_thunk_rcx": "rcx",
+        "__x86_indirect_thunk_rdi": "rdi",
+        "__x86_indirect_thunk_rdx": "rdx",
+        "__x86_indirect_thunk_rsi": "rsi",
+    }
     ind_calls = {}
 
     for symbol, reg in symbol_names.items():
@@ -56,20 +59,36 @@ def get_x86_indirect_thunks(proj):
 
 
 def get_x86_registers():
-    return ["rax", "rbx", "rcx", "rdx", "rsi",
-            "rdi", "rbp", "rsp", "r8", "r9",
-            "r10", "r11", "r12", "r13", "r14", "r15"]
+    return [
+        "rax",
+        "rbx",
+        "rcx",
+        "rdx",
+        "rsi",
+        "rdi",
+        "rbp",
+        "rsp",
+        "r8",
+        "r9",
+        "r10",
+        "r11",
+        "r12",
+        "r13",
+        "r14",
+        "r15",
+    ]
 
 
-def report_error(error: Exception, where="dunno", start_addr="dunno",
-                 error_type="GENERIC"):
+def report_error(
+    error: Exception, where="dunno", start_addr="dunno", error_type="GENERIC"
+):
     ins_addr = None
-    if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
+    if hasattr(error, "ins_addr") and isinstance(error.ins_addr, int):
         ins_addr = hex(error.ins_addr)
 
     o = open("fail.txt", "a+")
     o.write(f"---------------- [ {error_type} ERROR ] ----------------\n")
-    ins_addr_str = f'instruction addr: {ins_addr}' if ins_addr else ''
+    ins_addr_str = f"instruction addr: {ins_addr}" if ins_addr else ""
     o.write(f"where: {where}     started at: {start_addr} {ins_addr_str}\n")
     o.write(str(error) + "\n")
     o.write(traceback.format_exc())
@@ -77,24 +96,32 @@ def report_error(error: Exception, where="dunno", start_addr="dunno",
     o.close()
 
 
-def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno",
-                       error_type="GENERIC"):
-    if hasattr(error, 'ins_addr') and isinstance(error.ins_addr, int):
+def report_unsupported(
+    error: Exception,
+    proj,
+    where="dunno",
+    start_addr="dunno",
+    error_type="GENERIC",
+):
+    if hasattr(error, "ins_addr") and isinstance(error.ins_addr, int):
         where = hex(error.ins_addr)
 
     try:
         mnemonic = get_mnemonic_at_address(proj, int(where, 16))
     except ValueError:
-        mnemonic = ''
+        mnemonic = ""
 
-    if mnemonic == 'ud2':
+    if mnemonic == "ud2":
         return
 
     o = open("unsupported.txt", "a+")
     o.write(
-        f"---------------- [ {error_type} UNSUPPORTED INSTRUCTION ] ----------------\n")
-    o.write(f"instruction addr: {where}     started at: {start_addr}     "
-            f"mnemonic: '{mnemonic}'\n")
+        f"---------------- [ {error_type} UNSUPPORTED INSTRUCTION ] ----------------\n"
+    )
+    o.write(
+        f"instruction addr: {where}     started at: {start_addr}     "
+        f"mnemonic: '{mnemonic}'\n"
+    )
     o.write(str(error) + "\n")
     o.write("\n")
     o.close()
@@ -102,7 +129,7 @@ def report_unsupported(error: Exception, proj, where="dunno", start_addr="dunno"
 
 def get_bbl_index(state):
     # Index of the current bbl in the path, see Scanner.add_bbl.
-    return state.globals['bbl_index']
+    return state.globals["bbl_index"]
 
 
 def get_outcome(cond, source, target):
@@ -130,41 +157,44 @@ def ordered_branches(branches):
 
 def ordered_constraints(constraints):
     constraints = sorted(constraints, key=lambda x: x[0])
-    return [(hex(addr), truncate_str(cond), str(ctype))
-            for addr, cond, ctype in constraints]
+    return [
+        (hex(addr), truncate_str(cond), str(ctype)) for addr, cond, ctype in constraints
+    ]
 
 
 def get_mnemonic_at_address(proj, address):
     proj.loader.memory.seek(address)
     bytes = proj.loader.memory.read(10)
     if not bytes:
-        return ''
+        return ""
 
     md = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
     md.detail = True
     instructions = list(md.disasm(bytes, 0))
     if not instructions:
-        return ''
+        return ""
 
     return instructions[0].mnemonic
 
+
 def truncate_str(s, width=1000):
-    placeholder = '[...]'
+    placeholder = "[...]"
     s = str(s)
 
     if not global_config["OutputTruncatedASTs"]:
         return s
 
-    assert (width > len(placeholder) + 20)
+    assert width > len(placeholder) + 20
 
     if len(s) > width:
-        return s[:width - 20 - len(placeholder)] + placeholder + s[-20:]
+        return s[: width - 20 - len(placeholder)] + placeholder + s[-20:]
 
     return s
 
 
 def sorted_set_str(s: set) -> str:
     return "{" + ", ".join(sorted([str(x) for x in s])) + "}"
+
 
 def merge_dependent_sets(sets: list) -> list:
     """

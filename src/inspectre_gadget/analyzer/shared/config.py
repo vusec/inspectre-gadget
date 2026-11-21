@@ -18,7 +18,7 @@ def init_config(config):
     # AggressiveSpeculation follows branches even if their condition is always false.
     global_config["AggressiveSpeculation"] = False
     # Mnemonics which are assumed to stop speculation
-    global_config["SpeculationStopMnemonics"] = {'lfence', 'mfence', 'cpuid'}
+    global_config["SpeculationStopMnemonics"] = {"lfence", "mfence", "cpuid"}
     # Crash (exit) on exceptions
     global_config["CrashOnExceptions"] = False
     # Load concrete memory values from the loaded binary (instead all symbolic).

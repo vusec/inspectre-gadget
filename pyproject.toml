@@ -75,7 +75,7 @@ markers = [
 #   ruff format .       # format (black-compatible)
 # ---------------------------------------------------------------------------
 [tool.ruff]
-line-length = 80
+line-length = 90
 src = ["src", "tests"]
 extend-exclude = ["docs/build"]
 

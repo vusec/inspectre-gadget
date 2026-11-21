@@ -4,21 +4,18 @@ This analysis is responsible of identifying the basic components (transmission
 base, transmitted secret and secret address) of a transmission.
 """
 
-import sys
 import claripy.ast.base
-import itertools
 
-from .dependencyGraph import DepGraph
+from ..scanner import annotations
+from ..scanner.annotations import SecretAnnotation, TransmissionAnnotation
 
 # autopep8: off
-from ..shared import logger
-from ..shared import astTransform
+from ..shared import astTransform, logger, utils
 from ..shared.astTransform import ConditionalAst, SplitTooManyNestedIfException
 from ..shared.config import global_config
 from ..shared.transmission import Transmission, TransmissionExpr
-from ..scanner import annotations
-from ..scanner.annotations import SecretAnnotation, TransmissionAnnotation
-from ..shared import utils
+from .dependencyGraph import DepGraph
+
 # autopep8: on
 
 l = logger.get_logger("TransmissionAnalysis")
@@ -46,7 +43,10 @@ def reduce_to_shifts(args, size):
 
         return (to_shift << remaining_size) + to_add
 
-def concat_to_shift(ast: claripy.ast.BV,):
+
+def concat_to_shift(
+    ast: claripy.ast.BV,
+):
     """
     Transform A <concat> B into (A << size_of_b) + B.
     """
@@ -95,8 +95,9 @@ def distribute_shifts(ast: claripy.ast.BV):
             expr_size = ast.size() - val_to_shift.size()
 
             # Apply shift to every addenda.
-            args_shifted = [claripy.ZeroExt(expr_size, arg) << shift_amount
-                            for arg in args_analyzed]
+            args_shifted = [
+                claripy.ZeroExt(expr_size, arg) << shift_amount for arg in args_analyzed
+            ]
             # Add everything together again.
             return astTransform.generate_addition(args_shifted)
 
@@ -130,8 +131,10 @@ def canonicalize(expr, addr):
     l.info(f"canonicalized: {splitted}")
     return splitted
 
-def get_dependency_graph(potential_t: TransmissionExpr,
-                         transmission_expr: ConditionalAst):
+
+def get_dependency_graph(
+    potential_t: TransmissionExpr, transmission_expr: ConditionalAst
+):
     d = DepGraph()
     d.add_nodes(transmission_expr.expr)
     d.add_aliases(map(lambda x: x.to_BV(), potential_t.aliases))
@@ -147,7 +150,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
     of a double load) to identify its components. Note that the same expression
     might contain multiple transmissions.
     """
-    l.warning(f"========= [AST] ==========")
+    l.warning("========= [AST] ==========")
     l.warning(f"Analyzing @{hex(potential_t.pc)}: {potential_t.expr}")
 
     # Extract members of the transmission.
@@ -159,8 +162,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
     transmissions = []
     for canonical_expr in canonical_exprs:
-        l.warning(
-            f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
+        l.warning(f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
         members = astTransform.extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {potential_t.aliases}")
 
@@ -184,7 +186,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
             # If there is at least one secret in this member...
             for secret_sym, secret_addr in secrets:
-                l.warning(f"    Found secret")
+                l.warning("    Found secret")
                 # Create new transmission.
                 t = Transmission(potential_t)
                 t.transmission.expr = canonical_expr.expr
@@ -210,19 +212,29 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                         continue
 
                     # TODO: is check_addr=True too strict?
-                    if d.is_independent(other_m, secret_sym,
-                                        check_constraints=False, check_addr=True):
+                    if d.is_independent(
+                        other_m,
+                        secret_sym,
+                        check_constraints=False,
+                        check_addr=True,
+                    ):
                         # If the other member is completely independent
                         # from the secret, it's part of the base.
                         base_members.append(other_m)
 
-                        if d.is_independent(other_m, secret_addr,
-                                            check_constraints=False,
-                                            check_addr=True):
+                        if d.is_independent(
+                            other_m,
+                            secret_addr,
+                            check_constraints=False,
+                            check_addr=True,
+                        ):
                             independent_base_members.append(other_m)
-                        elif d.is_independent(other_m, secret_addr,
-                                              check_constraints=False,
-                                              check_addr=False):
+                        elif d.is_independent(
+                            other_m,
+                            secret_addr,
+                            check_constraints=False,
+                            check_addr=False,
+                        ):
                             indirect_dependent_base.append(other_m)
                         else:
                             direct_dependent_base.append(other_m)
@@ -240,26 +252,37 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 # Create base sub-components.
                 if len(independent_base_members) > 0:
                     t.independent_base.expr = astTransform.generate_addition(
-                        independent_base_members)
+                        independent_base_members
+                    )
                 else:
                     t.independent_base = None
 
-                t.properties['direct_dependent_base_expr'] = (
+                t.properties["direct_dependent_base_expr"] = (
                     astTransform.generate_addition(direct_dependent_base)
-                    if len(direct_dependent_base) > 0 else None)
+                    if len(direct_dependent_base) > 0
+                    else None
+                )
 
-                t.properties['indirect_dependent_base_expr'] = (
+                t.properties["indirect_dependent_base_expr"] = (
                     astTransform.generate_addition(indirect_dependent_base)
-                    if len(indirect_dependent_base) > 0 else None)
+                    if len(indirect_dependent_base) > 0
+                    else None
+                )
 
                 # Calculate size.
-                for component in [t.base, t.secret_address, t.transmission,
-                                  t.transmitted_secret, t.secret_val,
-                                  t.independent_base]:
+                for component in [
+                    t.base,
+                    t.secret_address,
+                    t.transmission,
+                    t.transmitted_secret,
+                    t.secret_val,
+                    t.independent_base,
+                ]:
                     if component != None:
                         component.size = component.expr.size()
                         component.max_load_depth = annotations.get_load_depth(
-                            component.expr)
+                            component.expr
+                        )
 
                 transmissions.append(t)
 

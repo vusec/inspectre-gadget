@@ -18,8 +18,6 @@ def pytest_terminal_summary(terminalreporter):
     ]
     if reruns:
         terminalreporter.section("e2e failures reproducers")
-        terminalreporter.line(
-            "Commands to reproduce failing e2e tests (one per line):\n"
-        )
+        terminalreporter.line("Commands to reproduce failing e2e tests (one per line):\n")
         for cmd in reruns:
             terminalreporter.line(cmd)

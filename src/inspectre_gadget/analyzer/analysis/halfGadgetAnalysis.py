@@ -4,31 +4,28 @@ This analysis is responsible of identifying the basic components of a half-spect
 gadget.
 """
 
-import sys
-import claripy.ast.base
-import itertools
 import copy
 
+from ..scanner import annotations
+
 # autopep8: off
-from ..shared import logger
-from ..shared import astTransform
+from ..shared import astTransform, logger
 from ..shared.astTransform import SplitTooManyNestedIfException
 from ..shared.halfGadget import HalfGadget
-from ..scanner import annotations
 from . import transmissionAnalysis
+
 # autopep8: on
 
 l = logger.get_logger("HalfSpectreAnalysis")
 
 
 def analyse(gadget: HalfGadget):
-    l.warning(f"========= [HalfGadget] ==========")
+    l.warning("========= [HalfGadget] ==========")
     l.warning(f"Analyzing @{hex(gadget.pc)}: {gadget.loaded.expr}")
 
     # Extract members of the transmission.
     try:
-        canonical_exprs = transmissionAnalysis.canonicalize(gadget.loaded.expr,
-                                                            gadget.pc)
+        canonical_exprs = transmissionAnalysis.canonicalize(gadget.loaded.expr, gadget.pc)
     except SplitTooManyNestedIfException:
         l.error("half_gadget analyse: Failed canonicalizing expression")
         return []
@@ -39,8 +36,7 @@ def analyse(gadget: HalfGadget):
         g.loaded.expr = canonical_expr.expr
         g.loaded.constraints.extend(canonical_expr.conditions)
 
-        l.warning(
-            f"POTENTIAL HALF GADGET: {canonical_expr}")
+        l.warning(f"POTENTIAL HALF GADGET: {canonical_expr}")
         members = astTransform.extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {gadget.aliases}")
 
@@ -74,13 +70,14 @@ def analyse(gadget: HalfGadget):
             g.base = None
         if len(uncontrolled_base_members) > 0:
             g.uncontrolled_base.expr = astTransform.generate_addition(
-                uncontrolled_base_members)
+                uncontrolled_base_members
+            )
         else:
             g.uncontrolled_base = None
         # Create the attacker-controlled component.
         if len(attacker_members) == 0:
             # This may happen if the attacker controlled expr is simplified to 0
-            l.warning(f"Uncontrolled half gadget, skipping...")
+            l.warning("Uncontrolled half gadget, skipping...")
             continue
 
         g.attacker.expr = astTransform.generate_addition(attacker_members)
@@ -89,8 +86,7 @@ def analyse(gadget: HalfGadget):
         for component in [g.loaded, g.base, g.attacker, g.uncontrolled_base]:
             if component != None:
                 component.size = component.expr.size()
-                component.max_load_depth = annotations.get_load_depth(
-                    component.expr)
+                component.max_load_depth = annotations.get_load_depth(component.expr)
 
         gadgets.append(g)
 

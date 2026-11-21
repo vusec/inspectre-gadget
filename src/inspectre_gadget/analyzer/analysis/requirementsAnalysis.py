@@ -5,19 +5,22 @@ controlled or leaked by the attacker in order to trigger a transmission.
 """
 
 import claripy
-import sys
 
-# autopep8: off
-from ..shared.transmission import (ControlType, Requirements, Transmission,
-                                   TransmissionComponent)
-from ..shared.taintedFunctionPointer import TaintedFunctionPointer
-from ..shared.halfGadget import HalfGadget
-from ..shared.secretDependentBranch import SecretDependentBranch
-from ..shared import utils
-from ..shared import astTransform
-from ..shared import logger
 from ..scanner import annotations
 from ..scanner.annotations import AttackerAnnotation, LoadAnnotation
+from ..shared import astTransform, logger, utils
+from ..shared.halfGadget import HalfGadget
+from ..shared.secretDependentBranch import SecretDependentBranch
+from ..shared.taintedFunctionPointer import TaintedFunctionPointer
+
+# autopep8: off
+from ..shared.transmission import (
+    ControlType,
+    Requirements,
+    Transmission,
+    TransmissionComponent,
+)
+
 # autopep8: on
 
 l = logger.get_logger("ReqAnalysis")
@@ -78,8 +81,11 @@ def get_requirements(expr: claripy.ast.BV) -> Requirements:
 
 def get_control(c: TransmissionComponent, report_massaging=False) -> ControlType:
     # TODO: check aliasing
-    if (len(c.requirements.const_mem) == 0 and len(c.requirements.mem) == 0
-            and len(c.requirements.regs) == 0):
+    if (
+        len(c.requirements.const_mem) == 0
+        and len(c.requirements.mem) == 0
+        and len(c.requirements.regs) == 0
+    ):
         return ControlType.NO_CONTROL
 
     # At least one component is controlled
@@ -112,7 +118,7 @@ def get_control(c: TransmissionComponent, report_massaging=False) -> ControlType
     else:
         # If we are here, the expression has at least one symbol, but none of the
         # symbols are controlled, so for sure we have at least one uncontrolled symbol.
-        assert (has_uncontrolled_components)
+        assert has_uncontrolled_components
         if report_massaging:
             # If an expression contains only _uncontrolled_ symbols, i.e. symbols
             # that are not derived by the initial attacker-controlled registers,
@@ -135,18 +141,24 @@ def get_transmission_control(t: Transmission):
     if t.secret_address.control == ControlType.NO_CONTROL:
         return ControlType.NO_CONTROL
 
-    if ((t.base != None and t.base.control == ControlType.REQUIRES_MEM_LEAK)
-            or t.secret_address.control == ControlType.REQUIRES_MEM_LEAK):
+    if (
+        t.base != None and t.base.control == ControlType.REQUIRES_MEM_LEAK
+    ) or t.secret_address.control == ControlType.REQUIRES_MEM_LEAK:
         return ControlType.REQUIRES_MEM_LEAK
 
     return ControlType.CONTROLLED
 
 
 def analyse(t: Transmission):
-    l.warning(f"========= [REQS] ==========")
+    l.warning("========= [REQS] ==========")
 
-    for c in [t.base, t.transmitted_secret, t.secret_address, t.transmission,
-              t.independent_base]:
+    for c in [
+        t.base,
+        t.transmitted_secret,
+        t.secret_address,
+        t.transmission,
+        t.independent_base,
+    ]:
         if c != None:
             c.requirements = get_requirements(c.expr)
             c.control = get_control(c)
@@ -170,11 +182,9 @@ def analyse(t: Transmission):
     t.all_requirements_w_branches.merge(t.all_requirements)
     t.all_requirements_w_branches.merge(t.branch_requirements)
 
-    l.warning(
-        f"base_requirements:  {'NONE' if t.base == None else t.base.requirements}")
+    l.warning(f"base_requirements:  {'NONE' if t.base == None else t.base.requirements}")
     l.warning(f"secret_address_requirements:  {t.secret_address.requirements}")
-    l.warning(
-        f"transmitted_secret_requirements:  {t.transmitted_secret.requirements}")
+    l.warning(f"transmitted_secret_requirements:  {t.transmitted_secret.requirements}")
     l.warning(f"transmission_requirements:  {t.transmission.requirements}")
     l.warning("==========================")
 
@@ -188,14 +198,16 @@ def analyse(t: Transmission):
 
 
 def analyse_tfp(t: TaintedFunctionPointer):
-    l.warning(f"========= [REQS] ==========")
+    l.warning("========= [REQS] ==========")
     for r in t.registers:
         t.registers[r].requirements = get_requirements(t.registers[r].expr)
         t.registers[r].control = get_control(t.registers[r])
 
-        if t.registers[r].control in (ControlType.REQUIRES_MEM_LEAK,
-                                      ControlType.REQUIRES_MEM_MASSAGING,
-                                      ControlType.CONTROLLED):
+        if t.registers[r].control in (
+            ControlType.REQUIRES_MEM_LEAK,
+            ControlType.REQUIRES_MEM_MASSAGING,
+            ControlType.CONTROLLED,
+        ):
             t.controlled.append(r)
 
     t.requirements = get_requirements(t.expr)
@@ -205,7 +217,7 @@ def analyse_tfp(t: TaintedFunctionPointer):
 
 
 def analyse_half_gadget(g: HalfGadget):
-    l.warning(f"========= [REQS] ==========")
+    l.warning("========= [REQS] ==========")
 
     # Calculate for main expression.
     g.loaded.requirements = get_requirements(g.loaded.expr)
@@ -215,7 +227,9 @@ def analyse_half_gadget(g: HalfGadget):
     for c in [g.base, g.uncontrolled_base, g.attacker]:
         if c != None:
             c.requirements = get_requirements(c.expr)
-            c.control = get_control(c,)
+            c.control = get_control(
+                c,
+            )
 
     g.branch_requirements = Requirements()
     for b in g.branches:
@@ -235,10 +249,10 @@ def analyse_half_gadget(g: HalfGadget):
     g.all_requirements_w_branches.merge(g.all_requirements)
     g.all_requirements_w_branches.merge(g.branch_requirements)
 
-    l.warning(
-        f"base_requirements:  {'NONE' if g.base == None else g.base.requirements}")
-    uncontrolled_requirements = ('NONE' if g.uncontrolled_base == None
-                                 else g.uncontrolled_base.requirements)
+    l.warning(f"base_requirements:  {'NONE' if g.base == None else g.base.requirements}")
+    uncontrolled_requirements = (
+        "NONE" if g.uncontrolled_base == None else g.uncontrolled_base.requirements
+    )
     l.warning(f"uncontrolled_base_requirements:  {uncontrolled_requirements}")
     l.warning(f"attacker_requirements:  {g.attacker.requirements}")
     l.warning("==========================")
@@ -255,15 +269,18 @@ def analyse_secret_dependent_branch(sdb: SecretDependentBranch):
 
     if sdb.controlled_cmp_value != None:
         sdb.controlled_cmp_value.requirements = get_requirements(
-            sdb.controlled_cmp_value.expr)
-        sdb.controlled_cmp_value.control = get_control(
-            sdb.controlled_cmp_value)
+            sdb.controlled_cmp_value.expr
+        )
+        sdb.controlled_cmp_value.control = get_control(sdb.controlled_cmp_value)
 
     sdb.all_requirements.merge(sdb.cmp_value.requirements)
     sdb.all_requirements_w_branches.merge(sdb.cmp_value.requirements)
 
     l.warning(f"cmp_value_requirements:  {sdb.cmp_value.requirements}")
-    controlled_requirements = ('NONE' if sdb.controlled_cmp_value == None
-                               else sdb.controlled_cmp_value.requirements)
+    controlled_requirements = (
+        "NONE"
+        if sdb.controlled_cmp_value == None
+        else sdb.controlled_cmp_value.requirements
+    )
     l.warning(f"controlled_cmp_value_requirements: {controlled_requirements}")
     l.warning("==========================")

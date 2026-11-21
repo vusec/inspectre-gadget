@@ -1,13 +1,13 @@
 # Annotations are effectively taint labels that we attach to symbolic values
 # to track which expressions contain an attacker-controlled register or a secret.
 
+
 import claripy
-import sys
 
 # autopep8: off
-from ..shared import utils
-from ..shared import astTransform
-from ..shared.transmission import ControlType, Requirements
+from ..shared import astTransform, utils
+from ..shared.transmission import Requirements
+
 # autopep8: on
 
 
@@ -16,6 +16,7 @@ class LoadAnnotation(claripy.Annotation):
     This annotation is attached to any symbol that is created as a result
     of a load (both concrete loads and symbolic loads).
     """
+
     read_address_ast: claripy.ast.BV
     name: str
     address: int
@@ -85,8 +86,9 @@ class SecretAnnotation(LoadAnnotation):
         super().__init__(read_address_ast, "Secret", address, controlled, bbl_index)
 
     def copy(self):
-        return SecretAnnotation(self.read_address_ast, self.address, self.controlled,
-                                self.bbl_index)
+        return SecretAnnotation(
+            self.read_address_ast, self.address, self.controlled, self.bbl_index
+        )
 
 
 class TransmissionAnnotation(LoadAnnotation):
@@ -98,8 +100,9 @@ class TransmissionAnnotation(LoadAnnotation):
         super().__init__(read_address_ast, "Transmission", address, controlled, bbl_index)
 
     def copy(self):
-        return TransmissionAnnotation(self.read_address_ast, self.address,
-                                      self.controlled, self.bbl_index)
+        return TransmissionAnnotation(
+            self.read_address_ast, self.address, self.controlled, self.bbl_index
+        )
 
 
 class UncontrolledLoadAnnotation(LoadAnnotation):
@@ -108,12 +111,18 @@ class UncontrolledLoadAnnotation(LoadAnnotation):
     """
 
     def __init__(self, read_address_ast, address, bbl_index):
-        super().__init__(read_address_ast, "UncontrolledLoad", address,
-                         controlled=False, bbl_index=bbl_index)
+        super().__init__(
+            read_address_ast,
+            "UncontrolledLoad",
+            address,
+            controlled=False,
+            bbl_index=bbl_index,
+        )
 
     def copy(self):
-        return UncontrolledLoadAnnotation(self.read_address_ast, self.address,
-                                          self.bbl_index)
+        return UncontrolledLoadAnnotation(
+            self.read_address_ast, self.address, self.bbl_index
+        )
 
 
 class AttackerMemoryAnnotation(LoadAnnotation):
@@ -125,12 +134,19 @@ class AttackerMemoryAnnotation(LoadAnnotation):
     """
 
     def __init__(self, read_address_ast, address, bbl_index):
-        super().__init__(read_address_ast, "AttackerMemory", address, controlled=True,
-                         bbl_index=bbl_index)
+        super().__init__(
+            read_address_ast,
+            "AttackerMemory",
+            address,
+            controlled=True,
+            bbl_index=bbl_index,
+        )
 
     def copy(self):
-        return AttackerMemoryAnnotation(self.read_address_ast, self.address,
-                                        self.bbl_index)
+        return AttackerMemoryAnnotation(
+            self.read_address_ast, self.address, self.bbl_index
+        )
+
 
 class AttackerAnnotation(claripy.Annotation):
     register: str
@@ -155,10 +171,12 @@ class AttackerAnnotation(claripy.Annotation):
     def copy(self):
         return AttackerAnnotation(self.register)
 
+
 class UncontrolledAnnotation(claripy.Annotation):
     """
     Some memory might be symbolic but already known to be uncontrolled.
     """
+
     register: str
 
     def __init__(self, register):
@@ -211,8 +229,9 @@ def propagate_annotations(ast: claripy.ast.BV, address, bbl_index):
                 can_be_controlled = True
 
     if is_secret or is_transmission:
-        return TransmissionAnnotation(ast, address, controlled=can_be_controlled,
-                                      bbl_index=bbl_index)
+        return TransmissionAnnotation(
+            ast, address, controlled=can_be_controlled, bbl_index=bbl_index
+        )
     elif is_attack:
         return SecretAnnotation(ast, address, controlled=True, bbl_index=bbl_index)
     else:
@@ -239,6 +258,7 @@ def get_load_annotation(x):
                 return anno
     return None
 
+
 def get_load_depth(x):
     max_depth = 0
     if utils.is_sym_expr(x):
@@ -256,6 +276,7 @@ def get_attacker_annotation(x):
                 return anno
     return None
 
+
 def get_uncontrolled_annotation(x):
     if utils.is_sym_var(x):
         for anno in utils.get_annotations(x):
@@ -263,12 +284,14 @@ def get_uncontrolled_annotation(x):
                 return anno
     return None
 
+
 def get_uncontrolled_load_annotation(x):
     if utils.is_sym_var(x):
         for anno in utils.get_annotations(x):
             if isinstance(anno, UncontrolledLoadAnnotation):
                 return anno
     return None
+
 
 def get_dep_set(expr):
     depset = set()
@@ -281,12 +304,21 @@ def get_dep_set(expr):
 
     return depset
 
+
 def is_attacker_controlled(ast):
     for anno in utils.get_annotations(ast):
-        if isinstance(anno, (AttackerAnnotation, AttackerMemoryAnnotation,
-                             SecretAnnotation, TransmissionAnnotation)):
+        if isinstance(
+            anno,
+            (
+                AttackerAnnotation,
+                AttackerMemoryAnnotation,
+                SecretAnnotation,
+                TransmissionAnnotation,
+            ),
+        ):
             return True
     return False
+
 
 def is_directly_controlled(ast: claripy.ast.BV):
     if not utils.is_sym_expr(ast):
@@ -304,8 +336,9 @@ def get_controlled_members(expr):
     Return the summands of expr that contain at least one attacker-controlled
     symbol. Constants and summands with only uncontrolled symbols are left out.
     """
-    return [m for m in astTransform.extract_summed_vals(expr)
-            if is_attacker_controlled(m)]
+    return [
+        m for m in astTransform.extract_summed_vals(expr) if is_attacker_controlled(m)
+    ]
 
 
 def get_controlled_expr(expr):

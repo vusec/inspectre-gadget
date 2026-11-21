@@ -25,13 +25,16 @@ def run_analyzer(args):
     # Parse entrypoint list.
     entrypoints = []
     if args.address != "":
-        entrypoints = [[args.address, args.name if args.name !=
-                        "" else os.path.basename(args.binary)]]
+        entrypoints = [
+            [
+                args.address,
+                args.name if args.name != "" else os.path.basename(args.binary),
+            ]
+        ]
     elif args.address_list != "":
         entrypoints = parse_gadget_list(args.address_list)
 
-    parsed_entrypoints = [[int(x[0], 16), str(x[1]).strip()]
-                          for x in entrypoints]
+    parsed_entrypoints = [[int(x[0], 16), str(x[1]).strip()] for x in entrypoints]
 
     # Base address is by default the address of the first entrypoint.
     if args.base_address == "":
@@ -39,17 +42,18 @@ def run_analyzer(args):
     else:
         base_address = int(args.base_address, 16)
 
-    analyzer.run(binary=args.binary,
-                 config_file=args.config,
-                 base_address=base_address,
-                 gadgets=parsed_entrypoints,
-                 cache_project=args.cache_project,
-                 csv_filename=args.output,
-                 tfp_csv_filename=args.tfp_output,
-                 asm_folder=args.asm,
-                 symbol_binary=args.symbol_binary,
-                 half_gadget_filename=args.half_gadget_output
-                 )
+    analyzer.run(
+        binary=args.binary,
+        config_file=args.config,
+        base_address=base_address,
+        gadgets=parsed_entrypoints,
+        cache_project=args.cache_project,
+        csv_filename=args.output,
+        tfp_csv_filename=args.tfp_output,
+        asm_folder=args.asm,
+        symbol_binary=args.symbol_binary,
+        half_gadget_filename=args.half_gadget_output,
+    )
 
 
 def run_reasoner(args):
@@ -68,62 +72,108 @@ def run_viewer(args):
 
 def build_parser():
     arg_parser = argparse.ArgumentParser(
-        prog='inspectre',
-        description='An inspector for Spectre gadgets')
+        prog="inspectre", description="An inspector for Spectre gadgets"
+    )
     subparsers = arg_parser.add_subparsers(
-        dest='command', help='command to run', required=True)
+        dest="command", help="command to run", required=True
+    )
 
     # ----------- Analyzer
     analyzer_args = subparsers.add_parser(
-        'analyze', help='Extract a list of transmission gadgets from a binary')
+        "analyze", help="Extract a list of transmission gadgets from a binary"
+    )
     # Required args.
-    analyzer_args.add_argument('binary')
+    analyzer_args.add_argument("binary")
     analyzer_args.add_argument(
-        '--config', type=str, required=True, help='which configuration file to use')
+        "--config",
+        type=str,
+        required=True,
+        help="which configuration file to use",
+    )
     group = analyzer_args.add_mutually_exclusive_group(required=True)
-    group.add_argument('--address', default='',
-                       help='inspect a single entrypoint at the given (hex) address')
+    group.add_argument(
+        "--address",
+        default="",
+        help="inspect a single entrypoint at the given (hex) address",
+    )
     analyzer_args.add_argument(
-        '--name', default='', help='give a name to the single entrypoint to analyze (you can choose any name)')
-    group.add_argument('--address-list', default='',
-                       help='read entrypoints from a file with the format <HEX_ADDRESS>,<NAME> (you can choose any name)')
+        "--name",
+        default="",
+        help="give a name to the single entrypoint to analyze (you can choose any name)",
+    )
+    group.add_argument(
+        "--address-list",
+        default="",
+        help="read entrypoints from a file with the format <HEX_ADDRESS>,<NAME>"
+        " (you can choose any name)",
+    )
 
     # Optional args.
-    analyzer_args.add_argument('--cache-project', action='store_true',
-                               help='load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist')
-    analyzer_args.add_argument('--base-address', required=False,
-                               default='', help='base address of the binary to analyze')
     analyzer_args.add_argument(
-        "--symbol-binary", default='', help='binary that contains function symbols')
+        "--cache-project",
+        action="store_true",
+        help="load the angr project from a pickle named <BINARY>.angr, or create one if"
+        " it does not exist",
+    )
+    analyzer_args.add_argument(
+        "--base-address",
+        required=False,
+        default="",
+        help="base address of the binary to analyze",
+    )
+    analyzer_args.add_argument(
+        "--symbol-binary",
+        default="",
+        help="binary that contains function symbols",
+    )
 
     # Outputs.
     analyzer_args.add_argument(
-        '--output', required=False, default='', help='output all found gadgets to a CSV')
-    analyzer_args.add_argument('--tfp-output', required=False,
-                               default='', help='output all found dispatch gadgets to a CSV')
-    analyzer_args.add_argument('--half-gadget-output', required=False,
-                               default='', help='output all found half-spectre gadgets to a CSV')
-    analyzer_args.add_argument('--asm', required=False, default='',
-                               help='output an annotated ASM file for each gadget to the specified folder')
+        "--output",
+        required=False,
+        default="",
+        help="output all found gadgets to a CSV",
+    )
+    analyzer_args.add_argument(
+        "--tfp-output",
+        required=False,
+        default="",
+        help="output all found dispatch gadgets to a CSV",
+    )
+    analyzer_args.add_argument(
+        "--half-gadget-output",
+        required=False,
+        default="",
+        help="output all found half-spectre gadgets to a CSV",
+    )
+    analyzer_args.add_argument(
+        "--asm",
+        required=False,
+        default="",
+        help="output an annotated ASM file for each gadget to the specified folder",
+    )
     analyzer_args.set_defaults(func=run_analyzer)
 
     # ----------- Reasoner
     reasoner_args = subparsers.add_parser(
-        'reason', help='Reason about gadget exploitability')
-    reasoner_args.add_argument('csv_in')
-    reasoner_args.add_argument('csv_out')
+        "reason", help="Reason about gadget exploitability"
+    )
+    reasoner_args.add_argument("csv_in")
+    reasoner_args.add_argument("csv_out")
     reasoner_args.add_argument(
-        '--config', type=str, default=None,
-        help='configuration file, only the \'reasoner\' section is used')
+        "--config",
+        type=str,
+        default=None,
+        help="configuration file, only the 'reasoner' section is used",
+    )
     reasoner_args.set_defaults(func=run_reasoner)
 
     # ----------- Viewer
-    viewer_args = subparsers.add_parser(
-        'show', help='Inspect a specific gadget')
+    viewer_args = subparsers.add_parser("show", help="Inspect a specific gadget")
     viewer_args.add_argument(
-        'folder', help='folder containing the annotated assembly files')
-    viewer_args.add_argument(
-        'id', help='uuid or pc reported by the analyzer (in hex)')
+        "folder", help="folder containing the annotated assembly files"
+    )
+    viewer_args.add_argument("id", help="uuid or pc reported by the analyzer (in hex)")
     viewer_args.set_defaults(func=run_viewer)
 
     return arg_parser
@@ -135,11 +185,11 @@ def main(argv=None):
 
     # argparse has no support for mutual exclusivity between a group of 1 and
     # 2 arguments, so we check manually for this.
-    if args.command == 'analyze' and args.address_list and args.name:
+    if args.command == "analyze" and args.address_list and args.name:
         arg_parser.error("--name: not allowed with argument --address-list")
 
     args.func(args)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
