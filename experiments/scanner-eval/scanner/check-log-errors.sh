@@ -1,1 +1,0 @@
- echo "" > errors.txt; for f in $(grep -r "code 1" $1 | grep --invert-match "124" |  grep "^.*.:" --only-matching | sed "s/://g"); do cat $f | grep "code 1" -B1 | grep --invert-match "code 1" >> errors.txt; done; cat errors.txt | sort | uniq -c

@@ -4,8 +4,9 @@
 
 This is the official repository for the InSpectre Gadget tool.
 
-This code has been developed as part of our ["InSpectre Gadget" paper](https://download.vusec.net/papers/inspectre_sec24.pdf) (accepted
-at 33rd USENIX Security Symposium 2024).
+This code has been developed as part of our [InSpectre Gadget paper](https://download.vusec.net/papers/inspectre_sec24.pdf).
+The code for all the experiments reported in the paper (including PoCs)
+can be found at [inspectre-gadget-artifact](https://github.com/vusec/inspectre-gadget-artifact).
 
 **Disclaimer**
 
@@ -42,10 +43,3 @@ inspectre show <UUID>
 ## Demo
 
 ![](docs/img/inspectre.gif)
-
-## Evaluation and PoCs
-
-The code for all the experiments reported in the paper (including PoCs)
-can be found under the `experiments/` folder.
-
-`experiments/scanner-eval` shows how we ran InSpectre Gadget on the Linux kernel.
