@@ -2,6 +2,8 @@
 
 # InSpectre Gadget
 
+[![CI](https://github.com/vusec/inspectre-gadget/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/vusec/inspectre-gadget/actions/workflows/ci.yml?query=branch%3Amain)
+
 This is the official repository for the InSpectre Gadget tool.
 
 This code has been developed as part of our [InSpectre Gadget paper](https://download.vusec.net/papers/inspectre_sec24.pdf).

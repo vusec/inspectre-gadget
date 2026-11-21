@@ -60,9 +60,8 @@ inspectre show <UUID>
 ## Build Docs
 
 ```sh
-pip install sphinx myst-parser sphinx_rtd_theme sphinx-rtd-size
-cd docs
-make html && cp -r _build/* .
+pip install -e ".[docs]"
+make -C docs html
 
-# --> open _build/html/index.html in a browser
+# --> open docs/build/html/index.html in a browser
 ```

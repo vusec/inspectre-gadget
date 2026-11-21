@@ -8,15 +8,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Getting Started &mdash; InSpectre Gadget  documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/css/sphinx_rtd_size.css?v=a8ffd9ad" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=5929fcd5"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -89,7 +89,7 @@
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>Install <code class="docutils literal notranslate"><span class="pre">python3.11</span></code>, clone the repo and <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">-r</span> <span class="pre">requirements.txt</span></code> in a virtual environment.</p>
+<p>Install <code class="docutils literal notranslate"><span class="pre">python3.11</span></code>, clone the repo and <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">.</span></code> in a virtual environment (use <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">&quot;.[dev]&quot;</span></code> for development).</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>To install python3.11 on newer Ubuntu versions you can check <a class="reference external" href="https://askubuntu.com/questions/1512005/python3-11-install-on-ubuntu-24-04">here</a>.</p>
@@ -128,7 +128,7 @@ inspectre<span class="w"> </span>reason<span class="w"> </span>out/gadgets.csv<s
 
 <span class="c1"># Import the CSV in a database and query the results.</span>
 <span class="c1"># You can use any DB, this is just an example with sqlite3.</span>
-sqlite3<span class="w"> </span>:memory:<span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.mode csv&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.separator ;&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.import out/gadgets-reasoned.csv gadgets&#39;</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">&#39;.mode table&#39;</span><span class="w"> </span>&lt;<span class="w"> </span>queries/exploitable_list.sql
+sqlite3<span class="w"> </span>:memory:<span class="w"> </span>-cmd<span class="w"> </span><span class="s1">'.mode csv'</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">'.separator ;'</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">'.import out/gadgets-reasoned.csv gadgets'</span><span class="w"> </span>-cmd<span class="w"> </span><span class="s1">'.mode table'</span><span class="w"> </span>&lt;<span class="w"> </span>queries/exploitable_list.sql
 
 <span class="c1"># Manually inspect interesting candidates.</span>
 inspectre<span class="w"> </span>show<span class="w"> </span>&lt;UUID&gt;
@@ -141,13 +141,14 @@ inspectre<span class="w"> </span>show<span class="w"> </span>&lt;UUID&gt;
 </section>
 <section id="build-docs">
 <h2>Build Docs<a class="headerlink" href="#build-docs" title="Link to this heading"></a></h2>
-<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>sphinx<span class="w"> </span>myst-parser<span class="w"> </span>sphinx_rtd_theme<span class="w"> </span>sphinx-rtd-size
-<span class="nb">cd</span><span class="w"> </span>docs
-make<span class="w"> </span>html<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>cp<span class="w"> </span>-r<span class="w"> </span>_build/*<span class="w"> </span>.
+<div class="highlight-sh notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">".[docs]"</span>
+make<span class="w"> </span>-C<span class="w"> </span>docs<span class="w"> </span>html
 
-<span class="c1"># --&gt; open _build/html/index.html in a browser</span>
+<span class="c1"># --&gt; open docs/build/html/index.html in a browser</span>
 </pre></div>
 </div>
+<p>The published documentation is built and deployed automatically by CI on
+every push to <code class="docutils literal notranslate"><span class="pre">main</span></code>; there is no need to commit the build output.</p>
 </section>
 </section>
 

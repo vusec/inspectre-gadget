@@ -5,5 +5,5 @@ API Reference
    :toctree: generated
    :recursive:
 
-   analyzer
-   reasoner
+   inspectre_gadget.analyzer
+   inspectre_gadget.reasoner

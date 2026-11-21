@@ -11,11 +11,11 @@ authors = [
   { name = "Alvise de Faveri Tron" },
 ]
 dependencies = [
-  "angr>=9.2,<10",
+  "angr==9.2.186",
   "PyYAML",
   "pandas",
   "tabulate",
-  "bitstring>=4,<5",
+  "bitstring==4.0.2",
   "pycparser<3"
 ]
 
