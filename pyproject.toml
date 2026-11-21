@@ -25,6 +25,7 @@ dev = [
   "ruff",
   "pre-commit",
   "pytest",
+  "pytest-xdist",
 ]
 # pip install -e ".[docs]"
 docs = [
@@ -49,6 +50,23 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# ---------------------------------------------------------------------------
+# Pytest.
+#   pytest -n 4                     # run all tests with 4 parallel jobs
+#   pytest -m "not e2e"	            # run unit tests only
+#   pytest -m e2e -k cmove	        # run e2e tests containing cmove in the name
+#   pytest -m e2e --update-reference-output	  # regenerate reference output for e2e tests
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+# importlib mode: avoids sys.path hacks and module-name clashes
+addopts = ["--import-mode=importlib", "-ra", "--strict-markers", "--strict-config"]
+norecursedirs = ["test-cases", "test-queries", ".*", "__pycache__"]
+markers = [
+  "e2e: (slow) run full pipeline on simple assembly programs and compare output against ref-output",
+]
 
 # ---------------------------------------------------------------------------
 # Ruff (linter + formatter).

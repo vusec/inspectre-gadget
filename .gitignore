@@ -6,3 +6,4 @@ results
 .venv/
 dist/
 *.egg-info/
+*_cache/

@@ -33,7 +33,7 @@ if [ -f $1/config.yaml ]; then cfg=config.yaml; else cfg=../config_all.yaml; fi
 
 echo "    testing: ${name}"
 
-cd $1
+cd $1 || echo "NOTE: Are you running this script from the top folder?"
 rm -f -r ${OUT_FOLDER}
 rm -f -r ${ASM_FOLDER}
 mkdir -p ${OUT_FOLDER}
