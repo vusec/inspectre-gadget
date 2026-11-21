@@ -1,8 +1,8 @@
-*/gadget
 output/*
 fail.txt
 unsupported.txt
 
+*/gadget
 */output/
 */asm/
 */gadgets.csv
