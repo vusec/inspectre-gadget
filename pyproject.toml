@@ -1,6 +1,7 @@
 [project]
 name = "inspectre-gadget"
 version = "0.0.0"
+requires-python = ">=3.11"
 dependencies = [
   "angr>=9.2,<10",
   "PyYAML",
@@ -10,8 +11,14 @@ dependencies = [
   "pycparser<3"
 ]
 
+[project.optional-dependencies]
+dev = [
+  "autopep8"
+]
+
 [project.scripts]
 inspectre = "inspectre_gadget.cli:main"
+inspectre_gadget = "inspectre_gadget.cli:main"
 
 [build-system]
 requires = ["setuptools"]

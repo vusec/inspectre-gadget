@@ -2,7 +2,7 @@
 
 ## Installation
 
-Install `python3.11`, clone the repo and `pip3 install -r requirements.txt` in a virtual environment.
+Install `python3.11`, clone the repo and `pip3 install .` in a virtual environment (use `pip3 install -e ".[dev]"` for development).
 
 ```{warning}
  To install python3.11 on newer Ubuntu versions you can check [here](https://askubuntu.com/questions/1512005/python3-11-install-on-ubuntu-24-04).
