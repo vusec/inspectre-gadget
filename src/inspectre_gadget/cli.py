@@ -15,9 +15,7 @@ def parse_gadget_list(filename):
         data = list(csv.reader(file, delimiter=","))
 
     if len(data[0]) != 2:
-        print(
-            "Invalid CSV: gadgets should be in the form of <hex_address>,<name>"
-        )
+        print("Invalid CSV: gadgets should be in the form of <hex_address>,<name>")
         sys.exit(-1)
 
     return data
@@ -36,9 +34,7 @@ def run_analyzer(args):
     elif args.address_list != "":
         entrypoints = parse_gadget_list(args.address_list)
 
-    parsed_entrypoints = [
-        [int(x[0], 16), str(x[1]).strip()] for x in entrypoints
-    ]
+    parsed_entrypoints = [[int(x[0], 16), str(x[1]).strip()] for x in entrypoints]
 
     # Base address is by default the address of the first entrypoint.
     if args.base_address == "":
@@ -171,15 +167,11 @@ def build_parser():
     reasoner_args.set_defaults(func=run_reasoner)
 
     # ----------- Viewer
-    viewer_args = subparsers.add_parser(
-        "show", help="Inspect a specific gadget"
-    )
+    viewer_args = subparsers.add_parser("show", help="Inspect a specific gadget")
     viewer_args.add_argument(
         "folder", help="folder containing the annotated assembly files"
     )
-    viewer_args.add_argument(
-        "id", help="uuid or pc reported by the analyzer (in hex)"
-    )
+    viewer_args.add_argument("id", help="uuid or pc reported by the analyzer (in hex)")
     viewer_args.set_defaults(func=run_viewer)
 
     return arg_parser

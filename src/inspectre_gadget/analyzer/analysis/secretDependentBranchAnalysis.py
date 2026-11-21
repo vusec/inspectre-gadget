@@ -41,9 +41,7 @@ def get_secret_dependent_branches(
         return []
 
     if len(expr.args) == 1:
-        error_type = (
-            "get_secret_dependent_branches: Unexpected AST with args == 1"
-        )
+        error_type = "get_secret_dependent_branches: Unexpected AST with args == 1"
         utils.report_error(Exception(), hex(0), hex(0), error_type=error_type)
         return []
 
@@ -82,9 +80,7 @@ def get_secret_dependent_branches(
     ):
         # Get all transmission for the secret_expr
         potential_sdb.expr = secret_expr
-        all_transmissions = transmissionAnalysis.get_transmissions(
-            potential_sdb
-        )
+        all_transmissions = transmissionAnalysis.get_transmissions(potential_sdb)
 
         # Now create a secret dependent branch for each transmission
         for t in all_transmissions:

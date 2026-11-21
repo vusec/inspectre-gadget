@@ -40,20 +40,14 @@ def is_same_var(expr: claripy.ast.BV, reg):
     return sym.args[0] == reg
 
 
-def is_potential_secret(
-    d: DepGraph, expr: claripy.ast.BV, tfp_expr: claripy.ast.BV
-):
+def is_potential_secret(d: DepGraph, expr: claripy.ast.BV, tfp_expr: claripy.ast.BV):
     """
     Check if the expression is independent from the tfp and contains loads
     whose address is independent from the tfp.
     """
     has_load_anno = False
     for v in utils.get_vars(expr):
-        if not (
-            d.is_independent(
-                tfp_expr, v, check_constraints=True, check_addr=True
-            )
-        ):
+        if not (d.is_independent(tfp_expr, v, check_constraints=True, check_addr=True)):
             return False
 
         anno = annotations.get_load_annotation(v)
@@ -133,9 +127,9 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
     for tfp in tfps:
         if not global_config["NonTaintedFunctionPointers"]:
             # If the TFP is not really controlled, skip.
-            if not utils.is_sym_expr(
+            if not utils.is_sym_expr(tfp.expr) or not dependencyGraph.is_expr_controlled(
                 tfp.expr
-            ) or not dependencyGraph.is_expr_controlled(tfp.expr):
+            ):
                 continue
 
         d = get_dependency_graph(tfp)
@@ -162,9 +156,7 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
             elif tfp_controlled and not is_independent_from_tfp(
                 d, reg.expr, tfp.expr, check_addr=True
             ):
-                reg.control_type = (
-                    TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
-                )
+                reg.control_type = TFPRegisterControlType.INDIRECTLY_DEPENDS_ON_TFP_EXPR
                 tfp.aliasing.append(r)
             elif utils.is_sym_var(reg.expr) and is_same_var(reg.expr, reg.reg):
                 reg.control_type = TFPRegisterControlType.UNMODIFIED
@@ -184,9 +176,7 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
                 continue
 
             try:
-                canonical_exprs = transmissionAnalysis.canonicalize(
-                    expr, tfp.pc
-                )
+                canonical_exprs = transmissionAnalysis.canonicalize(expr, tfp.pc)
             except SplitTooManyNestedIfException:
                 continue
 
@@ -197,9 +187,7 @@ def analyse(t: TaintedFunctionPointer) -> list[TaintedFunctionPointer]:
                 )
 
             if len(controlled_members) > 0:
-                tfp.registers[
-                    r
-                ].controlled_expr = astTransform.generate_addition(
+                tfp.registers[r].controlled_expr = astTransform.generate_addition(
                     controlled_members
                 )
             else:

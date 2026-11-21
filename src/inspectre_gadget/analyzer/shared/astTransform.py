@@ -20,10 +20,7 @@ class SplitTooManyNestedIfException(Exception):
     pass
 
     def __str__(self):
-        return (
-            "SplitTooManyNestedIfException: Too many if statements in expr, "
-            "skipping"
-        )
+        return "SplitTooManyNestedIfException: Too many if statements in expr, skipping"
 
 
 class ConditionType(Enum):
@@ -157,9 +154,7 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
                 new_conds.extend(c.conditions)
                 new_conds.append((addr, c.expr, cond_type))
 
-                splitted_asts.append(
-                    ConditionalAst(expr=arg.expr, conds=new_conds)
-                )
+                splitted_asts.append(ConditionalAst(expr=arg.expr, conds=new_conds))
 
         for arg in arg2_splitted:
             for c in cond_splitted:
@@ -167,9 +162,7 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
                 new_conds.append((addr, claripy.Not(c.expr), cond_type))
-                splitted_asts.append(
-                    ConditionalAst(expr=arg.expr, conds=new_conds)
-                )
+                splitted_asts.append(ConditionalAst(expr=arg.expr, conds=new_conds))
 
         return splitted_asts
 
@@ -181,9 +174,7 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
         for i in range(0, len(ast.args)):
             if not utils.is_sym_expr(ast.args[i]):
                 continue
-            new_expr = claripy.replace(
-                new_expr, ast.args[i], combination[i].expr
-            )
+            new_expr = claripy.replace(new_expr, ast.args[i], combination[i].expr)
             new_conds.extend(combination[i].conditions)
         splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
 
@@ -197,11 +188,7 @@ def extract_summed_vals(ast: claripy.ast.BV):
     """
 
     # If this AST does not contain an operation, return the expression itself.
-    if (
-        not isinstance(ast, claripy.ast.base.Base)
-        or ast.concrete
-        or ast.depth == 1
-    ):
+    if not isinstance(ast, claripy.ast.base.Base) or ast.concrete or ast.depth == 1:
         return [ast]
 
     # If it's a sign/zero extension, drill through it.
@@ -249,11 +236,7 @@ def sign_ext_to_sum(ast: claripy.ast.BV, addr):
     """
 
     # If this AST is a constant, do nothing.
-    if (
-        not isinstance(ast, claripy.ast.BV)
-        or ast.concrete
-        or utils.is_sym_var(ast)
-    ):
+    if not isinstance(ast, claripy.ast.BV) or ast.concrete or utils.is_sym_var(ast):
         return ast
 
     # If this node is a signext, transform it.
@@ -277,11 +260,7 @@ def sign_ext_to_sum(ast: claripy.ast.BV, addr):
     # Visit arguments.
     new_expr = ast
     for arg in ast.args:
-        if (
-            not isinstance(arg, claripy.ast.BV)
-            or arg.concrete
-            or utils.is_sym_var(arg)
-        ):
+        if not isinstance(arg, claripy.ast.BV) or arg.concrete or utils.is_sym_var(arg):
             continue
         new_expr = claripy.replace(new_expr, arg, sign_ext_to_sum(arg, addr))
 
@@ -297,11 +276,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     """
 
     # If this AST is a constant, do nothing.
-    if (
-        not isinstance(ast, claripy.ast.BV)
-        or ast.concrete
-        or utils.is_sym_var(ast)
-    ):
+    if not isinstance(ast, claripy.ast.BV) or ast.concrete or utils.is_sym_var(ast):
         return ast
 
     # If this node is a concat, check if it's a sign extension.
@@ -329,9 +304,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
                 elif sign_ext_size == 0:
                     new_args.append(sign_sym)
                     sign_sym = arg
-                elif utils.is_sym_expr(arg) and arg.structurally_match(
-                    sign_sym.args[2]
-                ):
+                elif utils.is_sym_expr(arg) and arg.structurally_match(sign_sym.args[2]):
                     ext_size = sign_ext_size + 1
                     all_zeros = claripy.BVV(0, ext_size)
                     all_ones = claripy.BVV((2**ext_size) - 1, ext_size)
@@ -363,11 +336,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     # Recursively check args.
     new_expr = ast
     for arg in ast.args:
-        if (
-            not isinstance(arg, claripy.ast.BV)
-            or arg.concrete
-            or utils.is_sym_var(arg)
-        ):
+        if not isinstance(arg, claripy.ast.BV) or arg.concrete or utils.is_sym_var(arg):
             continue
 
         new_expr = claripy.replace(new_expr, arg, match_sign_ext(arg, addr))
@@ -375,9 +344,7 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     return new_expr
 
 
-def split_conditions(
-    expr: claripy.ast.BV, simplify: bool, addr
-) -> list[ConditionalAst]:
+def split_conditions(expr: claripy.ast.BV, simplify: bool, addr) -> list[ConditionalAst]:
     """
     Split any AST that contains CMOVEs, SignExtensions and If-Then-Else
     statements into separate ASTs with an associated condition.
@@ -395,9 +362,7 @@ def split_conditions(
     # Skip if we have more than 10 (nested) if statements
     if str(new_expr).count("else") > 10:
         n_nested = str(new_expr).count("else")
-        l.warning(
-            f"split_conditions: Too many (nested) if conditions: {n_nested}"
-        )
+        l.warning(f"split_conditions: Too many (nested) if conditions: {n_nested}")
         print(f"split_conditions: Too many (nested) if conditions: {n_nested}")
         raise SplitTooManyNestedIfException
 

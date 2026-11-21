@@ -96,8 +96,7 @@ def distribute_shifts(ast: claripy.ast.BV):
 
             # Apply shift to every addenda.
             args_shifted = [
-                claripy.ZeroExt(expr_size, arg) << shift_amount
-                for arg in args_analyzed
+                claripy.ZeroExt(expr_size, arg) << shift_amount for arg in args_analyzed
             ]
             # Add everything together again.
             return astTransform.generate_addition(args_shifted)
@@ -163,9 +162,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
 
     transmissions = []
     for canonical_expr in canonical_exprs:
-        l.warning(
-            f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}"
-        )
+        l.warning(f"POTENTIAL TRANSMISSION ({potential_t.transmitter}): {canonical_expr}")
         members = astTransform.extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {potential_t.aliases}")
 
@@ -184,9 +181,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
             secrets = []
             for var in utils.get_vars(member):
                 for anno in utils.get_annotations(var):
-                    if isinstance(
-                        anno, (SecretAnnotation, TransmissionAnnotation)
-                    ):
+                    if isinstance(anno, (SecretAnnotation, TransmissionAnnotation)):
                         secrets.append((var, anno.read_address_ast))
 
             # If there is at least one secret in this member...
@@ -195,9 +190,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 # Create new transmission.
                 t = Transmission(potential_t)
                 t.transmission.expr = canonical_expr.expr
-                t.max_load_depth = annotations.get_load_depth(
-                    t.transmission.expr
-                )
+                t.max_load_depth = annotations.get_load_depth(t.transmission.expr)
                 # Append CMOV conditions.
                 t.constraints.extend(canonical_expr.conditions)
                 # Append the dependency graph.
@@ -206,9 +199,7 @@ def get_transmissions(potential_t: TransmissionExpr) -> list[Transmission]:
                 # Save which secret is is being transmitted.
                 t.transmitted_secret.expr = member
                 t.secret_val.expr = secret_sym
-                t.secret_load_pc = annotations.get_load_annotation(
-                    secret_sym
-                ).address
+                t.secret_load_pc = annotations.get_load_annotation(secret_sym).address
                 t.secret_address.expr = secret_addr
 
                 # Check the rest of the expression

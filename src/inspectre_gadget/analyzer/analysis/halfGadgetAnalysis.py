@@ -25,9 +25,7 @@ def analyse(gadget: HalfGadget):
 
     # Extract members of the transmission.
     try:
-        canonical_exprs = transmissionAnalysis.canonicalize(
-            gadget.loaded.expr, gadget.pc
-        )
+        canonical_exprs = transmissionAnalysis.canonicalize(gadget.loaded.expr, gadget.pc)
     except SplitTooManyNestedIfException:
         l.error("half_gadget analyse: Failed canonicalizing expression")
         return []
@@ -60,10 +58,7 @@ def analyse(gadget: HalfGadget):
                 attacker_members.append(member)
             else:
                 base_members.append(member)
-                if (
-                    annotations.get_uncontrolled_load_annotation(member)
-                    is not None
-                ):
+                if annotations.get_uncontrolled_load_annotation(member) is not None:
                     # These are members that contain code loaded from
                     # uncontrolled locations (constants or GS).
                     uncontrolled_base_members.append(member)
@@ -91,9 +86,7 @@ def analyse(gadget: HalfGadget):
         for component in [g.loaded, g.base, g.attacker, g.uncontrolled_base]:
             if component != None:
                 component.size = component.expr.size()
-                component.max_load_depth = annotations.get_load_depth(
-                    component.expr
-                )
+                component.max_load_depth = annotations.get_load_depth(component.expr)
 
         gadgets.append(g)
 

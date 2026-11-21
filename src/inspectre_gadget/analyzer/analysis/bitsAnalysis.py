@@ -862,9 +862,7 @@ def get_inferable_bits(ast: claripy.ast.bv.BVS, source: claripy.ast.bv.BVS):
 def analyse(t: Transmission):
     l.warning("========= [BITS] ==========")
 
-    t.inferable_bits = get_inferable_bits(
-        t.transmitted_secret.expr, t.secret_val.expr
-    )
+    t.inferable_bits = get_inferable_bits(t.transmitted_secret.expr, t.secret_val.expr)
     if t.inferable_bits == None:
         t.inferable_bits = FlowMap({}, [], [])
 

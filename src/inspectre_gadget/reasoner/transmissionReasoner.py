@@ -95,9 +95,7 @@ def has_valid_secret_address(t: pd.Series):
         return False
 
     # The amount of control is only determined by the controlled part
-    controlled_window = t[
-        f"secret_address_controlled_range{branch_suffix()}_window"
-    ]
+    controlled_window = t[f"secret_address_controlled_range{branch_suffix()}_window"]
     if controlled_window < MIN_SECRET_ADDRESS_WINDOW:
         return False
 
@@ -110,10 +108,7 @@ def has_valid_secret_address(t: pd.Series):
 
 
 def is_cmove_independent_from_secret(t: pd.Series):
-    return (
-        t["cmove_control_type"]
-        == "BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET"
-    )
+    return t["cmove_control_type"] == "BranchControlType.BRANCH_INDEPENDENT_FROM_SECRET"
 
 
 def has_no_speculation_stop(t: pd.Series):
@@ -208,15 +203,12 @@ def is_max_secret_too_high(t: pd.Series, only_independent: bool = False):
 
 
 def base_has_direct_secret_dependency(t: pd.Series):
-    return (
-        t["base_control_type"] == "BaseControlType.BASE_DEPENDS_ON_SECRET_ADDR"
-    )
+    return t["base_control_type"] == "BaseControlType.BASE_DEPENDS_ON_SECRET_ADDR"
 
 
 def base_has_indirect_secret_dependency(t: pd.Series):
     return (
-        t["base_control_type"]
-        == "BaseControlType.BASE_INDIRECTLY_DEPENDS_ON_SECRET_ADDR"
+        t["base_control_type"] == "BaseControlType.BASE_INDIRECTLY_DEPENDS_ON_SECRET_ADDR"
     )
 
 
@@ -232,10 +224,7 @@ def is_branch_dependent_from_secret(t: pd.Series):
 
 
 def is_branch_dependent_from_uncontrolled(t: pd.Series):
-    return (
-        t["branch_control_type"]
-        == "BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED"
-    )
+    return t["branch_control_type"] == "BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED"
 
 
 # ----------------- Transformations
@@ -320,10 +309,7 @@ def can_perform_known_prefix(t: pd.Series):
         return False
 
     # TODO: should we check the secret address window also?
-    return (
-        t[f"secret_address_controlled_range{branch_suffix()}_stride"]
-        <= MAX_ENTROPY
-    )
+    return t[f"secret_address_controlled_range{branch_suffix()}_stride"] <= MAX_ENTROPY
 
 
 def can_adjust_base(t: pd.Series):
@@ -350,9 +336,7 @@ def can_adjust_base(t: pd.Series):
         # We assume the attacker can subtract the window from a valid address.
         # it is an approximation, but good enough
         valid_min = (
-            r[0] - base_controllable_window
-            if r[0] > base_controllable_window
-            else 0
+            r[0] - base_controllable_window if r[0] > base_controllable_window else 0
         )
 
         # First see if we can simple take a low base
@@ -559,9 +543,7 @@ def _covers_secret(t: pd.Series, component: str):
     window = t[f"{component}_controlled_range{branch_suffix()}_window"]
     stride = max(t[f"{component}_controlled_range{branch_suffix()}_stride"], 1)
     secret_window = t[f"transmitted_secret_range{branch_suffix()}_window"]
-    secret_stride = max(
-        t[f"transmitted_secret_range{branch_suffix()}_stride"], 1
-    )
+    secret_stride = max(t[f"transmitted_secret_range{branch_suffix()}_stride"], 1)
 
     # The attacker should be able to hit each possible secret value
     if stride > secret_stride:
@@ -604,9 +586,7 @@ def cmp_value_not_independently_controlled(t: pd.Series):
     The attacker can not choose the value the secret is compared with, neither
     via cmp_value nor via the base.
     """
-    return not (
-        _is_cmp_value_independently_controlled(t) or _is_sdb_base_controlled(t)
-    )
+    return not (_is_cmp_value_independently_controlled(t) or _is_sdb_base_controlled(t))
 
 
 def cmp_value_not_controlled(t: pd.Series):
@@ -636,9 +616,7 @@ def do_one_bit_compare(t: pd.Series):
     One secret bit is compared with a static value.
     """
 
-    return int(
-        t["inferable_bits_n_inferable_bits"]
-    ) == 1 and _is_cmp_value_independent(t)
+    return int(t["inferable_bits_n_inferable_bits"]) == 1 and _is_cmp_value_independent(t)
 
 
 # ----------------- Evaluation
@@ -788,9 +766,7 @@ def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
 
     # --------------------------------------------------------------------------
     # Add results of exploitability analysis considering branches.
-    print(
-        "[-] Performing exploitability analysis including branch constraints..."
-    )
+    print("[-] Performing exploitability analysis including branch constraints...")
     with_branches = True
     for b in basic_checks:
         df[b.__name__ + "_w_branches"] = df.apply(b, axis=1)
@@ -799,12 +775,8 @@ def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
         df["base_control_type"] = df.apply(transformation, axis=1)
 
     for c in advanced_checks:
-        df[c["problem"].__name__ + "_w_branches"] = df.apply(
-            c["problem"], axis=1
-        )
-        df[c["solution"].__name__ + "_w_branches"] = df.apply(
-            c["solution"], axis=1
-        )
+        df[c["problem"].__name__ + "_w_branches"] = df.apply(c["problem"], axis=1)
+        df[c["solution"].__name__ + "_w_branches"] = df.apply(c["solution"], axis=1)
 
     df[
         [
@@ -814,15 +786,11 @@ def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
         ]
     ] = df.apply(is_exploitable, axis=1, result_type="expand")
 
-    print(
-        f"Found {len(df[df['exploitable_w_branches'] == True])} exploitable gadgets!"
-    )
+    print(f"Found {len(df[df['exploitable_w_branches'] == True])} exploitable gadgets!")
 
     # --------------------------------------------------------------------------
     # Perform the checks for the SLAM attack
-    print(
-        "[-] Performing exploitability analysis assuming the SLAM covert channel..."
-    )
+    print("[-] Performing exploitability analysis assuming the SLAM covert channel...")
     with_branches = False
 
     for b in slam_basic_checks:
@@ -844,9 +812,7 @@ def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
         ]
     ] = df.apply(slam_is_exploitable, axis=1, result_type="expand")
 
-    print(
-        f"Found {len(df[df['exploitable_w_slam'] == True])} exploitable gadgets!"
-    )
+    print(f"Found {len(df[df['exploitable_w_slam'] == True])} exploitable gadgets!")
 
     return df
 
@@ -854,9 +820,7 @@ def reason_transmissions(df: pd.DataFrame) -> pd.DataFrame:
 def reason_secret_dependent_branches(df: pd.DataFrame) -> pd.DataFrame:
     global with_branches
 
-    print(
-        "[-] Performing exploitability analysis for secret dependent branches..."
-    )
+    print("[-] Performing exploitability analysis for secret dependent branches...")
     for with_branches in [False, True]:
         suffix = "" if not with_branches else "_w_branches"
 
@@ -865,18 +829,14 @@ def reason_secret_dependent_branches(df: pd.DataFrame) -> pd.DataFrame:
 
         for c in sdb_extra_checks:
             df[c["problem"].__name__ + suffix] = df.apply(c["problem"], axis=1)
-            df[c["solution"].__name__ + suffix] = df.apply(
-                c["solution"], axis=1
-            )
+            df[c["solution"].__name__ + suffix] = df.apply(c["solution"], axis=1)
 
         result_columns = [
             "exploitable_w_sdb" + suffix,
             "required_solutions_w_sdb" + suffix,
             "fail_reasons_w_sdb" + suffix,
         ]
-        df[result_columns] = df.apply(
-            sdb_is_exploitable, axis=1, result_type="expand"
-        )
+        df[result_columns] = df.apply(sdb_is_exploitable, axis=1, result_type="expand")
 
         n_exploitable = len(df[df["exploitable_w_sdb" + suffix] == True])
         print(
@@ -907,9 +867,7 @@ def add_missing_columns(df: pd.DataFrame) -> pd.DataFrame:
     columns = []
     for suffix in ["", "_w_branches"]:
         columns += [x + suffix for x in names(basic_checks, advanced_checks)]
-        columns += [
-            x + suffix for x in names(sdb_basic_checks, sdb_extra_checks)
-        ]
+        columns += [x + suffix for x in names(sdb_basic_checks, sdb_extra_checks)]
         columns += [x + suffix for x in results]
         columns += [x + "_w_sdb" + suffix for x in results]
     columns += names(slam_basic_checks, slam_advanced_checks)
@@ -1008,9 +966,7 @@ def run(in_csv, out_csv):
         df[i] = df[i].fillna(0)
 
     df["base_size"] = df.apply(calc_base_size, axis=1)
-    df["transmitted_secret_size"] = df.apply(
-        calc_transmitted_secret_size, axis=1
-    )
+    df["transmitted_secret_size"] = df.apply(calc_transmitted_secret_size, axis=1)
     df["pc_as_int"] = df.apply(get_pc_as_number, axis=1)
     print(f"[-] Imported {len(df)} gadgets")
 

@@ -154,9 +154,7 @@ def analyse(t: Transmission):
     l.warning(f"Branch control: {t.properties['branch_control_type']}")
 
     t.properties["cmove_control_type"] = get_cmove_control(t, d, False)
-    l.warning(
-        f"Cmove control with constraints: {t.properties['cmove_control_type']}"
-    )
+    l.warning(f"Cmove control with constraints: {t.properties['cmove_control_type']}")
 
     l.warning("===========================")
 

@@ -28,9 +28,7 @@ def range_column(prefix, field):
     Name of a range column in the analyzer output, e.g.,
     range_column('rax_controlled', 'min') -> 'rax_controlled_range_with_branches_min'.
     """
-    return (
-        f"{prefix}_range{'' if not with_branches else '_with_branches'}_{field}"
-    )
+    return f"{prefix}_range{'' if not with_branches else '_with_branches'}_{field}"
 
 
 def is_in_range(n, min, max):
@@ -178,9 +176,7 @@ def get_sufficiently_controlled_registers(t: pd.Series, reg_type):
             if t["reg"] == reg:
                 continue
 
-            controlled += t[
-                f"{reg}_controlled_sufficiently_indirect{branch_suffix()}"
-            ]
+            controlled += t[f"{reg}_controlled_sufficiently_indirect{branch_suffix()}"]
 
     return controlled, len(controlled)
 
@@ -213,9 +209,7 @@ def get_tfp_control(t: pd.Series):
     reg = t["reg"]
 
     if reg in get_x86_registers():
-        controlled_sufficiently = t[
-            f"{reg}_controlled_sufficiently{branch_suffix()}"
-        ]
+        controlled_sufficiently = t[f"{reg}_controlled_sufficiently{branch_suffix()}"]
         controlled_fully = t[f"{reg}_controlled_fully{branch_suffix()}"]
 
     else:
@@ -253,12 +247,10 @@ def add_extra_info(df):
         df[f"{reg}_controlled_sufficiently{branch_suffix()}"] = df.apply(
             is_register_sufficiently_controlled, axis=1, args=(reg,)
         )
-        df[f"{reg}_controlled_sufficiently_indirect{branch_suffix()}"] = (
-            df.apply(
-                get_indirect_offsets_sufficiently_controlled,
-                axis=1,
-                args=(reg,),
-            )
+        df[f"{reg}_controlled_sufficiently_indirect{branch_suffix()}"] = df.apply(
+            get_indirect_offsets_sufficiently_controlled,
+            axis=1,
+            args=(reg,),
         )
 
     for reg in get_x86_registers():
@@ -286,9 +278,7 @@ def add_extra_info(df):
             f"controlled_fully{branch_suffix()}",
             f"n_controlled_fully{branch_suffix()}",
         ]
-    ] = df.apply(
-        get_fully_controlled_registers, axis=1, args=(1,), result_type="expand"
-    )
+    ] = df.apply(get_fully_controlled_registers, axis=1, args=(1,), result_type="expand")
 
     # Indirect controlled registers (1)
     df[
@@ -307,9 +297,7 @@ def add_extra_info(df):
             f"controlled_fully_indirect{branch_suffix()}",
             f"n_controlled_fully_indirect{branch_suffix()}",
         ]
-    ] = df.apply(
-        get_fully_controlled_registers, axis=1, args=(2,), result_type="expand"
-    )
+    ] = df.apply(get_fully_controlled_registers, axis=1, args=(2,), result_type="expand")
 
     # All controlled registers (2)
     df[
@@ -328,9 +316,7 @@ def add_extra_info(df):
             f"controlled_fully_all{branch_suffix()}",
             f"n_controlled_fully_all{branch_suffix()}",
         ]
-    ] = df.apply(
-        get_fully_controlled_registers, axis=1, args=(3,), result_type="expand"
-    )
+    ] = df.apply(get_fully_controlled_registers, axis=1, args=(3,), result_type="expand")
 
     df[
         [
@@ -402,9 +388,7 @@ def run(in_csv, out_csv):
         is_exploitable, axis=1, result_type="expand"
     )
 
-    print(
-        f"   [+] Found {len(df[df['exploitable'] == True])} exploitable TFPs!"
-    )
+    print(f"   [+] Found {len(df[df['exploitable'] == True])} exploitable TFPs!")
     sufficiently = df[df["n_controlled_sufficiently"] >= 1]
     print(
         f"   [+] Found {len(sufficiently['pc'].unique())} (unique PCs) TFPs with at "

@@ -26,14 +26,10 @@ def get_branch_comments(proj, bbls, branches):
     # One dict per bbl; hooked bbls and the last bbl have no branch.
     comments = [{} for _ in bbls]
     branch_bbls = [
-        i
-        for i, bbl_addr in enumerate(bbls[:-1])
-        if not proj.is_hooked(bbl_addr)
+        i for i, bbl_addr in enumerate(bbls[:-1]) if not proj.is_hooked(bbl_addr)
     ]
     for i, (addr, condition, taken) in zip(branch_bbls, branches):
-        comments[i][addr] = (
-            str(taken) + "   " + utils.truncate_str(str(condition))
-        )
+        comments[i][addr] = str(taken) + "   " + utils.truncate_str(str(condition))
 
     return comments
 
@@ -120,23 +116,18 @@ def get_disassembled_trace_text(proj, bbls, color=True, comments=None):
         if (
             symbol != None
             and symbol.rebased_addr != bbl_addr
-            and (
-                prev_block == None
-                or prev_block.addr + prev_block.size != bbl_addr
-            )
+            and (prev_block == None or prev_block.addr + prev_block.size != bbl_addr)
         ):
             # Non-fallthrough and Capstone did not add a symbol
             bytes_width = (bbl_addr.bit_length() + 3) // 4 + 2
             output += (
-                " " * bytes_width
-                + f";{symbol.name}+{bbl_addr - symbol.rebased_addr}:\n"
+                " " * bytes_width + f";{symbol.name}+{bbl_addr - symbol.rebased_addr}:\n"
             )
 
         if n_visits[bbl_addr] > 1:
             bytes_width = (bbl_addr.bit_length() + 3) // 4 + 2
             output += (
-                " " * bytes_width
-                + f";(visit {visit[bbl_addr]}/{n_visits[bbl_addr]})\n"
+                " " * bytes_width + f";(visit {visit[bbl_addr]}/{n_visits[bbl_addr]})\n"
             )
 
         # Add the assembly code
@@ -166,9 +157,7 @@ def print_annotated_assembly(
     # Branches.
     comments = get_branch_comments(proj, bbls, branches)
     # Loads.
-    for (bbl_index, addr), comment in get_load_comments(
-        expr, secret_load_pc
-    ).items():
+    for (bbl_index, addr), comment in get_load_comments(expr, secret_load_pc).items():
         comments[bbl_index][addr] = comment
     # Transmission, in the last bbl.
     last = comments[-1]
@@ -191,9 +180,7 @@ def print_annotated_assembly(
             for a in all_annotations
             if isinstance(a, LoadAnnotation) and a.address == secret_load_pc
         }
-        annotations = replace_secret_annotations_with_name(
-            secret_annotations, "Secret"
-        )
+        annotations = replace_secret_annotations_with_name(secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(
             all_annotations - secret_annotations, "Attacker"
         )
@@ -206,9 +193,7 @@ def print_annotated_assembly(
             for a in all_annotations
             if isinstance(a, LoadAnnotation) and a.address == secret_load_pc
         }
-        annotations = replace_secret_annotations_with_name(
-            secret_annotations, "Secret"
-        )
+        annotations = replace_secret_annotations_with_name(secret_annotations, "Secret")
         annotations += replace_secret_annotations_with_name(
             all_annotations - secret_annotations, "Attacker"
         )
@@ -313,14 +298,9 @@ Branches: {utils.ordered_branches(t.branches)}
         o.write(f"  - Reg: {r}\n")
         o.write(f"    Expr: {utils.truncate_str(reg.expr)}\n")
         o.write(f"    ControlType: {reg.control_type}\n")
-        o.write(
-            f"    Controlled Expr: {utils.truncate_str(reg.controlled_expr)}\n"
-        )
+        o.write(f"    Controlled Expr: {utils.truncate_str(reg.controlled_expr)}\n")
         o.write(f"    Controlled Range: {reg.controlled_range}\n")
-        o.write(
-            f"    Controlled Range w Branches:"
-            f"{reg.controlled_range_with_branches}\n"
-        )
+        o.write(f"    Controlled Range w Branches:{reg.controlled_range_with_branches}\n")
 
     o.write("\nRegisters aliasing with tfp:\n")
     for r in t.aliasing:
@@ -376,9 +356,7 @@ Branches: {utils.ordered_branches(g.branches)}
     o.close()
 
 
-def output_secret_dependent_branch_to_file(
-    sdb: SecretDependentBranch, proj, path
-):
+def output_secret_dependent_branch_to_file(sdb: SecretDependentBranch, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/sdb_{sdb.name}_{hex(sdb.pc)}_{sdb.uuid}.asm", "a+")
     o.write("------------ SECRET DEPENDENT BRANCH ------------\n")

@@ -46,12 +46,8 @@ class RangeStrategyInferIsolated(RangeStrategy):
             # 0xffffffff81000000 + <BV32 AST >
             # get_range_map_from_ast() cannot handle 'overflows', so we
             # split the AST and add the concrete value manually to the range.
-            if ast.op == "__add__" and any(
-                not arg.symbolic for arg in ast.args
-            ):
-                concrete_value = next(
-                    arg for arg in ast.args if not arg.symbolic
-                ).args[0]
+            if ast.op == "__add__" and any(not arg.symbolic for arg in ast.args):
+                concrete_value = next(arg for arg in ast.args if not arg.symbolic).args[0]
                 sub_ast = sum([arg for arg in ast.args if arg.symbolic])
 
                 range_map = get_range_map_from_ast(sub_ast)
@@ -187,11 +183,7 @@ class RangeMap:
     def concrete_mul(self, value, int_length):
 
         # Check if we are in mask mode & multiplication is power of 2
-        if (
-            (not self.stride_mode)
-            and (value != 0)
-            and (value & (value - 1) == 0)
-        ):
+        if (not self.stride_mode) and (value != 0) and (value & (value - 1) == 0):
             # Power of two
             return self.shift_left(value.bit_length() - 1, int_length)
 
@@ -519,9 +511,9 @@ def op_if(ast, range_maps):
     # We return a full range if both the then and else are a full range
 
     if range_maps[1] and range_maps[2]:
-        if range_maps[1].is_full_range(ast.length) and range_maps[
-            2
-        ].is_full_range(ast.length):
+        if range_maps[1].is_full_range(ast.length) and range_maps[2].is_full_range(
+            ast.length
+        ):
             # TODO: Equal ranges should be enough
             return range_maps[1]
 
@@ -571,9 +563,7 @@ def get_range_map_from_ast(ast: claripy.ast.bv.BVS):
         if all(m is None or not m.has_range() for m in args_range_maps):
             return unknown_range()
 
-        if all(
-            m is None or not m.has_range() or m.unknown for m in args_range_maps
-        ):
+        if all(m is None or not m.has_range() or m.unknown for m in args_range_maps):
             return unknown_range()
 
         if ast.op in operators:

@@ -137,9 +137,7 @@ class HalfGadget:
 
         d["loaded"] = transmission.component_to_dict(self.loaded)
         d["base"] = transmission.component_to_dict(self.base)
-        d["uncontrolled_base"] = transmission.component_to_dict(
-            self.uncontrolled_base
-        )
+        d["uncontrolled_base"] = transmission.component_to_dict(self.uncontrolled_base)
         d["attacker"] = transmission.component_to_dict(self.attacker)
 
         d["branches"] = utils.ordered_branches(self.branches)

@@ -103,9 +103,7 @@ class MemoryAlias:
         return f"{self.val1} == {self.val2}"
 
     def is_symbolic(self):
-        return utils.is_sym_expr(self.val1.sym) or utils.is_sym_expr(
-            self.val2.sym
-        )
+        return utils.is_sym_expr(self.val1.sym) or utils.is_sym_expr(self.val2.sym)
 
     def to_BV(self):
         return self.val1.to_BV() == self.val2.to_BV()
@@ -133,9 +131,7 @@ def get_constraints_for_expr(state, expr) -> list:
     if not all_constraints:
         return []
 
-    splitted_constraints = state.solver._solver._split_constraints(
-        all_constraints
-    )
+    splitted_constraints = state.solver._solver._split_constraints(all_constraints)
     all_groups = [group[0] for group in splitted_constraints]
     # Get all independent groups
     independent_groups = utils.merge_dependent_sets(all_groups)
@@ -226,9 +222,7 @@ def addr_overlaps_with(
     return not state.solver.satisfiable(extra_constraints=constraints)
 
 
-def mem_op_overlaps_with(
-    load1: MemOp, load2: MemOp, state: angr.SimState
-) -> bool:
+def mem_op_overlaps_with(load1: MemOp, load2: MemOp, state: angr.SimState) -> bool:
     """
     Check if the memory region accessed by load1 overlaps the region of
     load2. Note that, since we are dealing with symbolic loads, the result
@@ -236,9 +230,7 @@ def mem_op_overlaps_with(
     is no possible solution where they don't.
     """
 
-    return addr_overlaps_with(
-        load1.addr, load1.size, load2.addr, load2.size, state
-    )
+    return addr_overlaps_with(load1.addr, load1.size, load2.addr, load2.size, state)
 
 
 def get_overlap(load1: MemOp, load2: MemOp, state: angr.SimState):
@@ -264,9 +256,7 @@ def get_overlap(load1: MemOp, load2: MemOp, state: angr.SimState):
             extra_constraints=[load1.addr != load2.addr + i] + edge_const
         ):
             l.error(
-                "Overlap found: {} ~~ {} (offset {})".format(
-                    load1.addr, load2.addr, i
-                )
+                "Overlap found: {} ~~ {} (offset {})".format(load1.addr, load2.addr, i)
             )
             return load2, load1, i
 
@@ -274,9 +264,7 @@ def get_overlap(load1: MemOp, load2: MemOp, state: angr.SimState):
             extra_constraints=[load1.addr + i != load2.addr] + edge_const
         ):
             l.error(
-                "Overlap found: {} (offset {}) ~~ {}".format(
-                    load1.addr, i, load2.addr
-                )
+                "Overlap found: {} (offset {}) ~~ {}".format(load1.addr, i, load2.addr)
             )
             return load1, load2, i
 
@@ -346,9 +334,7 @@ def get_aliasing_loads(
                 overlap = min(sz1 - off, sz2)
 
                 # Calculate overlapping ranges.
-                range1 = RangedSymbol(
-                    sym=val1, max=(off + overlap) * 8 - 1, min=off * 8
-                )
+                range1 = RangedSymbol(sym=val1, max=(off + overlap) * 8 - 1, min=off * 8)
                 range2 = RangedSymbol(sym=val2, max=overlap * 8 - 1, min=0)
 
                 memory_alias = MemoryAlias(range1, range2)
@@ -393,9 +379,7 @@ def get_aliasing_store(
     overlapping_stores = []
 
     for prev_s in prev_stores:
-        if addr_overlaps_with(
-            load_addr, load_size, prev_s.addr, prev_s.size, state
-        ):
+        if addr_overlaps_with(load_addr, load_size, prev_s.addr, prev_s.size, state):
             overlapping_stores.append(prev_s)
 
     if not overlapping_stores:
@@ -435,9 +419,7 @@ def get_aliasing_store(
             explicit_name=True,
         )
 
-        blank_state.memory.store(
-            load_addr, gap_expr, endness=archinfo.Endness.LE
-        )
+        blank_state.memory.store(load_addr, gap_expr, endness=archinfo.Endness.LE)
 
         # Now we store the stores, oldest first
         for s in overlapping_stores:

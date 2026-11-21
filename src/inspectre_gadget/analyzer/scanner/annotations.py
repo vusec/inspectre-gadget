@@ -83,9 +83,7 @@ class SecretAnnotation(LoadAnnotation):
     """
 
     def __init__(self, read_address_ast, address, controlled, bbl_index):
-        super().__init__(
-            read_address_ast, "Secret", address, controlled, bbl_index
-        )
+        super().__init__(read_address_ast, "Secret", address, controlled, bbl_index)
 
     def copy(self):
         return SecretAnnotation(
@@ -99,9 +97,7 @@ class TransmissionAnnotation(LoadAnnotation):
     """
 
     def __init__(self, read_address_ast, address, controlled, bbl_index):
-        super().__init__(
-            read_address_ast, "Transmission", address, controlled, bbl_index
-        )
+        super().__init__(read_address_ast, "Transmission", address, controlled, bbl_index)
 
     def copy(self):
         return TransmissionAnnotation(
@@ -237,9 +233,7 @@ def propagate_annotations(ast: claripy.ast.BV, address, bbl_index):
             ast, address, controlled=can_be_controlled, bbl_index=bbl_index
         )
     elif is_attack:
-        return SecretAnnotation(
-            ast, address, controlled=True, bbl_index=bbl_index
-        )
+        return SecretAnnotation(ast, address, controlled=True, bbl_index=bbl_index)
     else:
         """ In some cases a load from an uncontrolled value could still be
         seen as a secret, but for now this is out of scope """
@@ -343,9 +337,7 @@ def get_controlled_members(expr):
     symbol. Constants and summands with only uncontrolled symbols are left out.
     """
     return [
-        m
-        for m in astTransform.extract_summed_vals(expr)
-        if is_attacker_controlled(m)
+        m for m in astTransform.extract_summed_vals(expr) if is_attacker_controlled(m)
     ]
 
 

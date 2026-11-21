@@ -5,7 +5,6 @@ not taken for the transmission to happen, and how their condition influence
 the final transmission.
 """
 
-
 from ..shared import logger, utils
 from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranch
@@ -83,17 +82,13 @@ def analyse(t: Transmission):
         if len(constr_deps.intersection(secret_deps)):
             t.transmitted_secret.constraints.append((addr, cond, ctype))
 
-    l.warning(
-        f"Base constraints: {'None' if t.base == None else t.base.constraints}"
-    )
+    l.warning(f"Base constraints: {'None' if t.base == None else t.base.constraints}")
     indep_base_constraints = (
         "None" if t.independent_base == None else t.independent_base.constraints
     )
     l.warning(f"Independent Base constraints: {indep_base_constraints}")
     l.warning(f"Secret Addr constraints: {t.secret_address.constraints}")
-    l.warning(
-        f"Transmitted Secret constraints: {t.transmitted_secret.constraints}"
-    )
+    l.warning(f"Transmitted Secret constraints: {t.transmitted_secret.constraints}")
     l.warning(f"Transmission constraints: {t.transmission.constraints}")
 
     for a in t.aliases:
@@ -150,9 +145,7 @@ def analyse_sdb(sdb: SecretDependentBranch):
 
     l.warning(f"Cmp Value branches: {sdb.cmp_value.branches}")
     controlled_branches = (
-        "None"
-        if sdb.controlled_cmp_value == None
-        else sdb.controlled_cmp_value.branches
+        "None" if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.branches
     )
     l.warning(f"Controlled Cmp Value branches: {controlled_branches}")
 
@@ -182,9 +175,7 @@ def analyse_sdb(sdb: SecretDependentBranch):
 
     l.warning(f"Cmp Value aliases: {sdb.cmp_value.aliases}")
     controlled_aliases = (
-        "None"
-        if sdb.controlled_cmp_value == None
-        else sdb.controlled_cmp_value.aliases
+        "None" if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.aliases
     )
     l.warning(f"Controlled Cmp Value aliases: {controlled_aliases}")
 
@@ -292,13 +283,9 @@ def analyse_half_gadget(g: HalfGadget):
         if len(constr_deps.intersection(loaded_deps)):
             g.loaded.constraints.append((addr, cond, ctype))
 
-    l.warning(
-        f"Base constraints: {'None' if g.base == None else g.base.constraints}"
-    )
+    l.warning(f"Base constraints: {'None' if g.base == None else g.base.constraints}")
     uncontrolled_constraints = (
-        "None"
-        if g.uncontrolled_base == None
-        else g.uncontrolled_base.constraints
+        "None" if g.uncontrolled_base == None else g.uncontrolled_base.constraints
     )
     l.warning(f"Uncontrolled Base constraints: {uncontrolled_constraints}")
     l.warning(f"Attacker constraints: {g.attacker.constraints}")

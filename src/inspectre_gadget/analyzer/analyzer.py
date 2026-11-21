@@ -29,9 +29,7 @@ def load_config(config_file):
     if config_file:
         with open(config_file, "r") as f:
             config = yaml.safe_load(f)
-        if not (
-            "controlled_registers" in config or "controlled_stack" in config
-        ):
+        if not ("controlled_registers" in config or "controlled_stack" in config):
             l.critical("Invalid config file!")
     else:
         l.info("No config provided, using default config")
@@ -57,9 +55,7 @@ def load_config(config_file):
     config_module.init_config(config)
 
 
-def load_angr_project(
-    binary_file: str, base_address, use_pickle
-) -> angr.Project:
+def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Project:
     """
     Load angr project from a pickle, or create one if it does not exist.
     """
@@ -126,8 +122,7 @@ def analyse_gadget(
         l.info(f"Found {len(s.half_gadgets)} potential half-spectre gadgets.")
     if global_config["SecretDependentBranches"]:
         l.info(
-            f"Found {len(s.secretDependentBranches)}"
-            " potential secret dependent branches."
+            f"Found {len(s.secretDependentBranches)} potential secret dependent branches."
         )
 
     # Step 3. Analyze found gadgets (if not analyzed during scanning)
@@ -142,9 +137,7 @@ def analyse_gadget(
             analysis_pipeline.analyze_half_gadget(half)
 
     if global_config["TransmissionGadgets"]:
-        l.info(
-            f"Outputted {analysis_pipeline.n_final_transmissions} transmissions."
-        )
+        l.info(f"Outputted {analysis_pipeline.n_final_transmissions} transmissions.")
     if global_config["TaintedFunctionPointers"]:
         l.info(
             f"Outputted {analysis_pipeline.n_final_tainted_function_pointers}"
@@ -152,8 +145,7 @@ def analyse_gadget(
         )
     if global_config["HalfSpectre"]:
         l.info(
-            f"Outputted {analysis_pipeline.n_final_half_gadgets}"
-            " half-spectre gadgets."
+            f"Outputted {analysis_pipeline.n_final_half_gadgets} half-spectre gadgets."
         )
     if global_config["SecretDependentBranches"]:
         l.info(
@@ -194,9 +186,7 @@ def run(
 
     if symbol_binary:
         l.info("Loading symbol binary...")
-        symbol_proj = load_angr_project(
-            symbol_binary, base_address, cache_project
-        )
+        symbol_proj = load_angr_project(symbol_binary, base_address, cache_project)
 
         main_obj = proj.loader.all_objects[0]
         symbol_obj = symbol_proj.loader.all_objects[0]
@@ -226,9 +216,7 @@ def run(
                     continue
 
                 relative_addr = (
-                    symbol.relative_addr
-                    - text_obj.mapped_base
-                    + symbol.owner.mapped_base
+                    symbol.relative_addr - text_obj.mapped_base + symbol.owner.mapped_base
                 )
                 new_symbol = Symbol(
                     owner=text_obj,

@@ -4,7 +4,6 @@ This analysis calculates which registers and memory locations have to be
 controlled or leaked by the attacker in order to trigger a transmission.
 """
 
-
 import claripy
 
 from ..scanner import annotations
@@ -80,9 +79,7 @@ def get_requirements(expr: claripy.ast.BV) -> Requirements:
     return req
 
 
-def get_control(
-    c: TransmissionComponent, report_massaging=False
-) -> ControlType:
+def get_control(c: TransmissionComponent, report_massaging=False) -> ControlType:
     # TODO: check aliasing
     if (
         len(c.requirements.const_mem) == 0
@@ -185,13 +182,9 @@ def analyse(t: Transmission):
     t.all_requirements_w_branches.merge(t.all_requirements)
     t.all_requirements_w_branches.merge(t.branch_requirements)
 
-    l.warning(
-        f"base_requirements:  {'NONE' if t.base == None else t.base.requirements}"
-    )
+    l.warning(f"base_requirements:  {'NONE' if t.base == None else t.base.requirements}")
     l.warning(f"secret_address_requirements:  {t.secret_address.requirements}")
-    l.warning(
-        f"transmitted_secret_requirements:  {t.transmitted_secret.requirements}"
-    )
+    l.warning(f"transmitted_secret_requirements:  {t.transmitted_secret.requirements}")
     l.warning(f"transmission_requirements:  {t.transmission.requirements}")
     l.warning("==========================")
 
@@ -256,13 +249,9 @@ def analyse_half_gadget(g: HalfGadget):
     g.all_requirements_w_branches.merge(g.all_requirements)
     g.all_requirements_w_branches.merge(g.branch_requirements)
 
-    l.warning(
-        f"base_requirements:  {'NONE' if g.base == None else g.base.requirements}"
-    )
+    l.warning(f"base_requirements:  {'NONE' if g.base == None else g.base.requirements}")
     uncontrolled_requirements = (
-        "NONE"
-        if g.uncontrolled_base == None
-        else g.uncontrolled_base.requirements
+        "NONE" if g.uncontrolled_base == None else g.uncontrolled_base.requirements
     )
     l.warning(f"uncontrolled_base_requirements:  {uncontrolled_requirements}")
     l.warning(f"attacker_requirements:  {g.attacker.requirements}")

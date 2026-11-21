@@ -51,9 +51,9 @@ def get_expr_base_control(
     secrets = set(utils.get_vars(transmitted_secret_expr))
 
     # If the base is not symbolic, we're done.
-    if not utils.is_sym_expr(
+    if not utils.is_sym_expr(base_expr) or not dependencyGraph.is_expr_controlled(
         base_expr
-    ) or not dependencyGraph.is_expr_controlled(base_expr):
+    ):
         return BaseControlType.CONSTANT_BASE
     # Check if the base depends on the transmitted secret.
     elif not d.is_independently_controllable(
@@ -123,8 +123,7 @@ def analyse(t: Transmission):
 
     t.properties["base_control_w_constraints"] = get_base_control(t, d, True)
     l.warning(
-        "Base control with constraints: "
-        f"{t.properties['base_control_w_constraints']}"
+        f"Base control with constraints: {t.properties['base_control_w_constraints']}"
     )
 
     # 3. Check control considering also branch constraints.
@@ -135,9 +134,7 @@ def analyse(t: Transmission):
     else:
         base_control_w_branches = t.properties["base_control_w_constraints"]
 
-    t.properties["base_control_w_branches_and_constraints"] = (
-        base_control_w_branches
-    )
+    t.properties["base_control_w_branches_and_constraints"] = base_control_w_branches
     l.warning(f"Base control including branches: {base_control_w_branches}")
 
     t.properties["deps"] = d

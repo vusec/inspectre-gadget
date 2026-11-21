@@ -104,8 +104,7 @@ class AnalysisPipeline:
 
         for t in transmissions:
             l.info(
-                f"Analyzing TRANS @{hex(t.pc)}: "
-                f"{utils.truncate_str(t.transmission.expr)}"
+                f"Analyzing TRANS @{hex(t.pc)}: {utils.truncate_str(t.transmission.expr)}"
             )
             t.name = self.name
             t.address = self.gadget_address
@@ -166,9 +165,7 @@ class AnalysisPipeline:
         tainted_function_pointers = tfpAnalysis.analyse(t)
 
         for tfp in tainted_function_pointers:
-            l.info(
-                f"Analyzing TFP @{hex(tfp.pc)}: {utils.truncate_str(tfp.expr)}"
-            )
+            l.info(f"Analyzing TFP @{hex(tfp.pc)}: {utils.truncate_str(tfp.expr)}")
             tfp.name = self.name
             tfp.address = self.gadget_address
             tfp.uuid = get_uuid(
@@ -254,9 +251,7 @@ class AnalysisPipeline:
             l_verbose.info(g)
 
             if self.asm_folder != "":
-                asmprinter.output_half_gadget_to_file(
-                    g, self.proj, self.asm_folder
-                )
+                asmprinter.output_half_gadget_to_file(g, self.proj, self.asm_folder)
                 l.info(f"Dumped annotated ASM to {self.asm_folder}")
             if self.half_gadget_filename != "":
                 append_to_csv(self.half_gadget_filename, [g])
@@ -337,9 +332,7 @@ def flatten_dict(dictionary, parent_key="", separator="_"):
     for key, value in dictionary.items():
         new_key = parent_key + separator + key if parent_key else key
         if isinstance(value, MutableMapping):
-            items.extend(
-                flatten_dict(value, new_key, separator=separator).items()
-            )
+            items.extend(flatten_dict(value, new_key, separator=separator).items())
         else:
             items.append((new_key, value))
     return dict(items)
@@ -388,9 +381,7 @@ def append_to_csv(csv_filename, transmissions):
 def get_uuid(t, hash_list):
 
     if global_config["UseDeterministicUUIDs"]:
-        h = hashlib.sha256(
-            f"{t.name}{t.address}{t.pc}{hash_list}".encode()
-        ).hexdigest()
+        h = hashlib.sha256(f"{t.name}{t.address}{t.pc}{hash_list}".encode()).hexdigest()
         return str(uuid.UUID(int=(int(h, 16) % 2**128), version=4))
     else:
         return str(uuid.uuid4())

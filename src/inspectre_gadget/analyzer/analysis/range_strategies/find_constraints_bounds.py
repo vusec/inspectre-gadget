@@ -1,4 +1,3 @@
-
 import claripy
 
 from ...shared import logger, ranges, utils
@@ -55,9 +54,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             return ranges.range_static(ast_min, isolated=False)
 
         try:
-            sat_ranges = _find_sat_distribution(
-                constraints, ast, ast_min, ast_max
-            )
+            sat_ranges = _find_sat_distribution(constraints, ast, ast_min, ast_max)
         except claripy.ClaripyZ3Error:
             # timeout
             return None
@@ -97,9 +94,7 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             # 0xffffffff81000000 + <BV32 X > with condition x[31:31] != 0
             # (sign extended)
 
-            concrete_value = next(
-                arg for arg in ast.args if not arg.symbolic
-            ).args[0]
+            concrete_value = next(arg for arg in ast.args if not arg.symbolic).args[0]
             sub_ast = sum([arg for arg in ast.args if arg.symbolic])
 
             r = self.find_range(constraints, sub_ast, None, None)
@@ -129,9 +124,7 @@ def _find_sat_distribution(constraints, ast, start, end):
     # Start with a clean state
     s = claripy.Solver(timeout=global_config["Z3Timeout"])
 
-    if not s.satisfiable(
-        extra_constraints=[ast >= start, ast <= end, not_constraints]
-    ):
+    if not s.satisfiable(extra_constraints=[ast >= start, ast <= end, not_constraints]):
         # it is not satisfiable, thus we have a full range
         return [(start, end)]
 

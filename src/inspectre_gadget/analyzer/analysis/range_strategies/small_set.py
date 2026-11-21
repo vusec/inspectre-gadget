@@ -1,4 +1,3 @@
-
 import claripy
 
 # autopep8: off

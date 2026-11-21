@@ -115,20 +115,14 @@ class AstRange:
             return f"{hex(self.min)}"
 
         if self.intervals:
-            s = (
-                ",".join([str(i) for i in self.intervals])
-                + f" Exact: {self.exact}"
-            )
+            s = ",".join([str(i) for i in self.intervals]) + f" Exact: {self.exact}"
             if self.and_mask != None:
                 s += f", and_mask: {hex(self.and_mask)}"
             if self.or_mask:
                 s += f", or_mask: {hex(self.or_mask)}"
             return s
         else:
-            return (
-                ",".join([hex(i) for i in self.values])
-                + f" Exact: {self.exact}"
-            )
+            return ",".join([hex(i) for i in self.values]) + f" Exact: {self.exact}"
 
     def copy(self):
         return AstRange(
@@ -207,9 +201,7 @@ def range_from_symbolic_concrete_addition(
     ast_min = ast_min if isolated_ast_min < ast_min else isolated_ast_min
     ast_max = ast_max if isolated_ast_max > ast_max else isolated_ast_max
 
-    return range_simple(
-        ast_min, ast_max, ast.size(), sym_ast_stride, isolated=True
-    )
+    return range_simple(ast_min, ast_max, ast.size(), sym_ast_stride, isolated=True)
 
 
 def get_stride_from_mask(and_mask, or_mask):
@@ -223,9 +215,7 @@ def get_stride_from_mask(and_mask, or_mask):
     return 2**lowest_bit
 
 
-def range_complex(
-    min, max, ast_size, exact, entropy, and_mask, or_mask, isolated=False
-):
+def range_complex(min, max, ast_size, exact, entropy, and_mask, or_mask, isolated=False):
     stride = get_stride_from_mask(and_mask, or_mask)
 
     highest_bit = max.bit_length()

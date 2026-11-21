@@ -5,7 +5,6 @@ should be considered dependent from each other, i.e. they are tied together
 by either aliases or constraints that involve each other.
 """
 
-
 import claripy
 
 # autopep8: off
@@ -170,9 +169,7 @@ def is_addr_controllable(
 
     # Attacker memory is controlled through its content, not its address,
     # which is typically uncontrolled.
-    if isinstance(
-        annotations.get_load_annotation(sym), AttackerMemoryAnnotation
-    ):
+    if isinstance(annotations.get_load_annotation(sym), AttackerMemoryAnnotation):
         return True
 
     if isinstance(node, LoadNode) and utils.is_sym_expr(node.addr):
@@ -256,9 +253,7 @@ class DepGraph:
                 if isinstance(a, AttackerAnnotation)
             ]
             load_annos = [
-                a
-                for a in utils.get_annotations(expr)
-                if isinstance(a, LoadAnnotation)
+                a for a in utils.get_annotations(expr) if isinstance(a, LoadAnnotation)
             ]
             uncontrolled_annos = [
                 a
@@ -269,16 +264,12 @@ class DepGraph:
             # A symbol has at most one taint annotation. Symbols created by
             # angr itself (e.g., registers the scanner did not initialize) have
             # none: they become uncontrolled RegNodes.
-            n_annos = (
-                len(attacker_annos) + len(load_annos) + len(uncontrolled_annos)
-            )
+            n_annos = len(attacker_annos) + len(load_annos) + len(uncontrolled_annos)
             assert n_annos <= 1
 
             if len(load_annos) > 0:
                 self.add_nodes(load_annos[0].read_address_ast)
-                self.sym_nodes[expr] = LoadNode(
-                    expr, load_annos[0].read_address_ast
-                )
+                self.sym_nodes[expr] = LoadNode(expr, load_annos[0].read_address_ast)
             else:
                 self.sym_nodes[expr] = RegNode(expr)
 
@@ -388,9 +379,7 @@ class DepGraph:
         # Get all symbols in the expr that are not among the symbols, aliases or
         # constraints of any of the symbols of fixed_sym.
         sym_diff = set.difference(expr_syms, deps_to_check)
-        diff = set(
-            [elem for elem in filter(lambda x: is_expr_controlled(x), sym_diff)]
-        )
+        diff = set([elem for elem in filter(lambda x: is_expr_controlled(x), sym_diff)])
 
         # If there's none left, expr completely depends on fixed_syms.
         if len(diff) == 0:
@@ -403,10 +392,7 @@ class DepGraph:
         # Else, check each of the remaining symbols recursively and exclude those
         # that were loaded from an address that completely depends on fixed_syms.
         return any(
-            [
-                is_addr_controllable(self, x, fixed_syms, check_constraints)
-                for x in diff
-            ]
+            [is_addr_controllable(self, x, fixed_syms, check_constraints) for x in diff]
         )
 
     def is_independent(
@@ -436,8 +422,5 @@ class DepGraph:
 
         # Else, recursively check the address expression, following loads.
         return all(
-            [
-                is_addr_independent(self, x, expr2, check_constraints)
-                for x in expr1_syms
-            ]
+            [is_addr_independent(self, x, expr2, check_constraints) for x in expr1_syms]
         )

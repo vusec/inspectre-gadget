@@ -1,4 +1,3 @@
-
 import claripy
 
 from ..scanner import annotations
@@ -79,9 +78,7 @@ def calculate_range(component: TransmissionComponent, constraints, branches):
 
         # Calculate ranges considering also branch constraints.
         if len(branches) > 0:
-            component.range_with_branches = get_ast_ranges(
-                branches, component.expr
-            )
+            component.range_with_branches = get_ast_ranges(branches, component.expr)
         else:
             component.range_with_branches = component.range
 
@@ -90,9 +87,7 @@ def calculate_range(component: TransmissionComponent, constraints, branches):
             calculate_controlled_range(component, constraints, branches)
 
 
-def calculate_controlled_range(
-    component: TransmissionComponent, constraints, branches
-):
+def calculate_controlled_range(component: TransmissionComponent, constraints, branches):
     """
     Calculate the range of the part of the expression the attacker controls.
     """
@@ -112,9 +107,7 @@ def calculate_controlled_range(
         component.controlled_range_with_branches = component.range_with_branches
         return
 
-    component.controlled_range = get_ast_ranges(
-        constraints, component.controlled_expr
-    )
+    component.controlled_range = get_ast_ranges(constraints, component.controlled_expr)
     if len(branches) > 0:
         component.controlled_range_with_branches = get_ast_ranges(
             branches, component.controlled_expr
@@ -274,9 +267,7 @@ def analyze_secret_dependent_branch(sdb: SecretDependentBranch):
 
     l.warning(f"cmp_value range:  {sdb.cmp_value.range}")
     controlled_range = (
-        "NONE"
-        if sdb.controlled_cmp_value == None
-        else sdb.controlled_cmp_value.range
+        "NONE" if sdb.controlled_cmp_value == None else sdb.controlled_cmp_value.range
     )
     l.warning(f"controlled_cmp_value range:  {controlled_range}")
     l.warning("==========================")

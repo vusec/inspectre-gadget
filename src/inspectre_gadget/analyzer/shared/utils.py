@@ -152,16 +152,13 @@ def get_outcome(cond, source, target):
 
 def ordered_branches(branches):
     branches = sorted(branches, key=lambda x: x[0])
-    return [
-        (hex(addr), truncate_str(cond), taken) for addr, cond, taken in branches
-    ]
+    return [(hex(addr), truncate_str(cond), taken) for addr, cond, taken in branches]
 
 
 def ordered_constraints(constraints):
     constraints = sorted(constraints, key=lambda x: x[0])
     return [
-        (hex(addr), truncate_str(cond), str(ctype))
-        for addr, cond, ctype in constraints
+        (hex(addr), truncate_str(cond), str(ctype)) for addr, cond, ctype in constraints
     ]
 
 

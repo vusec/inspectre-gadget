@@ -49,10 +49,7 @@ class Requirements:
         d = {
             "regs": sorted([str(x) for x in self.regs]),
             "indirect_regs": sorted(
-                [
-                    f"{str(x)}: {sorted(self.indirect_regs[x])}"
-                    for x in self.indirect_regs
-                ]
+                [f"{str(x)}: {sorted(self.indirect_regs[x])}" for x in self.indirect_regs]
             ),
             "direct_regs": sorted([str(x) for x in self.direct_regs]),
             "mem": sorted([str(x) for x in self.mem]),
@@ -425,9 +422,7 @@ class Transmission:
         d["constraints"] = utils.ordered_constraints(self.constraints)
         d["constraint_requirements"] = self.constraint_requirements.to_dict()
         d["all_requirements"] = self.all_requirements.to_dict()
-        d["all_requirements_w_branches"] = (
-            self.all_requirements_w_branches.to_dict()
-        )
+        d["all_requirements_w_branches"] = self.all_requirements_w_branches.to_dict()
 
         d["inferable_bits"] = self.inferable_bits.to_dict()
         d["aliases"] = [str(x.to_BV()) for x in self.aliases]
