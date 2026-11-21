@@ -4,11 +4,11 @@ import sys
 
 from angr.misc.ansi import Color, BackgroundColor, color, clear
 
-ENDC = '\033[0m'
+ENDC = "\033[0m"
 
 
 class __CustomFormatter(logging.Formatter):
-    """Logging Formatter for a simple unix style logger """
+    """Logging Formatter for a simple unix style logger"""
 
     def format(self, record):
         name: str = record.name
@@ -50,6 +50,7 @@ def get_logger(name):
         __loggers[name] = __initialize_logger(name)
 
     return __loggers[name]
+
 
 def disable_logging(keep_main=False):
     for l in __loggers:

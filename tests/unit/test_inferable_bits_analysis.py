@@ -6,7 +6,6 @@ from inspectre_gadget.analyzer.analysis.bitsAnalysis import *
 
 
 class InferableBitsAnalysisTestCase(unittest.TestCase):
-
     def test_sign_extended_simple(self):
         a = claripy.BVS("a", 32)
         ast = a.sign_extend(32)
@@ -72,7 +71,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         # Concrete add
         a = claripy.BVS("a", 32)
         a_ext = a.zero_extend(32)
-        ast = (a_ext + 9)
+        ast = a_ext + 9
         flow_map = get_inferable_bits(ast, a)
 
         self.assertEqual(flow_map.is_direct, 0)
@@ -84,7 +83,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         # Concrete add big value
         a = claripy.BVS("a", 16)
         a_ext = a.zero_extend(48)
-        ast = (a_ext + 0xffffffff) * 2
+        ast = (a_ext + 0xFFFFFFFF) * 2
         flow_map = get_inferable_bits(ast, a)
 
         self.assertEqual(flow_map.is_direct, 0)
@@ -113,22 +112,23 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
 
         a = claripy.BVS("a", 32)
         a_ext = claripy.BVV(0, 32).concat(a)
-        ast = (a_ext >> 4) * 0xfc + (a_ext & 0xf3) * 0x18
+        ast = (a_ext >> 4) * 0xFC + (a_ext & 0xF3) * 0x18
         flow_map = get_inferable_bits(ast, a)
 
         self.assertEqual(flow_map.is_direct, 0)
         self.assertEqual(flow_map.number_of_bits_inferable, 30)
         self.assertEqual(flow_map.spread_low, 0)
         self.assertEqual(flow_map.spread_high, 36)
-        self.assertEqual(flow_map.all_inferable_bits,
-                         [0, 1] + list(range(4, 32)))
+        self.assertEqual(
+            flow_map.all_inferable_bits, [0, 1] + list(range(4, 32))
+        )
 
     def test_and_operation(self):
 
         # mask and add again
         a = claripy.BVS("a", 32)
         a_ext = claripy.BVV(0, 32).concat(a)
-        ast = (a_ext & 0xff96) + (a_ext & 0x69)
+        ast = (a_ext & 0xFF96) + (a_ext & 0x69)
 
         flow_map = get_inferable_bits(ast, a)
 
@@ -183,7 +183,7 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
     def test_and_or_and_or_mask(self):
 
         a = claripy.BVS("a", 64)
-        ast = (a & 0xe | 0x4) & 0xff
+        ast = (a & 0xE | 0x4) & 0xFF
 
         flow_map = get_inferable_bits(ast, a)
 
@@ -238,7 +238,8 @@ class InferableBitsAnalysisTestCase(unittest.TestCase):
         a = claripy.BVS("a", 32)
         a_spread = a + 20
         ast = claripy.Concat(
-            a_spread[31:31], a_spread[31:31], a_spread[31:31], a_spread[31:3])
+            a_spread[31:31], a_spread[31:31], a_spread[31:31], a_spread[31:3]
+        )
 
         flow_map = get_inferable_bits(ast, a)
 

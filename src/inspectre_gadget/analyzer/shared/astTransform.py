@@ -13,21 +13,28 @@ from . import logger
 
 l = logger.get_logger("AstTransform")
 
+
 class SplitTooManyNestedIfException(Exception):
     "Too many if statements in expr, skipping"
+
     pass
 
     def __str__(self):
-        return ("SplitTooManyNestedIfException: Too many if statements in expr, "
-                "skipping")
+        return (
+            "SplitTooManyNestedIfException: Too many if statements in expr, "
+            "skipping"
+        )
+
 
 class ConditionType(Enum):
     """
     Track which instruction is associated to a given condition.
     """
-    CMOVE = 0,
-    SIGN_EXT = 1,
+
+    CMOVE = (0,)
+    SIGN_EXT = (1,)
     UNKNOWN = 2
+
 
 class SignExtAnnotation(claripy.Annotation):
     """
@@ -53,6 +60,7 @@ class SignExtAnnotation(claripy.Annotation):
 
     def __repr__(self):
         return f"SignExtAnnotation@{hex(self.addr)}"
+
 
 def getSignExtAnnotation(ast: claripy.ast.BV):
     for a in ast.annotations:
@@ -86,6 +94,7 @@ class CmoveAnnotation(claripy.Annotation):
 
     def __repr__(self):
         return f"CmoveAnnotation@{hex(self.addr)}"
+
 
 def getCmoveAnnotation(ast: claripy.ast.BV):
     for a in ast.annotations:
@@ -148,8 +157,9 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
                 new_conds.extend(c.conditions)
                 new_conds.append((addr, c.expr, cond_type))
 
-                splitted_asts.append(ConditionalAst(
-                    expr=arg.expr, conds=new_conds))
+                splitted_asts.append(
+                    ConditionalAst(expr=arg.expr, conds=new_conds)
+                )
 
         for arg in arg2_splitted:
             for c in cond_splitted:
@@ -157,8 +167,9 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
                 new_conds.extend(arg.conditions)
                 new_conds.extend(c.conditions)
                 new_conds.append((addr, claripy.Not(c.expr), cond_type))
-                splitted_asts.append(ConditionalAst(
-                    expr=arg.expr, conds=new_conds))
+                splitted_asts.append(
+                    ConditionalAst(expr=arg.expr, conds=new_conds)
+                )
 
         return splitted_asts
 
@@ -171,7 +182,8 @@ def split_if_statements(ast: claripy.ast.BV, ast_addr) -> list[ConditionalAst]:
             if not utils.is_sym_expr(ast.args[i]):
                 continue
             new_expr = claripy.replace(
-                new_expr, ast.args[i], combination[i].expr)
+                new_expr, ast.args[i], combination[i].expr
+            )
             new_conds.extend(combination[i].conditions)
         splitted_asts.append(ConditionalAst(expr=new_expr, conds=new_conds))
 
@@ -185,18 +197,21 @@ def extract_summed_vals(ast: claripy.ast.BV):
     """
 
     # If this AST does not contain an operation, return the expression itself.
-    if not isinstance(ast, claripy.ast.base.Base) or ast.concrete or ast.depth == 1:
+    if (
+        not isinstance(ast, claripy.ast.base.Base)
+        or ast.concrete
+        or ast.depth == 1
+    ):
         return [ast]
 
     # If it's a sign/zero extension, drill through it.
     if ast.op == "ZeroExt" or ast.op == "SignExt":
-        return [claripy.ZeroExt(ast.size() - x.size(), x)
-                for x in extract_summed_vals(ast.args[1])]
+        return [
+            claripy.ZeroExt(ast.size() - x.size(), x)
+            for x in extract_summed_vals(ast.args[1])
+        ]
 
-    sum_ops = ["__add__",
-               "__radd__",
-               "__sub__",
-               "__rsub__"]
+    sum_ops = ["__add__", "__radd__", "__sub__", "__rsub__"]
 
     summed_vals = []
 
@@ -234,7 +249,11 @@ def sign_ext_to_sum(ast: claripy.ast.BV, addr):
     """
 
     # If this AST is a constant, do nothing.
-    if not isinstance(ast, claripy.ast.BV) or ast.concrete or utils.is_sym_var(ast):
+    if (
+        not isinstance(ast, claripy.ast.BV)
+        or ast.concrete
+        or utils.is_sym_var(ast)
+    ):
         return ast
 
     # If this node is a signext, transform it.
@@ -246,9 +265,11 @@ def sign_ext_to_sum(ast: claripy.ast.BV, addr):
 
         all_zeros = claripy.BVV(0, extend_size)
         all_ones = claripy.BVV((2**extend_size) - 1, extend_size)
-        upper_expr = claripy.If(sign_bit == 0,
-                                claripy.Concat(all_zeros, base),
-                                claripy.Concat(all_ones, base))
+        upper_expr = claripy.If(
+            sign_bit == 0,
+            claripy.Concat(all_zeros, base),
+            claripy.Concat(all_ones, base),
+        )
         upper_expr = upper_expr.annotate(SignExtAnnotation(addr))
 
         return upper_expr
@@ -256,7 +277,11 @@ def sign_ext_to_sum(ast: claripy.ast.BV, addr):
     # Visit arguments.
     new_expr = ast
     for arg in ast.args:
-        if not isinstance(arg, claripy.ast.BV) or arg.concrete or utils.is_sym_var(arg):
+        if (
+            not isinstance(arg, claripy.ast.BV)
+            or arg.concrete
+            or utils.is_sym_var(arg)
+        ):
             continue
         new_expr = claripy.replace(new_expr, arg, sign_ext_to_sum(arg, addr))
 
@@ -272,12 +297,15 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     """
 
     # If this AST is a constant, do nothing.
-    if not isinstance(ast, claripy.ast.BV) or ast.concrete or utils.is_sym_var(ast):
+    if (
+        not isinstance(ast, claripy.ast.BV)
+        or ast.concrete
+        or utils.is_sym_var(ast)
+    ):
         return ast
 
     # If this node is a concat, check if it's a sign extension.
     if ast.op == "Concat":
-
         sign_sym = ast.args[0]
         sign_ext_size = 0
         new_args = []
@@ -287,8 +315,12 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
             arg = match_sign_ext(ast.args[i], addr)
 
             # Symbol equal to previous one: add 1 to length.
-            if (utils.is_sym_expr(arg) and arg.op == "Extract" and arg.size() == 1
-                    and arg.structurally_match(sign_sym)):
+            if (
+                utils.is_sym_expr(arg)
+                and arg.op == "Extract"
+                and arg.size() == 1
+                and arg.structurally_match(sign_sym)
+            ):
                 sign_ext_size += 1
             # Symbol different to previous one: push new arg.
             else:
@@ -297,14 +329,17 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
                 elif sign_ext_size == 0:
                     new_args.append(sign_sym)
                     sign_sym = arg
-                elif (utils.is_sym_expr(arg)
-                        and arg.structurally_match(sign_sym.args[2])):
+                elif utils.is_sym_expr(arg) and arg.structurally_match(
+                    sign_sym.args[2]
+                ):
                     ext_size = sign_ext_size + 1
                     all_zeros = claripy.BVV(0, ext_size)
                     all_ones = claripy.BVV((2**ext_size) - 1, ext_size)
-                    if_expr = claripy.If(sign_sym == 0,
-                                         claripy.Concat(all_zeros, arg),
-                                         claripy.Concat(all_ones, arg))
+                    if_expr = claripy.If(
+                        sign_sym == 0,
+                        claripy.Concat(all_zeros, arg),
+                        claripy.Concat(all_ones, arg),
+                    )
                     if_expr = if_expr.annotate(SignExtAnnotation(addr))
                     new_args.append(if_expr)
 
@@ -328,7 +363,11 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     # Recursively check args.
     new_expr = ast
     for arg in ast.args:
-        if not isinstance(arg, claripy.ast.BV) or arg.concrete or utils.is_sym_var(arg):
+        if (
+            not isinstance(arg, claripy.ast.BV)
+            or arg.concrete
+            or utils.is_sym_var(arg)
+        ):
             continue
 
         new_expr = claripy.replace(new_expr, arg, match_sign_ext(arg, addr))
@@ -336,8 +375,9 @@ def match_sign_ext(ast: claripy.ast.BV, addr):
     return new_expr
 
 
-def split_conditions(expr: claripy.ast.BV, simplify: bool,
-                     addr) -> list[ConditionalAst]:
+def split_conditions(
+    expr: claripy.ast.BV, simplify: bool, addr
+) -> list[ConditionalAst]:
     """
     Split any AST that contains CMOVEs, SignExtensions and If-Then-Else
     statements into separate ASTs with an associated condition.
@@ -354,12 +394,15 @@ def split_conditions(expr: claripy.ast.BV, simplify: bool,
     # Split if-then-else statements into separate ConditionalASTs.
     # Skip if we have more than 10 (nested) if statements
     if str(new_expr).count("else") > 10:
-        n_nested = str(new_expr).count('else')
-        l.warning(f"split_conditions: Too many (nested) if conditions: {n_nested}")
+        n_nested = str(new_expr).count("else")
+        l.warning(
+            f"split_conditions: Too many (nested) if conditions: {n_nested}"
+        )
         print(f"split_conditions: Too many (nested) if conditions: {n_nested}")
         raise SplitTooManyNestedIfException
 
     return split_if_statements(new_expr, addr)
+
 
 def simplify_conservative(e: claripy.ast.BV) -> claripy.ast.BV:
     """
@@ -383,13 +426,17 @@ def simplify_conservative(e: claripy.ast.BV) -> claripy.ast.BV:
     if e.annotations:
         ast_args = tuple(a for a in e.args if isinstance(a, claripy.ast.Base))
         relocatable_annotations = chain.from_iterable(
-            a._relocatable_annotations for a in ast_args)
-        annotations = tuple(set(chain(relocatable_annotations,
-                                      tuple(a for a in e.annotations))))
+            a._relocatable_annotations for a in ast_args
+        )
+        annotations = tuple(
+            set(chain(relocatable_annotations, tuple(a for a in e.annotations)))
+        )
         if annotations != s.annotations:
-            l.warning("SafeSimplify: Experimental feature executed, annotations "
-                      f"removed by simplification operation. Old: {e} {annotations} "
-                      f"New: {s} {s.annotations} ")
+            l.warning(
+                "SafeSimplify: Experimental feature executed, annotations "
+                f"removed by simplification operation. Old: {e} {annotations} "
+                f"New: {s} {s.annotations} "
+            )
 
             # Claripy does instead:
             # s = s.remove_annotations(s.annotations)

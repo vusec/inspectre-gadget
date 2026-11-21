@@ -8,7 +8,6 @@ from inspectre_gadget.analyzer.shared.logger import disable_logging
 
 
 class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
-
     def setUp(self):
         init_config({})
         disable_logging()
@@ -22,7 +21,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         ast_range = get_ast_ranges(constraints, ast)
 
         self.assertEqual(ast_range.min, 16)
-        self.assertEqual(ast_range.max, 0xfffffffffffffff0)
+        self.assertEqual(ast_range.max, 0xFFFFFFFFFFFFFFF0)
         self.assertEqual(ast_range.stride, 16)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -31,11 +30,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         a = claripy.BVS("a", 64)
 
         ast = a << 4
-        constraints = [ast <= 0xffff, ast >= 0xff]
+        constraints = [ast <= 0xFFFF, ast >= 0xFF]
         ast_range = get_ast_ranges(constraints, ast)
 
         self.assertEqual(ast_range.min, 0x100)
-        self.assertEqual(ast_range.max, 0xfff0)
+        self.assertEqual(ast_range.max, 0xFFF0)
         self.assertEqual(ast_range.stride, 16)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -46,11 +45,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         a = claripy.BVS("a", 64)
 
         ast = a | (1 << 5)
-        constraints = [ast <= 0xffff]
+        constraints = [ast <= 0xFFFF]
         ast_range = get_ast_ranges(constraints, ast)
 
         self.assertEqual(ast_range.min, 32)
-        self.assertEqual(ast_range.max, 0xffff)
+        self.assertEqual(ast_range.max, 0xFFFF)
         self.assertEqual(ast_range.stride, 1)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, 32)
@@ -65,7 +64,7 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         ast_range = get_ast_ranges(constraints, ast)
 
         self.assertEqual(ast_range.min, 1)
-        self.assertEqual(ast_range.max, 0xffffffffffffffff)
+        self.assertEqual(ast_range.max, 0xFFFFFFFFFFFFFFFF)
         self.assertEqual(ast_range.stride, 1)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -75,12 +74,12 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         # to invert them in _find_sat_distribution
         a = claripy.BVS("a", 32)
 
-        ast = a & 0xfff00
-        constraints = [a < 0xffff, a != 0xb00]
+        ast = a & 0xFFF00
+        constraints = [a < 0xFFFF, a != 0xB00]
         ast_range = get_ast_ranges(constraints, ast)
 
         self.assertEqual(ast_range.min, 0)
-        self.assertEqual(ast_range.max, 0xff00)
+        self.assertEqual(ast_range.max, 0xFF00)
         self.assertEqual(ast_range.stride, 256)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -104,11 +103,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         a = claripy.BVS("a", 32)
 
         ast = a
-        constraints = [ast != 0xf, ast <= 0xffff]
+        constraints = [ast != 0xF, ast <= 0xFFFF]
         ast_range = get_ast_ranges(constraints, ast)
 
         self.assertEqual(ast_range.min, 0)
-        self.assertEqual(ast_range.max, 0xffff)
+        self.assertEqual(ast_range.max, 0xFFFF)
         self.assertEqual(ast_range.stride, 1)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -119,11 +118,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         # wrap-around with full range -- we should not care
         a = claripy.BVS("a", 64)
 
-        ast = a + 0xffffffff81000000
+        ast = a + 0xFFFFFFFF81000000
         ast_range = get_ast_ranges([], ast)
 
         self.assertEqual(ast_range.min, 0)
-        self.assertEqual(ast_range.max, 0xffffffffffffffff)
+        self.assertEqual(ast_range.max, 0xFFFFFFFFFFFFFFFF)
         self.assertEqual(ast_range.stride, 1)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -132,11 +131,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         # Simple wrap-around
         a = claripy.BVS("a", 32).zero_extend(32)
 
-        ast = a + 0xffffffff81000000
+        ast = a + 0xFFFFFFFF81000000
         ast_range = get_ast_ranges([], ast)
 
-        self.assertEqual(ast_range.min, 0xffffffff81000000)
-        self.assertEqual(ast_range.max, 0x80ffffff)
+        self.assertEqual(ast_range.min, 0xFFFFFFFF81000000)
+        self.assertEqual(ast_range.max, 0x80FFFFFF)
         self.assertEqual(ast_range.stride, 1)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -145,11 +144,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         # Wrap-around while preserving stride info
         a = claripy.BVS("a", 64)
 
-        ast = (a << 2) + 0xffffffff81000000
+        ast = (a << 2) + 0xFFFFFFFF81000000
         ast_range = get_ast_ranges([], ast)
 
         self.assertEqual(ast_range.min, 0)
-        self.assertEqual(ast_range.max, 0xfffffffffffffffc)
+        self.assertEqual(ast_range.max, 0xFFFFFFFFFFFFFFFC)
         self.assertEqual(ast_range.stride, 4)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -158,11 +157,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         # Wrap-around with different offset, due to different base of addition
         a = claripy.BVS("a", 64)
 
-        ast = (a << 2) + 0xffffffff81000002
+        ast = (a << 2) + 0xFFFFFFFF81000002
         ast_range = get_ast_ranges([], ast)
 
         self.assertEqual(ast_range.min, 2)
-        self.assertEqual(ast_range.max, 0xfffffffffffffffe)
+        self.assertEqual(ast_range.max, 0xFFFFFFFFFFFFFFFE)
         self.assertEqual(ast_range.stride, 4)
         self.assertEqual(ast_range.and_mask, None)
         self.assertEqual(ast_range.or_mask, None)
@@ -171,11 +170,11 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         # Non-linear range: we have to make a estimation
         a = claripy.BVS("a", 64)
 
-        ast = ((a << 2) & ~0x16) + 0xffffffff81000002
+        ast = ((a << 2) & ~0x16) + 0xFFFFFFFF81000002
         ast_range = get_ast_ranges([], ast)
 
         self.assertEqual(ast_range.min, 2)
-        self.assertEqual(ast_range.max, 0xffffffffffffffea)
+        self.assertEqual(ast_range.max, 0xFFFFFFFFFFFFFFEA)
         self.assertEqual(ast_range.stride, 8)
         self.assertFalse(ast_range.exact)
 
@@ -184,12 +183,12 @@ class RangeStrategyInferIsolatedTestCase(unittest.TestCase):
         a = claripy.BVS("a", 32)
         x = a.zero_extend(2) << 2
 
-        ast = 0xfffffffc00000040 + x.zero_extend(30)
+        ast = 0xFFFFFFFC00000040 + x.zero_extend(30)
         constraints = [a[31:31] != 0]
 
         ast_range = get_ast_ranges(constraints, ast)
 
-        self.assertEqual(ast_range.min, 0xfffffffe00000040)
-        self.assertEqual(ast_range.max, 0x3c)
+        self.assertEqual(ast_range.min, 0xFFFFFFFE00000040)
+        self.assertEqual(ast_range.max, 0x3C)
         self.assertEqual(ast_range.stride, 4)
         self.assertTrue(ast_range.exact)

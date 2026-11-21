@@ -85,12 +85,17 @@ def analyse(t: Transmission):
         if len(constr_deps.intersection(secret_deps)):
             t.transmitted_secret.constraints.append((addr, cond, ctype))
 
-    l.warning(f"Base constraints: {'None' if t.base == None else t.base.constraints}")
-    indep_base_constraints = ('None' if t.independent_base == None
-                              else t.independent_base.constraints)
+    l.warning(
+        f"Base constraints: {'None' if t.base == None else t.base.constraints}"
+    )
+    indep_base_constraints = (
+        "None" if t.independent_base == None else t.independent_base.constraints
+    )
     l.warning(f"Independent Base constraints: {indep_base_constraints}")
     l.warning(f"Secret Addr constraints: {t.secret_address.constraints}")
-    l.warning(f"Transmitted Secret constraints: {t.transmitted_secret.constraints}")
+    l.warning(
+        f"Transmitted Secret constraints: {t.transmitted_secret.constraints}"
+    )
     l.warning(f"Transmission constraints: {t.transmission.constraints}")
 
     for a in t.aliases:
@@ -108,8 +113,9 @@ def analyse(t: Transmission):
             t.transmitted_secret.aliases.append(a)
 
     l.warning(f"Base aliases: {'None' if t.base == None else t.base.aliases}")
-    indep_base_aliases = ('None' if t.independent_base == None
-                          else t.independent_base.aliases)
+    indep_base_aliases = (
+        "None" if t.independent_base == None else t.independent_base.aliases
+    )
     l.warning(f"Independent Base aliases: {indep_base_aliases}")
     l.warning(f"Secret Addr aliases: {t.secret_address.aliases}")
     l.warning(f"Transmitted Secret aliases: {t.transmitted_secret.aliases}")
@@ -145,8 +151,11 @@ def analyse_sdb(sdb: SecretDependentBranch):
             sdb.controlled_cmp_value.branches.append((addr, condition, taken))
 
     l.warning(f"Cmp Value branches: {sdb.cmp_value.branches}")
-    controlled_branches = ('None' if sdb.controlled_cmp_value == None
-                           else sdb.controlled_cmp_value.branches)
+    controlled_branches = (
+        "None"
+        if sdb.controlled_cmp_value == None
+        else sdb.controlled_cmp_value.branches
+    )
     l.warning(f"Controlled Cmp Value branches: {controlled_branches}")
 
     for addr, cond, ctype in sdb.constraints:
@@ -158,8 +167,11 @@ def analyse_sdb(sdb: SecretDependentBranch):
             sdb.controlled_cmp_value.constraints.append((addr, cond, ctype))
 
     l.warning(f"Cmp Value constraints: {sdb.cmp_value.constraints}")
-    controlled_constraints = ('None' if sdb.controlled_cmp_value == None
-                              else sdb.controlled_cmp_value.constraints)
+    controlled_constraints = (
+        "None"
+        if sdb.controlled_cmp_value == None
+        else sdb.controlled_cmp_value.constraints
+    )
     l.warning(f"Controlled Cmp Value constraints: {controlled_constraints}")
 
     for a in sdb.aliases:
@@ -171,8 +183,11 @@ def analyse_sdb(sdb: SecretDependentBranch):
             sdb.controlled_cmp_value.aliases.append(a)
 
     l.warning(f"Cmp Value aliases: {sdb.cmp_value.aliases}")
-    controlled_aliases = ('None' if sdb.controlled_cmp_value == None
-                          else sdb.controlled_cmp_value.aliases)
+    controlled_aliases = (
+        "None"
+        if sdb.controlled_cmp_value == None
+        else sdb.controlled_cmp_value.aliases
+    )
     l.warning(f"Controlled Cmp Value aliases: {controlled_aliases}")
 
     l.warning(f"==========================")
@@ -260,8 +275,9 @@ def analyse_half_gadget(g: HalfGadget):
             g.loaded.branches.append((addr, condition, taken))
 
     l.warning(f"Base branches: {'None' if g.base == None else g.base.branches}")
-    uncontrolled_branches = ('None' if g.uncontrolled_base == None
-                             else g.uncontrolled_base.branches)
+    uncontrolled_branches = (
+        "None" if g.uncontrolled_base == None else g.uncontrolled_base.branches
+    )
     l.warning(f"Uncontrolled Base branches: {uncontrolled_branches}")
     l.warning(f"Attacker branches: {g.attacker.branches}")
     l.warning(f"Loaded branches: {g.loaded.branches}")
@@ -278,9 +294,14 @@ def analyse_half_gadget(g: HalfGadget):
         if len(constr_deps.intersection(loaded_deps)):
             g.loaded.constraints.append((addr, cond, ctype))
 
-    l.warning(f"Base constraints: {'None' if g.base == None else g.base.constraints}")
-    uncontrolled_constraints = ('None' if g.uncontrolled_base == None
-                                else g.uncontrolled_base.constraints)
+    l.warning(
+        f"Base constraints: {'None' if g.base == None else g.base.constraints}"
+    )
+    uncontrolled_constraints = (
+        "None"
+        if g.uncontrolled_base == None
+        else g.uncontrolled_base.constraints
+    )
     l.warning(f"Uncontrolled Base constraints: {uncontrolled_constraints}")
     l.warning(f"Attacker constraints: {g.attacker.constraints}")
     l.warning(f"Loaded constraints: {g.loaded.constraints}")
@@ -298,8 +319,9 @@ def analyse_half_gadget(g: HalfGadget):
             g.loaded.aliases.append(a)
 
     l.warning(f"Base aliases: {'None' if g.base == None else g.base.aliases}")
-    uncontrolled_aliases = ('None' if g.uncontrolled_base == None
-                            else g.uncontrolled_base.aliases)
+    uncontrolled_aliases = (
+        "None" if g.uncontrolled_base == None else g.uncontrolled_base.aliases
+    )
     l.warning(f"Uncontrolled Base aliases: {uncontrolled_aliases}")
     l.warning(f"Attacker aliases: {g.attacker.aliases}")
     l.warning(f"Loaded aliases: {g.loaded.aliases}")

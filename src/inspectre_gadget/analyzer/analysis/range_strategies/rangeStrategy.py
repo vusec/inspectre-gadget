@@ -1,5 +1,4 @@
 class RangeStrategy:
-
     def __init__(self):
         pass
 

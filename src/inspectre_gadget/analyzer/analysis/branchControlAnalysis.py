@@ -23,10 +23,10 @@ l = logger.get_logger("BranchControlAnalysis")
 
 
 class BranchControlType(Enum):
-    BRANCH_DEPENDS_ON_UNCONTROLLED = 0,
-    BRANCH_DEPENDS_ON_SECRET_ADDRESS = 1,
-    BRANCH_DEPENDS_ON_SECRET_VALUE = 2,
-    BRANCH_INDEPENDENT_FROM_SECRET = 3,
+    BRANCH_DEPENDS_ON_UNCONTROLLED = (0,)
+    BRANCH_DEPENDS_ON_SECRET_ADDRESS = (1,)
+    BRANCH_DEPENDS_ON_SECRET_VALUE = (2,)
+    BRANCH_INDEPENDENT_FROM_SECRET = (3,)
     UNKNOWN = 8
 
 
@@ -46,21 +46,37 @@ def get_branch_control(t: Transmission, d: DepGraph, constraints: bool):
     if dependencyGraph.is_expr_uncontrolled(constraint_expr):
         return BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED
     # Check if any branch depends on the transmitted secret.
-    elif not d.is_independent(constraint_expr, t.transmitted_secret.expr,
-                              check_constraints=constraints, check_addr=False):
+    elif not d.is_independent(
+        constraint_expr,
+        t.transmitted_secret.expr,
+        check_constraints=constraints,
+        check_addr=False,
+    ):
         return BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE
-    elif not d.is_independent(constraint_expr, t.transmitted_secret.expr,
-                              check_constraints=constraints, check_addr=True):
+    elif not d.is_independent(
+        constraint_expr,
+        t.transmitted_secret.expr,
+        check_constraints=constraints,
+        check_addr=True,
+    ):
         return BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE
     else:
         # Check if any branch depends on the secret address.
         l.info(f"Analyzing {constraint_expr} vs {t.secret_address.expr}")
 
-        if not d.is_independent(constraint_expr, t.secret_address.expr,
-                                check_constraints=constraints, check_addr=False):
+        if not d.is_independent(
+            constraint_expr,
+            t.secret_address.expr,
+            check_constraints=constraints,
+            check_addr=False,
+        ):
             return BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS
-        elif not d.is_independent(constraint_expr, t.secret_address.expr,
-                                  check_constraints=constraints, check_addr=True):
+        elif not d.is_independent(
+            constraint_expr,
+            t.secret_address.expr,
+            check_constraints=constraints,
+            check_addr=True,
+        ):
             return BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS
 
         # If none of the above are true, we conclude that the base is independent.
@@ -85,21 +101,37 @@ def get_cmove_control(t: Transmission, d: DepGraph, constraints: bool):
     if dependencyGraph.is_expr_uncontrolled(constraint_expr):
         return BranchControlType.BRANCH_DEPENDS_ON_UNCONTROLLED
     # Check if any branch depends on the transmitted secret.
-    elif not d.is_independent(constraint_expr, t.transmitted_secret.expr,
-                              check_constraints=constraints, check_addr=False):
+    elif not d.is_independent(
+        constraint_expr,
+        t.transmitted_secret.expr,
+        check_constraints=constraints,
+        check_addr=False,
+    ):
         return BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE
-    elif not d.is_independent(constraint_expr, t.transmitted_secret.expr,
-                              check_constraints=constraints, check_addr=True):
+    elif not d.is_independent(
+        constraint_expr,
+        t.transmitted_secret.expr,
+        check_constraints=constraints,
+        check_addr=True,
+    ):
         return BranchControlType.BRANCH_DEPENDS_ON_SECRET_VALUE
     else:
         # Check if any branch depends on the secret address.
         l.info(f"Analyzing {constraint_expr} vs {t.secret_address.expr}")
 
-        if not d.is_independent(constraint_expr, t.secret_address.expr,
-                                check_constraints=constraints, check_addr=False):
+        if not d.is_independent(
+            constraint_expr,
+            t.secret_address.expr,
+            check_constraints=constraints,
+            check_addr=False,
+        ):
             return BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS
-        elif not d.is_independent(constraint_expr, t.secret_address.expr,
-                                  check_constraints=constraints, check_addr=True):
+        elif not d.is_independent(
+            constraint_expr,
+            t.secret_address.expr,
+            check_constraints=constraints,
+            check_addr=True,
+        ):
             return BranchControlType.BRANCH_DEPENDS_ON_SECRET_ADDRESS
 
         # If none of the above are true, we conclude that the base is independent.
@@ -123,7 +155,8 @@ def analyse(t: Transmission):
 
     t.properties["cmove_control_type"] = get_cmove_control(t, d, False)
     l.warning(
-        f"Cmove control with constraints: {t.properties['cmove_control_type']}")
+        f"Cmove control with constraints: {t.properties['cmove_control_type']}"
+    )
 
     l.warning(f"===========================")
 

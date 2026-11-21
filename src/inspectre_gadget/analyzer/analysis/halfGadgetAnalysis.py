@@ -27,8 +27,9 @@ def analyse(gadget: HalfGadget):
 
     # Extract members of the transmission.
     try:
-        canonical_exprs = transmissionAnalysis.canonicalize(gadget.loaded.expr,
-                                                            gadget.pc)
+        canonical_exprs = transmissionAnalysis.canonicalize(
+            gadget.loaded.expr, gadget.pc
+        )
     except SplitTooManyNestedIfException:
         l.error("half_gadget analyse: Failed canonicalizing expression")
         return []
@@ -39,8 +40,7 @@ def analyse(gadget: HalfGadget):
         g.loaded.expr = canonical_expr.expr
         g.loaded.constraints.extend(canonical_expr.conditions)
 
-        l.warning(
-            f"POTENTIAL HALF GADGET: {canonical_expr}")
+        l.warning(f"POTENTIAL HALF GADGET: {canonical_expr}")
         members = astTransform.extract_summed_vals(canonical_expr.expr)
         l.error(f"aliases:  {gadget.aliases}")
 
@@ -62,7 +62,10 @@ def analyse(gadget: HalfGadget):
                 attacker_members.append(member)
             else:
                 base_members.append(member)
-                if annotations.get_uncontrolled_load_annotation(member) is not None:
+                if (
+                    annotations.get_uncontrolled_load_annotation(member)
+                    is not None
+                ):
                     # These are members that contain code loaded from
                     # uncontrolled locations (constants or GS).
                     uncontrolled_base_members.append(member)
@@ -74,7 +77,8 @@ def analyse(gadget: HalfGadget):
             g.base = None
         if len(uncontrolled_base_members) > 0:
             g.uncontrolled_base.expr = astTransform.generate_addition(
-                uncontrolled_base_members)
+                uncontrolled_base_members
+            )
         else:
             g.uncontrolled_base = None
         # Create the attacker-controlled component.
@@ -90,7 +94,8 @@ def analyse(gadget: HalfGadget):
             if component != None:
                 component.size = component.expr.size()
                 component.max_load_depth = annotations.get_load_depth(
-                    component.expr)
+                    component.expr
+                )
 
         gadgets.append(g)
 

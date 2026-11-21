@@ -32,6 +32,7 @@ def get_list_of_bits_set(mask):
 
     return bits_set
 
+
 class FlowMap:
     is_direct: bool  # direct or spread
 
@@ -88,12 +89,14 @@ class FlowMap:
         """
 
     def to_dict(self):
-        return OrderedDict([
-            ("spread_high", self.spread_high),
-            ("spread_low", self.spread_low),
-            ("spread_total", self.spread_total),
-            ("n_inferable_bits", self.number_of_bits_inferable)
-        ])
+        return OrderedDict(
+            [
+                ("spread_high", self.spread_high),
+                ("spread_low", self.spread_low),
+                ("spread_total", self.spread_total),
+                ("n_inferable_bits", self.number_of_bits_inferable),
+            ]
+        )
 
     def __repr__(self):
         return self.to_string()
@@ -206,7 +209,7 @@ class FlowMap:
         if not self.spread:
             return
 
-        new_max = max(self.spread) + to_spread + 1   # last excluding
+        new_max = max(self.spread) + to_spread + 1  # last excluding
         if new_max > int_length:
             # we have a overflow, we set spread to all
             self.spread = range(0, int_length)
@@ -319,7 +322,6 @@ class FlowMap:
             self.direct_map = new_map
 
         else:
-
             if isinstance(self.spread, range):
                 new_start = self.spread.start + shift
                 new_stop = self.spread.stop + shift
@@ -355,7 +357,6 @@ class FlowMap:
             self.direct_map = new_map
 
         else:
-
             if isinstance(self.spread, range):
                 new_start = self.spread.start - shift
                 new_stop = self.spread.stop - shift
@@ -382,7 +383,6 @@ class FlowMap:
         sign_bit = None
 
         if self.is_direct:
-
             if msb in self.direct_map:
                 sign_bit = self.direct_map[msb]
 
@@ -459,6 +459,7 @@ class FlowMap:
 
             self.spread = new_spread
 
+
 def flow_maps_merge_inferable_bits(flow_maps, self=None):
 
     base_map = self
@@ -478,6 +479,7 @@ def op_zero_ext(ast, flow_maps):
     # zeros .. src : arg[0] .. arg[1]
     return flow_maps[1]
 
+
 def op_sign_ext(ast, flow_maps):
     # extendSize .. src : arg[0] .. arg[1]
     base_map = flow_maps[1]
@@ -492,6 +494,7 @@ def op_sign_ext(ast, flow_maps):
 
     return base_map
 
+
 def op_concat(ast, flow_maps):
     # arg0 .. arg1 .. _
 
@@ -499,9 +502,7 @@ def op_concat(ast, flow_maps):
     cur_length = 0
 
     for idx, arg in reversed(list(enumerate(ast.args))):
-
         if flow_maps[idx]:
-
             if base_map:
                 base_map.concat_flow_map(flow_maps[idx], cur_length)
             else:
@@ -513,6 +514,7 @@ def op_concat(ast, flow_maps):
 
     return base_map
 
+
 def op_extract(ast, flow_maps):
     # src[end:start] : arg2[arg1:arg0]
 
@@ -520,8 +522,9 @@ def op_extract(ast, flow_maps):
         # Normal case, src has a flow map
         base_map = flow_maps[2]
 
-        if isinstance(ast.args[0], claripy.ast.base.Base) \
-                or isinstance(ast.args[1], claripy.ast.base.Base):
+        if isinstance(ast.args[0], claripy.ast.base.Base) or isinstance(
+            ast.args[1], claripy.ast.base.Base
+        ):
             # Extract operations are symbolic, so we can't know which
             # bytes are extracted. We have to convert to spread
             flow_maps_merge_inferable_bits(flow_maps, base_map)
@@ -538,6 +541,7 @@ def op_extract(ast, flow_maps):
         base_map = flow_maps_merge_inferable_bits(flow_maps)
         base_map.set_spread(range(0, ast.length))
         return base_map
+
 
 def op_and(ast, flow_maps):
     # arg0 & arg1 & ...
@@ -565,6 +569,7 @@ def op_and(ast, flow_maps):
 
     return base_map
 
+
 def op_or(ast, flow_maps):
     # arg0 | arg1 | ...
 
@@ -591,11 +596,13 @@ def op_or(ast, flow_maps):
 
     return base_map
 
+
 def op_invert(ast, flow_maps):
     # ~ arg[0]
     # There are multiple ways to handle this situation. We just return the
     # flow map, since no secret information is lost only the bits are inverted
     return flow_maps[0]
+
 
 def op_lshift(ast, flow_maps):
     # arg0 << arg1 : dst << shift
@@ -624,6 +631,7 @@ def op_lshift(ast, flow_maps):
 
         return base_map
 
+
 def op_lshr(ast, flow_maps):
     # arg0 >> arg1 : dst >> shift
 
@@ -649,6 +657,7 @@ def op_lshr(ast, flow_maps):
         base_map.set_spread(range(0, ast.length))
         return base_map
 
+
 def op_rshift(ast, flow_maps):
     # sar arg0 arg1 : sar dst shift
 
@@ -663,6 +672,7 @@ def op_rshift(ast, flow_maps):
 
     base_map.sign_extended = True
     return op_lshr(ast, flow_maps)
+
 
 def op_add(ast, flow_maps):
     # arg0 + arg1 + _
@@ -682,7 +692,6 @@ def op_add(ast, flow_maps):
         if map:
             base_map.add_flow_map(map, ast.length)
         else:
-
             if ast.args[idx].symbolic:
                 size = ast.args[idx].length
             else:
@@ -693,9 +702,11 @@ def op_add(ast, flow_maps):
 
     return base_map
 
+
 def op_sub(ast, flow_maps):
     # arg0 - arg1 - _
     return op_add(ast, flow_maps)
+
 
 def op_mul(ast, flow_maps):
     # arg0 * ag1 * _
@@ -720,7 +731,7 @@ def op_mul(ast, flow_maps):
             # We first shift with the smallest multiplication of 2
             value = ast.args[idx].args[0]
             min_shift = value.bit_length() - 1
-            remainder = value - (2 ** min_shift)
+            remainder = value - (2**min_shift)
 
             if remainder == 0:
                 # Multiplication with base 2, we can treat it like a shift
@@ -732,6 +743,7 @@ def op_mul(ast, flow_maps):
                 base_map.spread_to_left_by(min_shift + 1, ast.length)
 
     return base_map
+
 
 def op_eq_neq(ast, flow_maps):
     # arg0 == arg1 or arg0 != arg1
@@ -748,6 +760,7 @@ def op_eq_neq(ast, flow_maps):
     # Set the spread to one bit
     base_map.spread_to_one()
     return base_map
+
 
 def op_if(ast, flow_maps):
     # if arg0 then arg1 else arg2
@@ -784,29 +797,30 @@ def op_if(ast, flow_maps):
 
     return base_map
 
+
 def op_unsupported(ast, flow_maps):
     return None
 
 
 operators = {
-    'ZeroExt': op_zero_ext,
-    'SignExt': op_sign_ext,
-    'Concat': op_concat,
-    'Extract': op_extract,
-    '__and__': op_and,
-    '__or__': op_or,
-    '__invert__': op_invert,
-    '__lshift__': op_lshift,
-    'LShR': op_lshr,
-    '__rshift__': op_rshift,
-    '__add__': op_add,
-    '__sub__': op_sub,
-    '__mul__': op_mul,
-    '__eq__': op_eq_neq,
-    '__ne__': op_eq_neq,
-    'If': op_if,
+    "ZeroExt": op_zero_ext,
+    "SignExt": op_sign_ext,
+    "Concat": op_concat,
+    "Extract": op_extract,
+    "__and__": op_and,
+    "__or__": op_or,
+    "__invert__": op_invert,
+    "__lshift__": op_lshift,
+    "LShR": op_lshr,
+    "__rshift__": op_rshift,
+    "__add__": op_add,
+    "__sub__": op_sub,
+    "__mul__": op_mul,
+    "__eq__": op_eq_neq,
+    "__ne__": op_eq_neq,
+    "If": op_if,
     # unsupported
-    '__xor__': op_unsupported
+    "__xor__": op_unsupported,
 }
 
 
@@ -823,7 +837,6 @@ def get_inferable_bits(ast: claripy.ast.bv.BVS, source: claripy.ast.bv.BVS):
     elif ast.depth == 1:
         return None
     else:
-
         # first get flow maps of child operations
 
         args_flow_maps = []
@@ -847,7 +860,8 @@ def analyse(t: Transmission):
     l.warning(f"========= [BITS] ==========")
 
     t.inferable_bits = get_inferable_bits(
-        t.transmitted_secret.expr, t.secret_val.expr)
+        t.transmitted_secret.expr, t.secret_val.expr
+    )
     if t.inferable_bits == None:
         t.inferable_bits = FlowMap({}, [], [])
 

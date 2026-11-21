@@ -12,7 +12,7 @@ from . import ranges
 from .transmission import ControlType, Requirements
 
 
-def flatten_dict(dictionary, parent_key='', separator='_'):
+def flatten_dict(dictionary, parent_key="", separator="_"):
     """
     Transform a hierarchy of nested objects into a flat dictionary.
     """
@@ -20,25 +20,26 @@ def flatten_dict(dictionary, parent_key='', separator='_'):
     for key, value in dictionary.items():
         new_key = parent_key + separator + key if parent_key else key
         if isinstance(value, MutableMapping):
-            items.extend(flatten_dict(value, new_key,
-                         separator=separator).items())
+            items.extend(
+                flatten_dict(value, new_key, separator=separator).items()
+            )
         else:
             items.append((new_key, value))
     return dict(items)
 
 
 class TFPRegisterControlType(Enum):
-    UNMODIFIED = 1,
-    CONTROLLED = 2,
-    UNCONTROLLED = 3,
-    DEPENDS_ON_TFP_EXPR = 4,
-    INDIRECTLY_DEPENDS_ON_TFP_EXPR = 5,
-    IS_TFP_REGISTER = 6,
-    POTENTIAL_SECRET = 7,
+    UNMODIFIED = (1,)
+    CONTROLLED = (2,)
+    UNCONTROLLED = (3,)
+    DEPENDS_ON_TFP_EXPR = (4,)
+    INDIRECTLY_DEPENDS_ON_TFP_EXPR = (5,)
+    IS_TFP_REGISTER = (6,)
+    POTENTIAL_SECRET = (7,)
     UNKNOWN = 8
 
 
-class TFPRegister():
+class TFPRegister:
     reg: str
     expr: BVS
     controlled_expr: BVS
@@ -97,51 +98,68 @@ class TFPRegister():
         reg_dereferenced_dict = {}
         for r in self.reg_dereferenced:
             new_dict = {
-                r.reg:
-                {
-                    'reg': r.reg,
-                    'expr': str(r.expr),
-                    'controlled_expr': str(r.controlled_expr),
-                    'control': str(r.control),
-                    'control_type': str(r.control_type),
-                    'branches': utils.ordered_branches(r.branches),
-                    'constraints': utils.ordered_constraints(r.constraints),
-                    'controlled_range': dict(
+                r.reg: {
+                    "reg": r.reg,
+                    "expr": str(r.expr),
+                    "controlled_expr": str(r.controlled_expr),
+                    "control": str(r.control),
+                    "control_type": str(r.control_type),
+                    "branches": utils.ordered_branches(r.branches),
+                    "constraints": utils.ordered_constraints(r.constraints),
+                    "controlled_range": dict(
                         ranges.AstRange(0, 0, 0, False).to_dict()
                         if r.controlled_range == None
-                        else r.controlled_range.to_dict()),
-                    'controlled_range_with_branches': dict(
+                        else r.controlled_range.to_dict()
+                    ),
+                    "controlled_range_with_branches": dict(
                         ranges.AstRange(0, 0, 0, False).to_dict()
                         if r.controlled_range_with_branches == None
-                        else r.controlled_range_with_branches.to_dict()),
+                        else r.controlled_range_with_branches.to_dict()
+                    ),
                 }
             }
 
             reg_dereferenced_dict[r.reg] = flatten_dict(new_dict)
 
-        return OrderedDict([
-            ("reg", self.reg),
-            ("expr", self.expr),
-            ("is_dereferenced", self.is_dereferenced),
-            ("controlled_expr", self.controlled_expr),
-            ("control", self.control),
-            ("control_type", self.control_type),
-            ("branches", utils.ordered_branches(self.branches)),
-            ("constraints", utils.ordered_constraints(self.constraints)),
-            ("aliases", [str(a.to_BV()) for a in self.aliases]),
-            ("requirements", self.requirements.to_dict()),
-            ("range", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.range == None else self.range.to_dict()),
-            ("range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.range_with_branches == None
-             else self.range_with_branches.to_dict()),
-            ("controlled_range", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.controlled_range == None else self.controlled_range.to_dict()),
-            ("controlled_range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.controlled_range_with_branches == None
-             else self.controlled_range_with_branches.to_dict()),
-            ("reg_dereferenced", str(reg_dereferenced_dict))
-        ])
+        return OrderedDict(
+            [
+                ("reg", self.reg),
+                ("expr", self.expr),
+                ("is_dereferenced", self.is_dereferenced),
+                ("controlled_expr", self.controlled_expr),
+                ("control", self.control),
+                ("control_type", self.control_type),
+                ("branches", utils.ordered_branches(self.branches)),
+                ("constraints", utils.ordered_constraints(self.constraints)),
+                ("aliases", [str(a.to_BV()) for a in self.aliases]),
+                ("requirements", self.requirements.to_dict()),
+                (
+                    "range",
+                    ranges.AstRange(0, 0, 0, False).to_dict()
+                    if self.range == None
+                    else self.range.to_dict(),
+                ),
+                (
+                    "range_with_branches",
+                    ranges.AstRange(0, 0, 0, False).to_dict()
+                    if self.range_with_branches == None
+                    else self.range_with_branches.to_dict(),
+                ),
+                (
+                    "controlled_range",
+                    ranges.AstRange(0, 0, 0, False).to_dict()
+                    if self.controlled_range == None
+                    else self.controlled_range.to_dict(),
+                ),
+                (
+                    "controlled_range_with_branches",
+                    ranges.AstRange(0, 0, 0, False).to_dict()
+                    if self.controlled_range_with_branches == None
+                    else self.controlled_range_with_branches.to_dict(),
+                ),
+                ("reg_dereferenced", str(reg_dereferenced_dict)),
+            ]
+        )
 
     def copy(self):
         new_t = TFPRegister(self.reg, self.expr, self.is_dereferenced)
@@ -154,13 +172,14 @@ class TFPRegister():
         return new_t
 
 
-class TaintedFunctionPointer():
+class TaintedFunctionPointer:
     """
     A TaintedFunctionPointer (TFP) or Dispatch Gadget consists of an indirect call
     (or jump) that ends up being attacker-controlled in the speculative window.
     These gadgets can be used to stitch together code snippets to for a complete
     transmission gadget.
     """
+
     uuid: str
     name: str
     address: int
@@ -179,9 +198,22 @@ class TaintedFunctionPointer():
     control: ControlType
     contains_spec_stop: bool
 
-    def __init__(self, pc, expr, reg, bbls, branches, constraints, aliases, n_instr,
-                 n_control_flow_changes, contains_spec_stop, n_dependent_loads,
-                 n_aggr_misprd=0, time_found=0.0) -> None:
+    def __init__(
+        self,
+        pc,
+        expr,
+        reg,
+        bbls,
+        branches,
+        constraints,
+        aliases,
+        n_instr,
+        n_control_flow_changes,
+        contains_spec_stop,
+        n_dependent_loads,
+        n_aggr_misprd=0,
+        time_found=0.0,
+    ) -> None:
         self.uuid = ""
         self.name = ""
         self.address = 0
@@ -256,43 +288,55 @@ class TaintedFunctionPointer():
         """
 
     def to_dict(self):
-        d = OrderedDict([
-            ("uuid", self.uuid),
-            ("name", self.name),
-            ("address", hex(self.address)),
-            ("address_symbol", self.address_symbol),
-            ("pc", hex(self.pc)),
-            ("pc_symbol", self.pc_symbol),
-            ("n_instr", self.n_instr),
-            ("n_control_flow_changes", self.n_control_flow_changes),
-            ("n_aggr_misprd", self.n_aggr_misprd),
-            ("time_found", self.time_found),
-            ("n_dependent_loads", self.n_dependent_loads),
-            ("n_branches", self.n_branches),
-            ("contains_spec_stop", self.contains_spec_stop),
-            ("reg", self.reg),
-            ("expr", self.expr),
-            ("control", self.control),
-            ("range", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.range == None else self.range.to_dict()),
-            ("range_with_branches", ranges.AstRange(0, 0, 0, False).to_dict()
-             if self.range_with_branches == None
-             else self.range_with_branches.to_dict()),
-            ("branches", utils.ordered_branches(self.constraints)),
-            ("constraints", utils.ordered_constraints(self.branches)),
-            ("requirements", self.requirements.to_dict()),
-            ("all_branches", utils.ordered_branches(self.all_constraints)),
-            ("all_constraints", utils.ordered_constraints(self.all_branches)),
-            ("aliases", self.aliases),
-            ("bbls", [hex(x) for x in self.bbls]),
-            ("controlled", self.controlled),
-            ("n_controlled", len(self.controlled)),
-            ("uncontrolled", self.uncontrolled),
-            ("unmodified", self.unmodified),
-            ("n_unmodified", len(self.unmodified)),
-            ("secrets", self.secrets),
-            ("aliasing", self.aliasing)
-        ])
+        d = OrderedDict(
+            [
+                ("uuid", self.uuid),
+                ("name", self.name),
+                ("address", hex(self.address)),
+                ("address_symbol", self.address_symbol),
+                ("pc", hex(self.pc)),
+                ("pc_symbol", self.pc_symbol),
+                ("n_instr", self.n_instr),
+                ("n_control_flow_changes", self.n_control_flow_changes),
+                ("n_aggr_misprd", self.n_aggr_misprd),
+                ("time_found", self.time_found),
+                ("n_dependent_loads", self.n_dependent_loads),
+                ("n_branches", self.n_branches),
+                ("contains_spec_stop", self.contains_spec_stop),
+                ("reg", self.reg),
+                ("expr", self.expr),
+                ("control", self.control),
+                (
+                    "range",
+                    ranges.AstRange(0, 0, 0, False).to_dict()
+                    if self.range == None
+                    else self.range.to_dict(),
+                ),
+                (
+                    "range_with_branches",
+                    ranges.AstRange(0, 0, 0, False).to_dict()
+                    if self.range_with_branches == None
+                    else self.range_with_branches.to_dict(),
+                ),
+                ("branches", utils.ordered_branches(self.constraints)),
+                ("constraints", utils.ordered_constraints(self.branches)),
+                ("requirements", self.requirements.to_dict()),
+                ("all_branches", utils.ordered_branches(self.all_constraints)),
+                (
+                    "all_constraints",
+                    utils.ordered_constraints(self.all_branches),
+                ),
+                ("aliases", self.aliases),
+                ("bbls", [hex(x) for x in self.bbls]),
+                ("controlled", self.controlled),
+                ("n_controlled", len(self.controlled)),
+                ("uncontrolled", self.uncontrolled),
+                ("unmodified", self.unmodified),
+                ("n_unmodified", len(self.unmodified)),
+                ("secrets", self.secrets),
+                ("aliasing", self.aliasing),
+            ]
+        )
 
         for r in self.registers.values():
             if not r.is_dereferenced:
@@ -314,7 +358,8 @@ class TaintedFunctionPointer():
             contains_spec_stop=self.contains_spec_stop,
             n_dependent_loads=self.n_dependent_loads,
             n_aggr_misprd=self.n_aggr_misprd,
-            time_found=self.time_found)
+            time_found=self.time_found,
+        )
         new_tfp.control = new_tfp.control
         new_tfp.constraints.extend(self.constraints)
         new_tfp.branches.extend(self.branches)

@@ -65,8 +65,16 @@ class AnalysisPipeline:
     n_found_secret_dependent_branches: int
     n_final_secret_dependent_branches: int
 
-    def __init__(self, name, gadget_address, proj, asm_folder, csv_filename,
-                 tfp_csv_filename, half_gadget_filename):
+    def __init__(
+        self,
+        name,
+        gadget_address,
+        proj,
+        asm_folder,
+        csv_filename,
+        tfp_csv_filename,
+        half_gadget_filename,
+    ):
         self.name = name
         self.gadget_address = gadget_address
         self.proj = proj
@@ -94,12 +102,20 @@ class AnalysisPipeline:
         transmissions = transmissionAnalysis.get_transmissions(potential_t)
 
         for t in transmissions:
-            l.info(f"Analyzing TRANS @{hex(t.pc)}: "
-                   f"{utils.truncate_str(t.transmission.expr)}")
+            l.info(
+                f"Analyzing TRANS @{hex(t.pc)}: "
+                f"{utils.truncate_str(t.transmission.expr)}"
+            )
             t.name = self.name
             t.address = self.gadget_address
-            t.uuid = get_uuid(t, [t.secret_address.expr, t.secret_val.expr,
-                              self.n_found_transmissions])
+            t.uuid = get_uuid(
+                t,
+                [
+                    t.secret_address.expr,
+                    t.secret_val.expr,
+                    self.n_found_transmissions,
+                ],
+            )
             pc_symbol = self.proj.loader.find_symbol(t.pc, fuzzy=True)
             t.pc_symbol = pc_symbol.name if pc_symbol else ""
             t.address_symbol = self.gadget_symbol
@@ -110,7 +126,7 @@ class AnalysisPipeline:
             try:
                 rangeAnalysis.analyse(t)
             except Exception as e:
-                if global_config['CrashOnExceptions']:
+                if global_config["CrashOnExceptions"]:
                     raise e
                 # TODO: In very few instances, our range analysis fails. Instead of
                 # interrupting the analysis right away, we want to continue to
@@ -119,8 +135,12 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                utils.report_error(e, where="range_analysis", start_addr=hex(
-                    self.gadget_address), error_type="RANGE")
+                utils.report_error(
+                    e,
+                    where="range_analysis",
+                    start_addr=hex(self.gadget_address),
+                    error_type="RANGE",
+                )
                 continue
 
             bitsAnalysis.analyse(t)
@@ -145,11 +165,18 @@ class AnalysisPipeline:
         tainted_function_pointers = tfpAnalysis.analyse(t)
 
         for tfp in tainted_function_pointers:
-            l.info(f"Analyzing TFP @{hex(tfp.pc)}: {utils.truncate_str(tfp.expr)}")
+            l.info(
+                f"Analyzing TFP @{hex(tfp.pc)}: {utils.truncate_str(tfp.expr)}"
+            )
             tfp.name = self.name
             tfp.address = self.gadget_address
-            tfp.uuid = get_uuid(tfp, [[r.expr for r in t.registers.values()],
-                                self.n_found_tainted_function_pointers])
+            tfp.uuid = get_uuid(
+                tfp,
+                [
+                    [r.expr for r in t.registers.values()],
+                    self.n_found_tainted_function_pointers,
+                ],
+            )
 
             pc_symbol = self.proj.loader.find_symbol(tfp.pc, fuzzy=True)
             tfp.pc_symbol = pc_symbol.name if pc_symbol else ""
@@ -160,7 +187,7 @@ class AnalysisPipeline:
             try:
                 rangeAnalysis.analyse_tfp(tfp)
             except Exception as e:
-                if global_config['CrashOnExceptions']:
+                if global_config["CrashOnExceptions"]:
                     raise e
                 # TODO: In very few instances, our range analysis fails. Instead of
                 # interrupting the analysis right away, we want to continue to
@@ -169,8 +196,12 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                utils.report_error(e, where="range_analysis", start_addr=hex(
-                    self.gadget_address), error_type="TFP RANGE")
+                utils.report_error(
+                    e,
+                    where="range_analysis",
+                    start_addr=hex(self.gadget_address),
+                    error_type="TFP RANGE",
+                )
                 continue
 
             self.n_final_tainted_function_pointers += 1
@@ -188,8 +219,10 @@ class AnalysisPipeline:
         gadgets = halfGadgetAnalysis.analyse(gadget)
 
         for g in gadgets:
-            l.info(f"Analyzing half-spectre @{hex(g.pc)}: "
-                   f"{utils.truncate_str(g.loaded.expr)}")
+            l.info(
+                f"Analyzing half-spectre @{hex(g.pc)}: "
+                f"{utils.truncate_str(g.loaded.expr)}"
+            )
             g.name = self.name
             g.address = self.gadget_address
             g.uuid = get_uuid(g, [g.loaded.expr, self.n_found_half_gadgets])
@@ -200,7 +233,7 @@ class AnalysisPipeline:
             try:
                 rangeAnalysis.analyse_half_gadget(g)
             except Exception as e:
-                if global_config['CrashOnExceptions']:
+                if global_config["CrashOnExceptions"]:
                     raise e
                 # TODO: In very few instances, our range analysis fails. Instead of
                 # interrupting the analysis right away, we want to continue to
@@ -209,14 +242,20 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                utils.report_error(e, where="range_analysis", start_addr=hex(
-                    self.gadget_address), error_type="HALF GADGET RANGE")
+                utils.report_error(
+                    e,
+                    where="range_analysis",
+                    start_addr=hex(self.gadget_address),
+                    error_type="HALF GADGET RANGE",
+                )
 
             self.n_final_half_gadgets += 1
             l_verbose.info(g)
 
             if self.asm_folder != "":
-                asmprinter.output_half_gadget_to_file(g, self.proj, self.asm_folder)
+                asmprinter.output_half_gadget_to_file(
+                    g, self.proj, self.asm_folder
+                )
                 l.info(f"Dumped annotated ASM to {self.asm_folder}")
             if self.half_gadget_filename != "":
                 append_to_csv(self.half_gadget_filename, [g])
@@ -226,15 +265,24 @@ class AnalysisPipeline:
 
         self.n_found_secret_dependent_branches += 1
         secret_dependent_branches = (
-            secretDependentBranchAnalysis.get_secret_dependent_branches(s))
+            secretDependentBranchAnalysis.get_secret_dependent_branches(s)
+        )
 
         for sdb in secret_dependent_branches:
-            l.info(f"Analyzing SDB   @{hex(sdb.pc)}: {utils.truncate_str(sdb.sdb_expr)}"
-                   f" <> {utils.truncate_str(sdb.cmp_value.expr)}")
+            l.info(
+                f"Analyzing SDB   @{hex(sdb.pc)}: {utils.truncate_str(sdb.sdb_expr)}"
+                f" <> {utils.truncate_str(sdb.cmp_value.expr)}"
+            )
             sdb.name = self.name
             sdb.address = self.gadget_address
-            sdb.uuid = get_uuid(sdb, [sdb.sdb_expr, sdb.cmp_value.expr,
-                                self.n_found_secret_dependent_branches])
+            sdb.uuid = get_uuid(
+                sdb,
+                [
+                    sdb.sdb_expr,
+                    sdb.cmp_value.expr,
+                    self.n_found_secret_dependent_branches,
+                ],
+            )
 
             pc_symbol = self.proj.loader.find_symbol(sdb.pc, fuzzy=True)
             sdb.pc_symbol = pc_symbol.name if pc_symbol else ""
@@ -253,8 +301,12 @@ class AnalysisPipeline:
                 # However, since the number of errors we encountered is very low,
                 # this has not been deemed to be a priority for now.
                 l.critical("Range analysis error: bailing out")
-                utils.report_error(e, where="range_analysis", start_addr=hex(
-                    self.gadget_address), error_type="RANGE")
+                utils.report_error(
+                    e,
+                    where="range_analysis",
+                    start_addr=hex(self.gadget_address),
+                    error_type="RANGE",
+                )
                 continue
 
             bitsAnalysis.analyse(sdb)
@@ -268,14 +320,15 @@ class AnalysisPipeline:
 
             if self.asm_folder != "":
                 asmprinter.output_secret_dependent_branch_to_file(
-                    sdb, self.proj, self.asm_folder)
+                    sdb, self.proj, self.asm_folder
+                )
                 l.info(f"Dumped annotated ASM to {self.asm_folder}")
             if self.csv_filename != "":
                 append_to_csv(self.csv_filename, [sdb])
             l.info(f"Dumped properties to {self.csv_filename}")
 
 
-def flatten_dict(dictionary, parent_key='', separator='_'):
+def flatten_dict(dictionary, parent_key="", separator="_"):
     """
     Transform a hierarchy of nested objects into a flat dictionary.
     """
@@ -283,8 +336,9 @@ def flatten_dict(dictionary, parent_key='', separator='_'):
     for key, value in dictionary.items():
         new_key = parent_key + separator + key if parent_key else key
         if isinstance(value, MutableMapping):
-            items.extend(flatten_dict(value, new_key,
-                         separator=separator).items())
+            items.extend(
+                flatten_dict(value, new_key, separator=separator).items()
+            )
         else:
             items.append((new_key, value))
     return dict(items)
@@ -302,7 +356,7 @@ def append_to_csv(csv_filename, transmissions):
         if os.stat(csv_filename).st_size > 0:
             o = open(csv_filename, "r")
             line = o.readline()
-            existing_keys = line.replace('\n', '').split(';')
+            existing_keys = line.replace("\n", "").split(";")
             # l.info(f"Got columns from existing file: {existing_keys}")
             o.close()
     except:
@@ -318,13 +372,13 @@ def append_to_csv(csv_filename, transmissions):
                 t.properties["deps"] = None
             new_d = flatten_dict(t.to_dict())
             flatten_dicts.append(new_d)
-            new_keys = (list(new_d.keys()))
+            new_keys = list(new_d.keys())
 
         l_verbose.info(f"Missing keys: {set(existing_keys) - set(new_keys)}")
         l_verbose.info(f"New keys: {set(new_keys) - set(existing_keys)}")
 
         keys = existing_keys if len(existing_keys) > 0 else new_keys
-        writer = csv.DictWriter(outfile, fieldnames=keys, delimiter=';')
+        writer = csv.DictWriter(outfile, fieldnames=keys, delimiter=";")
         if len(existing_keys) == 0:
             writer.writeheader()
         writer.writerows(flatten_dicts)
@@ -332,8 +386,10 @@ def append_to_csv(csv_filename, transmissions):
 
 def get_uuid(t, hash_list):
 
-    if global_config['UseDeterministicUUIDs']:
-        h = hashlib.sha256(f"{t.name}{t.address}{t.pc}{hash_list}".encode()).hexdigest()
-        return str(uuid.UUID(int=(int(h, 16) % 2 ** 128), version=4))
+    if global_config["UseDeterministicUUIDs"]:
+        h = hashlib.sha256(
+            f"{t.name}{t.address}{t.pc}{hash_list}".encode()
+        ).hexdigest()
+        return str(uuid.UUID(int=(int(h, 16) % 2**128), version=4))
     else:
         return str(uuid.uuid4())

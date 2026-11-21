@@ -63,10 +63,10 @@ def skip_concretization(state: angr.SimState):
 
 
 class SubstType(Enum):
-    ADDR_SUBST = 0,
-    VALUE_SUBST = 1,
-    COND_SUBST = 2,
-    CALL_SUBST = 3,
+    ADDR_SUBST = (0,)
+    VALUE_SUBST = (1,)
+    COND_SUBST = (2,)
+    CALL_SUBST = (3,)
     UNKNOWN_SUBST = 4
 
 
@@ -102,10 +102,13 @@ def getSubstitution(state, addr, type: SubstType):
 
 class SplitException(Exception):
     "Splitted state, skipping"
+
     pass
+
 
 class GeneralException(Exception):
     "General exception, skipping"
+
     pass
 
 
@@ -152,31 +155,52 @@ class Scanner:
         Mark stack locations and registers as attacker-controlled.
         """
         state.regs.rbp = claripy.BVS(
-            'rbp', 64, annotations=(UncontrolledAnnotation('rbp'),), explicit_name=True)
+            "rbp",
+            64,
+            annotations=(UncontrolledAnnotation("rbp"),),
+            explicit_name=True,
+        )
         state.regs.rsp = claripy.BVS(
-            'rsp', 64, annotations=(UncontrolledAnnotation('rsp'),), explicit_name=True)
+            "rsp",
+            64,
+            annotations=(UncontrolledAnnotation("rsp"),),
+            explicit_name=True,
+        )
         state.regs.gs = claripy.BVS(
-            'gs', 64, annotations=(UncontrolledAnnotation('gs'),), explicit_name=True)
+            "gs",
+            64,
+            annotations=(UncontrolledAnnotation("gs"),),
+            explicit_name=True,
+        )
 
         # Initialize non-controlled registers.
         for reg in utils.get_x86_registers():
-            if reg not in global_config['controlled_registers']:
+            if reg not in global_config["controlled_registers"]:
                 try:
                     length = getattr(state.regs, reg).length
-                    bvs = claripy.BVS(reg, length, annotations=(
-                        UncontrolledAnnotation(reg),), explicit_name=True)
+                    bvs = claripy.BVS(
+                        reg,
+                        length,
+                        annotations=(UncontrolledAnnotation(reg),),
+                        explicit_name=True,
+                    )
                     setattr(state.regs, reg, bvs)
                 except AttributeError:
                     l.critical(
-                        f"Unsupported arch! x86 register '{reg}' is not available")
+                        f"Unsupported arch! x86 register '{reg}' is not available"
+                    )
 
         # Initialize attacker-controlled registers.
         # They may partly overwrite uncontrolled registers (e.g., eax over rax)
-        for reg in global_config['controlled_registers']:
+        for reg in global_config["controlled_registers"]:
             try:
                 length = getattr(state.regs, reg).length
-                bvs = claripy.BVS(reg, length, annotations=(
-                    AttackerAnnotation(reg),), explicit_name=True)
+                bvs = claripy.BVS(
+                    reg,
+                    length,
+                    annotations=(AttackerAnnotation(reg),),
+                    explicit_name=True,
+                )
                 setattr(state.regs, reg, bvs)
             except AttributeError:
                 l.critical(f"Invalid register in config! {reg}")
@@ -184,37 +208,47 @@ class Scanner:
         # Attacker-controlled stack locations: save them as stores.
         # TODO: this is a hack. If STL forwarding is disabled, stack variables
         # will not be loaded.
-        if 'controlled_stack' in global_config:
-            for region in global_config['controlled_stack']:
-                for offset in range(region['start'], region['end'], region['size']):
-                    size = region['size']
-                    assert (size in [1, 2, 4, 8])
+        if "controlled_stack" in global_config:
+            for region in global_config["controlled_stack"]:
+                for offset in range(
+                    region["start"], region["end"], region["size"]
+                ):
+                    size = region["size"]
+                    assert size in [1, 2, 4, 8]
 
                     addr = state.regs.rsp + (offset)
                     name = f"rsp_{offset}"
-                    bvs = claripy.BVS(name, size * 8,
-                                      annotations=(AttackerAnnotation(name),),
-                                      explicit_name=True)
+                    bvs = claripy.BVS(
+                        name,
+                        size * 8,
+                        annotations=(AttackerAnnotation(name),),
+                        explicit_name=True,
+                    )
 
-                    cur_store = memory.MemOp(pc=state.addr,
-                                             addr=addr,
-                                             val=bvs,
-                                             size=size,
-                                             id=self.cur_id,
-                                             op_type=memory.MemOpType.STORE)
+                    cur_store = memory.MemOp(
+                        pc=state.addr,
+                        addr=addr,
+                        val=bvs,
+                        size=size,
+                        id=self.cur_id,
+                        op_type=memory.MemOpType.STORE,
+                    )
                     state.globals[self.cur_id] = cur_store
                     self.cur_id += 1
                     self.stores.append(cur_store)
 
     def block_contains_speculation_stop(self, bb: angr.block.Block):
         for instruction in bb.capstone.insns:
-            if instruction.mnemonic in global_config["SpeculationStopMnemonics"]:
+            if (
+                instruction.mnemonic
+                in global_config["SpeculationStopMnemonics"]
+            ):
                 return True
         return False
 
     def history_contains_speculation_stop(self, state):
         for bbl_addr in self.get_bbls(state):
-            if self.bbs[bbl_addr]['speculation_stop']:
+            if self.bbs[bbl_addr]["speculation_stop"]:
                 return True
         return False
 
@@ -222,15 +256,15 @@ class Scanner:
         n_instr = 0
 
         for bbl_addr in self.get_bbls(state):
-            n_instr += self.bbs[bbl_addr]['block'].instructions
+            n_instr += self.bbs[bbl_addr]["block"].instructions
             last_bbs_addr = bbl_addr
 
         # We cannot slice the iterator, so we iterate over the whole
         # list then ignore the last element.
         # This should by faster than creating a hard copy just to slice.
-        n_instr -= self.bbs[last_bbs_addr]['block'].instructions
+        n_instr -= self.bbs[last_bbs_addr]["block"].instructions
 
-        for addr in self.bbs[last_bbs_addr]['block'].instruction_addrs:
+        for addr in self.bbs[last_bbs_addr]["block"].instruction_addrs:
             n_instr += 1
             if addr == instruction_addr:
                 break
@@ -242,18 +276,19 @@ class Scanner:
         # - Returns
         n_control_flow_changes = 0
 
-        for bbl_addr, jump_kind, jump_target in zip(self.get_bbls(state)[:-1],
-                                                    list(state.history.jumpkinds)[1:],
-                                                    state.history.jump_targets):
-            if jump_kind == 'Ijk_Ret':
+        for bbl_addr, jump_kind, jump_target in zip(
+            self.get_bbls(state)[:-1],
+            list(state.history.jumpkinds)[1:],
+            state.history.jump_targets,
+        ):
+            if jump_kind == "Ijk_Ret":
                 n_control_flow_changes += 1
 
-            elif jump_kind == 'Ijk_Call':
+            elif jump_kind == "Ijk_Call":
                 n_control_flow_changes += 1
 
-            elif jump_kind == 'Ijk_Boring':
-
-                vex = self.bbs[bbl_addr]['block'].vex
+            elif jump_kind == "Ijk_Boring":
+                vex = self.bbs[bbl_addr]["block"].vex
                 if len(vex.constant_jump_targets_and_jumpkinds.keys()) > 1:
                     # conditional jump, only count if we took non-default target
                     if vex.default_exit_target != jump_target.args[0]:
@@ -263,7 +298,7 @@ class Scanner:
 
     def count_aggressive_mispredictions(self, state):
         # UNSAT branches taken on this path (AggressiveSpeculation).
-        return state.globals.get('n_aggr_misprd', 0)
+        return state.globals.get("n_aggr_misprd", 0)
 
     def get_time_found(self):
         # Seconds since the scanner was created.
@@ -289,7 +324,11 @@ class Scanner:
         for h in state.history.lineage:
             # A SimProcedure adds a history node without a jump source, and
             # the current block has no exit yet. Skip both.
-            if h.jump_guard is None or h.jump_source is None or h.jump_target is None:
+            if (
+                h.jump_guard is None
+                or h.jump_source is None
+                or h.jump_target is None
+            ):
                 continue
             cond, source, target = h.jump_guard, h.jump_source, h.jump_target
 
@@ -306,14 +345,14 @@ class Scanner:
 
     def add_bbl(self, state):
         # Append state.addr to the path, bbl_index is its position.
-        state.globals[f'hist_{self.n_hist}'] = state.addr
-        state.globals['bbl_index'] = state.globals.get('bbl_index', -1) + 1
+        state.globals[f"hist_{self.n_hist}"] = state.addr
+        state.globals["bbl_index"] = state.globals.get("bbl_index", -1) + 1
         self.n_hist += 1
 
     def get_bbls(self, state):
         hist = []
         for f in state.globals.keys():
-            if str(f).startswith('hist_'):
+            if str(f).startswith("hist_"):
                 hist.append(state.globals[f])
 
         return hist
@@ -326,7 +365,7 @@ class Scanner:
         in their expression are saved as potential transmissions.
         """
 
-        if not global_config['TransmissionGadgets']:
+        if not global_config["TransmissionGadgets"]:
             return
 
         if annotations.contains_secret(expr):
@@ -343,10 +382,13 @@ class Scanner:
                 n_control_flow_changes=self.count_control_flow_changes(state),
                 n_aggr_misprd=self.count_aggressive_mispredictions(state),
                 time_found=self.get_time_found(),
-                contains_spec_stop=self.history_contains_speculation_stop(state))
+                contains_spec_stop=self.history_contains_speculation_stop(
+                    state
+                ),
+            )
             self.transmissions.append(t)
 
-            if global_config['AnalyzeDuringScanning']:
+            if global_config["AnalyzeDuringScanning"]:
                 self.analysis_pipeline.analyze_transmission(t)
 
     def check_tfp(self, state, func_ptr_reg, func_ptr_ast):
@@ -355,16 +397,19 @@ class Scanner:
         as tainted function pointers (a.k.a Dispatch Gadgets).
         """
 
-        if not global_config['TaintedFunctionPointers']:
+        if not global_config["TaintedFunctionPointers"]:
             return
 
-        if (not global_config['NonTaintedFunctionPointers']
-                and not annotations.is_attacker_controlled(func_ptr_ast)):
+        if not global_config[
+            "NonTaintedFunctionPointers"
+        ] and not annotations.is_attacker_controlled(func_ptr_ast):
             # Lets save computation time, tfp is not attacker controlled
             return
 
-        l.warning(f"Found new Dispatch Gadget! {func_ptr_ast} "
-                  f"{utils.get_annotations(func_ptr_ast)}")
+        l.warning(
+            f"Found new Dispatch Gadget! {func_ptr_ast} "
+            f"{utils.get_annotations(func_ptr_ast)}"
+        )
         # Create a new TFP object.
         tfp = TaintedFunctionPointer(
             pc=state.scratch.ins_addr,
@@ -379,13 +424,14 @@ class Scanner:
             n_aggr_misprd=self.count_aggressive_mispredictions(state),
             time_found=self.get_time_found(),
             contains_spec_stop=self.history_contains_speculation_stop(state),
-            n_dependent_loads=annotations.get_load_depth(func_ptr_ast))
+            n_dependent_loads=annotations.get_load_depth(func_ptr_ast),
+        )
 
         for reg in utils.get_x86_registers():
             reg_ast = getattr(state.regs, reg)
             tfp.registers[reg] = TFPRegister(reg, reg_ast)
 
-        if global_config['TaintedFunctionPointersRegisterDereference']:
+        if global_config["TaintedFunctionPointersRegisterDereference"]:
             # Check if there is a register at dereference
             for reg in utils.get_x86_registers():
                 reg_expr = tfp.registers[reg].expr
@@ -393,27 +439,33 @@ class Scanner:
                 # If the instruction is a call, it will add 8 to rsp, so we also
                 # need to add + 8
                 call_offset = 0
-                if reg == 'rsp':
+                if reg == "rsp":
                     block = state.project.factory.block(state.scratch.ins_addr)
-                    if block.vex.jumpkind == 'Ijk_Call':
+                    if block.vex.jumpkind == "Ijk_Call":
                         call_offset = 8
 
-                for offset in range(-0x40, 0xa0, 8):
-                    reg_str = f'{reg}_{offset + call_offset}'
+                for offset in range(-0x40, 0xA0, 8):
+                    reg_str = f"{reg}_{offset + call_offset}"
 
                     alias_store, stored_val = memory.get_aliasing_store(
-                        reg_expr + offset + call_offset, 8, self.cur_id, state)
+                        reg_expr + offset + call_offset, 8, self.cur_id, state
+                    )
 
-                    if (alias_store and annotations.is_attacker_controlled(stored_val)
-                            and 'gs' not in str(stored_val)):
+                    if (
+                        alias_store
+                        and annotations.is_attacker_controlled(stored_val)
+                        and "gs" not in str(stored_val)
+                    ):
                         tfp.registers[reg_str] = TFPRegister(
-                            reg_str, stored_val, is_dereferenced=True)
+                            reg_str, stored_val, is_dereferenced=True
+                        )
                         tfp.registers[reg].reg_dereferenced.append(
-                            tfp.registers[reg_str])
+                            tfp.registers[reg_str]
+                        )
 
         self.calls.append(tfp)
 
-        if global_config['AnalyzeDuringScanning']:
+        if global_config["AnalyzeDuringScanning"]:
             self.analysis_pipeline.analyze_tainted_function_pointer(tfp)
 
     def check_half_spectre(self, expr, state):
@@ -423,22 +475,23 @@ class Scanner:
         if annotations.is_directly_controlled(expr):
             l.warning(f"Found new Half Gadget! {expr}")
             # Create a new transmission object.
-            g = HalfGadget(expr=expr,
-                           pc=state.scratch.ins_addr,
-                           n_instr=self.count_instructions(
-                               state, state.scratch.ins_addr),
-                           contains_spec_stop=self.history_contains_speculation_stop(
-                               state),
-                           aliases=self.get_aliases(state),
-                           constraints=self.get_constraints(state),
-                           branches=self.get_history(state),
-                           bbls=self.get_bbls(state),
-                           n_aggr_misprd=self.count_aggressive_mispredictions(state),
-                           time_found=self.get_time_found(),
-                           )
+            g = HalfGadget(
+                expr=expr,
+                pc=state.scratch.ins_addr,
+                n_instr=self.count_instructions(state, state.scratch.ins_addr),
+                contains_spec_stop=self.history_contains_speculation_stop(
+                    state
+                ),
+                aliases=self.get_aliases(state),
+                constraints=self.get_constraints(state),
+                branches=self.get_history(state),
+                bbls=self.get_bbls(state),
+                n_aggr_misprd=self.count_aggressive_mispredictions(state),
+                time_found=self.get_time_found(),
+            )
             self.half_gadgets.append(g)
 
-            if global_config['AnalyzeDuringScanning']:
+            if global_config["AnalyzeDuringScanning"]:
                 self.analysis_pipeline.analyze_half_gadget(g)
 
     def check_secret_dependent_branch(self, expr, state):
@@ -447,11 +500,10 @@ class Scanner:
         branch condition expression (guard) are saved as potential
         secret dependent branches.
         """
-        if not global_config['SecretDependentBranches']:
+        if not global_config["SecretDependentBranches"]:
             return
 
         if annotations.contains_secret(expr):
-
             pc = state.scratch.ins_addr
             bbls = self.get_bbls(state)
             constraints = self.get_constraints(state)
@@ -463,10 +515,15 @@ class Scanner:
                 prev = self.secretDependentBranches[-1]
                 # Check if the constraints are equal (We compare the PC +
                 # AST cache key of each constraint)
-                if (pc == prev.pc and bbls == prev.bbls
-                        and len(constraints) == len(prev.constraints)
-                        and all(c[0] == prev_c[0] and c[1].identical(prev_c[1])
-                                for c, prev_c in zip(constraints, prev.constraints))):
+                if (
+                    pc == prev.pc
+                    and bbls == prev.bbls
+                    and len(constraints) == len(prev.constraints)
+                    and all(
+                        c[0] == prev_c[0] and c[1].identical(prev_c[1])
+                        for c, prev_c in zip(constraints, prev.constraints)
+                    )
+                ):
                     # duplicate, thus return
                     return
 
@@ -483,17 +540,26 @@ class Scanner:
                 n_control_flow_changes=self.count_control_flow_changes(state),
                 n_aggr_misprd=self.count_aggressive_mispredictions(state),
                 time_found=self.get_time_found(),
-                contains_spec_stop=self.history_contains_speculation_stop(state))
+                contains_spec_stop=self.history_contains_speculation_stop(
+                    state
+                ),
+            )
 
             self.secretDependentBranches.append(sdb)
 
-            if global_config['AnalyzeDuringScanning']:
+            if global_config["AnalyzeDuringScanning"]:
                 self.analysis_pipeline.analyze_secret_dependent_branch(sdb)
 
     # ---------------- STATE SPLITTING ----------------------------
 
-    def split_state(self, state, asts, addr, branch_split=False,
-                    subst_type=SubstType.ADDR_SUBST):
+    def split_state(
+        self,
+        state,
+        asts,
+        addr,
+        branch_split=False,
+        subst_type=SubstType.ADDR_SUBST,
+    ):
         """
         Manually split the state in two sub-states with different conditions.
         Needed e.g. for CMOVEs and SExt. Note that the current state should be
@@ -529,9 +595,13 @@ class Scanner:
             # TODO: Satisfiability check can be expensive, can we do better with
             # ast substitutions?
             if s.solver.satisfiable():
-                conditions = [(hex(addr), cond, str(ctype))
-                              for addr, cond, ctype in a.conditions]
-                l.info(f"Added state @{hex(s.addr)}  with condition {conditions}")
+                conditions = [
+                    (hex(addr), cond, str(ctype))
+                    for addr, cond, ctype in a.conditions
+                ]
+                l.info(
+                    f"Added state @{hex(s.addr)}  with condition {conditions}"
+                )
                 self.states.append(s)
 
     # ---------------- EXPRESSIONS HANDLING ----------------------------
@@ -545,30 +615,43 @@ class Scanner:
         """
         if state.inspect.expr_result.op == "Concat":
             l.info(f"Expr Hook (Concat) @{hex(state.scratch.ins_addr)} :")
-            l.info(f"   Before:  {state.inspect.expr_result}  "
-                   f"{utils.get_annotations(state.inspect.expr_result)}")
+            l.info(
+                f"   Before:  {state.inspect.expr_result}  "
+                f"{utils.get_annotations(state.inspect.expr_result)}"
+            )
             state.inspect.expr_result = astTransform.match_sign_ext(
-                state.inspect.expr_result, state.scratch.ins_addr)
-            l.info(f"   After:  {state.inspect.expr_result}  "
-                   f"{utils.get_annotations(state.inspect.expr_result)}")
+                state.inspect.expr_result, state.scratch.ins_addr
+            )
+            l.info(
+                f"   After:  {state.inspect.expr_result}  "
+                f"{utils.get_annotations(state.inspect.expr_result)}"
+            )
 
         elif state.inspect.expr_result.op == "SignExt":
             l.info(f"Expr Hook (SignExt) @{hex(state.scratch.ins_addr)} :")
-            l.info(f"   Before:  {state.inspect.expr_result}  "
-                   f"{utils.get_annotations(state.inspect.expr_result)}")
+            l.info(
+                f"   Before:  {state.inspect.expr_result}  "
+                f"{utils.get_annotations(state.inspect.expr_result)}"
+            )
             state.inspect.expr_result = astTransform.sign_ext_to_sum(
-                state.inspect.expr_result, state.scratch.ins_addr)
-            l.info(f"   After:  {state.inspect.expr_result}  "
-                   f"{utils.get_annotations(state.inspect.expr_result)}")
+                state.inspect.expr_result, state.scratch.ins_addr
+            )
+            l.info(
+                f"   After:  {state.inspect.expr_result}  "
+                f"{utils.get_annotations(state.inspect.expr_result)}"
+            )
 
         elif state.inspect.expr_result.op == "If":
             # We assume any expression that is directly translated as an
             # if-then-else statement is a CMOVE-like instruction.
             expr_result = state.inspect.expr_result
-            if (astTransform.getCmoveAnnotation(expr_result) == None
-                    and astTransform.getSignExtAnnotation(expr_result) == None):
+            if (
+                astTransform.getCmoveAnnotation(expr_result) == None
+                and astTransform.getSignExtAnnotation(expr_result) == None
+            ):
                 state.inspect.expr_result = expr_result.annotate(
-                    CmoveAnnotation(state.scratch.ins_addr))
+                    CmoveAnnotation(state.scratch.ins_addr)
+                )
 
     # ---------------- LOADS ----------------------------
 
@@ -579,30 +662,39 @@ class Scanner:
         """
         load_addr = state.inspect.mem_read_address
         load_len = state.inspect.mem_read_length
-        l.info(f"Load@{hex(state.scratch.ins_addr)}: {load_addr}  "
-               f"{utils.get_annotations(load_addr)}")
+        l.info(
+            f"Load@{hex(state.scratch.ins_addr)}: {load_addr}  "
+            f"{utils.get_annotations(load_addr)}"
+        )
         l.info(state.solver.constraints)
 
         # If the state has been manually splitted after this load, we already
         # have a value for this load: just use that.
-        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.VALUE_SUBST)
+        subst = getSubstitution(
+            state, state.scratch.ins_addr, SubstType.VALUE_SUBST
+        )
         if subst != None:
             state.inspect.mem_read_expr = subst
             return
 
         # If the state has been manually splitted _on_ this load, use
         # the substitution recorded for the address.
-        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.ADDR_SUBST)
+        subst = getSubstitution(
+            state, state.scratch.ins_addr, SubstType.ADDR_SUBST
+        )
         if subst != None:
             load_addr = subst
-            l.info(f" Applied substitution! {load_addr}  "
-                   f"{utils.get_annotations(load_addr)}")
+            l.info(
+                f" Applied substitution! {load_addr}  "
+                f"{utils.get_annotations(load_addr)}"
+            )
         else:
             # If the state has _not_ been manually splitted, check if we
             # should split it.
             asts = astTransform.split_conditions(
-                load_addr, simplify=False, addr=state.scratch.ins_addr)
-            assert (len(asts) >= 1)
+                load_addr, simplify=False, addr=state.scratch.ins_addr
+            )
+            assert len(asts) >= 1
 
             l.info(f"  After transformations: {load_addr}")
 
@@ -612,47 +704,69 @@ class Scanner:
 
         # Check if we should forward an existing value (STL) or create a new symbol.
         alias_store, stored_val = memory.get_aliasing_store(
-            load_addr, load_len, self.cur_id, state)
+            load_addr, load_len, self.cur_id, state
+        )
         if alias_store:
             # Perform Store-to-Load forwarding.
             load_val = stored_val
-            l.info(f"Forwarded ({load_val} {utils.get_annotations(load_val)})"
-                   f" from store @({alias_store.addr})")
-        elif (global_config['LoadConcreteMemory'] and not load_addr.symbolic
-                and not state.inspect.mem_read_expr.symbolic):
+            l.info(
+                f"Forwarded ({load_val} {utils.get_annotations(load_val)})"
+                f" from store @({alias_store.addr})"
+            )
+        elif (
+            global_config["LoadConcreteMemory"]
+            and not load_addr.symbolic
+            and not state.inspect.mem_read_expr.symbolic
+        ):
             annotation = annotations.propagate_annotations(
-                load_addr, state.scratch.ins_addr, utils.get_bbl_index(state))
-            load_val = claripy.BVV(state.inspect.mem_read_expr.args[0],
-                                   size=load_len * 8,
-                                   annotations=(annotation,))
+                load_addr, state.scratch.ins_addr, utils.get_bbl_index(state)
+            )
+            load_val = claripy.BVV(
+                state.inspect.mem_read_expr.args[0],
+                size=load_len * 8,
+                annotations=(annotation,),
+            )
 
             # Save it, in case we later need to split this state manually.
-            recordSubstitution(self.cur_state, state.scratch.ins_addr, load_val,
-                               SubstType.VALUE_SUBST)
+            recordSubstitution(
+                self.cur_state,
+                state.scratch.ins_addr,
+                load_val,
+                SubstType.VALUE_SUBST,
+            )
         else:
             # Create a new symbol to represent the loaded value.
-            annotation = annotations.propagate_annotations(load_addr,
-                                                           state.scratch.ins_addr,
-                                                           utils.get_bbl_index(state))
-            load_name = f'LOAD_{load_len * 8}[{load_addr}]_{self.cur_id}'
-            load_val = claripy.BVS(name=load_name,
-                                   size=load_len * 8,
-                                   annotations=(annotation,), explicit_name=True)
+            annotation = annotations.propagate_annotations(
+                load_addr, state.scratch.ins_addr, utils.get_bbl_index(state)
+            )
+            load_name = f"LOAD_{load_len * 8}[{load_addr}]_{self.cur_id}"
+            load_val = claripy.BVS(
+                name=load_name,
+                size=load_len * 8,
+                annotations=(annotation,),
+                explicit_name=True,
+            )
 
             # Save it, in case we later need to split this state manually.
-            recordSubstitution(self.cur_state, state.scratch.ins_addr,
-                               load_val, SubstType.VALUE_SUBST)
+            recordSubstitution(
+                self.cur_state,
+                state.scratch.ins_addr,
+                load_val,
+                SubstType.VALUE_SUBST,
+            )
 
         # Overwrite loaded val.
         state.inspect.mem_read_expr = load_val
 
         # Check for aliasing loads.
-        cur_load = memory.MemOp(pc=state.scratch.ins_addr,
-                                addr=load_addr,
-                                val=load_val,
-                                size=load_len,
-                                id=self.cur_id,
-                                op_type=memory.MemOpType.LOAD)
+        cur_load = memory.MemOp(
+            pc=state.scratch.ins_addr,
+            addr=load_addr,
+            val=load_val,
+            size=load_len,
+            id=self.cur_id,
+            op_type=memory.MemOpType.LOAD,
+        )
         self.cur_id += 1
 
         aliases = memory.get_aliasing_loads(cur_load, state, alias_store)
@@ -663,8 +777,12 @@ class Scanner:
             state.solver.add(alias.to_BV())
             l.warning(f"Adding alias {alias.to_BV()}")
             if not state.solver.satisfiable():
-                utils.report_error(Exception(), hex(self.cur_state.scratch.ins_addr),
-                                   hex(0), error_type="ALIAS UNSAT")
+                utils.report_error(
+                    Exception(),
+                    hex(self.cur_state.scratch.ins_addr),
+                    hex(0),
+                    error_type="ALIAS UNSAT",
+                )
 
         # Save this load in the angr state.
         state.globals[self.cur_id] = cur_load
@@ -691,7 +809,9 @@ class Scanner:
         store_addr = state.inspect.mem_write_address
         store_len = state.inspect.mem_write_length
         stored_value = state.inspect.mem_write_expr
-        l.error(f"Store@{hex(state.scratch.ins_addr)}: [{store_addr}] = {stored_value}")
+        l.error(
+            f"Store@{hex(state.scratch.ins_addr)}: [{store_addr}] = {stored_value}"
+        )
         l.info(state.solver.constraints)
 
         # Don't execute the store architecturally.
@@ -700,33 +820,41 @@ class Scanner:
         # Check if there is a substitution to be made for this address.
         # This can happen if the state comes from a manual splitting.
         is_subst = False
-        subst = getSubstitution(state, state.scratch.ins_addr, SubstType.ADDR_SUBST)
+        subst = getSubstitution(
+            state, state.scratch.ins_addr, SubstType.ADDR_SUBST
+        )
         if subst != None:
             store_addr = subst
         else:
             # Check if the address contains an if-then-else node.
             addr_asts = astTransform.split_conditions(
-                store_addr, simplify=False, addr=state.scratch.ins_addr)
+                store_addr, simplify=False, addr=state.scratch.ins_addr
+            )
             # value_asts = split_conditions(stored_value, simplify=False,
             #                               addr=state.scratch.ins_addr)
 
             l.error(
-                f" After ast transformation: [{store_addr}] = {stored_value}")
+                f" After ast transformation: [{store_addr}] = {stored_value}"
+            )
             if len(addr_asts) > 1:
                 self.split_state(state, addr_asts, state.scratch.ins_addr)
                 raise SplitException
 
-        l.error(f"After substitution: Store@{hex(state.scratch.ins_addr)}: "
-                f"[{store_addr}] = {stored_value}")
+        l.error(
+            f"After substitution: Store@{hex(state.scratch.ins_addr)}: "
+            f"[{store_addr}] = {stored_value}"
+        )
 
         # Save this store in the angr state, so that future loads can check for
         # aliasing.
-        cur_store = memory.MemOp(pc=state.scratch.ins_addr,
-                                 addr=store_addr,
-                                 val=stored_value,
-                                 size=store_len,
-                                 id=self.cur_id,
-                                 op_type=memory.MemOpType.STORE)
+        cur_store = memory.MemOp(
+            pc=state.scratch.ins_addr,
+            addr=store_addr,
+            val=stored_value,
+            size=store_len,
+            id=self.cur_id,
+            op_type=memory.MemOpType.STORE,
+        )
         state.globals[self.cur_id] = cur_store
         self.cur_id += 1
         self.stores.append(cur_store)
@@ -749,23 +877,27 @@ class Scanner:
             return
 
         # ----------- Dispatch gadgets (tainted function pointers)
-        if (func_ptr_ast.symbolic
-                or state.inspect.exit_target.args[0] in self.thunk_list):
+        if (
+            func_ptr_ast.symbolic
+            or state.inspect.exit_target.args[0] in self.thunk_list
+        ):
             # First case: symbolic target
             if func_ptr_ast.symbolic:
                 # Whenever the target is symbolic, and it is not a return, we
                 # know we are performing an indirect call.
                 block = state.block()
-                if (state.inspect.exit_jumpkind == 'Ijk_Ret'
-                        or block.vex.jumpkind == 'Ijk_Ret'):
+                if (
+                    state.inspect.exit_jumpkind == "Ijk_Ret"
+                    or block.vex.jumpkind == "Ijk_Ret"
+                ):
                     return
 
                 # get the register
                 instruction = block.capstone.insns[-1].insn
 
-                if 'ptr' in instruction.op_str:
+                if "ptr" in instruction.op_str:
                     # Jump to pointer in memory (e.g, jmp qword ptr [rax])
-                    func_ptr_reg = 'mem'
+                    func_ptr_reg = "mem"
                 else:
                     # Jump to registers
                     regs_read, regs_write = instruction.regs_access()
@@ -773,7 +905,8 @@ class Scanner:
                     # exclude all written registers; RSP in case of a call instruction
                     if len(regs_read) > len(regs_write):
                         regs_read = [
-                            x for x in regs_read if x not in regs_write]
+                            x for x in regs_read if x not in regs_write
+                        ]
 
                     reg_id = regs_read[0]
                     func_ptr_reg = instruction.reg_name(reg_id)
@@ -788,31 +921,37 @@ class Scanner:
             # Check if we need to substitute the expression (happens with manual
             # splits).
             subst = getSubstitution(
-                state, state.scratch.ins_addr, SubstType.CALL_SUBST)
+                state, state.scratch.ins_addr, SubstType.CALL_SUBST
+            )
             if subst != None:
-                l.warning(
-                    f"Substituting {func_ptr_ast}   with   {subst}")
+                l.warning(f"Substituting {func_ptr_ast}   with   {subst}")
                 func_ptr_ast = subst
             else:
                 # Check if the symbolic address contains an if-then-else node.
                 asts = astTransform.split_conditions(
-                    func_ptr_ast, simplify=False, addr=state.scratch.ins_addr)
-                assert (len(asts) >= 1)
+                    func_ptr_ast, simplify=False, addr=state.scratch.ins_addr
+                )
+                assert len(asts) >= 1
 
                 l.warning(f"  Before transformations: {func_ptr_ast}")
                 l.warning(f"  After transformations: {asts}")
 
                 if len(asts) > 1:
-                    self.split_state(state, asts, state.scratch.ins_addr,
-                                     branch_split=False,
-                                     subst_type=SubstType.CALL_SUBST)
+                    self.split_state(
+                        state,
+                        asts,
+                        state.scratch.ins_addr,
+                        branch_split=False,
+                        subst_type=SubstType.CALL_SUBST,
+                    )
                     raise SplitException
 
             # process the TFP
             self.check_tfp(state, func_ptr_reg, func_ptr_ast)
             # check if it is also a transmission
             self.check_transmission(
-                func_ptr_ast, TransmitterType.CODE_LOAD, state)
+                func_ptr_ast, TransmitterType.CODE_LOAD, state
+            )
 
             # Stop exploration here
             raise GeneralException
@@ -824,23 +963,29 @@ class Scanner:
             # Check if we need to substitute the expression (happens with manual
             # splits).
             subst = getSubstitution(
-                state, state.scratch.ins_addr, SubstType.CALL_SUBST)
+                state, state.scratch.ins_addr, SubstType.CALL_SUBST
+            )
             if subst != None:
                 l.warning(f"Substituting {exit_guard}   with   {subst}")
                 exit_guard = subst
             else:
                 # Check if the address contains an if-then-else node.
                 asts = astTransform.split_conditions(
-                    exit_guard, simplify=False, addr=state.scratch.ins_addr)
-                assert (len(asts) >= 1)
+                    exit_guard, simplify=False, addr=state.scratch.ins_addr
+                )
+                assert len(asts) >= 1
 
                 l.warning(f"  Before transformations: {exit_guard}")
                 l.warning(f"  After transformations: {asts}")
 
                 if len(asts) > 1:
-                    self.split_state(state, asts, state.scratch.ins_addr,
-                                     branch_split=False,
-                                     subst_type=SubstType.CALL_SUBST)
+                    self.split_state(
+                        state,
+                        asts,
+                        state.scratch.ins_addr,
+                        branch_split=False,
+                        subst_type=SubstType.CALL_SUBST,
+                    )
                     raise SplitException
 
             self.check_secret_dependent_branch(exit_guard, state)
@@ -853,9 +998,12 @@ class Scanner:
 
         state = proj.factory.blank_state(
             addr=start_address,
-            add_options={angr.options.SYMBOL_FILL_UNCONSTRAINED_MEMORY,
-                         angr.options.SYMBOL_FILL_UNCONSTRAINED_REGISTERS,
-                         angr.options.SIMPLIFY_CONSTRAINTS})
+            add_options={
+                angr.options.SYMBOL_FILL_UNCONSTRAINED_MEMORY,
+                angr.options.SYMBOL_FILL_UNCONSTRAINED_REGISTERS,
+                angr.options.SIMPLIFY_CONSTRAINTS,
+            },
+        )
 
         state.solver._solver.timeout = global_config["Z3Timeout"]
 
@@ -873,16 +1021,21 @@ class Scanner:
         state.memory.read_strategies = [DummyConcretizationStrategy()]
 
         # Hooks.
-        state.inspect.b('mem_read', when=angr.BP_AFTER,
-                        action=self.load_hook_after)
-        state.inspect.b('mem_write', when=angr.BP_BEFORE,
-                        action=self.store_hook_before)
-        state.inspect.b('exit', when=angr.BP_BEFORE,
-                        action=self.exit_hook_before)
-        state.inspect.b('address_concretization',
-                        when=angr.BP_AFTER, action=skip_concretization)
-        state.inspect.b('expr', when=angr.BP_AFTER,
-                        action=self.expr_hook_after)
+        state.inspect.b(
+            "mem_read", when=angr.BP_AFTER, action=self.load_hook_after
+        )
+        state.inspect.b(
+            "mem_write", when=angr.BP_BEFORE, action=self.store_hook_before
+        )
+        state.inspect.b(
+            "exit", when=angr.BP_BEFORE, action=self.exit_hook_before
+        )
+        state.inspect.b(
+            "address_concretization",
+            when=angr.BP_AFTER,
+            action=skip_concretization,
+        )
+        state.inspect.b("expr", when=angr.BP_AFTER, action=self.expr_hook_after)
 
         self.initialize_regs_and_stack(state)
         self.thunk_list = utils.get_x86_indirect_thunks(proj)
@@ -907,48 +1060,73 @@ class Scanner:
                 if self.cur_state.addr not in self.bbs:
                     cur_block = self.cur_state.block()
                     spec_stop = self.block_contains_speculation_stop(cur_block)
-                    self.bbs[self.cur_state.addr] = {"block": cur_block,
-                                                     "speculation_stop": spec_stop}
+                    self.bbs[self.cur_state.addr] = {
+                        "block": cur_block,
+                        "speculation_stop": spec_stop,
+                    }
                 # "Execute" the state (triggers the hooks we installed).
                 ns = self.cur_state.step()
                 succs = ns.successors
                 # If we're in aggressive mode, we need to also explore unsat successors.
-                if global_config['AggressiveSpeculation']:
+                if global_config["AggressiveSpeculation"]:
                     succs.extend(ns.unsat_successors)
 
             except (SplitException, GeneralException) as e:
                 # The state has been manually splitted: don't explore it further.
                 continue
-            except (angr.errors.SimIRSBNoDecodeError,
-                    angr.errors.UnsupportedIROpError) as e:
-                l.error("=============== UNSUPPORTED INSTRUCTION ===============")
+            except (
+                angr.errors.SimIRSBNoDecodeError,
+                angr.errors.UnsupportedIROpError,
+            ) as e:
+                l.error(
+                    "=============== UNSUPPORTED INSTRUCTION ==============="
+                )
                 l.error(str(e))
-                utils.report_unsupported(e, proj, hex(self.cur_state.addr), hex(
-                    start_address), error_type="SCANNER")
+                utils.report_unsupported(
+                    e,
+                    proj,
+                    hex(self.cur_state.addr),
+                    hex(start_address),
+                    error_type="SCANNER",
+                )
                 continue
             except angr.errors.UnsupportedDirtyError as e:
                 if "IRET" in str(e):
                     continue
-                l.error("=============== UNSUPPORTED INSTRUCTION ===============")
+                l.error(
+                    "=============== UNSUPPORTED INSTRUCTION ==============="
+                )
                 l.error(str(e))
-                utils.report_unsupported(e, proj, hex(self.cur_state.addr), hex(
-                    start_address), error_type="SCANNER")
+                utils.report_unsupported(
+                    e,
+                    proj,
+                    hex(self.cur_state.addr),
+                    hex(start_address),
+                    error_type="SCANNER",
+                )
                 continue
             except Exception as e:
                 # Catch test-case end error
-                if 'No bytes in memory for block starting at 0x400dead.' == str(e):
+                if "No bytes in memory for block starting at 0x400dead." == str(
+                    e
+                ):
                     continue
 
                 if str(e).startswith("Cannot execute following jumpkind"):
                     # E.g., Ijk_SigSEGV
-                    l.error("=============== UNSUPPORTED JUMPKIND ===============")
+                    l.error(
+                        "=============== UNSUPPORTED JUMPKIND ==============="
+                    )
                     l.error(str(e))
                     continue
 
                 # Debug setting to print the trace and immediately exit
-                if global_config['CrashOnExceptions']:
-                    print(asmprinter.get_disassembled_trace_text(
-                        proj, self.cur_state.history.bbl_addrs))
+                if global_config["CrashOnExceptions"]:
+                    print(
+                        asmprinter.get_disassembled_trace_text(
+                            proj, self.cur_state.history.bbl_addrs
+                        )
+                    )
                     raise e
 
                 # On long runs (e.g. running on the whole Linux Kernel)
@@ -957,18 +1135,27 @@ class Scanner:
                 l.error(str(e))
 
                 if not l.disabled:
-                    print(asmprinter.get_disassembled_trace_text(
-                        proj, self.cur_state.history.bbl_addrs))
+                    print(
+                        asmprinter.get_disassembled_trace_text(
+                            proj, self.cur_state.history.bbl_addrs
+                        )
+                    )
                     traceback.format_exc()
 
-                utils.report_error(e, hex(self.cur_state.addr), hex(
-                    start_address), error_type="SCANNER")
+                utils.report_error(
+                    e,
+                    hex(self.cur_state.addr),
+                    hex(start_address),
+                    error_type="SCANNER",
+                )
                 continue
 
             # If we reached this point, the analysis of the BB has completed.
             for ns in succs:
-                if (global_config['AggressiveSpeculation']
-                        and not ns.solver.satisfiable()):
+                if (
+                    global_config["AggressiveSpeculation"]
+                    and not ns.solver.satisfiable()
+                ):
                     # If we are in 'AggressiveSpeculation' mode, we follow
                     # branches even if their condition is always false.
                     # For these successors, we remove the branch condition
@@ -977,19 +1164,27 @@ class Scanner:
                     # aggressively speculated that branch.
                     ns.solver.reload_solver(self.cur_state.solver.constraints)
                     marker = claripy.BoolV("UNSAT")
-                    ns.history.jump_guard = (marker)
-                    ns.globals['n_aggr_misprd'] = self.count_aggressive_mispredictions(ns) + 1
+                    ns.history.jump_guard = marker
+                    ns.globals["n_aggr_misprd"] = (
+                        self.count_aggressive_mispredictions(ns) + 1
+                    )
 
                 self.add_bbl(ns)
 
                 # Check if the last branch condition contains an if-then-else statement.
                 try:
                     asts = astTransform.split_conditions(
-                        ns.history.jump_guards[-1], simplify=False,
-                        addr=ns.history.jump_sources[-1])
+                        ns.history.jump_guards[-1],
+                        simplify=False,
+                        addr=ns.history.jump_sources[-1],
+                    )
                 except SplitTooManyNestedIfException as e:
-                    utils.report_error(e, hex(self.cur_state.addr), hex(
-                        start_address), error_type="SCANNER")
+                    utils.report_error(
+                        e,
+                        hex(self.cur_state.addr),
+                        hex(start_address),
+                        error_type="SCANNER",
+                    )
                     continue
 
                 if len(asts) > 1:
@@ -1003,14 +1198,32 @@ class Scanner:
             # Print all loads. (If less than 50)
             if len(self.loads) < 50:
                 from tabulate import tabulate
+
                 rows = []
                 for x in self.loads:
                     load_anno = annotations.get_load_annotation(x.val)
                     depth = "0" if load_anno == None else load_anno.depth
-                    deps = "none" if load_anno == None else load_anno.requirements
-                    rows.append([hex(x.pc), str(x.addr), depth, str(x.val),
-                                 str(utils.get_annotations(x.addr)),
-                                 str(utils.get_annotations(x.val)), deps])
-                headers = ["pc", "addr", "depth", "val", "addr annotations",
-                           "val annotations", "deps"]
+                    deps = (
+                        "none" if load_anno == None else load_anno.requirements
+                    )
+                    rows.append(
+                        [
+                            hex(x.pc),
+                            str(x.addr),
+                            depth,
+                            str(x.val),
+                            str(utils.get_annotations(x.addr)),
+                            str(utils.get_annotations(x.val)),
+                            deps,
+                        ]
+                    )
+                headers = [
+                    "pc",
+                    "addr",
+                    "depth",
+                    "val",
+                    "addr annotations",
+                    "val annotations",
+                    "deps",
+                ]
                 l.info(tabulate(rows, headers=headers))

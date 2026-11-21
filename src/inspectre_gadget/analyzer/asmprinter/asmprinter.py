@@ -12,17 +12,26 @@ from ..shared.halfGadget import HalfGadget
 from ..shared.secretDependentBranch import SecretDependentBranch
 from ..shared import utils
 from ..scanner import annotations as annotations_module
-from ..scanner.annotations import (LoadAnnotation, SecretAnnotation,
-                                   TransmissionAnnotation)
+from ..scanner.annotations import (
+    LoadAnnotation,
+    SecretAnnotation,
+    TransmissionAnnotation,
+)
 # autopep8: on
 
 
 def get_branch_comments(proj, bbls, branches):
     # One dict per bbl; hooked bbls and the last bbl have no branch.
     comments = [{} for _ in bbls]
-    branch_bbls = [i for i, bbl_addr in enumerate(bbls[:-1]) if not proj.is_hooked(bbl_addr)]
+    branch_bbls = [
+        i
+        for i, bbl_addr in enumerate(bbls[:-1])
+        if not proj.is_hooked(bbl_addr)
+    ]
     for i, (addr, condition, taken) in zip(branch_bbls, branches):
-        comments[i][addr] = str(taken) + "   " + utils.truncate_str(str(condition))
+        comments[i][addr] = (
+            str(taken) + "   " + utils.truncate_str(str(condition))
+        )
 
     return comments
 
@@ -31,8 +40,9 @@ def replace_secret_annotations_with_name(annotations, name):
     new_annotations = []
     for anno in annotations:
         if isinstance(anno, (SecretAnnotation, TransmissionAnnotation)):
-            new_annotations.append(LoadAnnotation(
-                None, name, anno.address, None, anno.bbl_index))
+            new_annotations.append(
+                LoadAnnotation(None, name, anno.address, None, anno.bbl_index)
+            )
         else:
             new_annotations.append(anno)
 
@@ -53,14 +63,20 @@ def get_load_comments(expr: claripy.ast.BV, secret_load_pc):
                 loaded_name = "Attacker"
 
             addr_annos = replace_secret_annotations_with_name(
-                utils.get_annotations(load_anno.read_address_ast), "Attacker")
+                utils.get_annotations(load_anno.read_address_ast), "Attacker"
+            )
             val_annos = replace_secret_annotations_with_name(
-                utils.get_annotations(v), loaded_name)
+                utils.get_annotations(v), loaded_name
+            )
             annotations[(load_anno.bbl_index, load_anno.address)] = (
-                utils.sorted_set_str(addr_annos) + " -> " + utils.sorted_set_str(val_annos))
+                utils.sorted_set_str(addr_annos)
+                + " -> "
+                + utils.sorted_set_str(val_annos)
+            )
 
-            annotations.update(get_load_comments(
-                load_anno.read_address_ast, secret_load_pc))
+            annotations.update(
+                get_load_comments(load_anno.read_address_ast, secret_load_pc)
+            )
 
     return annotations
 
@@ -72,10 +88,10 @@ def print_annotations(t: Transmission):
 
 
 class GadgetType(Enum):
-    TRANSMISSION = 0,
-    TFP = 1,
-    HALF = 2,
-    SDB = 3,
+    TRANSMISSION = (0,)
+    TFP = (1,)
+    HALF = (2,)
+    SDB = (3,)
     UNKNOWN = 3
 
 
@@ -91,23 +107,35 @@ def get_disassembled_trace_text(proj, bbls, color=True, comments=None):
         # Symbol
         symbol = proj.loader.find_symbol(bbl_addr, fuzzy=True)
         # Dont print basic blocks that are hooked & passed
-        if (proj.is_hooked(bbl_addr)
-                and proj.hooked_by(bbl_addr).display_name == 'pass_function'):
+        if (
+            proj.is_hooked(bbl_addr)
+            and proj.hooked_by(bbl_addr).display_name == "pass_function"
+        ):
             output += "; hooked -- skipped printing\n"
             continue
         # We want a symbol add every non-fallthrough
         # As Disassembly adds a symbol at the start of the function, we do not
-        if symbol != None and symbol.rebased_addr != bbl_addr and \
-                (prev_block == None or prev_block.addr + prev_block.size != bbl_addr):
+        if (
+            symbol != None
+            and symbol.rebased_addr != bbl_addr
+            and (
+                prev_block == None
+                or prev_block.addr + prev_block.size != bbl_addr
+            )
+        ):
             # Non-fallthrough and Capstone did not add a symbol
             bytes_width = (bbl_addr.bit_length() + 3) // 4 + 2
-            output += " " * bytes_width + \
-                f";{symbol.name}+{bbl_addr - symbol.rebased_addr}:\n"
+            output += (
+                " " * bytes_width
+                + f";{symbol.name}+{bbl_addr - symbol.rebased_addr}:\n"
+            )
 
         if n_visits[bbl_addr] > 1:
             bytes_width = (bbl_addr.bit_length() + 3) // 4 + 2
-            output += " " * bytes_width + \
-                f";(visit {visit[bbl_addr]}/{n_visits[bbl_addr]})\n"
+            output += (
+                " " * bytes_width
+                + f";(visit {visit[bbl_addr]}/{n_visits[bbl_addr]})\n"
+            )
 
         # Add the assembly code
         if comments is not None:
@@ -115,50 +143,73 @@ def get_disassembled_trace_text(proj, bbls, color=True, comments=None):
         block = proj.factory.block(bbl_addr)
         prev_block = block
         output += proj.analyses.Disassembly(
-            ranges=[(block.addr, block.addr + block.size)]).render(color=color)
+            ranges=[(block.addr, block.addr + block.size)]
+        ).render(color=color)
 
         output += "\n"
 
     return output
 
 
-def print_annotated_assembly(proj: angr.Project, bbls, branches, expr, pc,
-                             secret_load_pc, type: GadgetType, color=True):
+def print_annotated_assembly(
+    proj: angr.Project,
+    bbls,
+    branches,
+    expr,
+    pc,
+    secret_load_pc,
+    type: GadgetType,
+    color=True,
+):
     # Branches.
     comments = get_branch_comments(proj, bbls, branches)
     # Loads.
-    for (bbl_index, addr), comment in get_load_comments(expr, secret_load_pc).items():
+    for (bbl_index, addr), comment in get_load_comments(
+        expr, secret_load_pc
+    ).items():
         comments[bbl_index][addr] = comment
     # Transmission, in the last bbl.
     last = comments[-1]
     if type == GadgetType.TFP:
         attacker_annos = replace_secret_annotations_with_name(
-            utils.get_annotations(expr), "Attacker")
+            utils.get_annotations(expr), "Attacker"
+        )
         last[pc] = utils.sorted_set_str(attacker_annos)
         last[pc] += " -> " + "TAINTED FUNCTION POINTER"
     elif type == GadgetType.HALF:
         attacker_annos = replace_secret_annotations_with_name(
-            utils.get_annotations(expr), "Attacker")
+            utils.get_annotations(expr), "Attacker"
+        )
         last[pc] = utils.sorted_set_str(attacker_annos)
         last[pc] += " -> " + "HALF GADGET"
     elif type == GadgetType.TRANSMISSION:
         all_annotations = set(utils.get_annotations(expr))
-        secret_annotations = {a for a in all_annotations if isinstance(
-            a, LoadAnnotation) and a.address == secret_load_pc}
+        secret_annotations = {
+            a
+            for a in all_annotations
+            if isinstance(a, LoadAnnotation) and a.address == secret_load_pc
+        }
         annotations = replace_secret_annotations_with_name(
-            secret_annotations, "Secret")
+            secret_annotations, "Secret"
+        )
         annotations += replace_secret_annotations_with_name(
-            all_annotations - secret_annotations, "Attacker")
+            all_annotations - secret_annotations, "Attacker"
+        )
         last[pc] = utils.sorted_set_str(annotations)
         last[pc] += " -> " + "TRANSMISSION"
     elif type == GadgetType.SDB:
         all_annotations = set(utils.get_annotations(expr))
-        secret_annotations = {a for a in all_annotations if isinstance(
-            a, LoadAnnotation) and a.address == secret_load_pc}
+        secret_annotations = {
+            a
+            for a in all_annotations
+            if isinstance(a, LoadAnnotation) and a.address == secret_load_pc
+        }
         annotations = replace_secret_annotations_with_name(
-            secret_annotations, "Secret")
+            secret_annotations, "Secret"
+        )
         annotations += replace_secret_annotations_with_name(
-            all_annotations - secret_annotations, "Attacker")
+            all_annotations - secret_annotations, "Attacker"
+        )
         last[pc] = utils.sorted_set_str(annotations)
         last[pc] += " -> " + "SECRET DEPENDENT BRANCH"
 
@@ -172,17 +223,27 @@ def output_gadget_to_file(t: Transmission, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/gadget_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"----------------- TRANSMISSION -----------------\n")
-    o.write(print_annotated_assembly(proj, t.bbls, t.branches, t.transmission.expr,
-            t.pc, t.secret_load_pc, type=GadgetType.TRANSMISSION, color=False))
+    o.write(
+        print_annotated_assembly(
+            proj,
+            t.bbls,
+            t.branches,
+            t.transmission.expr,
+            t.pc,
+            t.secret_load_pc,
+            type=GadgetType.TRANSMISSION,
+            color=False,
+        )
+    )
 
     if t.independent_base == None:
-        indep_expr = indep_range = 'None'
+        indep_expr = indep_range = "None"
     else:
         indep_expr = utils.truncate_str(t.independent_base.expr)
         indep_range = utils.truncate_str(t.independent_base.range)
 
     o.write(f"""
-{'-' * 48}
+{"-" * 48}
 uuid: {t.uuid}
 transmitter: {t.transmitter}
 
@@ -195,18 +256,18 @@ Transmitted Secret:
   - Spread: {t.inferable_bits.spread_low} - {t.inferable_bits.spread_high}
   - Number of Bits Inferable: {t.inferable_bits.number_of_bits_inferable}
 Base:
-  - Expr: {'None' if t.base == None else utils.truncate_str(t.base.expr)}
-  - Range: {'None' if t.base == None else t.base.range}
+  - Expr: {"None" if t.base == None else utils.truncate_str(t.base.expr)}
+  - Range: {"None" if t.base == None else t.base.range}
   - Independent Expr: {indep_expr}
   - Independent Range: {indep_range}
 Transmission:
   - Expr: {utils.truncate_str(t.transmission.expr)}
   - Range: {t.transmission.range}
 
-Register Requirements: {t.all_requirements.to_dict()['regs']}
+Register Requirements: {t.all_requirements.to_dict()["regs"]}
 Constraints: {utils.ordered_constraints(t.constraints)}
 Branches: {utils.ordered_branches(t.branches)}
-{'-' * 48}
+{"-" * 48}
 """)
     o.close()
 
@@ -215,10 +276,20 @@ def output_tfp_to_file(t: TaintedFunctionPointer, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/tfp_{t.name}_{hex(t.pc)}_{t.uuid}.asm", "a+")
     o.write(f"--------------------- TFP ----------------------\n")
-    o.write(print_annotated_assembly(proj, t.bbls, t.all_branches,
-            t.expr, t.pc, None, type=GadgetType.TFP, color=False))
+    o.write(
+        print_annotated_assembly(
+            proj,
+            t.bbls,
+            t.all_branches,
+            t.expr,
+            t.pc,
+            None,
+            type=GadgetType.TFP,
+            color=False,
+        )
+    )
     o.write(f"""
-{'-' * 48}
+{"-" * 48}
 uuid: {t.uuid}
 
 Reg: {t.reg}
@@ -227,7 +298,7 @@ Tainted Function Pointer:
   - Reg: {t.reg}
   - Expr: {utils.truncate_str(t.expr)}
   - Control: {t.control}
-  - Register Requirements: {t.requirements.to_dict()['regs']}
+  - Register Requirements: {t.requirements.to_dict()["regs"]}
 
 Constraints: {utils.ordered_constraints(t.constraints)}
 Branches: {utils.ordered_branches(t.branches)}
@@ -240,10 +311,14 @@ Branches: {utils.ordered_branches(t.branches)}
         o.write(f"  - Reg: {r}\n")
         o.write(f"    Expr: {utils.truncate_str(reg.expr)}\n")
         o.write(f"    ControlType: {reg.control_type}\n")
-        o.write(f"    Controlled Expr: {utils.truncate_str(reg.controlled_expr)}\n")
+        o.write(
+            f"    Controlled Expr: {utils.truncate_str(reg.controlled_expr)}\n"
+        )
         o.write(f"    Controlled Range: {reg.controlled_range}\n")
-        o.write(f"    Controlled Range w Branches:"
-                f"{reg.controlled_range_with_branches}\n")
+        o.write(
+            f"    Controlled Range w Branches:"
+            f"{reg.controlled_range_with_branches}\n"
+        )
 
     o.write(f"\nRegisters aliasing with tfp:\n")
     for r in t.aliasing:
@@ -258,7 +333,7 @@ Branches: {utils.ordered_branches(t.branches)}
     o.write(f"Potential Secrets: {t.secrets}\n")
 
     o.write(f"""
-{'-' * 48}
+{"-" * 48}
 """)
     o.close()
 
@@ -267,14 +342,24 @@ def output_half_gadget_to_file(g: HalfGadget, proj, path):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/halfgadget_{g.name}_{hex(g.pc)}_{g.uuid}.asm", "a+")
     o.write(f"--------------------- HALF GADGET ----------------------\n")
-    o.write(print_annotated_assembly(proj, g.bbls, g.branches,
-            g.loaded.expr, g.pc, None, type=GadgetType.HALF, color=False))
+    o.write(
+        print_annotated_assembly(
+            proj,
+            g.bbls,
+            g.branches,
+            g.loaded.expr,
+            g.pc,
+            None,
+            type=GadgetType.HALF,
+            color=False,
+        )
+    )
     o.write(f"""
-{'-' * 48}
+{"-" * 48}
 uuid: {g.uuid}
 
 Expr: {utils.truncate_str(g.loaded.expr)}
-Base: {'None' if g.base == None else utils.truncate_str(g.base.expr)}
+Base: {"None" if g.base == None else utils.truncate_str(g.base.expr)}
 Attacker: {utils.truncate_str(g.attacker.expr)}
 ControlType: {g.loaded.control}
 
@@ -284,32 +369,44 @@ Branches: {utils.ordered_branches(g.branches)}
 """)
 
     o.write(f"""
-{'-' * 48}
+{"-" * 48}
 """)
     o.close()
 
 
-def output_secret_dependent_branch_to_file(sdb: SecretDependentBranch, proj, path):
+def output_secret_dependent_branch_to_file(
+    sdb: SecretDependentBranch, proj, path
+):
     Path(path).mkdir(parents=True, exist_ok=True)
     o = open(f"{path}/sdb_{sdb.name}_{hex(sdb.pc)}_{sdb.uuid}.asm", "a+")
     o.write(f"------------ SECRET DEPENDENT BRANCH ------------\n")
-    o.write(print_annotated_assembly(proj, sdb.bbls, sdb.branches, sdb.sdb_expr,
-            sdb.pc, sdb.secret_load_pc, GadgetType.SDB, color=False))
+    o.write(
+        print_annotated_assembly(
+            proj,
+            sdb.bbls,
+            sdb.branches,
+            sdb.sdb_expr,
+            sdb.pc,
+            sdb.secret_load_pc,
+            GadgetType.SDB,
+            color=False,
+        )
+    )
 
     if sdb.independent_base == None:
-        indep_expr = indep_range = 'None'
+        indep_expr = indep_range = "None"
     else:
         indep_expr = utils.truncate_str(sdb.independent_base.expr)
         indep_range = sdb.independent_base.range
 
     if sdb.controlled_cmp_value == None:
-        controlled_expr = controlled_range = 'None'
+        controlled_expr = controlled_range = "None"
     else:
         controlled_expr = utils.truncate_str(sdb.controlled_cmp_value.expr)
         controlled_range = sdb.controlled_cmp_value.range
 
     o.write(f"""
-{'-' * 48}
+{"-" * 48}
 uuid: {sdb.uuid}
 transmitter: {sdb.transmitter}
 CMP operation: {sdb.cmp_operation}
@@ -325,8 +422,8 @@ Transmitted Secret:
   - Spread: {sdb.inferable_bits.spread_low} - {sdb.inferable_bits.spread_high}
   - Number of Bits Inferable: {sdb.inferable_bits.number_of_bits_inferable}
 Base:
-  - Expr: {'None' if sdb.base == None else utils.truncate_str(sdb.base.expr)}
-  - Range: {'None' if sdb.base == None else sdb.base.range}
+  - Expr: {"None" if sdb.base == None else utils.truncate_str(sdb.base.expr)}
+  - Range: {"None" if sdb.base == None else sdb.base.range}
   - Independent Expr: {indep_expr}
   - Independent Range: {indep_range}
 Transmission:
@@ -340,12 +437,12 @@ CMP Value:
   - Controlled Range: {controlled_range}
 
 Register Requirements:
-  - All: {sdb.all_requirements.to_dict()['regs']}
+  - All: {sdb.all_requirements.to_dict()["regs"]}
   - Transmission: {sdb.transmission.requirements.regs}
   - CMP Value: {sdb.cmp_value.requirements.regs}
 
 Constraints: {utils.ordered_constraints(sdb.constraints)}
 Branches: {utils.ordered_branches(sdb.branches)}
-{'-' * 48}
+{"-" * 48}
 """)
     o.close()

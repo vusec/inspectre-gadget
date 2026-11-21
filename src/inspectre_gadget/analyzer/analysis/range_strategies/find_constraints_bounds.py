@@ -23,8 +23,13 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
         self.infer_isolated_strategy = infer_isolated_strategy
 
-    def find_range(self, constraints, ast: claripy.ast.bv.BVS,
-                   ast_min: int = None, ast_max: int = None):
+    def find_range(
+        self,
+        constraints,
+        ast: claripy.ast.bv.BVS,
+        ast_min: int = None,
+        ast_max: int = None,
+    ):
 
         if not constraints:
             return None
@@ -53,7 +58,8 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
         try:
             sat_ranges = _find_sat_distribution(
-                constraints, ast, ast_min, ast_max)
+                constraints, ast, ast_min, ast_max
+            )
         except claripy.ClaripyZ3Error as e:
             # timeout
             return None
@@ -65,7 +71,8 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
             # isolated
 
             r = self.infer_isolated_strategy.find_range(
-                [], ast, sat_ranges[0][0], sat_ranges[0][1])
+                [], ast, sat_ranges[0][0], sat_ranges[0][1]
+            )
 
             if r != None and sat_ranges[0][0] > sat_ranges[0][1]:
                 # The range wraps around, we have to be sure that the AST range is
@@ -73,9 +80,12 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
                 # ranges which we cannot describe in our range
                 # (e.g., [ast != 0xf, ast <= 0xffff])
                 max_strided_value = (1 << ast.size()) - 1 - (r.stride - 1)
-                if (r.and_mask != None or r.or_mask != None
-                        or ast_max != max_strided_value or ast_min != 0):
-
+                if (
+                    r.and_mask != None
+                    or r.or_mask != None
+                    or ast_max != max_strided_value
+                    or ast_min != 0
+                ):
                     # We have a complex range thus fail (e.g., masking is performed)
                     return None
 
@@ -83,24 +93,30 @@ class RangeStrategyFindConstraintsBounds(RangeStrategy):
 
         # --------- symbolic + (large) concrete value
 
-        if ast.op == '__add__' and any(not arg.symbolic for arg in ast.args):
-
+        if ast.op == "__add__" and any(not arg.symbolic for arg in ast.args):
             # We try an extra optimization: separating the concrete value
             # from addition. This covers cases like:
             # 0xffffffff81000000 + <BV32 X > with condition x[31:31] != 0
             # (sign extended)
 
             concrete_value = next(
-                arg for arg in ast.args if not arg.symbolic).args[0]
+                arg for arg in ast.args if not arg.symbolic
+            ).args[0]
             sub_ast = sum([arg for arg in ast.args if arg.symbolic])
 
             r = self.find_range(constraints, sub_ast, None, None)
 
             # We only support 'stride mode' ranges
             if r != None and r.and_mask == None and r.or_mask == None:
-
                 return ranges.range_from_symbolic_concrete_addition(
-                    ast, ast_min, ast_max, r.min, r.max, r.stride, concrete_value)
+                    ast,
+                    ast_min,
+                    ast_max,
+                    r.min,
+                    r.max,
+                    r.stride,
+                    concrete_value,
+                )
 
         # --------- Can't solve this
         l.warning(f"Cant' solve range: {ast}  ({constraints})")
@@ -115,19 +131,22 @@ def _find_sat_distribution(constraints, ast, start, end):
     # Start with a clean state
     s = claripy.Solver(timeout=global_config["Z3Timeout"])
 
-    if not s.satisfiable(extra_constraints=[ast >= start, ast <= end, not_constraints]):
+    if not s.satisfiable(
+        extra_constraints=[ast >= start, ast <= end, not_constraints]
+    ):
         # it is not satisfiable, thus we have a full range
         return [(start, end)]
 
-    samples = s.eval(ast, 2, extra_constraints=[
-                     ast >= start, ast <= end, not_constraints])
+    samples = s.eval(
+        ast, 2, extra_constraints=[ast >= start, ast <= end, not_constraints]
+    )
     sample_len = len(samples)
 
     if sample_len == 1:
         value = samples[0]
 
         # Should not happen, as this full a range case which taken care of above
-        assert (value >= start and value <= end)
+        assert value >= start and value <= end
 
         if value == start:
             # Range with a "hole" at the start
