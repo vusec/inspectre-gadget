@@ -104,14 +104,16 @@ def build_parser():
     group.add_argument(
         "--address-list",
         default="",
-        help="read entrypoints from a file with the format <HEX_ADDRESS>,<NAME> (you can choose any name)",
+        help="read entrypoints from a file with the format <HEX_ADDRESS>,<NAME>"
+        " (you can choose any name)",
     )
 
     # Optional args.
     analyzer_args.add_argument(
         "--cache-project",
         action="store_true",
-        help="load the angr project from a pickle named <BINARY>.angr, or create one if it does not exist",
+        help="load the angr project from a pickle named <BINARY>.angr, or create one if"
+        " it does not exist",
     )
     analyzer_args.add_argument(
         "--base-address",

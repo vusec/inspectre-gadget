@@ -65,15 +65,16 @@ def load_angr_project(binary_file: str, base_address, use_pickle) -> angr.Projec
         try:
             f = open(pickle_file, "rb")
             proj = pickle.load(f)
-        except:
+        except Exception:
             proj = angr.Project(
                 binary_file,
                 auto_load_libs=False,
                 main_opts={"base_addr": base_address},
             )
-            f = open(pickle_file, "wb")
-            pickle.dump(proj, f)
             f.close()
+            out_f = open(pickle_file, "wb")
+            pickle.dump(proj, out_f)
+            out_f.close()
     else:
         proj = angr.Project(
             binary_file,

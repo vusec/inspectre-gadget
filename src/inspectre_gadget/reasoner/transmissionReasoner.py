@@ -47,9 +47,8 @@ def is_in_range(n, min, max):
 def calc_base_size(t: pd.Series):
     if t["base_control"] == "BaseControlType.NO_BASE" or t["base_expr"] == "":
         return 0
-    try:
-        assert t["base_expr"].startswith("<BV")
-    except:
+    expr = t["base_expr"]
+    if not isinstance(expr, str) or not expr.startswith("<BV"):
         return 0
     return int(t["base_expr"].split(" ")[0].replace("<BV", ""))
 
@@ -399,7 +398,7 @@ def slam_has_exact_secret_range(t: pd.Series):
 
     secret_range_exact = t["transmitted_secret_range_exact"]
 
-    assert type(secret_range_exact) == bool
+    assert type(secret_range_exact) is bool
 
     if secret_range_exact == False:
         return False
@@ -468,7 +467,8 @@ def perform_out_of_place_training(t: pd.Series):
 def leak_secret_near_valid_base(t: pd.Series):
     # We consider indirect secret dependency always as not-exploitable by default
     # There are cases why one mind would include these gadgets, if so, one
-    # can include gadgets having the fail_reasons equal to 'base_has_indirect_secret_dependency'
+    # can include gadgets having the fail_reasons equal to
+    # 'base_has_indirect_secret_dependency'
     return False
 
 

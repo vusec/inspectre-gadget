@@ -353,7 +353,7 @@ def append_to_csv(csv_filename, transmissions):
             existing_keys = line.replace("\n", "").split(";")
             # l.info(f"Got columns from existing file: {existing_keys}")
             o.close()
-    except:
+    except Exception:
         existing_keys = []
 
     # Append transmissions to the csv.

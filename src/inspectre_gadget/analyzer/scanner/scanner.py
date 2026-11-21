@@ -785,7 +785,6 @@ class Scanner:
 
         # Check if there is a substitution to be made for this address.
         # This can happen if the state comes from a manual splitting.
-        is_subst = False
         subst = getSubstitution(state, state.scratch.ins_addr, SubstType.ADDR_SUBST)
         if subst != None:
             store_addr = subst
@@ -910,7 +909,7 @@ class Scanner:
             raise GeneralException
 
         # ----------- Secret dependent branches (conditional jumps)
-        elif type(state.inspect.exit_guard.args[0]) != bool:
+        elif type(state.inspect.exit_guard.args[0]) is not bool:
             exit_guard = state.inspect.exit_guard
 
             # Check if we need to substitute the expression (happens with manual

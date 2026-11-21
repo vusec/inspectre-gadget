@@ -1,3 +1,4 @@
+import ast
 from io import StringIO
 from warnings import simplefilter
 
@@ -66,17 +67,15 @@ def get_x86_registers():
 def calc_reg_size(t: pd.Series, reg):
     if t[f"{reg}_expr"] == "":
         return 0
-    try:
-        assert t[f"{reg}_expr"].startswith("<BV")
-    except:
+    expr = t[f"{reg}_expr"]
+    if not isinstance(expr, str) or not expr.startswith("<BV"):
         return 0
     return int(t[f"{reg}_expr"].split(" ")[0].replace("<BV", ""))
 
 
 def eval_column_to_dict(t: pd.Series, column):
-
-    lst = eval(t[column])
-    assert type(lst) == dict
+    lst = ast.literal_eval(t[column])
+    assert isinstance(lst, dict)
 
     return lst
 
