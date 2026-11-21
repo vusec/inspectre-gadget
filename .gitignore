@@ -1,7 +1,9 @@
 __pycache__
+.mypy_cache
 .vscode/
 code/range/distribution/smt_samples
 results
 .venv/
 dist/
 *.egg-info/
+*_cache/

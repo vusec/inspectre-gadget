@@ -1,0 +1,12 @@
+output/*
+fail.txt
+unsupported.txt
+
+*/gadget
+*/output/
+*/asm/
+*/gadgets.csv
+*/gadgets-reasoned.csv
+*/tfp.csv
+*/tfp-reasoned.csv
+*/half.csv
