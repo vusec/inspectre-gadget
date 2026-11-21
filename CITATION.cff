@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use InSpectre Gadget in your research, please cite our paper."
+title: "InSpectre Gadget"
+type: software
+license: Apache-2.0
+repository-code: "https://github.com/vusec/inspectre-gadget"
+url: "https://vusec.github.io/inspectre-gadget"
+authors:
+  - family-names: Wiebing
+    given-names: Sander
+    affiliation: Vrije Universiteit Amsterdam
+  - family-names: de Faveri Tron
+    given-names: Alvise
+    affiliation: Vrije Universiteit Amsterdam
+  - family-names: Bos
+    given-names: Herbert
+    affiliation: Vrije Universiteit Amsterdam
+  - family-names: Giuffrida
+    given-names: Cristiano
+    affiliation: Vrije Universiteit Amsterdam
+preferred-citation:
+  type: conference-paper
+  title: "InSpectre Gadget: Inspecting the Residual Attack Surface of Cross-privilege Spectre v2"
+  authors:
+    - family-names: Wiebing
+      given-names: Sander
+    - family-names: de Faveri Tron
+      given-names: Alvise
+    - family-names: Bos
+      given-names: Herbert
+    - family-names: Giuffrida
+      given-names: Cristiano
+  collection-title: "33rd USENIX Security Symposium (USENIX Security 24)"
+  conference:
+    name: "USENIX Security Symposium"
+  publisher:
+    name: "USENIX Association"
+  year: 2024
+  month: 8
+  url: "https://download.vusec.net/papers/inspectre_sec24.pdf"
