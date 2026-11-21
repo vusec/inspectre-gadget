@@ -12,7 +12,8 @@ import pytest
 
 # Test cases are identified by folders with a Makefile in it
 # TODO: maybe not the most elegat thing to do but good enough right now
-CASES_DIR = Path(__file__).parent / "test-cases"
+E2E_DIR = Path(__file__).parent
+CASES_DIR = E2E_DIR / "cases"
 CASES = sorted(p.parent.name for p in CASES_DIR.glob("*/Makefile"))
 REQUIRED_TOOLS = ["cc", "make", "objdump", "sqlite3", "git"]
 
@@ -37,6 +38,11 @@ def script_env():
 
 @pytest.mark.parametrize("case", CASES)
 def test_e2e(case, request, tools_available, script_env):
+    # Nice section that lists how to reproduce specific failing cases
+    request.node.user_properties.append(
+        ("rerun", f"tests/end2end/test-single.sh {case}")
+    )
+
     build = subprocess.run(
         ["make", "-s", "-C", str(CASES_DIR / case)],
         capture_output=True,
@@ -44,19 +50,19 @@ def test_e2e(case, request, tools_available, script_env):
     )
     assert build.returncode == 0, f"build failed:\n{build.stdout}{build.stderr}"
 
-    cmd = ["./test-single.sh", case]
+    cmd = [str(E2E_DIR / "test-single.sh"), case]
     if request.config.getoption("--update-reference-output"):
         cmd.append("--update")
 
     res = subprocess.run(
         cmd,
-        cwd=CASES_DIR,
         env=script_env,
         capture_output=True,
         text=True,
     )
 
     assert res.returncode == 0, (
-        f"{case}: `{' '.join(cmd)}` differs from reference output \n"
+        f"{case}: differs from reference output, "
+        f"re-run with `tests/end2end/test-single.sh {case}`\n"
         f"{res.stdout}{res.stderr}"
     )

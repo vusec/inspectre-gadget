@@ -63,7 +63,7 @@ minversion = "8.0"
 testpaths = ["tests"]
 # importlib mode: avoids sys.path hacks and module-name clashes
 addopts = ["--import-mode=importlib", "-ra", "--strict-markers", "--strict-config"]
-norecursedirs = ["test-cases", "test-queries", ".*", "__pycache__"]
+norecursedirs = ["cases", "queries", ".*", "__pycache__"]
 markers = [
   "e2e: (slow) run full pipeline on simple assembly programs and compare output against ref-output",
 ]

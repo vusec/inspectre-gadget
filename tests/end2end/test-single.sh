@@ -1,8 +1,14 @@
 #!/bin/bash
+
 OUT_REF_FOLDER="ref-output"
 ASM_REF_FOLDER="ref-asm"
 OUT_FOLDER="output"
 ASM_FOLDER="asm"
+
+E2E_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CASES_DIR="$E2E_DIR/cases"
+QUERIES_DIR="$E2E_DIR/queries"
+DEFAULT_CFG="$E2E_DIR/config_all.yaml"
 
 do_update=0
 
@@ -25,18 +31,19 @@ fi
 # ------------------------------------------------------------------------------
 # Cleanup folder
 
-f=$1/gadget
-name=`basename $1`
+name="$1"
+case_dir="$CASES_DIR/$name"
+[ -d "$case_dir" ] || { echo "unknown test case: $name"; exit 1; }
 
 # Select default or test-case specific config
-if [ -f $1/config.yaml ]; then cfg=config.yaml; else cfg=../config_all.yaml; fi
+if [ -f "$case_dir/config.yaml" ]; then cfg="$case_dir/config.yaml"; else cfg="$DEFAULT_CFG"; fi
 
 echo "    testing: ${name}"
 
-cd $1 || echo "NOTE: Are you running this script from the top folder?"
-rm -f -r ${OUT_FOLDER}
-rm -f -r ${ASM_FOLDER}
-mkdir -p ${OUT_FOLDER}
+cd "$case_dir" || exit 1
+rm -f -r "$OUT_FOLDER"
+rm -f -r "$ASM_FOLDER"
+mkdir -p "$OUT_FOLDER"
 rm -f gadgets.csv
 rm -f tfp.csv
 rm -f half.csv
@@ -44,125 +51,93 @@ rm -f half.csv
 # ------------------------------------------------------------------------------
 # Run InSpectre Scanner
 
-objdump --adjust-vma=0x4000000 -d -Mintel gadget > ${OUT_FOLDER}/out.txt
+objdump --adjust-vma=0x4000000 -d -Mintel gadget > "$OUT_FOLDER/out.txt"
 
-echo ""  >> ${OUT_FOLDER}/out.txt
-echo "== SCANNER ==" >> ${OUT_FOLDER}/out.txt
-python3 -m inspectre_gadget analyze --config $cfg --base-address 0x4000000 --address 0x4000000 --name $name --output gadgets.csv --tfp-output tfp.csv --asm asm --half-gadget-output half.csv gadget 2> /dev/null >> ${OUT_FOLDER}/out.txt || true
-[ -f fail.txt ] && mv fail.txt ${OUT_FOLDER}/fail.txt
+echo ""  >> "$OUT_FOLDER/out.txt"
+echo "== SCANNER ==" >> "$OUT_FOLDER/out.txt"
+python3 -m inspectre_gadget analyze --config "$cfg" --base-address 0x4000000 --address 0x4000000 --name "$name" --output gadgets.csv --tfp-output tfp.csv --asm "$ASM_FOLDER" --half-gadget-output half.csv gadget 2> /dev/null >> "$OUT_FOLDER/out.txt" || true
+[ -f fail.txt ] && mv fail.txt "$OUT_FOLDER/fail.txt"
 
 # ------------------------------------------------------------------------------
 # Run InSpectre Reasoner
 
 if [ -f gadgets.csv ]; then
-    echo ""  >> ${OUT_FOLDER}/out.txt
-    echo "== REASONER TRANSMISSION ==" >> ${OUT_FOLDER}/out.txt
-    python3 -m inspectre_gadget reason --config $cfg gadgets.csv gadgets-reasoned.csv &>> ${OUT_FOLDER}/out.txt
+    echo ""  >> "$OUT_FOLDER/out.txt"
+    echo "== REASONER TRANSMISSION ==" >> "$OUT_FOLDER/out.txt"
+    python3 -m inspectre_gadget reason --config "$cfg" gadgets.csv gadgets-reasoned.csv &>> "$OUT_FOLDER/out.txt"
 fi
 
 if [ -f tfp.csv ]; then
-    echo ""  >> ${OUT_FOLDER}/out.txt
-    echo "== REASONER DISPATCH ==" >> ${OUT_FOLDER}/out.txt
-    python3 -m inspectre_gadget reason --config $cfg tfp.csv tfp-reasoned.csv &>> ${OUT_FOLDER}/out.txt
+    echo ""  >> "$OUT_FOLDER/out.txt"
+    echo "== REASONER DISPATCH ==" >> "$OUT_FOLDER/out.txt"
+    python3 -m inspectre_gadget reason --config "$cfg" tfp.csv tfp-reasoned.csv &>> "$OUT_FOLDER/out.txt"
 fi
 # Drop environment-specific angr log lines (e.g., unicorn version mismatch),
 # format: "ERROR    | 2024-01-01 12:00:00,000 | angr.some.module | message"
-sed -i -E '/^(DEBUG|INFO|WARNING|ERROR|CRITICAL) +\| [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:,]+ \| /d' ${OUT_FOLDER}/out.txt
+sed -i -E '/^(DEBUG|INFO|WARNING|ERROR|CRITICAL) +\| [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:,]+ \| /d' "$OUT_FOLDER/out.txt"
 
 # ------------------------------------------------------------------------------
-# Execute queries for disclosure gadgets
+# Queries
 
-if [ -f gadgets.csv ]; then
-    echo "== GADGETS =="  >> ${OUT_FOLDER}/scanner_data.txt
-    for sql in in ../../test-queries/scanner-gadgets/*.sql;
-    do
+# run_queries <csv> <table> <query-subdir> <outfile>
+# Runs every $QUERIES_DIR/<query-subdir>/*.sql on <csv> (imported as <table>).
+# Each result is preceded by the query's name relative to $QUERIES_DIR, so the
+# output does not depend on where the queries folder lives.
+run_queries() {
+    local csv=$1 table=$2 subdir=$3 out=$4
+    for sql in "$QUERIES_DIR/$subdir"/*.sql; do
         [ -e "$sql" ] || continue
-        echo $sql >> ${OUT_FOLDER}/scanner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets.csv gadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
-        echo "" >> ${OUT_FOLDER}/scanner_data.txt
+        echo "$subdir/$(basename "$sql")" >> "$out"
+        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import $csv $table" -cmd '.mode table -wrap 0 --wordwrap on' < "$sql" >> "$out" || true
+        echo "" >> "$out"
     done
+}
+
+SCANNER_DATA="$OUT_FOLDER/scanner_data.txt"
+REASONER_DATA="$OUT_FOLDER/reasoner_data.txt"
+
+# Disclosure gadgets
+if [ -f gadgets.csv ]; then
+    echo "== GADGETS ==" >> "$SCANNER_DATA"
+    run_queries gadgets.csv gadgets scanner-gadgets "$SCANNER_DATA"
 fi
 
 if [ -f gadgets-reasoned.csv ]; then
-    # First reasoner specific fields
-    for sql in in ../../test-queries/reasoner-gadgets/*.sql;
-    do
-        [ -e "$sql" ] || continue
-        echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets-reasoned.csv gadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
-        echo "" >> ${OUT_FOLDER}/reasoner_data.txt
-    done
-
-     # Next again the scanner fields, in case we screwed something up in the reasoner
-    for sql in in ../../test-queries/scanner-gadgets/*.sql;
-    do
-        [ -e "$sql" ] || continue
-        echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import gadgets-reasoned.csv gadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
-        echo "" >> ${OUT_FOLDER}/reasoner_data.txt
-    done
+    # First reasoner specific fields, then again the scanner fields,
+    # in case we screwed something up in the reasoner.
+    run_queries gadgets-reasoned.csv gadgets reasoner-gadgets "$REASONER_DATA"
+    run_queries gadgets-reasoned.csv gadgets scanner-gadgets "$REASONER_DATA"
 fi
 
-# ------------------------------------------------------------------------------
-# Execute queries for dispatch (TFP) gadgets
-
+# Dispatch (TFP) gadgets
 if [ -f tfp.csv ]; then
-    echo "== TFPs =="  >> ${OUT_FOLDER}/scanner_data.txt
-    for sql in in ../../test-queries/scanner-tfp/*.sql;
-    do
-        [ -e "$sql" ] || continue
-        echo $sql >> ${OUT_FOLDER}/scanner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
-        echo "" >> ${OUT_FOLDER}/scanner_data.txt
-    done
+    echo "== TFPs ==" >> "$SCANNER_DATA"
+    run_queries tfp.csv tfps scanner-tfp "$SCANNER_DATA"
 fi
 
 if [ -f tfp-reasoned.csv ]; then
-    # First reasoner specific fields
-    for sql in in ../../test-queries/reasoner-tfp/*.sql;
-    do
-        [ -e "$sql" ] || continue
-        echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp-reasoned.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
-        echo "" >> ${OUT_FOLDER}/reasoner_data.txt
-    done
-
-     # Next again the scanner fields, in case we screwed something up in the reasoner
-    for sql in in ../../test-queries/scanner-tfp/*.sql;
-    do
-        [ -e "$sql" ] || continue
-        echo $sql >> ${OUT_FOLDER}/reasoner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import tfp-reasoned.csv tfps" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/reasoner_data.txt || true
-        echo "" >> ${OUT_FOLDER}/reasoner_data.txt
-    done
+    run_queries tfp-reasoned.csv tfps reasoner-tfp "$REASONER_DATA"
+    run_queries tfp-reasoned.csv tfps scanner-tfp "$REASONER_DATA"
 fi
 
-# ------------------------------------------------------------------------------
-# Execute queries for Half-Spectre gadgets
-
+# Half-Spectre gadgets
 if [ -f half.csv ]; then
-    echo "== Half-Spectre =="  >> ${OUT_FOLDER}/scanner_data.txt
-    for sql in in ../../test-queries/scanner-half-spectre/*.sql;
-    do
-        [ -e "$sql" ] || continue
-        echo $sql >> ${OUT_FOLDER}/scanner_data.txt
-        sqlite3 :memory: -cmd '.mode csv' -cmd '.separator ;' -cmd ".import half.csv halfgadgets" -cmd '.mode table -wrap 0 --wordwrap on' < $sql >> ${OUT_FOLDER}/scanner_data.txt || true
-        echo "" >> ${OUT_FOLDER}/scanner_data.txt
-    done
+    echo "== Half-Spectre ==" >> "$SCANNER_DATA"
+    run_queries half.csv halfgadgets scanner-half-spectre "$SCANNER_DATA"
 fi
 
 # Remove trailing whitespace, to avoid differences that only consist of whitespace
-find ${OUT_FOLDER} -type f -exec sed -i 's/[[:space:]]*$//' {} +
+find "$OUT_FOLDER" -type f -exec sed -i 's/[[:space:]]*$//' {} +
 
 # ------------------------------------------------------------------------------
 # Create ref folder if it does not exist
 
-if [ ! -d ${OUT_REF_FOLDER} ]; then
+if [ ! -d "$OUT_REF_FOLDER" ]; then
     echo "[+] ref folder does not exist, creating it and skipping ${name}"
-    rm -f ${OUT_REF_FOLDER}
-    mv ${OUT_FOLDER} ${OUT_REF_FOLDER}
-    rm -f -r ${ASM_REF_FOLDER}
-    [ -d ${ASM_FOLDER} ] && mv ${ASM_FOLDER} ${ASM_REF_FOLDER}
+    rm -f "$OUT_REF_FOLDER"
+    mv "$OUT_FOLDER" "$OUT_REF_FOLDER"
+    rm -f -r "$ASM_REF_FOLDER"
+    [ -d "$ASM_FOLDER" ] && mv "$ASM_FOLDER" "$ASM_REF_FOLDER"
 
     # We exit since we cannot compare
     exit 0
@@ -171,23 +146,19 @@ fi
 # ------------------------------------------------------------------------------
 # Perform diff
 
-git --no-pager diff --minimal --no-index --word-diff=color --word-diff-regex=. ${OUT_REF_FOLDER} ${OUT_FOLDER};
-
-if [ $? -ne 0 ];
-then
+if ! git --no-pager diff --minimal --no-index --word-diff=color --word-diff-regex=. "$OUT_REF_FOLDER" "$OUT_FOLDER"; then
     # Folders differ
     echo -e "\e[31m[-] failed:   ${name}\e[0m"
 
-    if [ $do_update -eq 1 ]; then
+    if [ "$do_update" -eq 1 ]; then
         echo "    Updating ref folders:  ${name}"
-        rm -f -r ${OUT_REF_FOLDER}
-        rm -f -r ${ASM_REF_FOLDER}
-        mv ${OUT_FOLDER} ${OUT_REF_FOLDER}
-        [ -d ${ASM_FOLDER} ] && mv ${ASM_FOLDER} ${ASM_REF_FOLDER}
+        rm -f -r "$OUT_REF_FOLDER"
+        rm -f -r "$ASM_REF_FOLDER"
+        mv "$OUT_FOLDER" "$OUT_REF_FOLDER"
+        [ -d "$ASM_FOLDER" ] && mv "$ASM_FOLDER" "$ASM_REF_FOLDER"
     fi
 
     exit 1
-
 else
     # Folders are equal
     echo "[+] passed:  ${name}"
