@@ -1,7 +1,15 @@
 [project]
 name = "inspectre-gadget"
 version = "0.0.0"
+description = "Inspect potential Spectre disclosure gadgets and perform exploitability analysis"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 requires-python = ">=3.11"
+authors = [
+  { name = "Sander Wiebing" },
+  { name = "Alvise de Faveri Tron" },
+]
 dependencies = [
   "angr>=9.2,<10",
   "PyYAML",
@@ -12,17 +20,62 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# pip install -e ".[dev]"
 dev = [
-  "autopep8"
+  "ruff",
+  "pre-commit",
+  "pytest",
 ]
+# pip install -e ".[docs]"
+docs = [
+  "sphinx",
+  "sphinx-rtd-theme",
+  "sphinx-rtd-size",
+  "myst-parser",
+]
+
+[project.urls]
+Homepage = "https://github.com/vusec/inspectre-gadget"
+Documentation = "https://vusec.github.io/inspectre-gadget"
+Paper = "https://download.vusec.net/papers/inspectre_sec24.pdf"
 
 [project.scripts]
 inspectre = "inspectre_gadget.cli:main"
 inspectre_gadget = "inspectre_gadget.cli:main"
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# ---------------------------------------------------------------------------
+# Ruff (linter + formatter).
+#   ruff check .        # lint
+#   ruff check --fix .  # lint and apply safe fixes
+#   ruff format .       # format (black-compatible)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 80
+src = ["src", "tests"]
+extend-exclude = ["docs/build"]
+
+[tool.ruff.format]
+# Keep multi-line collections.
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+# E/W: pycodestyle, F: pyflakes, "I" (isort)
+select = ["E", "W", "F", "I"]
+ignore = [
+  "E741",  # ambiguous variable name
+  # `== None` / `== True`: on claripy ASTs `==` builds a symbolic expression,
+  # so the suggested `is None` / `is True` would change semantics.
+  "E711",  # comparison to None
+  "E712",  # comparison to True/False
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore start imports for tests.
+"tests/**" = ["F403", "F405"]
